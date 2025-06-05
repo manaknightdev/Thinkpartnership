@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const CustomerPortal = () => {
   return (
@@ -17,25 +18,96 @@ const CustomerPortal = () => {
           <Input type="search" placeholder="Search for services (e.g., 'painter', 'mover', 'inspector')..." className="w-full" />
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {/* Placeholder for service categories or featured services */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Painting Services</h3>
-            <p className="text-gray-600 dark:text-gray-400">Find professional painters for your home.</p>
-            <Button variant="link" className="mt-2" asChild><Link to="#">Browse</Link></Button>
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Browse by Category</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <Button variant="outline" className="h-24 text-lg">Plumbing</Button>
+            <Button variant="outline" className="h-24 text-lg">Electrical</Button>
+            <Button variant="outline" className="h-24 text-lg">Cleaning</Button>
+            <Button variant="outline" className="h-24 text-lg">Landscaping</Button>
+            <Button variant="outline" className="h-24 text-lg">HVAC</Button>
+            <Button variant="outline" className="h-24 text-lg">Painting</Button>
+            <Button variant="outline" className="h-24 text-lg">Moving</Button>
+            <Button variant="outline" className="h-24 text-lg">Inspections</Button>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Moving Services</h3>
-            <p className="text-gray-600 dark:text-gray-400">Reliable movers for a smooth transition.</p>
-            <Button variant="link" className="mt-2" asChild><Link to="#">Browse</Link></Button>
+        </section>
+
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Featured Services</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <Card className="text-left">
+              <CardHeader>
+                <CardTitle>Premium Home Painting</CardTitle>
+                <CardDescription>By "Brush Strokes Pro"</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Transform your home with high-quality interior and exterior painting services. Experienced and reliable.
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold text-primary">$500+</span>
+                  <Button>View Details</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="text-left">
+              <CardHeader>
+                <CardTitle>Emergency Plumbing Repair</CardTitle>
+                <CardDescription>By "Rapid Plumbers"</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold text-primary">$150+</span>
+                  <Button>View Details</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="text-left">
+              <CardHeader>
+                <CardTitle>Full Home Inspection</CardTitle>
+                <CardDescription>By "Certified Inspectors Inc."</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold text-primary">$300+</span>
+                  <Button>View Details</Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Home Inspections</h3>
-            <p className="text-gray-600 dark:text-gray-400">Thorough inspections for peace of mind.</p>
-            <Button variant="link" className="mt-2" asChild><Link to="#">Browse</Link></Button>
+        </section>
+
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">What Our Customers Say</h2>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <Card className="text-left">
+              <CardContent className="pt-6">
+                <p className="italic text-gray-700 dark:text-gray-300 mb-4">
+                  "Found a fantastic painter through this portal! The process was smooth and the quality was excellent."
+                </p>
+                <p className="font-semibold text-gray-800 dark:text-gray-200">- Jane D.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Service: Painting</p>
+              </CardContent>
+            </Card>
+            <Card className="text-left">
+              <CardContent className="pt-6">
+                <p className="italic text-gray-700 dark:text-gray-300 mb-4">
+                  "Quick and reliable plumbing service. Highly recommend using this platform to find local pros."
+                </p>
+                <p className="font-semibold text-gray-800 dark:text-gray-200">- Mark S.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Service: Plumbing</p>
+              </CardContent>
+            </Card>
           </div>
-          {/* More service placeholders can be added here */}
-        </div>
+        </section>
 
         <div className="mt-12">
           <Button asChild>
