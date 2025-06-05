@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Handshake, Users, Home, DollarSign, ShieldCheck, Lightbulb } from "lucide-react"; // Importing icons
+import { Footer } from "@/components/Footer"; // Import Footer
 
 const Index = () => {
   return (
@@ -197,6 +198,7 @@ const Index = () => {
 
       </main>
       <MadeWithDyad />
+      <Footer /> {/* Add Footer here */}
     </div>
   );
 };

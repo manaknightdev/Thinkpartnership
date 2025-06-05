@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer"; // Import Footer
 
 const ClientDashboard = () => {
   return (
@@ -60,6 +61,7 @@ const ClientDashboard = () => {
           </Button>
         </div>
       </main>
+      <Footer /> {/* Add Footer here */}
     </div>
   );
 };

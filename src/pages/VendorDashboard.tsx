@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { cn } from "@/lib/utils"; // Import cn utility for conditional classes
+import { Footer } from "@/components/Footer"; // Import Footer
 
 const VendorDashboard = () => {
   const location = useLocation();
@@ -46,6 +47,7 @@ const VendorDashboard = () => {
           <Outlet /> {/* This is where nested route components will render */}
         </main>
       </div>
+      <Footer /> {/* Add Footer here */}
     </div>
   );
 };

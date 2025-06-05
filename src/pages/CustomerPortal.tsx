@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Footer } from "@/components/Footer"; // Import Footer
 
 const CustomerPortal = () => {
   return (
@@ -115,6 +116,7 @@ const CustomerPortal = () => {
           </Button>
         </div>
       </main>
+      <Footer /> {/* Add Footer here */}
     </div>
   );
 };
