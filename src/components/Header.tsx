@@ -17,7 +17,12 @@ export const Header = () => {
         <Button variant="ghost" asChild>
           <Link to="/customer-portal">Customers</Link>
         </Button>
-        <Button>Sign Up</Button>
+        <Button variant="ghost" asChild>
+          <Link to="/login">Login</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/signup">Sign Up</Link>
+        </Button>
       </nav>
     </header>
   );
