@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Handshake, Users, Home, DollarSign, ShieldCheck, Lightbulb, Quote } from "lucide-react"; // Importing icons
+import { Handshake, Users, Home, DollarSign, ShieldCheck, Lightbulb, Quote, Info } from "lucide-react"; // Importing new Info icon
 import { Footer } from "@/components/Footer"; // Import Footer
 
 const Index = () => {
@@ -13,20 +13,20 @@ const Index = () => {
       <main className="flex-grow flex flex-col items-center justify-center">
 
         {/* Hero Section */}
-        <section className="relative w-full py-24 md:py-32 lg:py-40 text-center bg-gradient-to-br from-blue-700 to-purple-800 dark:from-blue-900 dark:to-purple-950 text-white overflow-hidden">
+        <section className="relative w-full py-24 md:py-32 lg:py-40 text-center bg-gradient-to-br from-blue-600 to-teal-500 dark:from-blue-800 dark:to-teal-700 text-white overflow-hidden">
           <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
           <div className="relative z-10 max-w-5xl mx-auto px-4">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight drop-shadow-lg animate-fade-in-up">
               ThinkPartnerships: Your Ultimate Referral Ecosystem
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100 dark:text-purple-100 mb-10 max-w-3xl mx-auto animate-fade-in-up animate-delay-200">
+            <p className="text-xl md:text-2xl text-blue-100 dark:text-teal-100 mb-10 max-w-3xl mx-auto animate-fade-in-up animate-delay-200">
               Seamlessly connect clients with trusted service providers, manage referral programs, and unlock new revenue streams.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-up animate-delay-400">
               <Button size="lg" className="bg-white text-blue-700 hover:bg-gray-100 hover:text-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" asChild>
                 <Link to="/signup">Get Started Free</Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" asChild>
+              <Button size="lg" variant="outline" className="border-blue-200 text-blue-100 hover:bg-blue-100 hover:text-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" asChild>
                 <Link to="/client-portal">Learn More</Link>
               </Button>
             </div>
@@ -87,8 +87,36 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Key Features Section */}
+        {/* About Us Section */}
         <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left">
+              <Info className="h-16 w-16 text-blue-600 dark:text-blue-400 mb-6 mx-auto md:mx-0" />
+              <h2 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Our Mission</h2>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                At ThinkPartnerships, we believe in the power of connection. Our mission is to create a seamless, transparent, and rewarding ecosystem where businesses can effortlessly expand their service offerings through trusted partnerships, and customers can easily find reliable professionals for their needs.
+              </p>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                We're dedicated to fostering growth, simplifying operations, and building a community where everyone thrives.
+              </p>
+            </div>
+            <div className="relative h-80 md:h-96 rounded-lg overflow-hidden shadow-xl">
+              <img
+                src="https://images.unsplash.com/photo-1552664730-d307ca88499d?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Team collaboration"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/70 to-transparent"></div>
+              <div className="absolute bottom-4 left-4 text-white text-shadow">
+                <p className="text-xl font-semibold">Building Stronger Connections</p>
+                <p className="text-sm opacity-80">Through innovative partnership solutions</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Key Features Section */}
+        <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Why Choose ThinkPartnerships?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -161,7 +189,7 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
+        <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">What Our Users Say</h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card className="p-6 text-left shadow-md hover:shadow-lg transition-shadow duration-300">
