@@ -17,6 +17,7 @@ import VendorDashboard from "./pages/VendorDashboard";
 import VendorProfilePage from "./pages/vendor/VendorProfilePage";
 import VendorReferralsPage from "./pages/vendor/VendorReferralsPage";
 import VendorInvitePage from "./pages/vendor/VendorInvitePage";
+import VendorFullReferralReportPage from "./pages/vendor/VendorFullReferralReportPage"; // Import the new page
 
 // Import new client sub-pages
 import ClientOverviewPage from "./pages/client/ClientOverviewPage";
@@ -28,7 +29,7 @@ import ClientRevenueRulesPage from "./pages/client/ClientRevenueRulesPage";
 import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesPage";
 import CustomerOrdersPage from "./pages/customer/CustomerOrdersPage";
 import CustomerAccountPage from "./pages/customer/CustomerAccountPage";
-import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage"; // Import the new ServiceDetailsPage
+import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage";
 
 
 const queryClient = new QueryClient();
@@ -50,7 +51,7 @@ const App = () => (
           <Route path="/customer-portal" element={<CustomerDashboard />}>
             <Route index element={<Navigate to="browse" replace />} />
             <Route path="browse" element={<CustomerBrowseServicesPage />} />
-            <Route path="services/:serviceName" element={<ServiceDetailsPage />} /> {/* New route for service details */}
+            <Route path="services/:serviceName" element={<ServiceDetailsPage />} />
             <Route path="orders" element={<CustomerOrdersPage />} />
             <Route path="account" element={<CustomerAccountPage />} />
           </Route>
@@ -69,6 +70,7 @@ const App = () => (
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<VendorProfilePage />} />
             <Route path="referrals" element={<VendorReferralsPage />} />
+            <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} /> {/* New route */}
             <Route path="invite" element={<VendorInvitePage />} />
           </Route>
 

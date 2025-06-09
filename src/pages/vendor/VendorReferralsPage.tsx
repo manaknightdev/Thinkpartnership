@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users, DollarSign, TrendingUp } from "lucide-react";
-import { toast } from "sonner";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const VendorReferralsPage = () => {
   const mockReferralData = [
@@ -21,10 +21,6 @@ const VendorReferralsPage = () => {
     { id: "ref003", customer: "Charlie Brown", service: "HVAC Check-up", date: "2023-10-15", commission: "$30.00", status: "Pending" },
     { id: "ref004", customer: "Diana Prince", service: "Landscaping Design", date: "2023-10-10", commission: "$70.00", status: "Paid" },
   ];
-
-  const handleViewFullReport = () => {
-    toast.info("Generating full referral report...");
-  };
 
   return (
     <div className="p-6">
@@ -122,7 +118,9 @@ const VendorReferralsPage = () => {
               ))}
             </TableBody>
           </Table>
-          <Button onClick={handleViewFullReport} variant="outline" className="mt-4">View Full Report</Button>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/vendor-portal/referrals/full-report">View Full Report</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>
