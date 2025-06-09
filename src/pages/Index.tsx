@@ -25,7 +25,7 @@ const Index = () => {
               <Button size="lg" className="bg-white text-blue-700 hover:bg-gray-100 hover:text-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" asChild>
                 <Link to="/signup">Get Started Free</Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-blue-100 hover:text-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" asChild>
+              <Button size="lg" className="bg-white text-blue-700 hover:bg-gray-100 hover:text-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" asChild>
                 <Link to="/client-portal">Learn More</Link>
               </Button>
             </div>
