@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
+  const handleSignUp = () => {
+    // In a real application, you would handle user registration here.
+    // For now, we'll just simulate a successful signup and redirect to onboarding.
+    console.log("Simulating signup and redirecting to client onboarding...");
+    navigate("/onboarding-client");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar />
@@ -22,7 +31,7 @@ const SignUp = () => {
 
           {/* Form Section */}
           <div className="p-8 lg:p-12 flex items-center justify-center">
-            <Card className="w-full max-w-lg border-none shadow-none"> {/* Increased max-w-md to max-w-lg */}
+            <Card className="w-full max-w-lg border-none shadow-none">
               <CardHeader className="text-center">
                 <CardTitle className="text-3xl font-bold">Sign Up</CardTitle>
                 <CardDescription>Create your account to get started.</CardDescription>
@@ -41,7 +50,7 @@ const SignUp = () => {
                     <Label htmlFor="confirm-password">Confirm Password</Label>
                     <Input id="confirm-password" type="password" required />
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="button" onClick={handleSignUp} className="w-full">
                     Sign Up
                   </Button>
                 </form>

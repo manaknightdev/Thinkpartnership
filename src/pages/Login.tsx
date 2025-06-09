@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // In a real application, you would handle authentication here.
+    // For now, we'll just simulate a successful login and redirect to onboarding.
+    console.log("Simulating login and redirecting to client onboarding...");
+    navigate("/onboarding-client");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar />
@@ -22,7 +31,7 @@ const Login = () => {
 
           {/* Form Section */}
           <div className="p-8 lg:p-12 flex items-center justify-center">
-            <Card className="w-full max-w-lg border-none shadow-none"> {/* Increased max-w-md to max-w-lg */}
+            <Card className="w-full max-w-lg border-none shadow-none">
               <CardHeader className="text-center">
                 <CardTitle className="text-3xl font-bold">Login</CardTitle>
                 <CardDescription>Enter your credentials to access your account.</CardDescription>
@@ -37,7 +46,7 @@ const Login = () => {
                     <Label htmlFor="password">Password</Label>
                     <Input id="password" type="password" required />
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="button" onClick={handleLogin} className="w-full">
                     Login
                   </Button>
                 </form>
