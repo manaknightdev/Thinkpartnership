@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } = "sonner";
+import { toast } from "sonner"; // Corrected import syntax
 import { Search, Home, Wrench, Paintbrush, Leaf, Lightbulb, Truck, Building2, CheckCircle } from "lucide-react";
 
 const CustomerBrowseServicesPage = () => {
