@@ -40,6 +40,7 @@ import AdminVendorApprovalsPage from "./pages/admin/AdminVendorApprovalsPage";
 import AdminRevenueRulesPage from "./pages/admin/AdminRevenueRulesPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminManualCommissionsPage from "./pages/admin/AdminManualCommissionsPage";
+import AdminLicenseManagementPage from "./pages/admin/AdminLicenseManagementPage"; // Import new page
 
 
 const queryClient = new QueryClient();
@@ -94,6 +95,7 @@ const App = () => (
             <Route path="revenue-rules" element={<AdminRevenueRulesPage />} />
             <Route path="reports" element={<AdminReportsPage />} />
             <Route path="manual-commissions" element={<AdminManualCommissionsPage />} />
+            <Route path="license-management" element={<AdminLicenseManagementPage />} /> {/* New route */}
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/Footer";
-import { LogOut, LayoutDashboard, DollarSign, Users, Settings, BarChart, PlusCircle } from "lucide-react";
+import { LogOut, LayoutDashboard, DollarSign, Users, Settings, BarChart, PlusCircle, Key } from "lucide-react"; // Added Key icon
 import { toast } from "sonner";
 
 const AdminDashboard = () => {
@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     { name: "Global Revenue Rules", path: "/admin-portal/revenue-rules", icon: Settings },
     { name: "Usage Reports", path: "/admin-portal/reports", icon: BarChart },
     { name: "Manual Commissions", path: "/admin-portal/manual-commissions", icon: PlusCircle },
+    { name: "License Management", path: "/admin-portal/license-management", icon: Key }, // New nav item
   ];
 
   const handleLogout = () => {
