@@ -10,11 +10,11 @@ const SignUp = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar />
       <div className="flex-grow flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden md:grid md:grid-cols-2">
+        <div className="w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden md:grid md:grid-cols-2">
           {/* Image Section (Hidden on mobile, visible on desktop) */}
           <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-blue-600 to-teal-500 dark:from-blue-800 dark:to-teal-700 p-8">
             <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c76d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://static.vecteezy.com/system/resources/previews/008/151/374/non_2x/business-teamwork-and-partnership-help-to-achieve-team-success-think-together-to-solve-business-problem-business-connection-concept-businessmen-working-team-building-connect-jigsaw-puzzle-bridge-vector.jpg"
               alt="Collaboration"
               className="w-full h-full object-cover rounded-md shadow-xl"
             />
@@ -22,7 +22,7 @@ const SignUp = () => {
 
           {/* Form Section */}
           <div className="p-8 lg:p-12 flex items-center justify-center">
-            <Card className="w-full max-w-md border-none shadow-none">
+            <Card className="w-full max-w-lg border-none shadow-none"> {/* Increased max-w-md to max-w-lg */}
               <CardHeader className="text-center">
                 <CardTitle className="text-3xl font-bold">Sign Up</CardTitle>
                 <CardDescription>Create your account to get started.</CardDescription>
@@ -56,7 +56,6 @@ const SignUp = () => {
           </div>
         </div>
       </div>
-      {/* Footer removed */}
     </div>
   );
 };
