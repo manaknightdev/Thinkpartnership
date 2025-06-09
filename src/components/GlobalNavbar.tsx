@@ -18,6 +18,7 @@ export const GlobalNavbar = () => {
     { name: "Clients", path: "/client-portal" },
     { name: "Vendors", path: "/vendor-portal" },
     { name: "Customers", path: "/customer-portal" },
+    { name: "Admin", path: "/admin-portal" }, // New Admin link
   ];
 
   return (

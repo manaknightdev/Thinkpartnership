@@ -12,12 +12,13 @@ import OnboardingVendor from "./pages/OnboardingVendor";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
 import VendorDashboard from "./pages/VendorDashboard";
+import AdminDashboard from "./pages/AdminDashboard"; // Import AdminDashboard
 
 // Import new vendor sub-pages
 import VendorProfilePage from "./pages/vendor/VendorProfilePage";
 import VendorReferralsPage from "./pages/vendor/VendorReferralsPage";
 import VendorInvitePage from "./pages/vendor/VendorInvitePage";
-import VendorFullReferralReportPage from "./pages/vendor/VendorFullReferralReportPage"; // Import the new page
+import VendorFullReferralReportPage from "./pages/vendor/VendorFullReferralReportPage";
 
 // Import new client sub-pages
 import ClientOverviewPage from "./pages/client/ClientOverviewPage";
@@ -30,7 +31,15 @@ import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesP
 import CustomerOrdersPage from "./pages/customer/CustomerOrdersPage";
 import CustomerAccountPage from "./pages/customer/CustomerAccountPage";
 import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage";
-import CheckoutPage from "./pages/customer/CheckoutPage"; // Import the new CheckoutPage
+import CheckoutPage from "./pages/customer/CheckoutPage";
+
+// Import new admin sub-pages
+import AdminDashboardOverviewPage from "./pages/admin/AdminDashboardOverviewPage";
+import AdminTransactionsPage from "./pages/admin/AdminTransactionsPage";
+import AdminVendorApprovalsPage from "./pages/admin/AdminVendorApprovalsPage";
+import AdminRevenueRulesPage from "./pages/admin/AdminRevenueRulesPage";
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
+import AdminManualCommissionsPage from "./pages/admin/AdminManualCommissionsPage";
 
 
 const queryClient = new QueryClient();
@@ -53,7 +62,7 @@ const App = () => (
             <Route index element={<Navigate to="browse" replace />} />
             <Route path="browse" element={<CustomerBrowseServicesPage />} />
             <Route path="services/:serviceName" element={<ServiceDetailsPage />} />
-            <Route path="checkout/:serviceName" element={<CheckoutPage />} /> {/* New route for checkout */}
+            <Route path="checkout/:serviceName" element={<CheckoutPage />} />
             <Route path="orders" element={<CustomerOrdersPage />} />
             <Route path="account" element={<CustomerAccountPage />} />
           </Route>
@@ -72,8 +81,19 @@ const App = () => (
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<VendorProfilePage />} />
             <Route path="referrals" element={<VendorReferralsPage />} />
-            <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} /> {/* New route */}
+            <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} />
             <Route path="invite" element={<VendorInvitePage />} />
+          </Route>
+
+          {/* Nested routes for Admin Portal */}
+          <Route path="/admin-portal" element={<AdminDashboard />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<AdminDashboardOverviewPage />} />
+            <Route path="transactions" element={<AdminTransactionsPage />} />
+            <Route path="vendor-approvals" element={<AdminVendorApprovalsPage />} />
+            <Route path="revenue-rules" element={<AdminRevenueRulesPage />} />
+            <Route path="reports" element={<AdminReportsPage />} />
+            <Route path="manual-commissions" element={<AdminManualCommissionsPage />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
