@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,15 @@ import { toast } from "sonner";
 import { Search, Home, Wrench, Paintbrush, Leaf, Lightbulb, Truck, Building2, CheckCircle } from "lucide-react";
 
 const CustomerBrowseServicesPage = () => {
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
   const handleSearch = () => {
     toast.info("Searching for services...");
   };
 
   const handleViewDetails = (serviceName: string) => {
-    toast.info(`Viewing details for ${serviceName}...`);
+    // Navigate to the new service details page
+    navigate(`/customer-portal/services/${encodeURIComponent(serviceName)}`);
   };
 
   const mockCategories = [
@@ -31,42 +34,42 @@ const CustomerBrowseServicesPage = () => {
       vendor: "Brush Strokes Pro",
       description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
       price: "$500+",
-      image: "https://images.unsplash.com/photo-1580587771525-78b9dba3825b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Updated image URL for Painting
+      image: "https://images.unsplash.com/photo-1580587771525-78b9dba3825b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
       title: "Emergency Plumbing Repair",
       vendor: "Rapid Plumbers",
       description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
       price: "$150+",
-      image: "https://images.unsplash.com/photo-1582210256130-6d771118616e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Updated image URL for Plumbing
+      image: "https://images.unsplash.com/photo-1582210256130-6d771118616e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
       title: "Full Home Inspection",
       vendor: "Certified Inspectors Inc.",
       description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
       price: "$300+",
-      image: "https://images.unsplash.com/photo-1560448204-e02f1123d356?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Updated image URL for Inspections
+      image: "https://images.unsplash.com/photo-1560448204-e02f1123d356?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
       title: "Professional Lawn Care",
       vendor: "Green Thumb Landscaping",
       description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
       price: "$80+",
-      image: "https://images.unsplash.com/photo-1518621736915-f218812f276b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Updated image URL for Landscaping
+      image: "https://images.unsplash.com/photo-1518621736915-f218812f276b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
       title: "HVAC System Tune-up",
       vendor: "Climate Control Experts",
       description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
       price: "$120+",
-      image: "https://images.unsplash.com/photo-1583912229130-e0f3301f121e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Updated image URL for HVAC
+      image: "https://images.unsplash.com/photo-1583912229130-e0f3301f121e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
       title: "Deep House Cleaning",
       vendor: "Sparkling Spaces",
       description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
       price: "$200+",
-      image: "https://images.unsplash.com/photo-1581578731548-adab4975807f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Updated image URL for Cleaning
+      image: "https://images.unsplash.com/photo-1581578731548-adab4975807f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
   ];
 
