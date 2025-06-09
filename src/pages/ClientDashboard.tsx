@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/Header";
+import { GlobalNavbar } from "@/components/GlobalNavbar"; // Updated import
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/Footer";
 import { LogOut } from "lucide-react"; // Import LogOut icon
@@ -27,7 +27,7 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
-      <Header />
+      <GlobalNavbar /> {/* Replaced Header with GlobalNavbar */}
       <div className="flex flex-col md:flex-row flex-grow">
         {/* Sidebar */}
         <aside className="w-full md:w-64 border-b md:border-r bg-white dark:bg-gray-900 p-4 flex flex-col">

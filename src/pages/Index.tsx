@@ -1,4 +1,4 @@
-import { Header } from "@/components/Header";
+import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
-      <Header />
+      <GlobalNavbar />
       <main className="flex-grow flex flex-col items-center justify-center">
 
         {/* Hero Section */}
