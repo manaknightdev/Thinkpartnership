@@ -116,8 +116,9 @@ const VendorReferralsPage = () => {
                     <TableCell>{referral.commission}</TableCell>
                     <TableCell>{referral.status}</TableCell>
                   </TableRow>
-                </TableBody>
-              </Table>
+                ))}
+              </TableBody>
+            </Table>
           </div>
           <Button asChild variant="outline" className="mt-4">
             <Link to="/vendor-portal/referrals/full-report">View Full Report</Link>
