@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -7,10 +7,19 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { MobileSheet } from "./MobileSheet"; // New import
-import { LogOut } from "lucide-react"; // For logout button in mobile menu
+import { MobileSheet } from "./MobileSheet";
+import { cn } from "@/lib/utils"; // Import cn utility
 
 export const GlobalNavbar = () => {
+  const location = useLocation(); // Get current location
+
+  // Define main navigation items
+  const mainNavItems = [
+    { name: "Clients", path: "/client-portal" },
+    { name: "Vendors", path: "/vendor-portal" },
+    { name: "Customers", path: "/customer-portal" },
+  ];
+
   return (
     <header className="border-b p-4 flex justify-between items-center bg-white dark:bg-gray-900">
       <Link to="/" className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -18,32 +27,30 @@ export const GlobalNavbar = () => {
       </Link>
 
       {/* Desktop Navigation */}
-      <NavigationMenu className="hidden md:flex"> {/* Hidden on mobile, flex on desktop */}
+      <NavigationMenu className="hidden md:flex">
         <NavigationMenuList className="flex space-x-4">
-          <NavigationMenuItem>
-            <Link to="/client-portal" legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Clients
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Link to="/vendor-portal" legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Vendors
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Link to="/customer-portal" legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Customers
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
+          {mainNavItems.map((item) => (
+            <NavigationMenuItem key={item.path}>
+              <Link to={item.path} legacyBehavior passHref>
+                <NavigationMenuLink
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    location.pathname.startsWith(item.path) && "bg-primary/10 font-semibold" // Highlight active link
+                  )}
+                >
+                  {item.name}
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+          ))}
           <NavigationMenuItem>
             <Link to="/login" legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  location.pathname === "/login" && "bg-primary/10 font-semibold"
+                )}
+              >
                 Login
               </NavigationMenuLink>
             </Link>
@@ -57,18 +64,29 @@ export const GlobalNavbar = () => {
       </NavigationMenu>
 
       {/* Mobile Navigation */}
-      <MobileSheet title="Navigation">
+      <MobileSheet title="ThinkPartnerships"> {/* Pass logo text as title */}
         <nav className="flex flex-col space-y-2">
-          <Button variant="ghost" className="justify-start" asChild>
-            <Link to="/client-portal">Clients</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild>
-            <Link to="/vendor-portal">Vendors</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild>
-            <Link to="/customer-portal">Customers</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild>
+          {mainNavItems.map((item) => (
+            <Button
+              key={item.path}
+              variant="ghost"
+              className={cn(
+                "justify-start",
+                location.pathname.startsWith(item.path) && "bg-muted dark:bg-gray-800" // Highlight active link
+              )}
+              asChild
+            >
+              <Link to={item.path}>{item.name}</Link>
+            </Button>
+          ))}
+          <Button
+            variant="ghost"
+            className={cn(
+              "justify-start",
+              location.pathname === "/login" && "bg-muted dark:bg-gray-800"
+            )}
+            asChild
+          >
             <Link to="/login">Login</Link>
           </Button>
           <Button asChild className="justify-start">

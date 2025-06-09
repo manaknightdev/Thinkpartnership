@@ -38,7 +38,7 @@ const ClientDashboard = () => {
                 variant="ghost"
                 className={cn(
                   "justify-start",
-                  location.pathname === item.path && "bg-muted dark:bg-gray-800"
+                  location.pathname === item.path && "bg-muted dark:bg-gray-800" // Highlight active link
                 )}
                 asChild
               >
