@@ -38,32 +38,34 @@ const VendorFullReferralReportPage = () => {
         </CardHeader>
         <CardContent>
           {mockFullReferralHistory.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Commission</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockFullReferralHistory.map((referral) => (
-                  <TableRow key={referral.id}>
-                    <TableCell className="font-medium">{referral.id}</TableCell>
-                    <TableCell>{referral.customer}</TableCell>
-                    <TableCell>{referral.service}</TableCell>
-                    <TableCell>{referral.date}</TableCell>
-                    <TableCell>{referral.commission}</TableCell>
-                    <TableCell>{referral.status}</TableCell>
-                    <TableCell>{referral.notes}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Commission</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Notes</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {mockFullReferralHistory.map((referral) => (
+                    <TableRow key={referral.id}>
+                      <TableCell className="font-medium">{referral.id}</TableCell>
+                      <TableCell>{referral.customer}</TableCell>
+                      <TableCell>{referral.service}</TableCell>
+                      <TableCell>{referral.date}</TableCell>
+                      <TableCell>{referral.commission}</TableCell>
+                      <TableCell>{referral.status}</TableCell>
+                      <TableCell>{referral.notes}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">No detailed referral history available.</p>
           )}

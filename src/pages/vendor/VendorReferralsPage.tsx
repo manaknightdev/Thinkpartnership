@@ -29,7 +29,7 @@ const VendorReferralsPage = () => {
         Track your referred customers and earned commissions.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
@@ -96,28 +96,29 @@ const VendorReferralsPage = () => {
           <CardDescription>Detailed breakdown of your referrals and commissions.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Commission</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockReferralHistory.map((referral) => (
-                <TableRow key={referral.id}>
-                  <TableCell className="font-medium">{referral.customer}</TableCell>
-                  <TableCell>{referral.service}</TableCell>
-                  <TableCell>{referral.date}</TableCell>
-                  <TableCell>{referral.commission}</TableCell>
-                  <TableCell>{referral.status}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Commission</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {mockReferralHistory.map((referral) => (
+                  <TableRow key={referral.id}>
+                    <TableCell className="font-medium">{referral.customer}</TableCell>
+                    <TableCell>{referral.service}</TableCell>
+                    <TableCell>{referral.date}</TableCell>
+                    <TableCell>{referral.commission}</TableCell>
+                    <TableCell>{referral.status}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+          </div>
           <Button asChild variant="outline" className="mt-4">
             <Link to="/vendor-portal/referrals/full-report">View Full Report</Link>
           </Button>

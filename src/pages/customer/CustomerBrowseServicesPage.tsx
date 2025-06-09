@@ -74,13 +74,13 @@ const CustomerBrowseServicesPage = () => {
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 text-left">Welcome to the Customer Portal</h1>
       <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-2xl text-left">
         Discover a wide range of trusted home services from our network of vetted professionals.
       </p>
 
-      <div className="max-w-xl mb-12 flex space-x-2 text-left">
+      <div className="max-w-xl mb-12 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 text-left">
         <Input type="search" placeholder="Search for services (e.g., 'painter', 'mover', 'inspector')..." className="flex-grow" />
         <Button onClick={handleSearch}>
           <Search className="h-4 w-4 mr-2" /> Search
@@ -101,7 +101,7 @@ const CustomerBrowseServicesPage = () => {
 
       <section className="mb-12">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-left">Featured Services</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {mockFeaturedServices.map((service, index) => (
             <Card key={index} className="text-left overflow-hidden">
               {service.image && (

@@ -61,29 +61,31 @@ const ClientRevenueRulesPage = () => {
         </CardHeader>
         <CardContent>
           {mockServiceRules.length > 0 ? (
-            <Table className="mb-4">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service Category</TableHead>
-                  <TableHead>Your Share</TableHead>
-                  <TableHead>Vendor Share</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockServiceRules.map((rule) => (
-                  <TableRow key={rule.id}>
-                    <TableCell className="font-medium">{rule.service}</TableCell>
-                    <TableCell>{rule.clientShare}</TableCell>
-                    <TableCell>{rule.vendorShare}</TableCell>
-                    <TableCell className="text-right">
-                      <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">Edit</Button>
-                      <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table className="mb-4">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Service Category</TableHead>
+                    <TableHead>Your Share</TableHead>
+                    <TableHead>Vendor Share</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {mockServiceRules.map((rule) => (
+                    <TableRow key={rule.id}>
+                      <TableCell className="font-medium">{rule.service}</TableCell>
+                      <TableCell>{rule.clientShare}</TableCell>
+                      <TableCell>{rule.vendorShare}</TableCell>
+                      <TableCell className="text-right">
+                        <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">Edit</Button>
+                        <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400 mb-4">No service-specific rules configured yet.</p>
           )}

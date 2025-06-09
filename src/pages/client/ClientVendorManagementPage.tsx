@@ -60,35 +60,37 @@ const ClientVendorManagementPage = () => {
           <div className="mb-4">
             <Input placeholder="Search vendors by name or email..." />
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Services</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockVendors.map((vendor) => (
-                <TableRow key={vendor.id}>
-                  <TableCell className="font-medium">{vendor.name}</TableCell>
-                  <TableCell>{vendor.email}</TableCell>
-                  <TableCell>{vendor.services}</TableCell>
-                  <TableCell>
-                    <Badge variant={vendor.status === "Active" ? "default" : "destructive"}>
-                      {vendor.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button onClick={() => handleViewVendor(vendor.name)} variant="ghost" size="sm">View</Button>
-                    <Button onClick={() => handleEditVendor(vendor.name)} variant="ghost" size="sm">Edit</Button>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Services</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {mockVendors.map((vendor) => (
+                  <TableRow key={vendor.id}>
+                    <TableCell className="font-medium">{vendor.name}</TableCell>
+                    <TableCell>{vendor.email}</TableCell>
+                    <TableCell>{vendor.services}</TableCell>
+                    <TableCell>
+                      <Badge variant={vendor.status === "Active" ? "default" : "destructive"}>
+                        {vendor.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button onClick={() => handleViewVendor(vendor.name)} variant="ghost" size="sm">View</Button>
+                      <Button onClick={() => handleEditVendor(vendor.name)} variant="ghost" size="sm">Edit</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           <Button onClick={handleAddVendor} variant="outline" className="mt-4">Add New Vendor</Button>
         </CardContent>
       </Card>
@@ -102,12 +104,12 @@ const ClientVendorManagementPage = () => {
           {mockPendingVendors.length > 0 ? (
             <div className="space-y-4">
               {mockPendingVendors.map((vendor) => (
-                <div key={vendor.id} className="flex items-center justify-between p-3 border rounded-md dark:border-gray-700">
+                <div key={vendor.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-md dark:border-gray-700">
                   <div>
                     <p className="font-medium">{vendor.name}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{vendor.email} - {vendor.services}</p>
                   </div>
-                  <div className="space-x-2">
+                  <div className="space-x-2 mt-2 sm:mt-0">
                     <Button onClick={() => handleApproveVendor(vendor.name)} variant="default" size="sm">Approve</Button>
                     <Button onClick={() => handleRejectVendor(vendor.name)} variant="outline" size="sm">Reject</Button>
                   </div>

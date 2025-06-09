@@ -9,7 +9,7 @@ const CustomerPortal = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <Header />
-      <main className="flex-grow p-8 text-center">
+      <main className="flex-grow p-4 sm:p-8 text-center">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Customer Portal</h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
           Discover a wide range of trusted home services from our network of vetted professionals.
@@ -35,7 +35,7 @@ const CustomerPortal = () => {
 
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Featured Services</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <Card className="text-left">
               <CardHeader>
                 <CardTitle>Premium Home Painting</CardTitle>
@@ -88,7 +88,7 @@ const CustomerPortal = () => {
 
         <section className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">What Our Customers Say</h2>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card className="text-left">
               <CardContent className="pt-6">
                 <p className="italic text-gray-700 dark:text-gray-300 mb-4">
@@ -109,8 +109,6 @@ const CustomerPortal = () => {
             </Card>
           </div>
         </section>
-
-        {/* Removed "Return to Home" button */}
       </main>
       <Footer /> {/* Add Footer here */}
     </div>

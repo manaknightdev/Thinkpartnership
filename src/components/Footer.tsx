@@ -4,9 +4,9 @@ import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 export const Footer = () => {
   return (
     <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-10 px-4">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         {/* Company Info */}
-        <div className="col-span-1 md:col-span-2">
+        <div className="col-span-1 sm:col-span-2">
           <h3 className="text-2xl font-bold text-white mb-4">ThinkPartnerships</h3>
           <p className="text-gray-400 text-sm">
             Your ultimate referral ecosystem for seamless connections, managed programs, and new revenue streams.

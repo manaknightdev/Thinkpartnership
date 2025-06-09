@@ -39,7 +39,7 @@ const ClientReportsPage = () => {
 
       <div className="flex justify-end mb-4">
         <Select defaultValue="monthly">
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
           <SelectContent>
@@ -86,24 +86,26 @@ const ClientReportsPage = () => {
           <CardDescription>Vendors with the highest revenue and referrals.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Total Revenue</TableHead>
-                <TableHead>Total Referrals</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockTopVendors.map((vendor, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{vendor.name}</TableCell>
-                  <TableCell>{vendor.revenue}</TableCell>
-                  <TableCell>{vendor.referrals}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Total Revenue</TableHead>
+                  <TableHead>Total Referrals</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {mockTopVendors.map((vendor, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{vendor.name}</TableCell>
+                    <TableCell>{vendor.revenue}</TableCell>
+                    <TableCell>{vendor.referrals}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           <Button onClick={handleViewAllVendorsReport} variant="outline" className="mt-4">View All Vendors Report</Button>
         </CardContent>
       </Card>

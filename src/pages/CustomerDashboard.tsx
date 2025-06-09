@@ -25,9 +25,9 @@ const CustomerDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <Header />
-      <div className="flex flex-grow">
+      <div className="flex flex-col md:flex-row flex-grow">
         {/* Sidebar */}
-        <aside className="w-64 border-r bg-white dark:bg-gray-900 p-4 flex flex-col">
+        <aside className="w-full md:w-64 border-b md:border-r bg-white dark:bg-gray-900 p-4 flex flex-col">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Customer Menu</h2>
           <nav className="flex flex-col space-y-2">
             {navItems.map((item) => (

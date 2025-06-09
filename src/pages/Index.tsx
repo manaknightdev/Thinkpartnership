@@ -35,7 +35,7 @@ const Index = () => {
         {/* How It Works Section */}
         <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               <Handshake className="h-16 w-16 text-primary mb-4" />
               <CardHeader className="p-0 pb-4">
@@ -88,7 +88,7 @@ const Index = () => {
 
         {/* About Us Section */}
         <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="text-center md:text-left animate-fade-in-up">
               <Info className="h-16 w-16 text-blue-600 dark:text-blue-400 mb-6 mx-auto md:mx-0" />
               <h2 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Our Mission</h2>
@@ -117,7 +117,7 @@ const Index = () => {
         {/* Key Features Section */}
         <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Why Choose ThinkPartnerships?</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Card className="p-6 shadow-md hover:shadow-lg transition-all duration-300">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <DollarSign className="h-10 w-10 text-blue-600" />
@@ -190,7 +190,7 @@ const Index = () => {
         {/* Testimonials Section */}
         <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">What Our Users Say</h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card className="p-6 text-left shadow-md hover:shadow-lg transition-all duration-300">
               <CardContent className="p-0 pt-2">
                 <Quote className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />

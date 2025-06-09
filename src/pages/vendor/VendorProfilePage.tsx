@@ -80,35 +80,37 @@ const VendorProfilePage = () => {
         </CardHeader>
         <CardContent>
           {mockServices.length > 0 ? (
-            <Table className="mb-4">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price Range</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockServices.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">{service.name}</TableCell>
-                    <TableCell>{service.category}</TableCell>
-                    <TableCell>{service.price}</TableCell>
-                    <TableCell>{service.status}</TableCell>
-                    <TableCell className="text-right">
-                      <Button onClick={() => handleEditService(service.name)} variant="ghost" size="sm" className="mr-2">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button onClick={() => handleDeleteService(service.name)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table className="mb-4">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Service Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Price Range</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {mockServices.map((service) => (
+                    <TableRow key={service.id}>
+                      <TableCell className="font-medium">{service.name}</TableCell>
+                      <TableCell>{service.category}</TableCell>
+                      <TableCell>{service.price}</TableCell>
+                      <TableCell>{service.status}</TableCell>
+                      <TableCell className="text-right">
+                        <Button onClick={() => handleEditService(service.name)} variant="ghost" size="sm" className="mr-2">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button onClick={() => handleDeleteService(service.name)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400 mb-4">No services listed yet. Add your first service!</p>
           )}

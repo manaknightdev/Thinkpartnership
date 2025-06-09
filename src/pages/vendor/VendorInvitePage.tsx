@@ -39,7 +39,7 @@ const VendorInvitePage = () => {
           <CardDescription>Share this link with your customers to track their activity.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <Input readOnly value={referralLink} className="flex-grow" />
             <Button onClick={copyToClipboard} className="shrink-0">
               <Copy className="mr-2 h-4 w-4" /> Copy Link
@@ -74,26 +74,28 @@ const VendorInvitePage = () => {
         </CardHeader>
         <CardContent>
           {mockSentInvites.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Date Sent</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Converted</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockSentInvites.map((invite) => (
-                  <TableRow key={invite.id}>
-                    <TableCell className="font-medium">{invite.email}</TableCell>
-                    <TableCell>{invite.dateSent}</TableCell>
-                    <TableCell>{invite.status}</TableCell>
-                    <TableCell>{invite.conversion}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Date Sent</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Converted</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {mockSentInvites.map((invite) => (
+                    <TableRow key={invite.id}>
+                      <TableCell className="font-medium">{invite.email}</TableCell>
+                      <TableCell>{invite.dateSent}</TableCell>
+                      <TableCell>{invite.status}</TableCell>
+                      <TableCell>{invite.conversion}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">No invites sent yet.</p>
           )}

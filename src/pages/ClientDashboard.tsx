@@ -28,9 +28,9 @@ const ClientDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <Header />
-      <div className="flex flex-grow">
+      <div className="flex flex-col md:flex-row flex-grow">
         {/* Sidebar */}
-        <aside className="w-64 border-r bg-white dark:bg-gray-900 p-4 flex flex-col">
+        <aside className="w-full md:w-64 border-b md:border-r bg-white dark:bg-gray-900 p-4 flex flex-col">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Client Menu</h2>
           <nav className="flex flex-col space-y-2">
             {navItems.map((item) => (
@@ -48,7 +48,6 @@ const ClientDashboard = () => {
             ))}
           </nav>
           <div className="mt-auto pt-4 border-t dark:border-gray-700 space-y-2">
-            {/* Removed "Return to Home" button */}
             <Button onClick={handleLogout} variant="destructive" className="w-full">
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </Button>

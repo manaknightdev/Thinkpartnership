@@ -122,7 +122,7 @@ const ServiceDetailsPage = () => {
 
   if (!service) {
     return (
-      <div className="p-8 text-center">
+      <div className="p-4 sm:p-8 text-center">
         <h1 className="text-3xl font-bold text-red-600 dark:text-red-400 mb-4">Service Not Found</h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
           The service you are looking for does not exist.
@@ -137,7 +137,7 @@ const ServiceDetailsPage = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <Button variant="outline" className="mb-6" asChild>
         <Link to="/customer-portal/browse">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Browse Services
@@ -146,27 +146,27 @@ const ServiceDetailsPage = () => {
 
       <Card className="overflow-hidden">
         {service.image && (
-          <img src={service.image} alt={service.title} className="w-full h-64 object-cover" />
+          <img src={service.image} alt={service.title} className="w-full h-48 sm:h-64 object-cover" />
         )}
         <CardHeader>
-          <CardTitle className="text-4xl font-bold">{serviceName}</CardTitle>
-          <CardDescription className="text-xl text-primary">By "{service.vendor}"</CardDescription>
+          <CardTitle className="text-3xl sm:text-4xl font-bold">{serviceName}</CardTitle>
+          <CardDescription className="text-lg sm:text-xl text-primary">By "{service.vendor}"</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-2xl font-semibold mb-2">Description</h3>
+            <h3 className="text-xl sm:text-2xl font-semibold mb-2">Description</h3>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{service.description}</p>
           </div>
 
           <div>
-            <h3 className="text-2xl font-semibold mb-2">Pricing</h3>
-            <p className="text-3xl font-bold text-primary">{service.price}</p>
+            <h3 className="text-xl sm:text-2xl font-semibold mb-2">Pricing</h3>
+            <p className="text-2xl sm:text-3xl font-bold text-primary">{service.price}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Final price may vary based on scope.</p>
           </div>
 
           {service.features && service.features.length > 0 && (
             <div>
-              <h3 className="text-2xl font-semibold mb-2">Key Features</h3>
+              <h3 className="text-xl sm:text-2xl font-semibold mb-2">Key Features</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                 {service.features.map((feature, index) => (
                   <li key={index}>{feature}</li>
@@ -177,7 +177,7 @@ const ServiceDetailsPage = () => {
 
           {service.contact && (
             <div>
-              <h3 className="text-2xl font-semibold mb-2">Contact Vendor</h3>
+              <h3 className="text-xl sm:text-2xl font-semibold mb-2">Contact Vendor</h3>
               <div className="space-y-2 text-gray-700 dark:text-gray-300">
                 {service.contact.phone && (
                   <p className="flex items-center gap-2">

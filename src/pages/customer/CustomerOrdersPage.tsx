@@ -43,32 +43,34 @@ const CustomerOrdersPage = () => {
         </CardHeader>
         <CardContent>
           {mockOrders.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Vendor</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockOrders.map((order) => (
-                  <TableRow key={order.id} onClick={() => handleViewOrderDetails(order.id)} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.service}</TableCell>
-                    <TableCell>{order.vendor}</TableCell>
-                    <TableCell>{order.date}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{order.amount}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Vendor</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {mockOrders.map((order) => (
+                    <TableRow key={order.id} onClick={() => handleViewOrderDetails(order.id)} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <TableCell className="font-medium">{order.id}</TableCell>
+                      <TableCell>{order.service}</TableCell>
+                      <TableCell>{order.vendor}</TableCell>
+                      <TableCell>{order.date}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{order.amount}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">You haven't placed any orders yet.</p>
           )}
