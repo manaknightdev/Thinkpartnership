@@ -1,67 +1,54 @@
-import { Link } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer"; // Import Footer
+import { cn } from "@/lib/utils";
+import { Footer } from "@/components/Footer";
 
 const ClientDashboard = () => {
+  const location = useLocation();
+
+  const navItems = [
+    { name: "Overview", path: "/client-portal/overview" },
+    { name: "Reports", path: "/client-portal/reports" },
+    { name: "Manage Vendors", path: "/client-portal/vendors" },
+    { name: "Set Rules", path: "/client-portal/rules" },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <Header />
-      <main className="flex-grow p-8">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Client Dashboard</h1>
-        <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-2xl">
-          Welcome to your client portal! Here you can manage your branded sub-marketplace, onboard vendors, and monitor transactions.
-        </p>
+      <div className="flex flex-grow">
+        {/* Sidebar */}
+        <aside className="w-64 border-r bg-white dark:bg-gray-900 p-4 flex flex-col">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Client Menu</h2>
+          <nav className="flex flex-col space-y-2">
+            {navItems.map((item) => (
+              <Button
+                key={item.path}
+                variant="ghost"
+                className={cn(
+                  "justify-start",
+                  location.pathname === item.path && "bg-muted dark:bg-gray-800"
+                )}
+                asChild
+              >
+                <Link to={item.path}>{item.name}</Link>
+              </Button>
+            ))}
+          </nav>
+          <div className="mt-auto pt-4 border-t dark:border-gray-700">
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/">Return to Home</Link>
+            </Button>
+          </div>
+        </aside>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Marketplace Overview</CardTitle>
-              <CardDescription>View key metrics and performance of your marketplace.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-400">
-                (Placeholder for charts, total transactions, active vendors, etc.)
-              </p>
-              <Button variant="outline" className="mt-4">View Reports</Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Vendor Management</CardTitle>
-              <CardDescription>Approve new vendors and manage existing partner profiles.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-400">
-                (Placeholder for vendor list, approval queue, edit vendor details.)
-              </p>
-              <Button variant="outline" className="mt-4">Manage Vendors</Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue Rules</CardTitle>
-              <CardDescription>Configure commission splits and payout settings for your marketplace.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-400">
-                (Placeholder for dynamic revenue sharing rules engine.)
-              </p>
-              <Button variant="outline" className="mt-4">Set Rules</Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mt-12">
-          <Button asChild>
-            <Link to="/">Return to Home</Link>
-          </Button>
-        </div>
-      </main>
-      <Footer /> {/* Add Footer here */}
+        {/* Main Content Area */}
+        <main className="flex-grow">
+          <Outlet /> {/* This is where nested route components will render */}
+        </main>
+      </div>
+      <Footer />
     </div>
   );
 };
