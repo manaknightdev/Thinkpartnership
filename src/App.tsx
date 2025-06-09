@@ -30,6 +30,7 @@ import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesP
 import CustomerOrdersPage from "./pages/customer/CustomerOrdersPage";
 import CustomerAccountPage from "./pages/customer/CustomerAccountPage";
 import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage";
+import CheckoutPage from "./pages/customer/CheckoutPage"; // Import the new CheckoutPage
 
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
             <Route index element={<Navigate to="browse" replace />} />
             <Route path="browse" element={<CustomerBrowseServicesPage />} />
             <Route path="services/:serviceName" element={<ServiceDetailsPage />} />
+            <Route path="checkout/:serviceName" element={<CheckoutPage />} /> {/* New route for checkout */}
             <Route path="orders" element={<CustomerOrdersPage />} />
             <Route path="account" element={<CustomerAccountPage />} />
           </Route>

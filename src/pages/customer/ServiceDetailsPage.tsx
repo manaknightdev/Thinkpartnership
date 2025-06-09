@@ -1,10 +1,11 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
 
 const ServiceDetailsPage = () => {
   const { serviceName } = useParams<{ serviceName: string }>();
+  const navigate = useNavigate();
 
   // Mock data for service details - in a real app, this would come from an API
   const mockServiceDetails = {
@@ -198,7 +199,9 @@ const ServiceDetailsPage = () => {
             </div>
           )}
 
-          <Button size="lg" className="w-full">Request Service</Button>
+          <Button size="lg" className="w-full" onClick={() => navigate(`/customer-portal/checkout/${encodeURIComponent(serviceName || '')}`)}>
+            Request Service
+          </Button>
         </CardContent>
       </Card>
     </div>
