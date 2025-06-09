@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { toast } from "sonner";
-import { Download, BarChart as BarChartIcon, TrendingUp } from "lucide-react";
+import { Download, BarChart as BarChartIcon, TrendingUp, Users } from "lucide-react"; // Added Users import
 
 const mockOverallRevenueData = [
   { name: 'Jan', totalRevenue: 50000, platformRevenue: 2500 },
