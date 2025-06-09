@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/Footer";
+import { LogOut } from "lucide-react"; // Import LogOut icon
+import { toast } from "sonner"; // Import toast
 
 const ClientDashboard = () => {
   const location = useLocation();
@@ -13,6 +15,15 @@ const ClientDashboard = () => {
     { name: "Manage Vendors", path: "/client-portal/vendors" },
     { name: "Set Rules", path: "/client-portal/rules" },
   ];
+
+  const handleLogout = () => {
+    // In a real application, you would clear user session/token here
+    toast.info("Logging out...");
+    // For now, we'll just redirect to home after a short delay
+    setTimeout(() => {
+      window.location.href = "/"; // Or navigate to /login
+    }, 500);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
@@ -36,9 +47,12 @@ const ClientDashboard = () => {
               </Button>
             ))}
           </nav>
-          <div className="mt-auto pt-4 border-t dark:border-gray-700">
+          <div className="mt-auto pt-4 border-t dark:border-gray-700 space-y-2">
             <Button asChild variant="outline" className="w-full">
               <Link to="/">Return to Home</Link>
+            </Button>
+            <Button onClick={handleLogout} variant="destructive" className="w-full">
+              <LogOut className="mr-2 h-4 w-4" /> Logout
             </Button>
           </div>
         </aside>
