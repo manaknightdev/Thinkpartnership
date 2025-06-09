@@ -32,7 +32,7 @@ export const GlobalNavbar = () => {
         <NavigationMenuList className="flex space-x-4">
           {mainNavItems.map((item) => (
             <NavigationMenuItem key={item.path}>
-              <Link to={item.path} legacyBehavior passHref>
+              <Link to={item.path} legacyBehavior> {/* Removed passHref */}
                 <NavigationMenuLink
                   className={cn(
                     navigationMenuTriggerStyle(),
@@ -45,7 +45,7 @@ export const GlobalNavbar = () => {
             </NavigationMenuItem>
           ))}
           <NavigationMenuItem>
-            <Link to="/login" legacyBehavior passHref>
+            <Link to="/login" legacyBehavior> {/* Removed passHref */}
               <NavigationMenuLink
                 className={cn(
                   navigationMenuTriggerStyle(),

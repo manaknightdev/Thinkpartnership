@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Users } from "lucide-react";
+import { CheckCircle, XCircle, Users, Clock } from "lucide-react"; // Added Clock import
 
 const mockAllVendors = [
   { id: "v001", name: "Rapid Plumbers", email: "rapid@example.com", status: "Active", services: "Plumbing", client: "Client A" },
