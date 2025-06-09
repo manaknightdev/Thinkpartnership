@@ -1,10 +1,9 @@
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Header } from "@/components/Header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } => "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Handshake, Users, Home, DollarSign, ShieldCheck, Lightbulb, Quote, Info } from "lucide-react"; // Importing new Info icon
-import { Footer } from "@/components/Footer"; // Import Footer
+import { Handshake, Users, Home, DollarSign, ShieldCheck, Lightbulb, Quote, Info } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -102,7 +101,7 @@ const Index = () => {
             </div>
             <div className="relative h-80 md:h-96 rounded-lg overflow-hidden shadow-xl">
               <img
-                src="https://images.unsplash.com/photo-1552664730-d307ca88499d?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="https://fellow.app/wp-content/uploads/2022/01/team-collaboration.jpg"
                 alt="Team collaboration"
                 className="w-full h-full object-cover"
               />
@@ -189,7 +188,7 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
+        <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">What Our Users Say</h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card className="p-6 text-left shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -227,8 +226,7 @@ const Index = () => {
         </section>
 
       </main>
-      <MadeWithDyad />
-      <Footer /> {/* Add Footer here */}
+      <Footer />
     </div>
   );
 };
