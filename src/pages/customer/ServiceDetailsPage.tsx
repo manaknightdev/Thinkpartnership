@@ -24,7 +24,7 @@ const ServiceDetailsPage = () => {
         "Eco-friendly paint options",
         "Satisfaction guarantee"
       ],
-      image: "https://images.unsplash.com/photo-1580587771525-78b9dba3825b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: "https://t3.ftcdn.net/jpg/00/96/57/12/360_F_96571267_qfpHjHTvH8siby0Cey6rTpfiJczIxX3e.jpg"
     },
     "Emergency Plumbing Repair": {
       vendor: "Rapid Plumbers",
@@ -42,7 +42,7 @@ const ServiceDetailsPage = () => {
         "Water heater repair/installation",
         "Pipe replacement"
       ],
-      image: "https://images.unsplash.com/photo-1582210256130-6d771118616e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: "https://media.istockphoto.com/id/183953925/photo/young-plumber-fixing-a-sink-in-bathroom.jpg?s=612x612&w=0&k=20&c=Ps2U_U4_Z60mIZsuem-BoaHLlCjsT8wYWiXNWR-TCDA="
     },
     "Full Home Inspection": {
       vendor: "Certified Inspectors Inc.",
@@ -60,7 +60,7 @@ const ServiceDetailsPage = () => {
         "Termite inspections",
         "Detailed digital reports"
       ],
-      image: "https://images.unsplash.com/photo-1560448204-e02f1123d356?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: "https://www.shutterstock.com/image-photo/mid-adult-woman-architect-wearing-600nw-2060102018.jpg"
     },
     "Professional Lawn Care": {
       vendor: "Green Thumb Landscaping",
@@ -78,7 +78,7 @@ const ServiceDetailsPage = () => {
         "Seasonal clean-ups",
         "Landscape design"
       ],
-      image: "https://images.unsplash.com/photo-1518621736915-f218812f276b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: "https://media.istockphoto.com/id/475958716/photo/lawn-mower.jpg?s=612x612&w=0&k=20&c=TIGBHDkXS9IJbq84NHtfsFIPp_aqy6APWni2r_oS2NQ="
     },
     "HVAC System Tune-up": {
       vendor: "Climate Control Experts",
@@ -96,7 +96,7 @@ const ServiceDetailsPage = () => {
         "Thermostat calibration",
         "Emergency repairs"
       ],
-      image: "https://images.unsplash.com/photo-1583912229130-e0f3301f121e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: "https://media.istockphoto.com/id/515643040/photo/man-repairing-computer.jpg?s=612x612&w=0&k=20&c=H9NBpHyqc14Rqc1AdFwypY-UXMys0nVYL2EVe8p-mUA="
     },
     "Deep House Cleaning": {
       vendor: "Sparkling Spaces",
@@ -114,7 +114,7 @@ const ServiceDetailsPage = () => {
         "Window cleaning (interior)",
         "Move-in/move-out cleaning"
       ],
-      image: "https://images.unsplash.com/photo-1581578731548-adab4975807f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: "https://t4.ftcdn.net/jpg/03/06/99/87/360_F_306998742_5awR6uVsZ8dRNdHHnj0tnm4sGUDBAxQ5.jpg"
     },
   };
 
