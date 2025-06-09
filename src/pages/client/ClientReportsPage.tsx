@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from "sonner";
 
 const ClientReportsPage = () => {
   const mockTopVendors = [
@@ -10,6 +12,23 @@ const ClientReportsPage = () => {
     { name: "Certified Inspectors Inc.", revenue: "$7,200", referrals: 30 },
     { name: "Green Thumb Landscaping", revenue: "$5,100", referrals: 25 },
   ];
+
+  const mockRevenueData = [
+    { name: 'Jan', revenue: 4000 },
+    { name: 'Feb', revenue: 3000 },
+    { name: 'Mar', revenue: 5000 },
+    { name: 'Apr', revenue: 4500 },
+    { name: 'May', revenue: 6000 },
+    { name: 'Jun', revenue: 5500 },
+  ];
+
+  const handleGenerateReport = () => {
+    toast.info("Generating custom report...");
+  };
+
+  const handleViewAllVendorsReport = () => {
+    toast.info("Navigating to all vendors report...");
+  };
 
   return (
     <div className="p-6">
@@ -39,10 +58,25 @@ const ClientReportsPage = () => {
           <CardDescription>Revenue and transaction trends over time.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-md flex items-center justify-center text-gray-500 dark:text-gray-400">
-            [Placeholder for Revenue Trend Chart]
-          </div>
-          <Button variant="outline" className="mt-4">Generate Custom Report</Button>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={mockRevenueData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="revenue" stroke="#8884d8" activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
+          <Button onClick={handleGenerateReport} variant="outline" className="mt-4">Generate Custom Report</Button>
         </CardContent>
       </Card>
 
@@ -70,7 +104,7 @@ const ClientReportsPage = () => {
               ))}
             </TableBody>
           </Table>
-          <Button variant="outline" className="mt-4">View All Vendors Report</Button>
+          <Button onClick={handleViewAllVendorsReport} variant="outline" className="mt-4">View All Vendors Report</Button>
         </CardContent>
       </Card>
     </div>

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { DollarSign, Users, TrendingUp } from "lucide-react";
+import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake } from "lucide-react"; // Importing new icons
 
 const ClientOverviewPage = () => {
   return (
@@ -49,7 +49,9 @@ const ClientOverviewPage = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Marketplace Metrics</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart className="h-5 w-5" /> Marketplace Metrics
+            </CardTitle>
             <CardDescription>View key metrics and performance of your marketplace.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -64,7 +66,9 @@ const ClientOverviewPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Vendor Management</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Handshake className="h-5 w-5" /> Vendor Management
+            </CardTitle>
             <CardDescription>Approve new vendors and manage existing partner profiles.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -79,7 +83,9 @@ const ClientOverviewPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Rules</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" /> Revenue Rules
+            </CardTitle>
             <CardDescription>Configure commission splits and payout settings for your marketplace.</CardDescription>
           </CardHeader>
           <CardContent>

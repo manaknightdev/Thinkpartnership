@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const ClientRevenueRulesPage = () => {
   const mockServiceRules = [
@@ -11,6 +12,22 @@ const ClientRevenueRulesPage = () => {
     { id: "r002", service: "Painting", clientShare: "10%", vendorShare: "90%" },
     { id: "r003", service: "Inspections", clientShare: "20%", vendorShare: "80%" },
   ];
+
+  const handleSaveGlobalRules = () => {
+    toast.success("Global rules saved!");
+  };
+
+  const handleEditRule = (service: string) => {
+    toast.info(`Editing rule for ${service}...`);
+  };
+
+  const handleDeleteRule = (service: string) => {
+    toast.error(`Deleted rule for ${service}.`);
+  };
+
+  const handleAddCustomRule = () => {
+    toast.success("Custom rule added!");
+  };
 
   return (
     <div className="p-6">
@@ -33,7 +50,7 @@ const ClientRevenueRulesPage = () => {
             <Label htmlFor="vendor-commission">Vendor Commission (%)</Label>
             <Input id="vendor-commission" type="number" placeholder="e.g., 90" defaultValue={90} />
           </div>
-          <Button>Save Global Rules</Button>
+          <Button onClick={handleSaveGlobalRules}>Save Global Rules</Button>
         </CardContent>
       </Card>
 
@@ -60,8 +77,8 @@ const ClientRevenueRulesPage = () => {
                     <TableCell>{rule.clientShare}</TableCell>
                     <TableCell>{rule.vendorShare}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Edit</Button>
-                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
+                      <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">Edit</Button>
+                      <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -96,7 +113,7 @@ const ClientRevenueRulesPage = () => {
               <Input id="new-vendor-share" type="number" placeholder="e.g., 85" />
             </div>
           </div>
-          <Button className="mt-4">Add Custom Rule</Button>
+          <Button onClick={handleAddCustomRule} className="mt-4">Add Custom Rule</Button>
         </CardContent>
       </Card>
     </div>

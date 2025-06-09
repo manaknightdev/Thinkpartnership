@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const ClientVendorManagementPage = () => {
   const mockVendors = [
@@ -18,6 +19,30 @@ const ClientVendorManagementPage = () => {
     { id: "p001", name: "Clean Sweep Services", email: "clean@example.com", services: "Cleaning" },
     { id: "p002", name: "Move It Right", email: "move@example.com", services: "Moving" },
   ];
+
+  const handleAddVendor = () => {
+    toast.info("Opening form to add new vendor...");
+  };
+
+  const handleViewVendor = (vendorName: string) => {
+    toast.info(`Viewing details for ${vendorName}...`);
+  };
+
+  const handleEditVendor = (vendorName: string) => {
+    toast.info(`Editing ${vendorName}...`);
+  };
+
+  const handleApproveVendor = (vendorName: string) => {
+    toast.success(`Approved ${vendorName}.`);
+  };
+
+  const handleRejectVendor = (vendorName: string) => {
+    toast.error(`Rejected ${vendorName}.`);
+  };
+
+  const handleReviewAllApplications = () => {
+    toast.info("Reviewing all pending applications...");
+  };
 
   return (
     <div className="p-6">
@@ -57,14 +82,14 @@ const ClientVendorManagementPage = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">View</Button>
-                    <Button variant="ghost" size="sm">Edit</Button>
+                    <Button onClick={() => handleViewVendor(vendor.name)} variant="ghost" size="sm">View</Button>
+                    <Button onClick={() => handleEditVendor(vendor.name)} variant="ghost" size="sm">Edit</Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-          <Button variant="outline" className="mt-4">Add New Vendor</Button>
+          <Button onClick={handleAddVendor} variant="outline" className="mt-4">Add New Vendor</Button>
         </CardContent>
       </Card>
 
@@ -83,8 +108,8 @@ const ClientVendorManagementPage = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400">{vendor.email} - {vendor.services}</p>
                   </div>
                   <div className="space-x-2">
-                    <Button variant="default" size="sm">Approve</Button>
-                    <Button variant="outline" size="sm">Reject</Button>
+                    <Button onClick={() => handleApproveVendor(vendor.name)} variant="default" size="sm">Approve</Button>
+                    <Button onClick={() => handleRejectVendor(vendor.name)} variant="outline" size="sm">Reject</Button>
                   </div>
                 </div>
               ))}
@@ -92,7 +117,7 @@ const ClientVendorManagementPage = () => {
           ) : (
             <p className="text-gray-600 dark:text-gray-400">No pending vendor applications at this time.</p>
           )}
-          <Button variant="outline" className="mt-4">Review All Applications</Button>
+          <Button onClick={handleReviewAllApplications} variant="outline" className="mt-4">Review All Applications</Button>
         </CardContent>
       </Card>
     </div>
