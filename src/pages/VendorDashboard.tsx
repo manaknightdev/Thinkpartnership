@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/Footer";
-import { LogOut } from "lucide-react";
+import { LogOut, User, DollarSign, Mail, Crown } from "lucide-react"; // Added Crown icon
 import { toast } from "sonner";
 // MobileSheet import is no longer needed here
 
@@ -11,9 +11,10 @@ const VendorDashboard = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: "Profile Setup", path: "/vendor-portal/profile" },
-    { name: "Referral Dashboard", path: "/vendor-portal/referrals" },
-    { name: "Invite System", path: "/vendor-portal/invite" },
+    { name: "Profile Setup", path: "/vendor-portal/profile", icon: User },
+    { name: "Referral Dashboard", path: "/vendor-portal/referrals", icon: DollarSign },
+    { name: "Invite System", path: "/vendor-portal/invite", icon: Mail },
+    { name: "Subscription", path: "/vendor-portal/subscription", icon: Crown }, // New nav item
   ];
 
   const handleLogout = () => {
@@ -37,11 +38,14 @@ const VendorDashboard = () => {
                 variant="ghost"
                 className={cn(
                   "justify-start",
-                  location.pathname === item.path && "bg-muted dark:bg-gray-800" // Highlight active link
+                  location.pathname.startsWith(item.path) && "bg-muted dark:bg-gray-800" // Highlight active link
                 )}
                 asChild
               >
-                <Link to={item.path}>{item.name}</Link>
+                <Link to={item.path}>
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.name}
+                </Link>
               </Button>
             ))}
           </nav>

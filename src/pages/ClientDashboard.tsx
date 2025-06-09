@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/Footer";
-import { LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard, BarChart, Users, Settings, Palette } from "lucide-react"; // Added Palette icon
 import { toast } from "sonner";
 // MobileSheet import is no longer needed here
 
@@ -11,10 +11,11 @@ const ClientDashboard = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: "Overview", path: "/client-portal/overview" },
-    { name: "Reports", path: "/client-portal/reports" },
-    { name: "Manage Vendors", path: "/client-portal/vendors" },
-    { name: "Set Rules", path: "/client-portal/rules" },
+    { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard },
+    { name: "Reports", path: "/client-portal/reports", icon: BarChart },
+    { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users },
+    { name: "Set Rules", path: "/client-portal/rules", icon: Settings },
+    { name: "Branding", path: "/client-portal/branding", icon: Palette }, // New nav item
   ];
 
   const handleLogout = () => {
@@ -38,11 +39,14 @@ const ClientDashboard = () => {
                 variant="ghost"
                 className={cn(
                   "justify-start",
-                  location.pathname === item.path && "bg-muted dark:bg-gray-800" // Highlight active link
+                  location.pathname.startsWith(item.path) && "bg-muted dark:bg-gray-800" // Highlight active link
                 )}
                 asChild
               >
-                <Link to={item.path}>{item.name}</Link>
+                <Link to={item.path}>
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.name}
+                </Link>
               </Button>
             ))}
           </nav>
