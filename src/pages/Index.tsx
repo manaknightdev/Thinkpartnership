@@ -36,7 +36,7 @@ const Index = () => {
         <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+            <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 animate-fade-in-up animate-delay-200">
               <Handshake className="h-16 w-16 text-primary mb-4" />
               <CardHeader className="p-0 pb-4">
                 <CardTitle className="text-2xl">For Clients (Licensees)</CardTitle>
@@ -52,7 +52,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+            <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 animate-fade-in-up animate-delay-400">
               <Users className="h-16 w-16 text-primary mb-4" />
               <CardHeader className="p-0 pb-4">
                 <CardTitle className="text-2xl">For Referral Partners (Vendors)</CardTitle>
@@ -68,7 +68,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+            <Card className="text-center p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 animate-fade-in-up animate-delay-600">
               <Home className="h-16 w-16 text-primary mb-4" />
               <CardHeader className="p-0 pb-4">
                 <CardTitle className="text-2xl">For Customers</CardTitle>
@@ -89,7 +89,7 @@ const Index = () => {
         {/* About Us Section */}
         <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-            <div className="text-center md:text-left">
+            <div className="text-center md:text-left animate-fade-in-up">
               <Info className="h-16 w-16 text-blue-600 dark:text-blue-400 mb-6 mx-auto md:mx-0" />
               <h2 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Our Mission</h2>
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
@@ -99,7 +99,7 @@ const Index = () => {
                 We're dedicated to fostering growth, simplifying operations, and building a community where everyone thrives.
               </p>
             </div>
-            <div className="relative h-80 md:h-96 rounded-lg overflow-hidden shadow-xl">
+            <div className="relative h-80 md:h-96 rounded-lg overflow-hidden shadow-xl animate-fade-in animate-delay-400">
               <img
                 src="https://fellow.app/wp-content/uploads/2022/01/team-collaboration.jpg"
                 alt="Team collaboration"
@@ -118,7 +118,7 @@ const Index = () => {
         <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Why Choose ThinkPartnerships?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-200">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <DollarSign className="h-10 w-10 text-blue-600" />
                 <CardTitle className="text-xl">Automated Commissions</CardTitle>
@@ -129,7 +129,7 @@ const Index = () => {
                 </p>
               </CardContent>
             </Card>
-            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-400">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <ShieldCheck className="h-10 w-10 text-green-600" />
                 <CardTitle className="text-xl">Vetted Professionals</CardTitle>
@@ -140,7 +140,7 @@ const Index = () => {
                 </p>
               </CardContent>
             </Card>
-            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-600">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <Lightbulb className="h-10 w-10 text-yellow-600" />
                 <CardTitle className="text-xl">Customizable Marketplaces</CardTitle>
@@ -151,7 +151,7 @@ const Index = () => {
                 </p>
               </CardContent>
             </Card>
-            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-200">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <Handshake className="h-10 w-10 text-purple-600" />
                 <CardTitle className="text-xl">Seamless Referrals</CardTitle>
@@ -162,7 +162,7 @@ const Index = () => {
                 </p>
               </CardContent>
             </Card>
-            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-400">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <Users className="h-10 w-10 text-red-600" />
                 <CardTitle className="text-xl">Centralized Management</CardTitle>
@@ -173,7 +173,7 @@ const Index = () => {
                 </p>
               </CardContent>
             </Card>
-            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-600">
               <CardHeader className="p-0 pb-4 flex-row items-center space-x-4">
                 <Home className="h-10 w-10 text-teal-600" />
                 <CardTitle className="text-xl">Diverse Service Categories</CardTitle>
@@ -188,10 +188,10 @@ const Index = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section className="w-full py-20 bg-gray-100 dark:bg-gray-900 px-4">
+        <section className="w-full py-20 bg-white dark:bg-gray-950 px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">What Our Users Say</h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="p-6 text-left shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 text-left shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-200">
               <CardContent className="p-0 pt-2">
                 <Quote className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
                 <p className="italic text-gray-700 dark:text-gray-300 mb-4">
@@ -200,7 +200,7 @@ const Index = () => {
                 <p className="font-semibold text-gray-800 dark:text-gray-200">- Sarah L., Real Estate Broker</p>
               </CardContent>
             </Card>
-            <Card className="p-6 text-left shadow-md hover:shadow-lg transition-shadow duration-300">
+            <Card className="p-6 text-left shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in-up animate-delay-400">
               <CardContent className="p-0 pt-2">
                 <Quote className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
                 <p className="italic text-gray-700 dark:text-gray-300 mb-4">
