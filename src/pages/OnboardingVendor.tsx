@@ -9,9 +9,7 @@ const OnboardingVendor = () => {
         This page will guide referral partners (vendors) through listing their services, setting up their profile,
         and understanding how to invite customers and earn commissions.
       </p>
-      <Button asChild>
-        <Link to="/">Return to Home</Link>
-      </Button>
+      {/* Removed "Return to Home" button */}
     </div>
   );
 };

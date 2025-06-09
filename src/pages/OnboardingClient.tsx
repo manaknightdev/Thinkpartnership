@@ -9,9 +9,7 @@ const OnboardingClient = () => {
         This is where clients (licensees) would go through the process of setting up their branded sub-marketplace.
         This involves configuring their domain, branding, and initial settings.
       </p>
-      <Button asChild>
-        <Link to="/">Return to Home</Link>
-      </Button>
+      {/* Removed "Return to Home" button */}
     </div>
   );
 };

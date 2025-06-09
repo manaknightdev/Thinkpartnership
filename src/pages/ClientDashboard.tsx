@@ -48,9 +48,7 @@ const ClientDashboard = () => {
             ))}
           </nav>
           <div className="mt-auto pt-4 border-t dark:border-gray-700 space-y-2">
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/">Return to Home</Link>
-            </Button>
+            {/* Removed "Return to Home" button */}
             <Button onClick={handleLogout} variant="destructive" className="w-full">
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </Button>

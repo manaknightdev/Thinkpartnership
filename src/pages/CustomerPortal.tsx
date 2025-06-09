@@ -110,11 +110,7 @@ const CustomerPortal = () => {
           </div>
         </section>
 
-        <div className="mt-12">
-          <Button asChild>
-            <Link to="/">Return to Home</Link>
-          </Button>
-        </div>
+        {/* Removed "Return to Home" button */}
       </main>
       <Footer /> {/* Add Footer here */}
     </div>
