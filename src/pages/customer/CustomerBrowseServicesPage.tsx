@@ -174,58 +174,59 @@ const CustomerBrowseServicesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-green-800 text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-green-900/30" />
-        <div className="relative container mx-auto px-4 sm:px-8 py-16 sm:py-24">
-          <div className="max-w-4xl">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Find Your Perfect
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
-                Home Service
-              </span>
-            </h1>
-            <p className="text-xl sm:text-2xl mb-8 text-slate-200 max-w-2xl leading-relaxed">
-              Connect with trusted, verified professionals for all your home improvement needs.
-              Quality service, guaranteed satisfaction.
-            </p>
-
-            {/* Enhanced Search Bar */}
-            <div className="max-w-2xl mb-8">
-              <div className="relative">
-                <Input
-                  type="search"
-                  placeholder="What service do you need? (e.g., 'plumber', 'painter', 'cleaner'...)"
-                  className="h-14 pl-12 pr-32 text-lg bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-2xl text-gray-900 placeholder:text-gray-500"
-                />
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
-                <Button
-                  onClick={handleSearch}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl"
-                >
-                  Search
-                </Button>
-              </div>
+    {/* Hero Section */}
+    <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-green-800 text-white">
+      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-green-900/30" />
+      <div className="relative container mx-auto px-4 sm:px-8 py-16 sm:py-24 flex items-center">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            Find Your Perfect
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
+              Home Service
+            </span>
+          </h1>
+          <p className="text-xl sm:text-2xl mb-8 text-slate-200 max-w-2xl leading-relaxed text-center">
+            Connect with trusted, verified professionals for all your home improvement needs.
+            Quality service, guaranteed satisfaction.
+          </p>
+  
+          {/* Enhanced Search Bar */}
+          <div className="max-w-2xl mb-8">
+            <div className="relative">
+              <Input
+                type="search"
+                placeholder="What service do you need? (e.g., 'plumber', 'painter', 'cleaner'...)"
+                className="h-14 pl-12 pr-32 text-lg bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-2xl text-gray-900 placeholder:text-gray-500"
+              />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+              <Button
+                onClick={handleSearch}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl"
+              >
+                Search
+              </Button>
             </div>
-
-            {/* Stats */}
-            <div className="flex flex-wrap gap-8 text-sm">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-green-300" />
-                <span>500+ Verified Professionals</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-emerald-300" />
-                <span>100% Satisfaction Guarantee</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-teal-300" />
-                <span>Fast Response Times</span>
-              </div>
+          </div>
+  
+          {/* Stats */}
+          <div className="flex flex-wrap gap-8 text-sm">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-green-300" />
+              <span>500+ Verified Professionals</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-emerald-300" />
+              <span>100% Satisfaction Guarantee</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-teal-300" />
+              <span>Fast Response Times</span>
             </div>
           </div>
         </div>
       </div>
+    </div>
+    
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-8 py-12">

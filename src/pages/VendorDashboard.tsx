@@ -30,7 +30,7 @@ const VendorDashboard = () => {
       <div className="flex flex-col md:flex-row flex-grow">
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-full md:w-64 border-b md:border-r bg-white dark:bg-gray-900 p-4 flex-col">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Vendor Menu</h2>
+          {/* <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Vendor Menu</h2> */}
           <nav className="flex flex-col space-y-2">
             {navItems.map((item) => (
               <Button
