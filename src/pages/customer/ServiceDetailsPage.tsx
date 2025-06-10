@@ -1,7 +1,21 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  ArrowLeft,
+  Phone,
+  Mail,
+  MapPin,
+  Star,
+  CheckCircle,
+  DollarSign,
+  Clock,
+  Shield,
+  Award
+} from "lucide-react";
 
 const ServiceDetailsPage = () => {
   const { serviceName } = useParams<{ serviceName: string }>();
@@ -138,72 +152,190 @@ const ServiceDetailsPage = () => {
   }
 
   return (
-    <div className="p-4 sm:p-8">
-      <Button variant="outline" className="mb-6" asChild>
-        <Link to="/customer-portal/browse">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Browse Services
-        </Link>
-      </Button>
-
-      <Card className="overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      {/* Hero Section with Background Image */}
+      <div className="relative h-96 overflow-hidden">
         {service.image && (
-          <img src={service.image} alt={service.title} className="w-full h-48 sm:h-64 object-cover" />
+          <>
+            <img
+              src={service.image}
+              alt={serviceName}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/50" />
+          </>
         )}
-        <CardHeader>
-          <CardTitle className="text-3xl sm:text-4xl font-bold">{serviceName}</CardTitle>
-          <CardDescription className="text-lg sm:text-xl text-primary">By "{service.vendor}"</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-xl sm:text-2xl font-semibold mb-2">Description</h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{service.description}</p>
+
+        {/* Navigation and Hero Content */}
+        <div className="absolute inset-0 flex flex-col">
+          <div className="p-4 sm:p-8">
+            <Button variant="secondary" className="mb-6 bg-white/90 hover:bg-white text-black" asChild>
+              <Link to="/customer-portal/browse">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to Browse Services
+              </Link>
+            </Button>
           </div>
 
-          <div>
-            <h3 className="text-xl sm:text-2xl font-semibold mb-2">Pricing</h3>
-            <p className="text-2xl sm:text-3xl font-bold text-primary">{service.price}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Final price may vary based on scope.</p>
-          </div>
-
-          {service.features && service.features.length > 0 && (
-            <div>
-              <h3 className="text-xl sm:text-2xl font-semibold mb-2">Key Features</h3>
-              <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                {service.features.map((feature, index) => (
-                  <li key={index}>{feature}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {service.contact && (
-            <div>
-              <h3 className="text-xl sm:text-2xl font-semibold mb-2">Contact Vendor</h3>
-              <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                {service.contact.phone && (
-                  <p className="flex items-center gap-2">
-                    <Phone className="h-5 w-5 text-muted-foreground" /> {service.contact.phone}
-                  </p>
-                )}
-                {service.contact.email && (
-                  <p className="flex items-center gap-2">
-                    <Mail className="h-5 w-5 text-muted-foreground" /> {service.contact.email}
-                  </p>
-                )}
-                {service.contact.address && (
-                  <p className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-muted-foreground" /> {service.contact.address}
-                  </p>
-                )}
+          <div className="flex-1 flex items-end p-4 sm:p-8">
+            <div className="text-white">
+              <div className="flex items-center gap-3 mb-4">
+                <Avatar className="h-12 w-12 border-2 border-white">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                    {service.vendor.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm opacity-90">Service Provider</p>
+                  <p className="font-semibold">{service.vendor}</p>
+                </div>
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">{serviceName}</h1>
+              <div className="flex items-center gap-4 text-lg">
+                <div className="flex items-center gap-1">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="ml-2">4.9 (127 reviews)</span>
+                </div>
+                <Badge variant="secondary" className="bg-green-500 text-white">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Verified
+                </Badge>
               </div>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
 
-          <Button size="lg" className="w-full" onClick={() => navigate(`/customer-portal/checkout/${encodeURIComponent(serviceName || '')}`)}>
-            Request Service
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 sm:px-8 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description Card */}
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Award className="h-6 w-6 text-primary" />
+                  About This Service
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+                  {service.description}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Features Card */}
+            {service.features && service.features.length > 0 && (
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                    What's Included
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {service.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Column - Pricing & Contact */}
+          <div className="space-y-6">
+            {/* Pricing Card */}
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm sticky top-4">
+              <CardHeader className="text-center">
+                <CardTitle className="text-3xl flex items-center justify-center gap-2">
+                  <DollarSign className="h-8 w-8 text-green-500" />
+                  {service.price}
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Starting price - Final cost may vary
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>Quick response time</span>
+                </div>
+
+                <Separator />
+
+                <Button
+                  size="lg"
+                  className="w-full text-lg py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  onClick={() => navigate(`/customer-portal/checkout/${encodeURIComponent(serviceName || '')}`)}
+                >
+                  Request Service Now
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  Free consultation • No commitment required
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Contact Card */}
+            {service.contact && (
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl">Contact Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {service.contact.phone && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors cursor-pointer">
+                      <div className="p-2 bg-blue-500 rounded-full">
+                        <Phone className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Phone</p>
+                        <p className="text-sm text-muted-foreground">{service.contact.phone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {service.contact.email && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors cursor-pointer">
+                      <div className="p-2 bg-purple-500 rounded-full">
+                        <Mail className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Email</p>
+                        <p className="text-sm text-muted-foreground">{service.contact.email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {service.contact.address && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer">
+                      <div className="p-2 bg-orange-500 rounded-full">
+                        <MapPin className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Location</p>
+                        <p className="text-sm text-muted-foreground">{service.contact.address}</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
