@@ -182,11 +182,11 @@ const CustomerBrowseServicesPage = () => {
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             Find Your Perfect
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
-              Home Service
+              Needed Service
             </span>
           </h1>
           <p className="text-xl sm:text-2xl mb-8 text-slate-200 max-w-2xl leading-relaxed text-center">
-            Connect with trusted, verified professionals for all your home improvement needs.
+            Connect with trusted, verified professionals for all your needs.
             Quality service, guaranteed satisfaction.
           </p>
   
