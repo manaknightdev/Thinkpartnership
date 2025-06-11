@@ -61,7 +61,7 @@ const CustomerDashboard = () => {
         </div>
 
         {/* Main Content Area */}
-        <main className="flex-grow md:ml-64 pt-16">
+        <main className="flex-grow md:ml-64 pt-16 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

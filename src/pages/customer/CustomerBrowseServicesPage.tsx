@@ -173,63 +173,63 @@ const CustomerBrowseServicesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-    {/* Hero Section */}
-    <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-green-800 text-white">
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-green-900/30" />
-      <div className="relative container mx-auto px-4 sm:px-8 py-16 sm:py-24 flex items-center">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Find Your Perfect
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
-              Needed Service
-            </span>
-          </h1>
-          <p className="text-xl sm:text-2xl mb-8 text-slate-200 max-w-2xl leading-relaxed text-center">
-            Connect with trusted, verified professionals for all your needs.
-            Quality service, guaranteed satisfaction.
-          </p>
-  
-          {/* Enhanced Search Bar */}
-          <div className="max-w-2xl mb-8">
-            <div className="relative">
-              <Input
-                type="search"
-                placeholder="What service do you need? (e.g., 'plumber', 'painter', 'cleaner'...)"
-                className="h-14 pl-12 pr-32 text-lg bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-2xl text-gray-900 placeholder:text-gray-500"
-              />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
-              <Button
-                onClick={handleSearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl"
-              >
-                Search
-              </Button>
+    <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 min-h-full">
+      {/* Hero Section - Adapted for dashboard */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-green-800 text-white mx-4 mt-4 rounded-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-green-900/30 rounded-2xl" />
+        <div className="relative px-6 py-12 flex items-center">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+              Find Your Perfect
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
+                Needed Service
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl mb-6 text-slate-200 max-w-2xl mx-auto leading-relaxed">
+              Connect with trusted, verified professionals for all your needs.
+              Quality service, guaranteed satisfaction.
+            </p>
+
+            {/* Enhanced Search Bar */}
+            <div className="max-w-2xl mx-auto mb-6">
+              <div className="relative">
+                <Input
+                  type="search"
+                  placeholder="What service do you need? (e.g., 'plumber', 'painter', 'cleaner'...)"
+                  className="h-12 pl-12 pr-28 text-base bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-2xl text-gray-900 placeholder:text-gray-500"
+                />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Button
+                  onClick={handleSearch}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-sm"
+                >
+                  Search
+                </Button>
+              </div>
             </div>
-          </div>
-  
-          {/* Stats */}
-          <div className="flex flex-wrap gap-8 text-sm">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-green-300" />
-              <span>500+ Verified Professionals</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-emerald-300" />
-              <span>100% Satisfaction Guarantee</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-teal-300" />
-              <span>Fast Response Times</span>
+
+            {/* Stats */}
+            <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-green-300" />
+                <span>500+ Verified Professionals</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-emerald-300" />
+                <span>100% Satisfaction Guarantee</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-teal-300" />
+                <span>Fast Response Times</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-8 py-12">
+      <div className="px-4 sm:px-6 py-8">
         {/* Categories Section */}
         <section className="mb-16">
           <div className="text-center mb-12">
@@ -241,7 +241,7 @@ const CustomerBrowseServicesPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mx-auto">
             {mockCategories.map((category) => (
               <HoverCard key={category.name}>
                 <HoverCardTrigger asChild>
@@ -293,8 +293,8 @@ const CustomerBrowseServicesPage = () => {
             </div>
           </div>
 
-          <div className="relative px-12">
-            <Carousel className="w-full max-w-6xl mx-auto">
+          <div className="relative">
+            <Carousel className="w-full mx-auto">
               <CarouselContent className="-ml-4">
                 {mockFeaturedServices.map((service, index) => (
                   <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
@@ -370,15 +370,15 @@ const CustomerBrowseServicesPage = () => {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="hidden md:flex -left-6 bg-white/90 hover:bg-white border shadow-lg" />
-              <CarouselNext className="hidden md:flex -right-6 bg-white/90 hover:bg-white border shadow-lg" />
+              <CarouselPrevious className="hidden md:flex -left-4 bg-white/90 hover:bg-white border shadow-lg" />
+              <CarouselNext className="hidden md:flex -right-4 bg-white/90 hover:bg-white border shadow-lg" />
             </Carousel>
           </div>
         </section>
 
         {/* Quick Actions */}
         <section className="text-center">
-          <Card className="max-w-4xl mx-auto border-0 bg-white/80 backdrop-blur-sm shadow-lg dark:bg-slate-800/80">
+          <Card className="mx-auto border-0 bg-white/80 backdrop-blur-sm shadow-lg dark:bg-slate-800/80">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 Need Help Finding the Right Service?
