@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar"; // Use GlobalNavbar
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Footer } from "@/components/Footer"; // Import Footer
 
 const CustomerPortal = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar /> {/* Use GlobalNavbar */}
-      <main className="flex-grow p-4 sm:p-8 text-center">
+      <main className="flex-grow p-4 sm:p-8 text-center pt-20">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Customer Portal</h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
           Discover a wide range of trusted home services from our network of vetted professionals.
@@ -110,7 +109,6 @@ const CustomerPortal = () => {
           </div>
         </section>
       </main>
-      <Footer /> {/* Add Footer here */}
     </div>
   );
 };

@@ -18,7 +18,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar />
-      <div className="flex-grow flex items-center justify-center p-4">
+      <div className="flex-grow flex items-center justify-center p-4 pt-20">
         <div className="w-full max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden md:grid md:grid-cols-2">
           {/* Image Section (Hidden on mobile, visible on desktop) */}
           <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-blue-600 to-teal-500 dark:from-blue-800 dark:to-teal-700 p-8">

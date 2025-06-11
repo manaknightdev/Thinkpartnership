@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -33,7 +32,7 @@ const OnboardingClient = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar />
-      <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
+      <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 pt-20">
         <div className="w-full max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 text-center">
             Client Onboarding: Set Up Your Marketplace
@@ -119,7 +118,6 @@ const OnboardingClient = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

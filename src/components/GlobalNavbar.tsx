@@ -22,7 +22,7 @@ export const GlobalNavbar = () => {
   ];
 
   return (
-    <header className="border-b p-4 flex justify-between items-center bg-white dark:bg-gray-900">
+    <header className="fixed top-0 left-0 right-0 z-20 border-b p-4 flex justify-between items-center bg-white dark:bg-gray-900">
       <Link to="/" className="text-2xl font-bold text-gray-900 dark:text-white">
         ThinkPartnerships
       </Link>

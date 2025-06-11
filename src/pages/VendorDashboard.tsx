@@ -2,7 +2,6 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { cn } from "@/lib/utils";
-import { Footer } from "@/components/Footer";
 import { LogOut, User, DollarSign, Mail, Crown } from "lucide-react"; // Added Crown icon
 import { toast } from "sonner";
 // MobileSheet import is no longer needed here
@@ -27,11 +26,11 @@ const VendorDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       <GlobalNavbar />
-      <div className="flex flex-col md:flex-row flex-grow">
+      <div className="flex flex-grow">
         {/* Desktop Sidebar */}
-        <aside className="hidden md:flex w-full md:w-64 border-b md:border-r bg-white dark:bg-gray-900 p-4 flex-col">
+        <aside className="hidden md:flex fixed left-0 top-16 z-10 w-64 h-[calc(100vh-4rem)] border-r bg-white dark:bg-gray-900 p-4 flex-col overflow-hidden">
           {/* <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Vendor Menu</h2> */}
-          <nav className="flex flex-col space-y-2">
+          <nav className="flex flex-col space-y-2 flex-1 overflow-y-auto">
             {navItems.map((item) => (
               <Button
                 key={item.path}
@@ -63,11 +62,10 @@ const VendorDashboard = () => {
         </div>
 
         {/* Main Content Area */}
-        <main className="flex-grow">
+        <main className="flex-grow md:ml-64 pt-16">
           <Outlet />
         </main>
       </div>
-      <Footer />
     </div>
   );
 };
