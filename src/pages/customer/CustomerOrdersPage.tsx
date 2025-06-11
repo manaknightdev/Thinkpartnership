@@ -2,31 +2,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import React, { useState } from "react"; // Added useState
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter, // Added DialogFooter
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button"; // Added Button
+
+interface CustomerOrder { // Renamed interface for clarity
+  id: string;
+  service: string;
+  vendor: string;
+  date: string;
+  status: "Completed" | "Pending" | "Cancelled" | "Scheduled" | "In Progress"; // Added more statuses
+  amount: string;
+  notes?: string; // Optional notes for more detail
+}
+
+const mockOrders: CustomerOrder[] = [
+  { id: "ORD001", service: "Interior Painting", vendor: "Brush Strokes Pro", date: "2023-10-28", status: "Completed", amount: "$1200.00", notes: "Excellent job, very clean." },
+  { id: "ORD002", service: "Emergency Drain Cleaning", vendor: "Rapid Plumbers", date: "2023-10-25", status: "Completed", amount: "$250.00" },
+  { id: "ORD003", service: "HVAC Check-up", vendor: "Climate Control Experts", date: "2023-10-20", status: "Scheduled", amount: "$120.00", notes: "Technician arriving between 2-4 PM." },
+  { id: "ORD004", service: "Full Home Inspection", vendor: "Certified Inspectors Inc.", date: "2023-10-15", status: "Completed", amount: "$350.00" },
+  { id: "ORD005", service: "Lawn Mowing Service", vendor: "Green Thumb Landscaping", date: "2023-10-10", status: "Cancelled", amount: "$80.00", notes: "Rescheduled due to rain." },
+  { id: "ORD006", service: "Appliance Repair", vendor: "FixItQuick", date: "2023-11-01", status: "In Progress", amount: "$180.00", notes: "Waiting for part delivery." },
+];
+
+const getStatusVariant = (status: CustomerOrder["status"]) => {
+  switch (status) {
+    case "Completed":
+      return "default";
+    case "Pending":
+    case "Scheduled":
+      return "secondary";
+    case "In Progress":
+      return "outline";
+    case "Cancelled":
+      return "destructive";
+    default:
+      return "outline";
+  }
+};
 
 const CustomerOrdersPage = () => {
-  const mockOrders = [
-    { id: "ORD001", service: "Interior Painting", vendor: "Brush Strokes Pro", date: "2023-10-28", status: "Completed", amount: "$1200.00" },
-    { id: "ORD002", service: "Emergency Drain Cleaning", vendor: "Rapid Plumbers", date: "2023-10-25", status: "Completed", amount: "$250.00" },
-    { id: "ORD003", service: "HVAC Check-up", vendor: "Climate Control Experts", date: "2023-10-20", status: "Pending", amount: "$120.00" },
-    { id: "ORD004", service: "Full Home Inspection", vendor: "Certified Inspectors Inc.", date: "2023-10-15", status: "Completed", amount: "$350.00" },
-    { id: "ORD005", service: "Lawn Mowing Service", vendor: "Green Thumb Landscaping", date: "2023-10-10", status: "Cancelled", amount: "$80.00" },
-  ];
+  const [selectedOrder, setSelectedOrder] = useState<CustomerOrder | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return "default";
-      case "Pending":
-        return "secondary";
-      case "Cancelled":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const handleViewOrderDetails = (orderId: string) => {
-    toast.info(`Viewing details for order ${orderId}...`);
+  const handleViewOrderDetails = (order: CustomerOrder) => {
+    setSelectedOrder(order);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -57,7 +85,11 @@ const CustomerOrdersPage = () => {
                 </TableHeader>
                 <TableBody>
                   {mockOrders.map((order) => (
-                    <TableRow key={order.id} onClick={() => handleViewOrderDetails(order.id)} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <TableRow 
+                      key={order.id} 
+                      onClick={() => handleViewOrderDetails(order)} 
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
                       <TableCell className="font-medium">{order.id}</TableCell>
                       <TableCell>{order.service}</TableCell>
                       <TableCell>{order.vendor}</TableCell>
@@ -76,6 +108,39 @@ const CustomerOrdersPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {selectedOrder && (
+        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Order Details: {selectedOrder.id}</DialogTitle>
+              <DialogDescription>
+                Information for your service order placed on {selectedOrder.date}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <p className="font-semibold">Order ID:</p><p>{selectedOrder.id}</p>
+                <p className="font-semibold">Service:</p><p>{selectedOrder.service}</p>
+                <p className="font-semibold">Vendor:</p><p>{selectedOrder.vendor}</p>
+                <p className="font-semibold">Date:</p><p>{selectedOrder.date}</p>
+                <p className="font-semibold">Amount:</p><p>{selectedOrder.amount}</p>
+                <p className="font-semibold">Status:</p>
+                <p><Badge variant={getStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge></p>
+              </div>
+              {selectedOrder.notes && (
+                <div className="mt-2">
+                  <p className="font-semibold mb-1">Notes:</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-2 rounded-md">{selectedOrder.notes}</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

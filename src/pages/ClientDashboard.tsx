@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalNavbar } from "@/components/GlobalNavbar";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/Footer";
-import { LogOut, LayoutDashboard, BarChart, Users, Settings, Palette } from "lucide-react"; // Added Palette icon
+import { LogOut, LayoutDashboard, BarChart, Users, Settings, Palette, ListOrdered } from "lucide-react"; // Added ListOrdered icon
 import { toast } from "sonner";
 // MobileSheet import is no longer needed here
 
@@ -15,7 +15,8 @@ const ClientDashboard = () => {
     { name: "Reports", path: "/client-portal/reports", icon: BarChart },
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users },
     { name: "Set Rules", path: "/client-portal/rules", icon: Settings },
-    { name: "Branding", path: "/client-portal/branding", icon: Palette }, // New nav item
+    { name: "Branding", path: "/client-portal/branding", icon: Palette },
+    { name: "Marketplace Orders", path: "/client-portal/orders", icon: ListOrdered }, // New nav item
   ];
 
   const handleLogout = () => {
@@ -31,7 +32,7 @@ const ClientDashboard = () => {
       <div className="flex flex-col md:flex-row flex-grow">
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-full md:w-64 border-b md:border-r bg-white dark:bg-gray-900 p-4 flex-col">
-          {/* <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Client Menu</h2> */}
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Client Menu</h2>
           <nav className="flex flex-col space-y-2">
             {navItems.map((item) => (
               <Button

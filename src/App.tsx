@@ -19,14 +19,15 @@ import VendorProfilePage from "./pages/vendor/VendorProfilePage";
 import VendorReferralsPage from "./pages/vendor/VendorReferralsPage";
 import VendorInvitePage from "./pages/vendor/VendorInvitePage";
 import VendorFullReferralReportPage from "./pages/vendor/VendorFullReferralReportPage";
-import VendorSubscriptionPage from "./pages/vendor/VendorSubscriptionPage"; // New import
+import VendorSubscriptionPage from "./pages/vendor/VendorSubscriptionPage";
 
 // Import new client sub-pages
 import ClientOverviewPage from "./pages/client/ClientOverviewPage";
 import ClientReportsPage from "./pages/client/ClientReportsPage";
 import ClientVendorManagementPage from "./pages/client/ClientVendorManagementPage";
 import ClientRevenueRulesPage from "./pages/client/ClientRevenueRulesPage";
-import ClientBrandingPage from "./pages/client/ClientBrandingPage"; // New import
+import ClientBrandingPage from "./pages/client/ClientBrandingPage";
+import ClientMarketplaceOrdersPage from "./pages/client/ClientMarketplaceOrdersPage"; // New import
 
 // Import new customer sub-pages
 import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesPage";
@@ -43,8 +44,8 @@ import AdminRevenueRulesPage from "./pages/admin/AdminRevenueRulesPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminManualCommissionsPage from "./pages/admin/AdminManualCommissionsPage";
 import AdminLicenseManagementPage from "./pages/admin/AdminLicenseManagementPage";
-import AdminSubscriptionPlansPage from "./pages/admin/AdminSubscriptionPlansPage"; // New import
-import AdminIntegrationsPage from "./pages/admin/AdminIntegrationsPage"; // New import
+import AdminSubscriptionPlansPage from "./pages/admin/AdminSubscriptionPlansPage";
+import AdminIntegrationsPage from "./pages/admin/AdminIntegrationsPage";
 
 
 const queryClient = new QueryClient();
@@ -79,7 +80,8 @@ const App = () => (
             <Route path="reports" element={<ClientReportsPage />} />
             <Route path="vendors" element={<ClientVendorManagementPage />} />
             <Route path="rules" element={<ClientRevenueRulesPage />} />
-            <Route path="branding" element={<ClientBrandingPage />} /> {/* New route */}
+            <Route path="branding" element={<ClientBrandingPage />} />
+            <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
           </Route>
 
           {/* Nested routes for Vendor Dashboard */}
@@ -89,7 +91,7 @@ const App = () => (
             <Route path="referrals" element={<VendorReferralsPage />} />
             <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} />
             <Route path="invite" element={<VendorInvitePage />} />
-            <Route path="subscription" element={<VendorSubscriptionPage />} /> {/* New route */}
+            <Route path="subscription" element={<VendorSubscriptionPage />} />
           </Route>
 
           {/* Nested routes for Admin Portal */}
@@ -102,8 +104,8 @@ const App = () => (
             <Route path="reports" element={<AdminReportsPage />} />
             <Route path="manual-commissions" element={<AdminManualCommissionsPage />} />
             <Route path="license-management" element={<AdminLicenseManagementPage />} />
-            <Route path="subscription-plans" element={<AdminSubscriptionPlansPage />} /> {/* New route */}
-            <Route path="integrations" element={<AdminIntegrationsPage />} /> {/* New route */}
+            <Route path="subscription-plans" element={<AdminSubscriptionPlansPage />} />
+            <Route path="integrations" element={<AdminIntegrationsPage />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
