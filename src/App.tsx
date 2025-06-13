@@ -35,6 +35,20 @@ import CustomerOrdersPage from "./pages/customer/CustomerOrdersPage";
 import CustomerAccountPage from "./pages/customer/CustomerAccountPage";
 import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
+import CategoriesPage from "./pages/customer/CategoriesPage";
+import AllServicesPage from "./pages/customer/AllServicesPage";
+import FavoritesPage from "./pages/customer/FavoritesPage";
+import RecentlyViewedPage from "./pages/customer/RecentlyViewedPage";
+import AccountPage from "./pages/customer/AccountPage";
+import HelpSupportPage from "./pages/customer/HelpSupportPage";
+import LocationBrowsePage from "./pages/customer/LocationBrowsePage";
+import DealsOffersPage from "./pages/customer/DealsOffersPage";
+import ServiceRequestsPage from "./pages/customer/ServiceRequestsPage";
+import ServiceRequestDetailsPage from "./pages/customer/ServiceRequestDetailsPage";
+import RequestServicePage from "./pages/customer/RequestServicePage";
+import ChatPage from "./pages/customer/ChatPage";
+import NotificationsPage from "./pages/customer/NotificationsPage";
+import PlaceholderPage from "./pages/customer/PlaceholderPage";
 
 // Import new admin sub-pages
 import AdminDashboardOverviewPage from "./pages/admin/AdminDashboardOverviewPage";
@@ -63,12 +77,29 @@ const App = () => (
           <Route path="/onboarding-client" element={<OnboardingClient />} />
           <Route path="/onboarding-vendor" element={<OnboardingVendor />} />
 
+          {/* Standalone Marketplace Routes */}
+          <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
+          <Route path="/marketplace/categories" element={<CategoriesPage />} />
+          <Route path="/marketplace/services" element={<AllServicesPage />} />
+          <Route path="/marketplace/services/:serviceName" element={<ServiceDetailsPage />} />
+          <Route path="/marketplace/checkout/:serviceName" element={<CheckoutPage />} />
+          <Route path="/marketplace/favorites" element={<FavoritesPage />} />
+          <Route path="/marketplace/recent" element={<RecentlyViewedPage />} />
+          <Route path="/marketplace/account" element={<AccountPage />} />
+          <Route path="/marketplace/help" element={<HelpSupportPage />} />
+          <Route path="/marketplace/location" element={<LocationBrowsePage />} />
+          <Route path="/marketplace/deals" element={<DealsOffersPage />} />
+          <Route path="/marketplace/requests" element={<ServiceRequestsPage />} />
+          <Route path="/marketplace/requests/:requestId" element={<ServiceRequestDetailsPage />} />
+          <Route path="/marketplace/request-service/:serviceName" element={<RequestServicePage />} />
+          <Route path="/marketplace/notifications" element={<NotificationsPage />} />
+          <Route path="/marketplace/request-submitted" element={<PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." />} />
+          <Route path="/marketplace/chat/:vendorName" element={<ChatPage />} />
+          <Route path="/marketplace/map" element={<PlaceholderPage title="Service Map" description="Interactive map view coming soon." />} />
+
           {/* Nested routes for Customer Dashboard */}
           <Route path="/customer-portal" element={<CustomerDashboard />}>
-            <Route index element={<Navigate to="browse" replace />} />
-            <Route path="browse" element={<CustomerBrowseServicesPage />} />
-            <Route path="services/:serviceName" element={<ServiceDetailsPage />} />
-            <Route path="checkout/:serviceName" element={<CheckoutPage />} />
+            <Route index element={<Navigate to="/marketplace" replace />} />
             <Route path="orders" element={<CustomerOrdersPage />} />
             <Route path="account" element={<CustomerAccountPage />} />
           </Route>

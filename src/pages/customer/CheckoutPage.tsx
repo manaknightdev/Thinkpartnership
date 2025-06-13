@@ -1,48 +1,102 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
-import { ArrowLeft, CreditCard, ShoppingCart } from "lucide-react";
+import { ArrowLeft, CheckCircle, Star, Clock, Shield, Verified } from "lucide-react";
 
 const mockServiceDetails = {
   "Premium Home Painting": {
     vendor: "Brush Strokes Pro",
+    vendorLevel: "Top Rated",
     description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
-    price: "$500+",
-    image: "https://t3.ftcdn.net/jpg/00/96/57/12/360_F_96571267_qfpHjHTvH8siby0Cey6rTpfiJczIxX3e.jpg"
+    price: 500,
+    originalPrice: 650,
+    rating: 4.9,
+    reviews: 127,
+    responseTime: "2 hours",
+    deliveryTime: "3-5 days",
+    image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
+    vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+    completedOrders: 150,
+    tags: ["Interior", "Exterior", "Eco-friendly"]
   },
   "Emergency Plumbing Repair": {
     vendor: "Rapid Plumbers",
+    vendorLevel: "Pro",
     description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
-    price: "$150+",
-    image: "https://media.istockphoto.com/id/183953925/photo/young-plumber-fixing-a-sink-in-bathroom.jpg?s=612x612&w=0&k=20&c=Ps2U_U4_Z60mIZsuem-BoaHLlCjsT8wYWiXNWR-TCDA="
+    price: 150,
+    originalPrice: 200,
+    rating: 4.8,
+    reviews: 89,
+    responseTime: "30 mins",
+    deliveryTime: "Same day",
+    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
+    vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+    completedOrders: 89,
+    tags: ["24/7", "Emergency", "Licensed"]
   },
   "Full Home Inspection": {
     vendor: "Certified Inspectors Inc.",
+    vendorLevel: "Top Rated",
     description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
-    price: "$300+",
-    image: "https://www.shutterstock.com/image-photo/mid-adult-woman-architect-wearing-600nw-2060102018.jpg"
+    price: 300,
+    originalPrice: 400,
+    rating: 4.9,
+    reviews: 156,
+    responseTime: "1 day",
+    deliveryTime: "2-3 days",
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
+    vendorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
+    completedOrders: 200,
+    tags: ["Certified", "Detailed Reports", "Pre-purchase"]
   },
   "Professional Lawn Care": {
     vendor: "Green Thumb Landscaping",
+    vendorLevel: "Pro",
     description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
-    price: "$80+",
-    image: "https://media.istockphoto.com/id/475958716/photo/lawn-mower.jpg?s=612x612&w=0&k=20&c=TIGBHDkXS9IJbq84NHtfsFIPp_aqy6APWni2r_oS2NQ="
+    price: 80,
+    originalPrice: 120,
+    rating: 4.7,
+    reviews: 203,
+    responseTime: "4 hours",
+    deliveryTime: "Weekly",
+    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
+    vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
+    completedOrders: 300,
+    tags: ["Weekly Service", "Organic", "Seasonal"]
   },
   "HVAC System Tune-up": {
     vendor: "Climate Control Experts",
+    vendorLevel: "Top Rated",
     description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
-    price: "$120+",
-    image: "https://media.istockphoto.com/id/515643040/photo/man-repairing-computer.jpg?s=612x612&w=0&k=20&c=H9NBpHyqc14Rqc1AdFwypY-UXMys0nVYL2EVe8p-mUA="
+    price: 120,
+    originalPrice: 180,
+    rating: 4.8,
+    reviews: 94,
+    responseTime: "6 hours",
+    deliveryTime: "1-2 days",
+    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
+    vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+    completedOrders: 120,
+    tags: ["Maintenance", "Energy Efficient", "Warranty"]
   },
   "Deep House Cleaning": {
     vendor: "Sparkling Spaces",
+    vendorLevel: "Pro",
     description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
-    price: "$200+",
-    image: "https://t4.ftcdn.net/jpg/03/06/99/87/360_F_306998742_5awR6uVsZ8dRNdHHnj0tnm4sGUDBAxQ5.jpg"
+    price: 200,
+    originalPrice: 280,
+    rating: 4.9,
+    reviews: 178,
+    responseTime: "3 hours",
+    deliveryTime: "Same day",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
+    vendorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
+    completedOrders: 250,
+    tags: ["Deep Clean", "Eco-friendly", "Insured"]
   },
 };
 
@@ -52,172 +106,189 @@ const CheckoutPage = () => {
 
   const service = serviceName ? mockServiceDetails[serviceName as keyof typeof mockServiceDetails] : undefined;
 
-  const handlePlaceOrder = () => {
-    toast.success("Order placed successfully! Redirecting to My Orders...");
-    // In a real app, this would involve sending data to a backend
+  const handlePaymentComplete = (paymentData: any) => {
+    toast.success("Payment successful! Your order has been placed.");
+    console.log("Payment completed:", paymentData);
+
+    // In a real app, this would send data to backend
     setTimeout(() => {
-      navigate("/customer-portal/orders");
-    }, 1500);
+      navigate("/marketplace/orders");
+    }, 2000);
   };
 
   if (!service) {
     return (
-      <div className="p-4 sm:p-8 text-center">
-        <h1 className="text-3xl font-bold text-red-600 dark:text-red-400 mb-4">Service Not Found</h1>
-        <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-          The service you are trying to purchase does not exist.
-        </p>
-        <Button asChild>
-          <Link to="/customer-portal/browse">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Browse Services
-          </Link>
-        </Button>
-      </div>
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ArrowLeft className="w-10 h-10 text-red-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
+            <p className="text-lg text-gray-600 mb-8">
+              The service you are trying to purchase does not exist.
+            </p>
+            <Button
+              onClick={() => navigate("/marketplace")}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketplace
+            </Button>
+          </div>
+        </div>
+      </MarketplaceLayout>
     );
   }
 
   return (
-    <div className="p-4 sm:p-8">
-      <Button variant="outline" className="mb-6" asChild>
-        <Link to={`/customer-portal/services/${encodeURIComponent(serviceName || '')}`}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Service Details
-        </Link>
-      </Button>
+    <MarketplaceLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Section */}
+        <section className="bg-white border-b border-gray-200 py-8">
+          <div className="max-w-7xl mx-auto px-4">
+            <Button
+              variant="outline"
+              className="mb-6 flex items-center gap-2"
+              onClick={() => navigate(`/marketplace/services/${encodeURIComponent(serviceName || '')}`)}
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Service Details
+            </Button>
 
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-        <ShoppingCart className="h-7 w-7" /> Checkout for "{serviceName}"
-      </h1>
-      <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-        Please review your order and provide your payment details to complete the purchase.
-      </p>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Order Summary Card */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Order Summary</CardTitle>
-            <CardDescription>Details of the service you are purchasing.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {service.image && (
-              <img src={service.image} alt={serviceName} className="w-full h-32 object-cover rounded-md mb-2" />
-            )}
-            <h3 className="text-xl font-semibold">{serviceName}</h3>
-            <p className="text-gray-600 dark:text-gray-400">By: {service.vendor}</p>
-            <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3">{service.description}</p>
-            <div className="flex justify-between items-center border-t pt-4 mt-4">
-              <span className="text-lg font-semibold">Total:</span>
-              <span className="text-2xl font-bold text-primary">{service.price}</span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Secure Checkout
+                </h1>
+                <p className="text-gray-600">Complete your purchase safely and securely</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Checkout Form Cards */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Information</CardTitle>
-              <CardDescription>Confirm your contact and billing details.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" type="text" defaultValue="Jane" />
+            {/* Progress Steps */}
+            <div className="flex items-center space-x-4 mt-6">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  1
                 </div>
-                <div>
-                  <Label htmlFor="last-name">Last Name</Label>
-                  <Input id="last-name" type="text" defaultValue="Doe" />
+                <span className="ml-2 text-sm font-medium text-green-600">Service Selected</span>
+              </div>
+              <div className="w-8 h-0.5 bg-green-600"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  2
                 </div>
+                <span className="ml-2 text-sm font-medium text-green-600">Payment</span>
               </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="jane.doe@example.com" />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" defaultValue="(123) 456-7890" />
-              </div>
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Input id="address" type="text" placeholder="123 Main St" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="city">City</Label>
-                  <Input id="city" type="text" placeholder="Anytown" />
+              <div className="w-8 h-0.5 bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-sm font-semibold">
+                  3
                 </div>
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <Input id="state" type="text" placeholder="CA" />
-                </div>
-                <div>
-                  <Label htmlFor="zip">Zip Code</Label>
-                  <Input id="zip" type="text" placeholder="90210" />
-                </div>
+                <span className="ml-2 text-sm font-medium text-gray-500">Confirmation</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" /> Payment Details
-              </CardTitle>
-              <CardDescription>Enter your credit card information.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="card-number">Card Number</Label>
-                <Input id="card-number" type="text" placeholder="XXXX XXXX XXXX XXXX" />
+        {/* Main Content */}
+        <section className="py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              {/* Service Details Sidebar */}
+              <div className="lg:col-span-2">
+                <Card className="sticky top-8">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-green-600" />
+                      Service Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="relative">
+                      <img
+                        src={service.image}
+                        alt={serviceName}
+                        className="w-full h-48 object-cover rounded-xl"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <Badge className={`${service.vendorLevel === 'Top Rated' ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} text-white text-sm px-3 py-1 rounded-full shadow-lg`}>
+                          {service.vendorLevel === 'Top Rated' && <Verified className="w-3 h-3 mr-1" />}
+                          {service.vendorLevel}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{serviceName}</h3>
+                      <p className="text-gray-600 mb-4">{service.description}</p>
+
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-bold text-gray-900">{service.rating}</span>
+                          <span className="text-sm text-gray-500">({service.reviews} reviews)</span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          <span>{service.responseTime} response</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3 mb-6">
+                        <img
+                          src={service.vendorImage}
+                          alt={service.vendor}
+                          className="w-10 h-10 rounded-full"
+                        />
+                        <div>
+                          <div className="font-semibold text-gray-900">{service.vendor}</div>
+                          <div className="text-sm text-gray-600">{service.completedOrders} orders completed</div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {service.tags.map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-600">Service Price</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg font-bold text-gray-900">${service.price}</span>
+                            {service.originalPrice && (
+                              <span className="text-sm text-gray-500 line-through">${service.originalPrice}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>Delivery Time</span>
+                          <span>{service.deliveryTime}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="expiry-month">Expiry Month</Label>
-                  <Select>
-                    <SelectTrigger id="expiry-month">
-                      <SelectValue placeholder="MM" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 12 }, (_, i) => (
-                        <SelectItem key={i + 1} value={String(i + 1).padStart(2, '0')}>
-                          {String(i + 1).padStart(2, '0')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="expiry-year">Expiry Year</Label>
-                  <Select>
-                    <SelectTrigger id="expiry-year">
-                      <SelectValue placeholder="YYYY" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 10 }, (_, i) => {
-                        const year = new Date().getFullYear() + i;
-                        return <SelectItem key={year} value={String(year)}>{year}</SelectItem>;
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="cvc">CVC</Label>
-                  <Input id="cvc" type="text" placeholder="XXX" />
-                </div>
+
+              {/* Payment Form */}
+              <div className="lg:col-span-3">
+                <PaymentForm
+                  amount={service.price}
+                  serviceName={serviceName || ''}
+                  onPaymentComplete={handlePaymentComplete}
+                />
               </div>
-              <div>
-                <Label htmlFor="name-on-card">Name on Card</Label>
-                <Input id="name-on-card" type="text" placeholder="Jane Doe" />
-              </div>
-              <Button onClick={handlePlaceOrder} className="w-full" size="lg">
-                Place Order
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </MarketplaceLayout>
   );
 };
 

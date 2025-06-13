@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,8 @@ import {
   DollarSign,
   Clock,
   Shield,
-  Award
+  Award,
+  MessageCircle
 } from "lucide-react";
 
 const ServiceDetailsPage = () => {
@@ -142,10 +143,8 @@ const ServiceDetailsPage = () => {
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
           The service you are looking for does not exist.
         </p>
-        <Button asChild>
-          <Link to="/customer-portal/browse">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Browse Services
-          </Link>
+        <Button onClick={() => navigate(-1)}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
       </div>
     );
@@ -169,10 +168,12 @@ const ServiceDetailsPage = () => {
         {/* Navigation and Hero Content */}
         <div className="absolute inset-0 flex flex-col">
           <div className="p-4 sm:p-8">
-            <Button variant="secondary" className="mb-6 bg-white/90 hover:bg-white text-black" asChild>
-              <Link to="/customer-portal/browse">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to Browse Services
-              </Link>
+            <Button
+              variant="secondary"
+              className="mb-6 bg-white/90 hover:bg-white text-black"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
           </div>
 
@@ -198,7 +199,7 @@ const ServiceDetailsPage = () => {
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="ml-2">4.9 (127 reviews)</span>
+                  <span className="ml-2">4.9 rating</span>
                 </div>
                 <Badge variant="secondary" className="bg-green-500 text-white">
                   <Shield className="h-3 w-3 mr-1" />
@@ -276,10 +277,20 @@ const ServiceDetailsPage = () => {
 
                 <Button
                   size="lg"
-                  className="w-full text-lg py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                  onClick={() => navigate(`/customer-portal/checkout/${encodeURIComponent(serviceName || '')}`)}
+                  className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  onClick={() => navigate(`/marketplace/request-service/${encodeURIComponent(serviceName || '')}`)}
                 >
                   Request Service Now
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full text-lg py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                  onClick={() => navigate(`/marketplace/chat/${encodeURIComponent(service.vendor)}`)}
+                >
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Chat with Seller
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">

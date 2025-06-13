@@ -10,7 +10,7 @@ const CustomerDashboard = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: "Browse Services", path: "/customer-portal/browse", icon: LayoutGrid },
+    { name: "Browse Services", path: "/marketplace/services", icon: LayoutGrid },
     { name: "My Orders", path: "/customer-portal/orders", icon: ShoppingBag },
     { name: "Account Settings", path: "/customer-portal/account", icon: User },
   ];

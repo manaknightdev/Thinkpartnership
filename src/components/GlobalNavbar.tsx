@@ -17,7 +17,7 @@ export const GlobalNavbar = () => {
   const mainNavItems = [
     { name: "Clients", path: "/client-portal" },
     { name: "Vendors", path: "/vendor-portal" },
-    { name: "Customers", path: "/customer-portal" },
+    { name: "Marketplace", path: "/marketplace" },
     { name: "Admin", path: "/admin-portal" }, // New Admin link
   ];
 
@@ -44,23 +44,6 @@ export const GlobalNavbar = () => {
               </Link>
             </NavigationMenuItem>
           ))}
-          <NavigationMenuItem>
-            <Link to="/login" legacyBehavior> {/* Removed passHref */}
-              <NavigationMenuLink
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  location.pathname === "/login" && "bg-primary/10 font-semibold"
-                )}
-              >
-                Login
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Button asChild>
-              <Link to="/signup">Sign Up</Link>
-            </Button>
-          </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
 
@@ -80,19 +63,6 @@ export const GlobalNavbar = () => {
               <Link to={item.path}>{item.name}</Link>
             </Button>
           ))}
-          <Button
-            variant="ghost"
-            className={cn(
-              "justify-start",
-              location.pathname === "/login" && "bg-muted dark:bg-gray-800"
-            )}
-            asChild
-          >
-            <Link to="/login">Login</Link>
-          </Button>
-          <Button asChild className="justify-start">
-            <Link to="/signup">Sign Up</Link>
-          </Button>
         </nav>
       </MobileSheet>
     </header>
