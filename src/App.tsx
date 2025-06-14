@@ -19,6 +19,7 @@ import VendorProfilePage from "./pages/vendor/VendorProfilePage";
 import VendorServicesPage from "./pages/vendor/VendorServicesPage";
 import VendorRequestsPage from "./pages/vendor/VendorRequestsPage";
 import VendorMessagesPage from "./pages/vendor/VendorMessagesPage";
+import VendorCustomersPage from "./pages/vendor/VendorCustomersPage";
 import VendorWalletPage from "./pages/vendor/VendorWalletPage";
 import VendorNotificationsPage from "./pages/vendor/VendorNotificationsPage";
 import VendorAccountPage from "./pages/vendor/VendorAccountPage";
@@ -130,6 +131,7 @@ const App = () => (
             <Route path="requests" element={<VendorRequestsPage />} />
             <Route path="messages" element={<VendorMessagesPage />} />
             <Route path="messages/:customerId" element={<VendorMessagesPage />} />
+            <Route path="customers" element={<VendorCustomersPage />} />
             <Route path="wallet" element={<VendorWalletPage />} />
             <Route path="notifications" element={<VendorNotificationsPage />} />
             <Route path="account" element={<VendorAccountPage />} />

@@ -41,6 +41,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
     { name: "Service Listings", path: "/vendor-portal/services", icon: List, exact: false },
     { name: "Service Requests", path: "/vendor-portal/requests", icon: FileText, exact: false },
     { name: "Messages", path: "/vendor-portal/messages", icon: MessageCircle, exact: false },
+    { name: "My Customers", path: "/vendor-portal/customers", icon: User, exact: false },
     { name: "Wallet", path: "/vendor-portal/wallet", icon: Wallet, exact: false },
     { name: "Referral Dashboard", path: "/vendor-portal/referrals", icon: DollarSign, exact: false },
     { name: "Invite System", path: "/vendor-portal/invite", icon: Mail, exact: false },
