@@ -33,6 +33,12 @@ import VendorSubscriptionPage from "./pages/vendor/VendorSubscriptionPage";
 import ClientOverviewPage from "./pages/client/ClientOverviewPage";
 import ClientReportsPage from "./pages/client/ClientReportsPage";
 import ClientVendorManagementPage from "./pages/client/ClientVendorManagementPage";
+import ClientCustomersPage from "./pages/client/ClientCustomersPage";
+import ClientInviteSystemPage from "./pages/client/ClientInviteSystemPage";
+import ClientPricingBillingPage from "./pages/client/ClientPricingBillingPage";
+import ClientWalletPage from "./pages/client/ClientWalletPage";
+import ClientNotificationsPage from "./pages/client/ClientNotificationsPage";
+import ClientHelpSupportPage from "./pages/client/ClientHelpSupportPage";
 import ClientRevenueRulesPage from "./pages/client/ClientRevenueRulesPage";
 import ClientBrandingPage from "./pages/client/ClientBrandingPage";
 import ClientMarketplaceOrdersPage from "./pages/client/ClientMarketplaceOrdersPage"; // New import
@@ -118,6 +124,12 @@ const App = () => (
             <Route path="overview" element={<ClientOverviewPage />} />
             <Route path="reports" element={<ClientReportsPage />} />
             <Route path="vendors" element={<ClientVendorManagementPage />} />
+            <Route path="customers" element={<ClientCustomersPage />} />
+            <Route path="invites" element={<ClientInviteSystemPage />} />
+            <Route path="pricing" element={<ClientPricingBillingPage />} />
+            <Route path="wallet" element={<ClientWalletPage />} />
+            <Route path="notifications" element={<ClientNotificationsPage />} />
+            <Route path="help" element={<ClientHelpSupportPage />} />
             <Route path="rules" element={<ClientRevenueRulesPage />} />
             <Route path="branding" element={<ClientBrandingPage />} />
             <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
