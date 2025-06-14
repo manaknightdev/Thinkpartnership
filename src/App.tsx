@@ -66,6 +66,9 @@ import PlaceholderPage from "./pages/customer/PlaceholderPage";
 
 // Import new admin sub-pages
 import AdminDashboardOverviewPage from "./pages/admin/AdminDashboardOverviewPage";
+import AdminAllClientsPage from "./pages/admin/AdminAllClientsPage";
+import AdminAllVendorsPage from "./pages/admin/AdminAllVendorsPage";
+import AdminAllCustomersPage from "./pages/admin/AdminAllCustomersPage";
 import AdminTransactionsPage from "./pages/admin/AdminTransactionsPage";
 import AdminVendorApprovalsPage from "./pages/admin/AdminVendorApprovalsPage";
 import AdminRevenueRulesPage from "./pages/admin/AdminRevenueRulesPage";
@@ -74,6 +77,7 @@ import AdminManualCommissionsPage from "./pages/admin/AdminManualCommissionsPage
 import AdminLicenseManagementPage from "./pages/admin/AdminLicenseManagementPage";
 import AdminSubscriptionPlansPage from "./pages/admin/AdminSubscriptionPlansPage";
 import AdminIntegrationsPage from "./pages/admin/AdminIntegrationsPage";
+import AdminHelpSupportPage from "./pages/admin/AdminHelpSupportPage";
 
 
 const queryClient = new QueryClient();
@@ -158,6 +162,9 @@ const App = () => (
           <Route path="/admin-portal" element={<AdminDashboard />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<AdminDashboardOverviewPage />} />
+            <Route path="clients" element={<AdminAllClientsPage />} />
+            <Route path="vendors" element={<AdminAllVendorsPage />} />
+            <Route path="customers" element={<AdminAllCustomersPage />} />
             <Route path="transactions" element={<AdminTransactionsPage />} />
             <Route path="vendor-approvals" element={<AdminVendorApprovalsPage />} />
             <Route path="revenue-rules" element={<AdminRevenueRulesPage />} />
@@ -166,6 +173,7 @@ const App = () => (
             <Route path="license-management" element={<AdminLicenseManagementPage />} />
             <Route path="subscription-plans" element={<AdminSubscriptionPlansPage />} />
             <Route path="integrations" element={<AdminIntegrationsPage />} />
+            <Route path="help" element={<AdminHelpSupportPage />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
