@@ -28,24 +28,35 @@ export const GlobalNavbar = () => {
       </Link>
 
       {/* Desktop Navigation */}
-      <NavigationMenu className="hidden md:flex">
-        <NavigationMenuList className="flex space-x-4">
-          {mainNavItems.map((item) => (
-            <NavigationMenuItem key={item.path}>
-              <Link to={item.path} legacyBehavior> {/* Removed passHref */}
+      <div className="hidden md:flex items-center space-x-6">
+        <NavigationMenu>
+          <NavigationMenuList className="flex space-x-4">
+            {mainNavItems.map((item) => (
+              <NavigationMenuItem key={item.path}>
                 <NavigationMenuLink
                   className={cn(
                     navigationMenuTriggerStyle(),
                     location.pathname.startsWith(item.path) && "bg-primary/10 font-semibold" // Highlight active link
                   )}
+                  asChild
                 >
-                  {item.name}
+                  <Link to={item.path}>{item.name}</Link>
                 </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        {/* Auth Buttons */}
+        <div className="flex items-center space-x-3">
+          <Button variant="ghost" asChild>
+            <Link to="/login">Sign In</Link>
+          </Button>
+          <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" asChild>
+            <Link to="/signup">Sign Up</Link>
+          </Button>
+        </div>
+      </div>
 
       {/* Mobile Navigation */}
       <MobileSheet title="ThinkPartnerships"> {/* Pass logo text as title */}
@@ -63,6 +74,16 @@ export const GlobalNavbar = () => {
               <Link to={item.path}>{item.name}</Link>
             </Button>
           ))}
+
+          {/* Mobile Auth Buttons */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+            <Button variant="ghost" className="w-full justify-start mb-2" asChild>
+              <Link to="/login">Sign In</Link>
+            </Button>
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" asChild>
+              <Link to="/signup">Sign Up</Link>
+            </Button>
+          </div>
         </nav>
       </MobileSheet>
     </header>

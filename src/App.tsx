@@ -78,6 +78,7 @@ import AdminLicenseManagementPage from "./pages/admin/AdminLicenseManagementPage
 import AdminSubscriptionPlansPage from "./pages/admin/AdminSubscriptionPlansPage";
 import AdminIntegrationsPage from "./pages/admin/AdminIntegrationsPage";
 import AdminHelpSupportPage from "./pages/admin/AdminHelpSupportPage";
+import AdminProfilePage from "./pages/admin/AdminProfilePage";
 
 
 const queryClient = new QueryClient();
@@ -174,6 +175,7 @@ const App = () => (
             <Route path="subscription-plans" element={<AdminSubscriptionPlansPage />} />
             <Route path="integrations" element={<AdminIntegrationsPage />} />
             <Route path="help" element={<AdminHelpSupportPage />} />
+            <Route path="profile" element={<AdminProfilePage />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

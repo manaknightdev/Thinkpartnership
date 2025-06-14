@@ -42,55 +42,62 @@ const Index = () => {
       ],
     },
     {
-      name: "WellnessHub",
-      description: "Holistic health & wellness community",
-      category: "Health & Wellness",
-      logo: "🌿",
+      name: "ServicePro Hub",
+      description: "Essential home services marketplace",
+      category: "Home Services & Maintenance",
+      logo: "🔧",
       color: "from-emerald-500 to-teal-500",
       services: [
         {
-          name: "Personal Training",
-          vendor: "FitLife Studios",
-          price: "From $80/session",
+          name: "Emergency Plumbing",
+          vendor: "Rapid Plumbers",
+          price: "From $150",
           rating: 4.9,
-          image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center"
+          image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop&crop=center"
         },
         {
-          name: "Nutrition Coaching",
-          vendor: "NutriWise Experts",
-          price: "From $120/month",
+          name: "HVAC Repair & Installation",
+          vendor: "Climate Control Experts",
+          price: "From $200",
           rating: 4.8,
-          image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=300&fit=crop&crop=center"
+          image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center"
         },
         {
-          name: "Massage Therapy",
-          vendor: "Zen Healing Center",
-          price: "From $90/session",
+          name: "Electrical Services",
+          vendor: "PowerLine Electricians",
+          price: "From $120",
           rating: 5.0,
-          image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=300&fit=crop&crop=center"
+          image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center"
         },
       ],
     },
     {
-      name: "BizConnect Pro",
-      description: "Professional business services network",
-      category: "Business & Professional",
-      logo: "💼",
+      name: "PropertyPro Network",
+      description: "Complete real estate services marketplace",
+      category: "Real Estate & Property",
+      logo: "🏘️",
       color: "from-purple-500 to-indigo-500",
       services: [
         {
-          name: "Legal Consulting",
-          vendor: "Premier Law Group",
-          price: "From $300/hour",
+          name: "Property Management",
+          vendor: "Elite Property Solutions",
+          price: "From $150/month",
           rating: 4.9,
-          image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=300&fit=crop&crop=center"
+          image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center"
         },
         {
-          name: "Digital Marketing",
-          vendor: "Growth Marketing Co",
-          price: "From $2,000/month",
+          name: "Home Inspection",
+          vendor: "TrustPoint Inspectors",
+          price: "From $400",
           rating: 4.8,
-          image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center"
+          image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=300&fit=crop&crop=center"
+        },
+        {
+          name: "Real Estate Photography",
+          vendor: "Premier Property Photos",
+          price: "From $250",
+          rating: 5.0,
+          image: "https://images.unsplash.com/photo-1560184897-ae75f418493e?w=400&h=300&fit=crop&crop=center"
         },
       ],
     },
@@ -142,7 +149,7 @@ const Index = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300" asChild>
-                <Link to="#preview" className="flex items-center">
+                <Link to="/signup" className="flex items-center">
                   <Play className="mr-2 w-5 h-5" />
                   See How It Works
                 </Link>
@@ -196,9 +203,11 @@ const Index = () => {
                       </span>
                     </div>
                   </div>
-                  <Button variant="outline" className="flex items-center space-x-2">
-                    <Eye className="w-4 h-4" />
-                    <span>Visit Marketplace</span>
+                  <Button variant="outline" className="flex items-center space-x-2" asChild>
+                    <Link to="/signup">
+                      <Eye className="w-4 h-4" />
+                      <span>Visit Marketplace</span>
+                    </Link>
                   </Button>
                 </div>
 
@@ -222,8 +231,8 @@ const Index = () => {
                         <p className="text-gray-600 mb-3">by {service.vendor}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-bold text-gray-900">{service.price}</span>
-                          <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
-                            View Details
+                          <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" asChild>
+                            <Link to="/signup">View Details</Link>
                           </Button>
                         </div>
                       </CardContent>
@@ -564,15 +573,15 @@ const Index = () => {
                 </div>
                 <Quote className="w-8 h-8 text-gray-300 mb-4" />
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  "As a wellness coach, joining WellnessHub was seamless. I've gained 200+ new clients and earn referral commissions. The platform just works!"
+                  "Joining ServicePro Hub transformed my plumbing business. I've gained 150+ new customers and earn great referral commissions. Best decision ever!"
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
                     MR
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Maria Rodriguez</p>
-                    <p className="text-gray-500 text-sm">Wellness Coach & Entrepreneur</p>
+                    <p className="font-semibold text-gray-900">Mike Rodriguez</p>
+                    <p className="text-gray-500 text-sm">Licensed Plumber & Contractor</p>
                   </div>
                 </div>
               </div>
@@ -586,15 +595,15 @@ const Index = () => {
                 </div>
                 <Quote className="w-8 h-8 text-gray-300 mb-4" />
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  "The setup was incredibly fast. Within 48 hours, we had our branded marketplace live with 50+ vendors. Revenue started flowing immediately."
+                  "PropertyPro Network launched in 48 hours with 30+ real estate service providers. Our agents love the seamless referral system and extra income!"
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
                     JS
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">James Smith</p>
-                    <p className="text-gray-500 text-sm">Founder, BizConnect Pro</p>
+                    <p className="font-semibold text-gray-900">Jennifer Smith</p>
+                    <p className="text-gray-500 text-sm">Broker, PropertyPro Network</p>
                   </div>
                 </div>
               </div>
@@ -641,8 +650,8 @@ const Index = () => {
                   <ArrowRight className="ml-3 w-6 h-6" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-10 py-5 text-xl font-semibold rounded-2xl transition-all duration-300" asChild>
-                <Link to="#preview">
+              <Button size="lg" variant="outline" className="border-2 border-white/30 text-black hover:bg-white/10 hover:text-white backdrop-blur-sm px-10 py-5 text-xl font-semibold rounded-2xl transition-all duration-300" asChild>
+                <Link to="/signup">
                   Schedule Demo
                 </Link>
               </Button>

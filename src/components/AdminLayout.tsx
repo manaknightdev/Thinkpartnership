@@ -43,11 +43,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   const sidebarItems = [
     { name: "Dashboard Overview", path: "/admin-portal/overview", icon: LayoutDashboard, exact: false },
+    { name: "Admin Profile", path: "/admin-portal/profile", icon: User, exact: false },
     { name: "All Clients", path: "/admin-portal/clients", icon: Building, exact: false },
     { name: "All Vendors", path: "/admin-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/admin-portal/customers", icon: UserCheck, exact: false },
     { name: "All Transactions", path: "/admin-portal/transactions", icon: DollarSign, exact: false },
-    { name: "Vendor Approvals", path: "/admin-portal/vendor-approvals", icon: User, exact: false },
+    { name: "Vendor Approvals", path: "/admin-portal/vendor-approvals", icon: Shield, exact: false },
     { name: "Global Revenue Rules", path: "/admin-portal/revenue-rules", icon: Settings, exact: false },
     { name: "Usage Reports", path: "/admin-portal/reports", icon: BarChart, exact: false },
     { name: "Manual Commissions", path: "/admin-portal/manual-commissions", icon: PlusCircle, exact: false },
@@ -130,17 +131,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   <p className="text-sm font-medium text-gray-900">{userName}</p>
                   <p className="text-xs text-gray-500">Platform Administrator</p>
                 </div>
-                <DropdownMenuItem onClick={() => navigate('/admin-portal/clients')}>
-                  <Building className="mr-2 h-4 w-4" />
-                  All Clients
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/admin-portal/vendors')}>
-                  <Users className="mr-2 h-4 w-4" />
-                  All Vendors
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/admin-portal/customers')}>
-                  <UserCheck className="mr-2 h-4 w-4" />
-                  All Customers
+                <DropdownMenuItem onClick={() => navigate('/admin-portal/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Admin Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/admin-portal/reports')}>
                   <BarChart className="mr-2 h-4 w-4" />
