@@ -3,376 +3,311 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building, Mail, Phone, Globe, PlusCircle, Edit, Trash2, Image as ImageIcon } from "lucide-react";
+import { Building, Mail, Phone, Globe, MapPin, Clock, Award, Users } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-interface Service {
-  id: string;
-  name: string;
-  category: string;
-  price: string;
-  status: "Active" | "Draft";
-  description: string;
-  imageUrl?: string; // Added imageUrl
-}
+import { Badge } from "@/components/ui/badge";
 
 const VendorProfilePage = () => {
-  const [services, setServices] = useState<Service[]>([
-    { id: "s001", name: "Emergency Plumbing Repair", category: "Plumbing", price: "$150+", status: "Active", description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.", imageUrl: "https://media.istockphoto.com/id/183953925/photo/young-plumber-fixing-a-sink-in-bathroom.jpg?s=612x612&w=0&k=20&c=Ps2U_U4_Z60mIZsuem-BoaHLlCjsT8wYWiXNWR-TCDA=" },
-    { id: "s002", name: "Interior & Exterior Painting", category: "Painting", price: "$500+", status: "Active", description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.", imageUrl: "https://t3.ftcdn.net/jpg/00/96/57/12/360_F_96571267_qfpHjHTvH8siby0Cey6rTpfiJczIxX3e.jpg" },
-    { id: "s003", name: "Full Home Inspection", category: "Inspections", price: "$300+", status: "Draft", description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.", imageUrl: "https://www.shutterstock.com/image-photo/mid-adult-woman-architect-wearing-600nw-2060102018.jpg" },
-  ]);
-  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
-  const [newService, setNewService] = useState<Omit<Service, 'id' | 'status'>>({
-    name: "",
-    category: "",
-    price: "",
-    description: "",
-    imageUrl: "", // Initialize imageUrl
+  const [profileData, setProfileData] = useState({
+    companyName: "Rapid Plumbers",
+    companyBio: "Rapid Plumbers provides 24/7 emergency plumbing services, leak detection, drain cleaning, and water heater installations. We are committed to fast, reliable, and high-quality service.",
+    contactEmail: "info@rapidplumbers.com",
+    contactPhone: "(555) 123-4567",
+    website: "https://www.rapidplumbers.com",
+    address: "123 Main Street, Anytown, ST 12345",
+    businessHours: "24/7 Emergency Service",
+    yearsInBusiness: "15",
+    teamSize: "12",
+    serviceAreas: ["Downtown", "Suburbs", "Industrial District"],
   });
-  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-  const [editServiceData, setEditServiceData] = useState<Omit<Service, 'id' | 'status'> | null>(null);
-  const [isEditServiceModalOpen, setIsEditServiceModalOpen] = useState(false);
 
 
   const handleSaveProfile = () => {
     toast.success("Company profile saved successfully!");
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, isNewService: boolean) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (isNewService) {
-          setNewService({ ...newService, imageUrl: reader.result as string });
-        } else if (editServiceData) {
-          setEditServiceData({ ...editServiceData, imageUrl: reader.result as string });
-        }
-      };
-      reader.readAsDataURL(file);
+  const handleInputChange = (field: string, value: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addServiceArea = () => {
+    const newArea = prompt("Enter new service area:");
+    if (newArea && !profileData.serviceAreas.includes(newArea)) {
+      setProfileData(prev => ({
+        ...prev,
+        serviceAreas: [...prev.serviceAreas, newArea]
+      }));
     }
   };
 
-  const handleAddService = () => {
-    if (newService.name && newService.category && newService.price) {
-      const serviceToAdd: Service = {
-        ...newService,
-        id: `s${Date.now()}`, // Unique ID
-        status: "Active", // Default status for new services
-      };
-      setServices([...services, serviceToAdd]);
-      setNewService({ name: "", category: "", price: "", description: "", imageUrl: "" }); // Clear form
-      toast.success("Service added successfully!");
-      setIsAddServiceModalOpen(false); // Close the modal
-    } else {
-      toast.error("Please fill in all required fields for the new service.");
-    }
-  };
-
-  const handleEditService = (serviceId: string) => {
-    const serviceToEdit = services.find(s => s.id === serviceId);
-    if (serviceToEdit) {
-      setEditingServiceId(serviceId);
-      setEditServiceData({
-        name: serviceToEdit.name,
-        category: serviceToEdit.category,
-        price: serviceToEdit.price,
-        description: serviceToEdit.description,
-        imageUrl: serviceToEdit.imageUrl, // Pass existing image URL
-      });
-      setIsEditServiceModalOpen(true);
-    }
-  };
-
-  const handleSaveEditedService = () => {
-    if (editingServiceId && editServiceData && editServiceData.name && editServiceData.category && editServiceData.price) {
-      setServices(services.map(s =>
-        s.id === editingServiceId
-          ? { ...s, ...editServiceData }
-          : s
-      ));
-      toast.success("Service updated successfully!");
-      setIsEditServiceModalOpen(false);
-      setEditingServiceId(null);
-      setEditServiceData(null);
-    } else {
-      toast.error("Please fill in all required fields for the edited service.");
-    }
-  };
-
-  const handleDeleteService = (serviceId: string) => {
-    setServices(services.filter(service => service.id !== serviceId));
-    toast.error("Service deleted.");
+  const removeServiceArea = (area: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      serviceAreas: prev.serviceAreas.filter(a => a !== area)
+    }));
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Profile Setup</h2>
-      <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-        Manage your company information and service listings. This is how clients and customers will see you.
-      </p>
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Company Profile</h1>
+          <p className="text-gray-600 mt-1">
+            Manage your business information and how customers see your company.
+          </p>
+        </div>
+        <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-700">
+          Save Changes
+        </Button>
+      </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" /> Company Information
-          </CardTitle>
-          <CardDescription>Update your business details that will be visible on your profile.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="company-name">Company Name</Label>
-            <Input id="company-name" type="text" placeholder="Your Company Name" defaultValue="Rapid Plumbers" />
-          </div>
-          <div>
-            <Label htmlFor="company-bio">Company Bio</Label>
-            <Textarea id="company-bio" placeholder="Tell us about your company and what you offer." rows={5} defaultValue="Rapid Plumbers provides 24/7 emergency plumbing services, leak detection, drain cleaning, and water heater installations. We are committed to fast, reliable, and high-quality service." />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="contact-email">Contact Email</Label>
-              <Input id="contact-email" type="email" placeholder="contact@yourcompany.com" defaultValue="info@rapidplumbers.com" />
-            </div>
-            <div>
-              <Label htmlFor="contact-phone">Phone Number</Label>
-              <Input id="contact-phone" type="tel" placeholder="(123) 456-7890" defaultValue="(555) 123-4567" />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="company-website">Website URL</Label>
-            <Input id="company-website" type="url" placeholder="https://www.yourcompany.com" defaultValue="https://www.rapidplumbers.com" />
-          </div>
-          <Button onClick={handleSaveProfile}>Save Profile</Button>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Profile Information */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5 text-blue-600" />
+                Basic Information
+              </CardTitle>
+              <CardDescription>
+                Your company's core details that customers will see first.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="company-name">Company Name *</Label>
+                <Input
+                  id="company-name"
+                  type="text"
+                  placeholder="Your Company Name"
+                  value={profileData.companyName}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="company-bio">Company Description *</Label>
+                <Textarea
+                  id="company-bio"
+                  placeholder="Tell customers about your company and what makes you special..."
+                  rows={4}
+                  value={profileData.companyBio}
+                  onChange={(e) => handleInputChange('companyBio', e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <PlusCircle className="h-5 w-5" /> Service Listings
-          </CardTitle>
-          <CardDescription>Add or manage the services you offer to customers.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {services.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table className="mb-4">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Image</TableHead> {/* New Table Head */}
-                    <TableHead>Service Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price Range</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {services.map((service) => (
-                    <TableRow key={service.id}>
-                      <TableCell>
-                        {service.imageUrl ? (
-                          <img src={service.imageUrl} alt={service.name} className="w-12 h-12 object-cover rounded-md" />
-                        ) : (
-                          <ImageIcon className="h-12 w-12 text-muted-foreground" />
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium">{service.name}</TableCell>
-                      <TableCell>{service.category}</TableCell>
-                      <TableCell>{service.price}</TableCell>
-                      <TableCell>{service.status}</TableCell>
-                      <TableCell className="text-right">
-                        <Button onClick={() => handleEditService(service.id)} variant="ghost" size="sm" className="mr-2">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button onClick={() => handleDeleteService(service.id)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-gray-600 dark:text-gray-400 mb-4">No services listed yet. Add your first service!</p>
-          )}
-          
-          <Dialog open={isAddServiceModalOpen} onOpenChange={setIsAddServiceModalOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add New Service
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add New Service</DialogTitle>
-                <DialogDescription>
-                  Enter the details for the service you want to offer.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-service-name">Service Name</Label>
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="h-5 w-5 text-blue-600" />
+                Contact Information
+              </CardTitle>
+              <CardDescription>
+                How customers can reach you for inquiries and bookings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="contact-email">Business Email *</Label>
                   <Input
-                    id="new-service-name"
-                    type="text"
-                    placeholder="e.g., Emergency Plumbing Repair"
-                    value={newService.name}
-                    onChange={(e) => setNewService({ ...newService, name: e.target.value })}
+                    id="contact-email"
+                    type="email"
+                    placeholder="contact@yourcompany.com"
+                    value={profileData.contactEmail}
+                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-service-category">Category</Label>
-                  <Select
-                    value={newService.category}
-                    onValueChange={(value) => setNewService({ ...newService, category: value })}
-                  >
-                    <SelectTrigger id="new-service-category">
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="plumbing">Plumbing</SelectItem>
-                      <SelectItem value="electrical">Electrical</SelectItem>
-                      <SelectItem value="cleaning">Cleaning</SelectItem>
-                      <SelectItem value="landscaping">Landscaping</SelectItem>
-                      <SelectItem value="hvac">HVAC</SelectItem>
-                      <SelectItem value="painting">Painting</SelectItem>
-                      <SelectItem value="moving">Moving</SelectItem>
-                      <SelectItem value="inspections">Inspections</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-price-range">Price Range (e.g., $100+, $500-$1000)</Label>
+                <div>
+                  <Label htmlFor="contact-phone">Phone Number *</Label>
                   <Input
-                    id="new-price-range"
-                    type="text"
-                    placeholder="$XXX+"
-                    value={newService.price}
-                    onChange={(e) => setNewService({ ...newService, price: e.target.value })}
+                    id="contact-phone"
+                    type="tel"
+                    placeholder="(123) 456-7890"
+                    value={profileData.contactPhone}
+                    onChange={(e) => handleInputChange('contactPhone', e.target.value)}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-service-description">Service Description</Label>
-                  <Textarea
-                    id="new-service-description"
-                    placeholder="Briefly describe this service."
-                    rows={3}
-                    value={newService.description}
-                    onChange={(e) => setNewService({ ...newService, description: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-service-image">Service Image</Label>
-                  <Input
-                    id="new-service-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, true)}
-                  />
-                  {newService.imageUrl && (
-                    <img src={newService.imageUrl} alt="Service Preview" className="mt-2 h-24 w-24 object-cover rounded-md" />
-                  )}
                 </div>
               </div>
-              <Button onClick={handleAddService}>Save Service</Button>
-            </DialogContent>
-          </Dialog>
+              <div>
+                <Label htmlFor="company-website">Website URL</Label>
+                <Input
+                  id="company-website"
+                  type="url"
+                  placeholder="https://www.yourcompany.com"
+                  value={profileData.website}
+                  onChange={(e) => handleInputChange('website', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="business-address">Business Address</Label>
+                <Input
+                  id="business-address"
+                  type="text"
+                  placeholder="123 Main Street, City, State, ZIP"
+                  value={profileData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Edit Service Dialog */}
-          <Dialog open={isEditServiceModalOpen} onOpenChange={setIsEditServiceModalOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit Service</DialogTitle>
-                <DialogDescription>
-                  Modify the details for this service.
-                </DialogDescription>
-              </DialogHeader>
-              {editServiceData && (
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-service-name">Service Name</Label>
-                    <Input
-                      id="edit-service-name"
-                      type="text"
-                      value={editServiceData.name}
-                      onChange={(e) => setEditServiceData({ ...editServiceData, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-service-category">Category</Label>
-                    <Select
-                      value={editServiceData.category}
-                      onValueChange={(value) => setEditServiceData({ ...editServiceData, category: value })}
-                    >
-                      <SelectTrigger id="edit-service-category">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="plumbing">Plumbing</SelectItem>
-                        <SelectItem value="electrical">Electrical</SelectItem>
-                        <SelectItem value="cleaning">Cleaning</SelectItem>
-                        <SelectItem value="landscaping">Landscaping</SelectItem>
-                        <SelectItem value="hvac">HVAC</SelectItem>
-                        <SelectItem value="painting">Painting</SelectItem>
-                        <SelectItem value="moving">Moving</SelectItem>
-                        <SelectItem value="inspections">Inspections</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-price-range">Price Range</Label>
-                    <Input
-                      id="edit-price-range"
-                      type="text"
-                      value={editServiceData.price}
-                      onChange={(e) => setEditServiceData({ ...editServiceData, price: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-service-description">Service Description</Label>
-                    <Textarea
-                      id="edit-service-description"
-                      placeholder="Briefly describe this service."
-                      rows={3}
-                      value={editServiceData.description}
-                      onChange={(e) => setEditServiceData({ ...editServiceData, description: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-service-image">Service Image</Label>
-                    <Input
-                      id="edit-service-image"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, false)}
-                    />
-                    {editServiceData.imageUrl && (
-                      <img src={editServiceData.imageUrl} alt="Service Preview" className="mt-2 h-24 w-24 object-cover rounded-md" />
-                    )}
-                  </div>
+          {/* Business Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-blue-600" />
+                Business Details
+              </CardTitle>
+              <CardDescription>
+                Additional information that builds trust with customers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="business-hours">Business Hours</Label>
+                  <Input
+                    id="business-hours"
+                    type="text"
+                    placeholder="Mon-Fri 9AM-5PM"
+                    value={profileData.businessHours}
+                    onChange={(e) => handleInputChange('businessHours', e.target.value)}
+                  />
                 </div>
-              )}
-              <Button onClick={handleSaveEditedService}>Save Changes</Button>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
+                <div>
+                  <Label htmlFor="years-in-business">Years in Business</Label>
+                  <Input
+                    id="years-in-business"
+                    type="text"
+                    placeholder="5"
+                    value={profileData.yearsInBusiness}
+                    onChange={(e) => handleInputChange('yearsInBusiness', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="team-size">Team Size</Label>
+                <Input
+                  id="team-size"
+                  type="text"
+                  placeholder="5"
+                  value={profileData.teamSize}
+                  onChange={(e) => handleInputChange('teamSize', e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Profile Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-blue-600" />
+                Profile Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Building className="h-10 w-10 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-lg">{profileData.companyName}</h3>
+                <p className="text-sm text-gray-600">Professional Service Provider</p>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-600">{profileData.yearsInBusiness} years in business</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Users className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-600">{profileData.teamSize} team members</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-600">Multiple service areas</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Service Areas */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-blue-600" />
+                Service Areas
+              </CardTitle>
+              <CardDescription>
+                Areas where you provide services
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {profileData.serviceAreas.map((area, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-red-100 hover:text-red-700"
+                    onClick={() => removeServiceArea(area)}
+                  >
+                    {area} ×
+                  </Badge>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addServiceArea}
+                className="w-full"
+              >
+                Add Service Area
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <a href="/vendor-portal/services">
+                  <Building className="mr-2 h-4 w-4" />
+                  Manage Services
+                </a>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <a href="/vendor-portal/referrals">
+                  <Award className="mr-2 h-4 w-4" />
+                  View Referrals
+                </a>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <a href="/vendor-portal/subscription">
+                  <Users className="mr-2 h-4 w-4" />
+                  Subscription
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

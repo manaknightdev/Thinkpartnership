@@ -16,6 +16,13 @@ import AdminDashboard from "./pages/AdminDashboard"; // Import AdminDashboard
 
 // Import new vendor sub-pages
 import VendorProfilePage from "./pages/vendor/VendorProfilePage";
+import VendorServicesPage from "./pages/vendor/VendorServicesPage";
+import VendorRequestsPage from "./pages/vendor/VendorRequestsPage";
+import VendorMessagesPage from "./pages/vendor/VendorMessagesPage";
+import VendorWalletPage from "./pages/vendor/VendorWalletPage";
+import VendorNotificationsPage from "./pages/vendor/VendorNotificationsPage";
+import VendorAccountPage from "./pages/vendor/VendorAccountPage";
+import VendorHelpSupportPage from "./pages/vendor/VendorHelpSupportPage";
 import VendorReferralsPage from "./pages/vendor/VendorReferralsPage";
 import VendorInvitePage from "./pages/vendor/VendorInvitePage";
 import VendorFullReferralReportPage from "./pages/vendor/VendorFullReferralReportPage";
@@ -119,6 +126,14 @@ const App = () => (
           <Route path="/vendor-portal" element={<VendorDashboard />}>
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<VendorProfilePage />} />
+            <Route path="services" element={<VendorServicesPage />} />
+            <Route path="requests" element={<VendorRequestsPage />} />
+            <Route path="messages" element={<VendorMessagesPage />} />
+            <Route path="messages/:customerId" element={<VendorMessagesPage />} />
+            <Route path="wallet" element={<VendorWalletPage />} />
+            <Route path="notifications" element={<VendorNotificationsPage />} />
+            <Route path="account" element={<VendorAccountPage />} />
+            <Route path="help" element={<VendorHelpSupportPage />} />
             <Route path="referrals" element={<VendorReferralsPage />} />
             <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} />
             <Route path="invite" element={<VendorInvitePage />} />
