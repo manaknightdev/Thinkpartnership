@@ -15,17 +15,6 @@ import {
   EyeOff
 } from "lucide-react";
 import { useState } from "react";
-import {
-  ArrowRight,
-  CheckCircle,
-  Sparkles,
-  Building2,
-  Users,
-  DollarSign,
-  Eye,
-  EyeOff
-} from "lucide-react";
-import { useState } from "react";
 
 const SignUp = () => {
   const navigate = useNavigate();
