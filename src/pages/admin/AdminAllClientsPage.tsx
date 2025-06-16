@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,8 @@ import {
   Trash2,
   Plus,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  LogIn
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -137,6 +139,7 @@ const getPlanColor = (plan: string) => {
 };
 
 const AdminAllClientsPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
@@ -162,6 +165,12 @@ const AdminAllClientsPage = () => {
 
   const handleSuspendClient = (clientName: string) => {
     toast.warning(`Suspending ${clientName}...`);
+  };
+
+  const handleLoginAsClient = (client: any) => {
+    toast.success(`Logging in as ${client.name}...`);
+    // Navigate to client portal
+    navigate('/client-portal');
   };
 
   const handleAddNewClient = () => {
@@ -464,6 +473,10 @@ const AdminAllClientsPage = () => {
                           <DropdownMenuItem onClick={() => handleEditClient(client)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Client
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleLoginAsClient(client)}>
+                            <LogIn className="mr-2 h-4 w-4" />
+                            Login as Client
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

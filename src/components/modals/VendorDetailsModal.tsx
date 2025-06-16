@@ -217,7 +217,7 @@ export const VendorDetailsModal: React.FC<VendorDetailsModalProps> = ({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Service Areas</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Cities</p>
                     <div className="flex flex-wrap gap-2">
                       {vendorDetails.serviceAreas.map((area: string, index: number) => (
                         <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

@@ -22,6 +22,7 @@ import {
   UserPlus,
   DollarSign,
   Wallet,
+  CheckSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   const sidebarItems = [
     { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard, exact: false },
+    { name: "Tasks & Follow-ups", path: "/client-portal/tasks", icon: CheckSquare, exact: false },
     { name: "Reports", path: "/client-portal/reports", icon: BarChart, exact: false },
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/client-portal/customers", icon: User, exact: false },
@@ -144,6 +146,10 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                   <p className="text-sm font-medium text-gray-900">{userName}</p>
                   <p className="text-xs text-gray-500">Client Portal Admin</p>
                 </div>
+                <DropdownMenuItem onClick={() => navigate('/client-portal/tasks')}>
+                  <CheckSquare className="mr-2 h-4 w-4" />
+                  Tasks & Follow-ups
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/client-portal/vendors')}>
                   <Users className="mr-2 h-4 w-4" />
                   Manage Vendors

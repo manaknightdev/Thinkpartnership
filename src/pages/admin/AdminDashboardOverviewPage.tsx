@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Users, TrendingUp, CheckCircle, Clock, ArrowUpRight, AlertTriangle, Activity } from "lucide-react";
+import { DollarSign, Users, TrendingUp, CheckCircle, Clock, ArrowUpRight, AlertTriangle, Activity, CheckSquare, Plus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { toast } from "sonner";
 import { ActivityLogModal } from "@/components/modals/ActivityLogModal";
@@ -45,6 +45,16 @@ const AdminDashboardOverviewPage = () => {
   const handleSystemStatus = () => {
     setIsSystemStatusOpen(true);
     toast.info("Opening system status dashboard...");
+  };
+
+  const handleViewTasks = () => {
+    navigate('/admin-portal/tasks');
+    toast.info("Navigating to tasks...");
+  };
+
+  const handleCreateTask = () => {
+    navigate('/admin-portal/tasks');
+    toast.info("Navigating to create new task...");
   };
 
   const handleViewDetails = () => {
@@ -274,6 +284,38 @@ const AdminDashboardOverviewPage = () => {
             <Button onClick={handleViewActivityLog} variant="outline" className="w-full mt-4">
               View Activity Log
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
+              <CheckSquare className="h-5 w-5 text-blue-600 mr-2" />
+              Tasks & Follow-ups
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+              <span className="text-sm text-gray-700">Overdue Tasks</span>
+              <span className="text-sm font-semibold text-red-600">1 overdue</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <span className="text-sm text-gray-700">Due Today</span>
+              <span className="text-sm font-semibold text-orange-600">2 pending</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <span className="text-sm text-gray-700">In Progress</span>
+              <span className="text-sm font-semibold text-blue-600">1 active</span>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button onClick={handleViewTasks} variant="outline" className="flex-1">
+                View All
+              </Button>
+              <Button onClick={handleCreateTask} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                <Plus className="h-4 w-4 mr-1" />
+                New Task
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

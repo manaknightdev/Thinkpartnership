@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import {
   Search,
@@ -21,35 +21,23 @@ import {
   Clock,
   Shield,
   Users,
-  Filter,
   Heart,
   ArrowRight,
-  Sparkles,
   Percent,
   Bookmark,
   Eye,
-  Verified
+  Verified,
+  Crown
 } from "lucide-react";
 
 const CustomerBrowseServicesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedLocation, setSelectedLocation] = useState("all");
-  const [selectedRating, setSelectedRating] = useState("all");
-  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState("all");
-  const [sortBy, setSortBy] = useState("best-match");
 
   const handleSearch = () => {
     // Navigate to all services with search parameters
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
-    if (selectedCategory !== 'all') params.set('category', selectedCategory);
-    if (selectedLocation !== 'all') params.set('location', selectedLocation);
-    if (selectedRating !== 'all') params.set('rating', selectedRating);
-    if (selectedDeliveryTime !== 'all') params.set('delivery', selectedDeliveryTime);
-    if (sortBy !== 'best-match') params.set('sort', sortBy);
-
     navigate(`/marketplace/services?${params.toString()}`);
   };
 
@@ -58,46 +46,13 @@ const CustomerBrowseServicesPage = () => {
     navigate(`/marketplace/services/${encodeURIComponent(serviceName)}`);
   };
 
-  const handleFilterChange = (filterType: string, value: string) => {
-    switch (filterType) {
-      case 'category':
-        setSelectedCategory(value);
-        break;
-      case 'location':
-        setSelectedLocation(value);
-        break;
-      case 'rating':
-        setSelectedRating(value);
-        break;
-      case 'delivery':
-        setSelectedDeliveryTime(value);
-        break;
-      case 'sort':
-        setSortBy(value);
-        break;
-    }
-  };
-
-  const clearFilters = () => {
-    setSelectedCategory("all");
-    setSelectedLocation("all");
-    setSelectedRating("all");
-    setSelectedDeliveryTime("all");
-    setSortBy("best-match");
-    setSearchTerm("");
-  };
-
-  const hasActiveFilters = selectedCategory !== "all" || selectedLocation !== "all" ||
-                          selectedRating !== "all" || selectedDeliveryTime !== "all" ||
-                          sortBy !== "best-match" || searchTerm !== "";
-
   const mockCategories = [
     {
-      name: "Plumbing",
-      icon: Wrench,
-      count: 24,
-      color: "bg-blue-500",
-      description: "Pipes, leaks, installations"
+      name: "Cleaning",
+      icon: CheckCircle,
+      count: 32,
+      color: "bg-green-500",
+      description: "Deep clean, maintenance"
     },
     {
       name: "Electrical",
@@ -107,11 +62,18 @@ const CustomerBrowseServicesPage = () => {
       description: "Wiring, outlets, lighting"
     },
     {
-      name: "Cleaning",
-      icon: CheckCircle,
-      count: 32,
-      color: "bg-green-500",
-      description: "Deep clean, maintenance"
+      name: "HVAC",
+      icon: Home,
+      count: 12,
+      color: "bg-orange-500",
+      description: "Heating, cooling, ventilation"
+    },
+    {
+      name: "Inspections",
+      icon: Building2,
+      count: 9,
+      color: "bg-indigo-500",
+      description: "Home, safety, compliance"
     },
     {
       name: "Landscaping",
@@ -121,11 +83,11 @@ const CustomerBrowseServicesPage = () => {
       description: "Lawn care, garden design"
     },
     {
-      name: "HVAC",
-      icon: Home,
-      count: 12,
-      color: "bg-orange-500",
-      description: "Heating, cooling, ventilation"
+      name: "Moving",
+      icon: Truck,
+      count: 8,
+      color: "bg-red-500",
+      description: "Relocation, packing, storage"
     },
     {
       name: "Painting",
@@ -135,18 +97,11 @@ const CustomerBrowseServicesPage = () => {
       description: "Interior, exterior, touch-ups"
     },
     {
-      name: "Moving",
-      icon: Truck,
-      count: 8,
-      color: "bg-red-500",
-      description: "Relocation, packing, storage"
-    },
-    {
-      name: "Inspections",
-      icon: Building2,
-      count: 9,
-      color: "bg-indigo-500",
-      description: "Home, safety, compliance"
+      name: "Plumbing",
+      icon: Wrench,
+      count: 24,
+      color: "bg-blue-500",
+      description: "Pipes, leaks, installations"
     },
   ];
 
@@ -343,173 +298,36 @@ const CustomerBrowseServicesPage = () => {
         </div>
       </section>
 
-      {/* Modern Filters and Sort Bar */}
-      <section className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Category Filter */}
-              <Select value={selectedCategory} onValueChange={(value) => handleFilterChange('category', value)}>
-                <SelectTrigger className="w-40 rounded-full border-gray-300 hover:border-green-500 transition-all duration-300">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="plumbing">Plumbing</SelectItem>
-                  <SelectItem value="electrical">Electrical</SelectItem>
-                  <SelectItem value="cleaning">Cleaning</SelectItem>
-                  <SelectItem value="landscaping">Landscaping</SelectItem>
-                  <SelectItem value="hvac">HVAC</SelectItem>
-                  <SelectItem value="painting">Painting</SelectItem>
-                  <SelectItem value="moving">Moving</SelectItem>
-                  <SelectItem value="inspections">Inspections</SelectItem>
-                </SelectContent>
-              </Select>
 
-              {/* Location Filter */}
-              <Select value={selectedLocation} onValueChange={(value) => handleFilterChange('location', value)}>
-                <SelectTrigger className="w-36 rounded-full border-gray-300 hover:border-green-500 transition-all duration-300">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Areas</SelectItem>
-                  <SelectItem value="nearby">Nearby (5 miles)</SelectItem>
-                  <SelectItem value="city">Within City</SelectItem>
-                  <SelectItem value="county">Within County</SelectItem>
-                  <SelectItem value="state">Within State</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Rating Filter */}
-              <Select value={selectedRating} onValueChange={(value) => handleFilterChange('rating', value)}>
-                <SelectTrigger className="w-32 rounded-full border-gray-300 hover:border-green-500 transition-all duration-300">
-                  <Star className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Rating" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Rating</SelectItem>
-                  <SelectItem value="4.5">4.5+ Stars</SelectItem>
-                  <SelectItem value="4.0">4.0+ Stars</SelectItem>
-                  <SelectItem value="3.5">3.5+ Stars</SelectItem>
-                  <SelectItem value="3.0">3.0+ Stars</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Delivery Time Filter */}
-              <Select value={selectedDeliveryTime} onValueChange={(value) => handleFilterChange('delivery', value)}>
-                <SelectTrigger className="w-40 rounded-full border-gray-300 hover:border-green-500 transition-all duration-300">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Delivery" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Time</SelectItem>
-                  <SelectItem value="same-day">Same Day</SelectItem>
-                  <SelectItem value="1-day">Within 1 Day</SelectItem>
-                  <SelectItem value="3-days">Within 3 Days</SelectItem>
-                  <SelectItem value="1-week">Within 1 Week</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Clear Filters Button */}
-              {hasActiveFilters && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  Clear All
-                </Button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 font-medium">Sort by:</span>
-              <Select value={sortBy} onValueChange={(value) => handleFilterChange('sort', value)}>
-                <SelectTrigger className="w-36 border-none bg-transparent">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="best-match">Best Match</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="popular">Most Popular</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Enhanced Categories Section */}
-        <section className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Explore Popular Categories
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Find the perfect professional for any home service you need
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
-            {mockCategories.map((category) => (
-              <Card key={category.name} className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 rounded-2xl overflow-hidden">
-                <CardContent className="p-6 text-center">
-                  <div className={`w-16 h-16 ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
-                    <category.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-base mb-2 text-gray-900 group-hover:text-green-600 transition-colors duration-300">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-2">
-                    {category.description}
-                  </p>
-                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
-                    {category.count} services
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-all duration-300 px-8"
-              onClick={() => navigate('/marketplace/categories')}
-            >
-              View All Categories
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
-        </section>
-
-        {/* Featured Services Section */}
+        {/* Premium Top-Rated Services Section */}
         <section className="mb-20">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Sparkles className="h-6 w-6 text-green-500" />
-              <Badge className="bg-green-100 text-green-700 px-3 py-1 rounded-full">Trending Now</Badge>
+              <Crown className="h-6 w-6 text-yellow-500" />
+              <Badge className="bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 px-4 py-2 rounded-full font-semibold">Premium Services</Badge>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Top-Rated Services
+              Top-Rated Premium Services
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Discover the most popular and highly-rated services from our trusted professionals
+              Discover our exclusive premium services from the highest-rated professionals. Quality guaranteed with priority support.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {mockFeaturedServices.map((service, index) => (
-              <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl">
+              <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl relative">
+                {/* Premium Badge */}
+                <div className="absolute top-2 left-2 z-10">
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs px-2 py-1 rounded-full shadow-lg">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
+                </div>
+
                 <div className="relative overflow-hidden rounded-t-2xl">
                   <img
                     src={service.image}
@@ -526,7 +344,7 @@ const CustomerBrowseServicesPage = () => {
                   </button>
 
                   {/* Vendor Level Badge */}
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-4 left-16">
                     <Badge className={`${service.vendorLevel === 'Top Rated' ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} text-white text-sm px-3 py-1 rounded-full shadow-lg`}>
                       {service.vendorLevel === 'Top Rated' && <Verified className="w-3 h-3 mr-1" />}
                       {service.vendorLevel}
@@ -604,9 +422,9 @@ const CustomerBrowseServicesPage = () => {
                     <Button
                       size="sm"
                       onClick={() => handleViewDetails(service.title)}
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
-                      View Details
+                      View Premium
                     </Button>
                   </div>
                 </CardContent>
@@ -619,13 +437,61 @@ const CustomerBrowseServicesPage = () => {
             <Button
               variant="outline"
               size="lg"
-              className="rounded-full border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-all duration-300 px-8 py-3 text-lg font-semibold"
+              className="rounded-full border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all duration-300 px-8 py-3 text-lg font-semibold"
               onClick={() => navigate('/marketplace/services')}
             >
-              View All Services
+              <Crown className="w-5 h-5 mr-2" />
+              View All Premium Services
             </Button>
           </div>
         </section>
+
+        {/* Enhanced Categories Section */}
+        <section className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Explore Popular Categories
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Find the perfect professional for any home service you need
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
+            {mockCategories.map((category) => (
+              <Card key={category.name} className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 rounded-2xl overflow-hidden">
+                <CardContent className="p-6 text-center">
+                  <div className={`w-16 h-16 ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
+                    <category.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-base mb-2 text-gray-900 group-hover:text-green-600 transition-colors duration-300">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {category.description}
+                  </p>
+                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                    {category.count} services
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-all duration-300 px-8"
+              onClick={() => navigate('/marketplace/categories')}
+            >
+              View All Categories
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </section>
+
+
 
         {/* Enhanced Call-to-Action Section */}
         <section className="mb-20">
@@ -665,27 +531,7 @@ const CustomerBrowseServicesPage = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="mb-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">10K+</div>
-              <div className="text-gray-600">Verified Professionals</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">50K+</div>
-              <div className="text-gray-600">Completed Projects</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">4.9</div>
-              <div className="text-gray-600">Average Rating</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">24/7</div>
-              <div className="text-gray-600">Customer Support</div>
-            </div>
-          </div>
-        </section>
+
       </div>
     </div>
     </MarketplaceLayout>

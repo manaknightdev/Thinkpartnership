@@ -18,7 +18,7 @@ const mockAvailablePlans: SubscriptionPlan[] = [
     name: "Basic Listing",
     price: "$19/month",
     features: ["Standard listing", "5 service listings", "Basic analytics"],
-    description: "Ideal for new vendors looking to get started."
+    description: "Ideal for new clients looking to get started."
   },
   {
     id: "plan-premium",

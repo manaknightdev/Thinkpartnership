@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake } from "lucide-react"; // Importing new icons
+import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake, CheckSquare, Clock, AlertTriangle } from "lucide-react"; // Importing new icons
 
 const ClientOverviewPage = () => {
   return (
@@ -123,6 +123,71 @@ const ClientOverviewPage = () => {
             </p>
             <Button className="w-full bg-purple-600 hover:bg-purple-700" asChild>
               <Link to="/client-portal/rules">Set Rules</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tasks & Follow-ups Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <CheckSquare className="h-5 w-5 text-orange-600" />
+              </div>
+              Tasks & Follow-ups
+            </CardTitle>
+            <CardDescription>Track your account setup progress and administrative tasks.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                <span className="text-sm text-gray-700">Pending Tasks</span>
+                <span className="text-sm font-semibold text-orange-600">2 pending</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm text-gray-700">In Progress</span>
+                <span className="text-sm font-semibold text-blue-600">1 active</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm text-gray-700">Completed</span>
+                <span className="text-sm font-semibold text-green-600">1 done</span>
+              </div>
+            </div>
+            <Button className="w-full bg-orange-600 hover:bg-orange-700" asChild>
+              <Link to="/client-portal/tasks">View All Tasks</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-teal-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-2 bg-teal-100 rounded-lg">
+                <Clock className="h-5 w-5 text-teal-600" />
+              </div>
+              Recent Activity
+            </CardTitle>
+            <CardDescription>Latest updates and actions on your account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm text-gray-700">Payment Setup Completed</span>
+                <span className="text-xs text-gray-500">2 hours ago</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm text-gray-700">Branding Review Started</span>
+                <span className="text-xs text-gray-500">1 day ago</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                <span className="text-sm text-gray-700">Onboarding Task Assigned</span>
+                <span className="text-xs text-gray-500">2 days ago</span>
+              </div>
+            </div>
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/client-portal/tasks">View Task History</Link>
             </Button>
           </CardContent>
         </Card>

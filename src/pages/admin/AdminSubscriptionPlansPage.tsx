@@ -17,25 +17,25 @@ interface SubscriptionPlan {
 
 const mockSubscriptionPlans: SubscriptionPlan[] = [
   {
-    id: "plan-basic",
-    name: "Basic Listing",
-    price: "$19/month",
-    features: ["Standard listing", "5 service listings", "Basic analytics"],
-    description: "Ideal for new vendors looking to get started."
-  },
-  {
-    id: "plan-premium",
-    name: "Premium Placement",
-    price: "$49/month",
-    features: ["Featured listing (rotating)", "Unlimited service listings", "Advanced analytics", "Priority support"],
-    description: "Boost visibility and access deeper insights."
-  },
-  {
-    id: "plan-elite",
-    name: "Elite Partner",
+    id: "plan-starter",
+    name: "Starter",
     price: "$99/month",
-    features: ["Top placement (fixed)", "Unlimited service listings", "Full analytics suite", "Dedicated account manager", "API access"],
-    description: "Maximize your reach and integrate seamlessly."
+    features: ["Up to 50 vendors", "Basic marketplace features", "Standard support", "Basic analytics", "Custom subdomain"],
+    description: "Perfect for small businesses starting their marketplace journey."
+  },
+  {
+    id: "plan-professional",
+    name: "Professional",
+    price: "$299/month",
+    features: ["Up to 200 vendors", "Advanced marketplace features", "Priority support", "Advanced analytics", "Custom domain", "White-label branding"],
+    description: "Ideal for growing businesses with expanding vendor networks."
+  },
+  {
+    id: "plan-enterprise",
+    name: "Enterprise",
+    price: "$599/month",
+    features: ["Unlimited vendors", "Full marketplace suite", "24/7 dedicated support", "Enterprise analytics", "Custom domain", "Full white-label", "API access", "Custom integrations"],
+    description: "Complete solution for large-scale marketplace operations."
   },
 ];
 
@@ -71,9 +71,9 @@ const AdminSubscriptionPlansPage = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Vendor Subscription Plans</h2>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Client Subscription Plans</h2>
       <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-        Define and manage the different subscription tiers available for vendors in your marketplace.
+        Define and manage the different subscription tiers available for clients using your SaaS platform.
       </p>
 
       <Card className="mb-8">
@@ -127,7 +127,7 @@ const AdminSubscriptionPlansPage = () => {
           <CardTitle className="flex items-center gap-2">
             <PlusCircle className="h-5 w-5" /> Add New Subscription Plan
           </CardTitle>
-          <CardDescription>Create a new tier for vendors to subscribe to.</CardDescription>
+          <CardDescription>Create a new tier for clients to subscribe to.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -135,17 +135,17 @@ const AdminSubscriptionPlansPage = () => {
             <Input
               id="plan-name"
               type="text"
-              placeholder="e.g., Premium Listing"
+              placeholder="e.g., Professional"
               value={newPlan.name}
               onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
             />
           </div>
           <div>
-            <Label htmlFor="plan-price">Price (e.g., $49/month)</Label>
+            <Label htmlFor="plan-price">Price (e.g., $299/month)</Label>
             <Input
               id="plan-price"
               type="text"
-              placeholder="$XX/month or $YYY/year"
+              placeholder="$XXX/month or $XXXX/year"
               value={newPlan.price}
               onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })}
             />
@@ -155,7 +155,7 @@ const AdminSubscriptionPlansPage = () => {
             <Input
               id="plan-features"
               type="text"
-              placeholder="e.g., Featured listing, Advanced analytics"
+              placeholder="e.g., Up to 200 vendors, Advanced analytics, Custom domain"
               value={newPlan.features.join(", ")}
               onChange={(e) => setNewPlan({ ...newPlan, features: e.target.value.split(',').map(f => f.trim()) })}
             />
@@ -165,7 +165,7 @@ const AdminSubscriptionPlansPage = () => {
             <Input
               id="plan-description"
               type="text"
-              placeholder="A brief description of the plan benefits."
+              placeholder="A brief description of the plan benefits for clients."
               value={newPlan.description}
               onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })}
             />

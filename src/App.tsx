@@ -42,6 +42,7 @@ import ClientHelpSupportPage from "./pages/client/ClientHelpSupportPage";
 import ClientRevenueRulesPage from "./pages/client/ClientRevenueRulesPage";
 import ClientBrandingPage from "./pages/client/ClientBrandingPage";
 import ClientMarketplaceOrdersPage from "./pages/client/ClientMarketplaceOrdersPage"; // New import
+import ClientTasksPage from "./pages/client/ClientTasksPage";
 
 // Import new customer sub-pages
 import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesPage";
@@ -79,6 +80,7 @@ import AdminSubscriptionPlansPage from "./pages/admin/AdminSubscriptionPlansPage
 import AdminIntegrationsPage from "./pages/admin/AdminIntegrationsPage";
 import AdminHelpSupportPage from "./pages/admin/AdminHelpSupportPage";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
+import AdminTasksPage from "./pages/admin/AdminTasksPage";
 
 
 const queryClient = new QueryClient();
@@ -127,6 +129,7 @@ const App = () => (
           <Route path="/client-portal" element={<ClientDashboard />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<ClientOverviewPage />} />
+            <Route path="tasks" element={<ClientTasksPage />} />
             <Route path="reports" element={<ClientReportsPage />} />
             <Route path="vendors" element={<ClientVendorManagementPage />} />
             <Route path="customers" element={<ClientCustomersPage />} />
@@ -163,6 +166,7 @@ const App = () => (
           <Route path="/admin-portal" element={<AdminDashboard />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<AdminDashboardOverviewPage />} />
+            <Route path="tasks" element={<AdminTasksPage />} />
             <Route path="clients" element={<AdminAllClientsPage />} />
             <Route path="vendors" element={<AdminAllVendorsPage />} />
             <Route path="customers" element={<AdminAllCustomersPage />} />

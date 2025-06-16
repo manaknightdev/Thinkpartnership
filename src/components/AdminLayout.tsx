@@ -19,7 +19,8 @@ import {
   Shield,
   HelpCircle,
   Building,
-  UserCheck
+  UserCheck,
+  CheckSquare
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const sidebarItems = [
     { name: "Dashboard Overview", path: "/admin-portal/overview", icon: LayoutDashboard, exact: false },
     { name: "Admin Profile", path: "/admin-portal/profile", icon: User, exact: false },
+    { name: "Tasks & Follow-ups", path: "/admin-portal/tasks", icon: CheckSquare, exact: false },
     { name: "All Clients", path: "/admin-portal/clients", icon: Building, exact: false },
     { name: "All Vendors", path: "/admin-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/admin-portal/customers", icon: UserCheck, exact: false },
@@ -134,6 +136,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <DropdownMenuItem onClick={() => navigate('/admin-portal/profile')}>
                   <User className="mr-2 h-4 w-4" />
                   Admin Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/admin-portal/tasks')}>
+                  <CheckSquare className="mr-2 h-4 w-4" />
+                  Tasks & Follow-ups
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/admin-portal/reports')}>
                   <BarChart className="mr-2 h-4 w-4" />

@@ -3,10 +3,108 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Building, Mail, Phone, Globe, MapPin, Clock, Award, Users } from "lucide-react";
+import { Building, Mail, Phone, Globe, MapPin, Clock, Award, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Cities organized by province/territory
+const citiesByProvince = {
+  "Alberta": [
+    "Calgary", "Edmonton", "Red Deer", "Lethbridge", "St. Albert", "Medicine Hat",
+    "Grande Prairie", "Airdrie", "Spruce Grove", "Okotoks", "Lloydminster", "Fort McMurray",
+    "Camrose", "Brooks", "Cold Lake", "Wetaskiwin", "Leduc", "Fort Saskatchewan",
+    "Cochrane", "Beaumont", "Canmore", "Stony Plain", "Sylvan Lake", "Chestermere",
+    "Lacombe", "Taber", "High River", "Hinton", "Innisfail", "Olds", "Drayton Valley",
+    "Slave Lake", "Peace River", "Whitecourt", "Athabasca", "Bonnyville", "Edson"
+  ],
+  "British Columbia": [
+    "Vancouver", "Surrey", "Burnaby", "Richmond", "Abbotsford", "Coquitlam", "Kelowna",
+    "Saanich", "Langley", "Delta", "North Vancouver", "Kamloops", "Nanaimo", "Victoria",
+    "Chilliwack", "Prince George", "Vernon", "Courtenay", "Campbell River", "Penticton",
+    "Mission", "Maple Ridge", "New Westminster", "Port Coquitlam", "North Cowichan",
+    "West Vancouver", "Port Moody", "Cranbrook", "Fort St. John", "Colwood", "Salmon Arm",
+    "Parksville", "Castlegar", "Dawson Creek", "Quesnel", "Williams Lake", "Powell River",
+    "Duncan", "Terrace", "Kitimat", "Prince Rupert", "Nelson", "Trail", "Revelstoke"
+  ],
+  "Manitoba": [
+    "Winnipeg", "Brandon", "Steinbach", "Thompson", "Portage la Prairie", "Winkler",
+    "Selkirk", "Morden", "Dauphin", "The Pas", "Flin Flon", "Swan River", "Neepawa",
+    "Virden", "Altona", "Carman", "Stonewall", "Beausejour", "Gimli", "Niverville",
+    "Minnedosa", "Roblin", "Killarney", "Souris", "Boissevain", "Russell", "Melita"
+  ],
+  "New Brunswick": [
+    "Saint John", "Moncton", "Fredericton", "Dieppe", "Riverview", "Miramichi",
+    "Edmundston", "Quispamsis", "Rothesay", "Bathurst", "Campbellton", "Caraquet",
+    "Sussex", "Sackville", "Woodstock", "Grand Falls", "Oromocto", "Dalhousie",
+    "Shippagan", "Richibucto", "St. Stephen", "Hampton", "Florenceville-Bristol"
+  ],
+  "Newfoundland and Labrador": [
+    "St. John's", "Mount Pearl", "Corner Brook", "Conception Bay South", "Paradise",
+    "Grand Falls-Windsor", "Happy Valley-Goose Bay", "Gander", "Labrador City",
+    "Stephenville", "Torbay", "Portugal Cove-St. Philip's", "Bay Roberts", "Clarenville",
+    "Carbonear", "Channel-Port aux Basques", "Deer Lake", "Marystown", "Placentia"
+  ],
+  "Northwest Territories": [
+    "Yellowknife", "Hay River", "Inuvik", "Fort Smith", "Behchokǫ̀", "Aklavik",
+    "Fort Simpson", "Norman Wells", "Tuktoyaktuk", "Fort McPherson", "Tsiigehtchic",
+    "Fort Good Hope", "Tulita", "Deline", "Wekweètì", "Whatì", "Gamètì", "Łutselk'e"
+  ],
+  "Nova Scotia": [
+    "Halifax", "Cape Breton", "Dartmouth", "Sydney", "Truro", "New Glasgow",
+    "Glace Bay", "Yarmouth", "Kentville", "Amherst", "Bridgewater", "Antigonish",
+    "Wolfville", "Stellarton", "New Waterford", "Windsor", "Westville", "Digby",
+    "Oxford", "Mahone Bay", "Liverpool", "Lunenburg", "Pictou", "Annapolis Royal",
+    "Berwick", "Clark's Harbour", "Lockeport", "Middleton", "Parrsboro", "Springhill"
+  ],
+  "Nunavut": [
+    "Iqaluit", "Rankin Inlet", "Arviat", "Baker Lake", "Cambridge Bay", "Igloolik",
+    "Pangnirtung", "Pond Inlet", "Kugluktuk", "Cape Dorset", "Gjoa Haven", "Taloyoak",
+    "Coral Harbour", "Naujaat", "Clyde River", "Hall Beach", "Arctic Bay", "Resolute",
+    "Sanikiluaq", "Whale Cove", "Chesterfield Inlet", "Kimmirut", "Qikiqtarjuaq"
+  ],
+  "Ontario": [
+    "Toronto", "Ottawa", "Mississauga", "Brampton", "Hamilton", "London", "Markham", "Vaughan",
+    "Kitchener", "Windsor", "Richmond Hill", "Oakville", "Burlington", "Sudbury", "Oshawa",
+    "Barrie", "St. Catharines", "Cambridge", "Kingston", "Guelph", "Thunder Bay", "Waterloo",
+    "Brantford", "Pickering", "Niagara Falls", "Peterborough", "Sault Ste. Marie", "Sarnia",
+    "Ajax", "Milton", "Whitby", "Newmarket", "Belleville", "Welland", "North Bay", "Timmins",
+    "Chatham-Kent", "Cornwall", "Stratford", "Orillia", "Orangeville", "Bradford West Gwillimbury",
+    "Innisfil", "Tecumseh", "New Tecumseth", "Clarence-Rockland", "Cobourg", "Collingwood",
+    "Woodstock", "Fort Erie", "Grimsby", "Leamington", "Lincoln", "Pelham", "Port Colborne",
+    "Thorold", "Amherstburg", "Essa", "Georgina", "Halton Hills", "LaSalle", "Norfolk County",
+    "Wasaga Beach", "Elliot Lake", "Hawkesbury", "Iroquois Falls", "Kapuskasing", "Kenora"
+  ],
+  "Prince Edward Island": [
+    "Charlottetown", "Summerside", "Stratford", "Cornwall", "Montague", "Kensington",
+    "Souris", "Alberton", "Georgetown", "Tignish", "Borden-Carleton", "O'Leary",
+    "Wellington", "Crapaud", "Hunter River", "Miltonvale Park", "North Rustico",
+    "Victoria", "Brackley", "Cavendish", "Morell", "Murray River", "Three Rivers"
+  ],
+  "Quebec": [
+    "Montreal", "Quebec City", "Laval", "Gatineau", "Longueuil", "Sherbrooke", "Saguenay",
+    "Trois-Rivières", "Terrebonne", "Saint-Jean-sur-Richelieu", "Repentigny", "Brossard",
+    "Drummondville", "Saint-Jérôme", "Granby", "Blainville", "Saint-Hyacinthe", "Shawinigan",
+    "Dollard-des-Ormeaux", "Rimouski", "Châteauguay", "Saint-Eustache", "Mascouche", "Lévis",
+    "Victoriaville", "Rouyn-Noranda", "Mirabel", "Joliette", "Sorel-Tracy", "Vaudreuil-Dorion",
+    "Val-d'Or", "Thetford Mines", "Sept-Îles", "Alma", "Beauport", "Boucherville", "Magog",
+    "Saint-Georges", "Chicoutimi", "Beloeil", "Sainte-Julie", "Saint-Bruno-de-Montarville",
+    "McMasterville", "Varennes", "La Prairie", "Candiac", "Delson", "Saint-Constant"
+  ],
+  "Saskatchewan": [
+    "Saskatoon", "Regina", "Prince Albert", "Moose Jaw", "Swift Current", "Yorkton",
+    "North Battleford", "Estevan", "Weyburn", "Lloydminster", "Martensville", "Warman",
+    "Meadow Lake", "Kindersley", "Melfort", "Humboldt", "Tisdale", "Melville", "Canora",
+    "Rosetown", "Unity", "Outlook", "Watrous", "Carlyle", "Esterhazy", "Foam Lake",
+    "Hudson Bay", "Kamsack", "Kerrobert", "Lanigan", "Nipawin", "Preeceville", "Wadena"
+  ],
+  "Yukon": [
+    "Whitehorse", "Dawson City", "Watson Lake", "Haines Junction", "Mayo", "Carmacks",
+    "Faro", "Ross River", "Teslin", "Beaver Creek", "Destruction Bay", "Pelly Crossing",
+    "Old Crow", "Eagle Plains", "Swift River", "Champagne", "Burwash Landing"
+  ]
+};
 
 const VendorProfilePage = () => {
   const [profileData, setProfileData] = useState({
@@ -19,8 +117,11 @@ const VendorProfilePage = () => {
     businessHours: "24/7 Emergency Service",
     yearsInBusiness: "15",
     teamSize: "12",
-    serviceAreas: ["Downtown", "Suburbs", "Industrial District"],
+    serviceAreas: ["Toronto", "Mississauga", "Brampton"],
   });
+
+  const [selectedProvince, setSelectedProvince] = useState("Ontario");
+  const [selectedCity, setSelectedCity] = useState("");
 
 
   const handleSaveProfile = () => {
@@ -34,21 +135,27 @@ const VendorProfilePage = () => {
     }));
   };
 
-  const addServiceArea = () => {
-    const newArea = prompt("Enter new service area:");
-    if (newArea && !profileData.serviceAreas.includes(newArea)) {
+  const addCity = () => {
+    if (selectedCity && !profileData.serviceAreas.includes(selectedCity)) {
       setProfileData(prev => ({
         ...prev,
-        serviceAreas: [...prev.serviceAreas, newArea]
+        serviceAreas: [...prev.serviceAreas, selectedCity]
       }));
+      setSelectedCity("");
+      toast.success(`${selectedCity} added to your service cities!`);
+    } else if (profileData.serviceAreas.includes(selectedCity)) {
+      toast.error("This city is already in your service list!");
+    } else {
+      toast.error("Please select a city first!");
     }
   };
 
-  const removeServiceArea = (area: string) => {
+  const removeCity = (city: string) => {
     setProfileData(prev => ({
       ...prev,
-      serviceAreas: prev.serviceAreas.filter(a => a !== area)
+      serviceAreas: prev.serviceAreas.filter(a => a !== city)
     }));
+    toast.success(`${city} removed from your service cities!`);
   };
 
   return (
@@ -239,44 +346,81 @@ const VendorProfilePage = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Multiple service areas</span>
+                  <span className="text-gray-600">Multiple service cities</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Service Areas */}
+          {/* Service Cities */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-blue-600" />
-                Service Areas
+                Service Cities
               </CardTitle>
               <CardDescription>
-                Areas where you provide services
+                Cities where you provide services
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {profileData.serviceAreas.map((area, index) => (
+                {profileData.serviceAreas.map((city, index) => (
                   <Badge
                     key={index}
                     variant="secondary"
                     className="cursor-pointer hover:bg-red-100 hover:text-red-700"
-                    onClick={() => removeServiceArea(area)}
+                    onClick={() => removeCity(city)}
                   >
-                    {area} ×
+                    {city} ×
                   </Badge>
                 ))}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addServiceArea}
-                className="w-full"
-              >
-                Add Service Area
-              </Button>
+
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="province-select">Province/State</Label>
+                  <Select value={selectedProvince} onValueChange={setSelectedProvince}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(citiesByProvince).map((province) => (
+                        <SelectItem key={province} value={province}>
+                          {province}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="city-select">City</Label>
+                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {citiesByProvince[selectedProvince as keyof typeof citiesByProvince]?.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addCity}
+                  className="w-full"
+                  disabled={!selectedCity}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add City
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

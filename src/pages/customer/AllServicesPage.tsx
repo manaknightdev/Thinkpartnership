@@ -186,7 +186,7 @@ const AllServicesPage = () => {
     vendor: service.vendor + " Plus"
   }))];
 
-  const categories = ["all", ...Array.from(new Set(allServices.map(service => service.category)))];
+  const categories = ["all", ...Array.from(new Set(allServices.map(service => service.category))).sort()];
 
   const filteredServices = extendedServices.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

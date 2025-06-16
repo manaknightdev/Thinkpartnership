@@ -33,8 +33,7 @@ const RequestServicePage = () => {
     preferredDate: "",
     preferredTime: "",
     urgency: "",
-    description: "",
-    budget: ""
+    description: ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -205,37 +204,19 @@ const RequestServicePage = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="urgency">Urgency Level</Label>
-                          <Select value={formData.urgency} onValueChange={(value) => handleInputChange('urgency', value)}>
-                            <SelectTrigger className="mt-1">
-                              <SelectValue placeholder="How urgent is this?" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="emergency">Emergency (ASAP)</SelectItem>
-                              <SelectItem value="urgent">Urgent (Within 24 hours)</SelectItem>
-                              <SelectItem value="soon">Soon (Within a week)</SelectItem>
-                              <SelectItem value="flexible">Flexible timing</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label htmlFor="budget">Budget Range</Label>
-                          <Select value={formData.budget} onValueChange={(value) => handleInputChange('budget', value)}>
-                            <SelectTrigger className="mt-1">
-                              <SelectValue placeholder="Select budget range" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="under-100">Under $100</SelectItem>
-                              <SelectItem value="100-300">$100 - $300</SelectItem>
-                              <SelectItem value="300-500">$300 - $500</SelectItem>
-                              <SelectItem value="500-1000">$500 - $1,000</SelectItem>
-                              <SelectItem value="over-1000">Over $1,000</SelectItem>
-                              <SelectItem value="quote">Request Quote</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div>
+                        <Label htmlFor="urgency">Urgency Level</Label>
+                        <Select value={formData.urgency} onValueChange={(value) => handleInputChange('urgency', value)}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="How urgent is this?" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="emergency">Emergency (ASAP)</SelectItem>
+                            <SelectItem value="urgent">Urgent (Within 24 hours)</SelectItem>
+                            <SelectItem value="soon">Soon (Within a week)</SelectItem>
+                            <SelectItem value="flexible">Flexible timing</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 

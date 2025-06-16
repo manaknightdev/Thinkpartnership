@@ -316,15 +316,15 @@ const VendorServicesPage = () => {
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="plumbing">Plumbing</SelectItem>
-                      <SelectItem value="electrical">Electrical</SelectItem>
                       <SelectItem value="cleaning">Cleaning</SelectItem>
-                      <SelectItem value="landscaping">Landscaping</SelectItem>
+                      <SelectItem value="electrical">Electrical</SelectItem>
                       <SelectItem value="hvac">HVAC</SelectItem>
-                      <SelectItem value="painting">Painting</SelectItem>
-                      <SelectItem value="moving">Moving</SelectItem>
                       <SelectItem value="inspections">Inspections</SelectItem>
+                      <SelectItem value="landscaping">Landscaping</SelectItem>
+                      <SelectItem value="moving">Moving</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="painting">Painting</SelectItem>
+                      <SelectItem value="plumbing">Plumbing</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -656,15 +656,15 @@ const VendorServicesPage = () => {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="plumbing">Plumbing</SelectItem>
-                    <SelectItem value="electrical">Electrical</SelectItem>
                     <SelectItem value="cleaning">Cleaning</SelectItem>
-                    <SelectItem value="landscaping">Landscaping</SelectItem>
+                    <SelectItem value="electrical">Electrical</SelectItem>
                     <SelectItem value="hvac">HVAC</SelectItem>
-                    <SelectItem value="painting">Painting</SelectItem>
-                    <SelectItem value="moving">Moving</SelectItem>
                     <SelectItem value="inspections">Inspections</SelectItem>
+                    <SelectItem value="landscaping">Landscaping</SelectItem>
+                    <SelectItem value="moving">Moving</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="painting">Painting</SelectItem>
+                    <SelectItem value="plumbing">Plumbing</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
