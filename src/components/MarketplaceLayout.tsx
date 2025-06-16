@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
 import {
   Search,
   FileText,
@@ -297,6 +298,9 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
           sidebarCollapsed ? "md:ml-16" : "md:ml-64"
         )}>
           {children}
+
+          {/* Quick Navigation Footer */}
+          <PortalQuickNavFooter />
         </main>
       </div>
     </div>

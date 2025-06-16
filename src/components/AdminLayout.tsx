@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { PortalQuickNavFooter } from '@/components/PortalQuickNavFooter';
 import {
   Menu,
   LayoutDashboard,
@@ -231,6 +232,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div className="p-6">
             {children}
           </div>
+
+          {/* Quick Navigation Footer */}
+          <PortalQuickNavFooter />
         </main>
       </div>
     </div>
