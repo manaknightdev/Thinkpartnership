@@ -17,13 +17,11 @@ import {
   Building2,
   CheckCircle,
   Star,
-  MapPin,
   Clock,
   Shield,
   Users,
   Heart,
   ArrowRight,
-  Percent,
   Bookmark,
   Eye,
   Verified,
@@ -440,8 +438,8 @@ const CustomerBrowseServicesPage = () => {
               className="rounded-full border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all duration-300 px-8 py-3 text-lg font-semibold"
               onClick={() => navigate('/marketplace/services')}
             >
-              <Crown className="w-5 h-5 mr-2" />
-              View All Premium Services
+              {/* <Crown className="w-5 h-5 mr-2" /> */}
+              View All Services
             </Button>
           </div>
         </section>
@@ -503,28 +501,18 @@ const CustomerBrowseServicesPage = () => {
                 </div>
               </div>
               <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Looking for Great Deals?
+                Ready to Get Started?
               </h3>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Discover amazing discounts and special offers from our top-rated service providers. Save money while getting quality work done.
+                Connect with our top-rated service providers in your area. Quality work from trusted professionals.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-full px-8 py-3"
-                  onClick={() => navigate('/marketplace/location')}
-                >
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Browse by Location
-                </Button>
-                <Button
-                  size="lg"
                   className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                  onClick={() => navigate('/marketplace/deals')}
+                  onClick={() => navigate('/marketplace/services')}
                 >
-                  <Percent className="h-5 w-5 mr-2" />
-                  View Deals & Offers
+                  Browse All Services
                 </Button>
               </div>
             </div>

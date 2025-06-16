@@ -140,10 +140,6 @@ const ChatPage = () => {
     { name: "Categories", path: "/marketplace/categories", icon: Grid3X3 },
     { name: "All Services", path: "/marketplace/services", icon: List },
     { name: "Messages", path: "/marketplace/chat/Certified%20Inspectors%20Inc.", icon: MessageCircle },
-    { name: "By Location", path: "/marketplace/location", icon: MapPin },
-    { name: "Deals & Offers", path: "/marketplace/deals", icon: Percent },
-    { name: "Favorites", path: "/marketplace/favorites", icon: Heart },
-    { name: "Recently Viewed", path: "/marketplace/recent", icon: Clock },
     { name: "Account", path: "/marketplace/account", icon: Settings },
     { name: "Help", path: "/marketplace/help", icon: HelpCircle },
   ];
@@ -386,14 +382,6 @@ const ChatPage = () => {
                 <DropdownMenuItem onClick={() => navigate('/marketplace/account')}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Account Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/marketplace/favorites')}>
-                  <Heart className="mr-2 h-4 w-4" />
-                  <span>Favorites</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/marketplace/recent')}>
-                  <Clock className="mr-2 h-4 w-4" />
-                  <span>Recently Viewed</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/marketplace/help')}>
                   <HelpCircle className="mr-2 h-4 w-4" />

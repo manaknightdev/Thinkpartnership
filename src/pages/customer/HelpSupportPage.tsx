@@ -1,33 +1,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Search,
   HelpCircle,
   MessageCircle,
-  Phone,
-  Mail,
   Clock,
-  CheckCircle,
   ChevronDown,
   ChevronRight,
-  Star,
   ThumbsUp,
   ThumbsDown,
-  Send,
-  FileText,
   Shield,
   CreditCard,
   Users,
   Settings,
   AlertCircle,
   BookOpen,
-  Video,
   Download
 } from "lucide-react";
 
@@ -35,13 +26,6 @@ const HelpSupportPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [contactForm, setContactForm] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-    category: "general"
-  });
 
   const helpCategories = [
     { id: "all", name: "All Topics", icon: HelpCircle, count: 45 },
@@ -161,32 +145,16 @@ const HelpSupportPage = () => {
     setExpandedFaq(expandedFaq === faqId ? null : faqId);
   };
 
-  const handleContactSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, this would submit to backend
-    console.log("Contact form submitted:", contactForm);
-    // Reset form
-    setContactForm({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-      category: "general"
-    });
-  };
-
   const handleQuickAction = (action: string) => {
     switch (action) {
       case "track-order":
         // Navigate to orders page
         break;
       case "contact-support":
-        // Scroll to contact form
-        document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" });
+        // Contact support action
         break;
       case "report-issue":
-        setContactForm(prev => ({ ...prev, category: "issue" }));
-        document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" });
+        // Report issue action
         break;
       case "download-app":
         // Open app download links
@@ -332,114 +300,7 @@ const HelpSupportPage = () => {
           </div>
         </section>
 
-        {/* Contact Support Section */}
-        <section id="contact-form" className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Contact Information */}
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                  Still need help?
-                </h2>
-                <p className="text-lg text-gray-600 mb-8">
-                  Our support team is here to help you with any questions or issues you may have.
-                </p>
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Live Chat</h3>
-                      <p className="text-gray-600">Available 24/7 for immediate assistance</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Email Support</h3>
-                      <p className="text-gray-600">support@thinkpartnership.com</p>
-                      <p className="text-sm text-gray-500">Response within 2-4 hours</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Phone Support</h3>
-                      <p className="text-gray-600">1-800-THINK-HELP</p>
-                      <p className="text-sm text-gray-500">Mon-Fri 9AM-6PM EST</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Form */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Send us a message</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleContactSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          value={contactForm.name}
-                          onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={contactForm.email}
-                          onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="subject">Subject</Label>
-                      <Input
-                        id="subject"
-                        value={contactForm.subject}
-                        onChange={(e) => setContactForm(prev => ({ ...prev, subject: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="message">Message</Label>
-                      <Textarea
-                        id="message"
-                        rows={4}
-                        value={contactForm.message}
-                        onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
       </div>
     </MarketplaceLayout>
   );

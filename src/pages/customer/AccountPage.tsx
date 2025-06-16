@@ -9,11 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   User,
-  Mail,
-  Phone,
-  MapPin,
-  Bell,
-  Shield,
   CreditCard,
   Settings,
   Camera,
@@ -22,10 +17,7 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  Star,
-  Award,
-  Calendar,
-  DollarSign
+  Calendar
 } from "lucide-react";
 
 const AccountPage = () => {
@@ -48,26 +40,10 @@ const AccountPage = () => {
     favoriteCategories: ["Cleaning", "Plumbing", "Landscaping"]
   });
 
-  const [notifications, setNotifications] = useState({
-    emailMarketing: true,
-    emailOrders: true,
-    emailMessages: true,
-    pushNotifications: true,
-    smsUpdates: false,
-    weeklyDigest: true
-  });
 
-  const [privacy, setPrivacy] = useState({
-    profileVisible: true,
-    showReviews: true,
-    showOrderHistory: false,
-    allowMessages: true
-  });
 
   const tabs = [
     { id: "profile", name: "Profile", icon: User },
-    { id: "notifications", name: "Notifications", icon: Bell },
-    { id: "privacy", name: "Privacy", icon: Shield },
     { id: "payment", name: "Payment", icon: CreditCard },
     { id: "security", name: "Security", icon: Settings }
   ];
@@ -76,14 +52,6 @@ const AccountPage = () => {
     // In a real app, this would save to backend
     setIsEditing(false);
     console.log("Profile saved:", userProfile);
-  };
-
-  const handleNotificationChange = (key: string, value: boolean) => {
-    setNotifications(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handlePrivacyChange = (key: string, value: boolean) => {
-    setPrivacy(prev => ({ ...prev, [key]: value }));
   };
 
   const renderProfileTab = () => (
@@ -230,126 +198,7 @@ const AccountPage = () => {
     </div>
   );
 
-  const renderNotificationsTab = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Notification Preferences</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="font-semibold text-gray-900">Email Notifications</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="emailOrders">Order Updates</Label>
-                <p className="text-sm text-gray-600">Get notified about order status changes</p>
-              </div>
-              <Switch
-                id="emailOrders"
-                checked={notifications.emailOrders}
-                onCheckedChange={(checked) => handleNotificationChange("emailOrders", checked)}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="emailMessages">Messages</Label>
-                <p className="text-sm text-gray-600">Receive messages from service providers</p>
-              </div>
-              <Switch
-                id="emailMessages"
-                checked={notifications.emailMessages}
-                onCheckedChange={(checked) => handleNotificationChange("emailMessages", checked)}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="emailMarketing">Marketing</Label>
-                <p className="text-sm text-gray-600">Promotional offers and updates</p>
-              </div>
-              <Switch
-                id="emailMarketing"
-                checked={notifications.emailMarketing}
-                onCheckedChange={(checked) => handleNotificationChange("emailMarketing", checked)}
-              />
-            </div>
-          </div>
-        </div>
 
-        <div className="space-y-4">
-          <h3 className="font-semibold text-gray-900">Push Notifications</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="pushNotifications">Push Notifications</Label>
-                <p className="text-sm text-gray-600">Real-time notifications on your device</p>
-              </div>
-              <Switch
-                id="pushNotifications"
-                checked={notifications.pushNotifications}
-                onCheckedChange={(checked) => handleNotificationChange("pushNotifications", checked)}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="smsUpdates">SMS Updates</Label>
-                <p className="text-sm text-gray-600">Important updates via text message</p>
-              </div>
-              <Switch
-                id="smsUpdates"
-                checked={notifications.smsUpdates}
-                onCheckedChange={(checked) => handleNotificationChange("smsUpdates", checked)}
-              />
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const renderPrivacyTab = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Privacy Settings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="profileVisible">Public Profile</Label>
-              <p className="text-sm text-gray-600">Make your profile visible to service providers</p>
-            </div>
-            <Switch
-              id="profileVisible"
-              checked={privacy.profileVisible}
-              onCheckedChange={(checked) => handlePrivacyChange("profileVisible", checked)}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="showReviews">Show Reviews</Label>
-              <p className="text-sm text-gray-600">Display your reviews publicly</p>
-            </div>
-            <Switch
-              id="showReviews"
-              checked={privacy.showReviews}
-              onCheckedChange={(checked) => handlePrivacyChange("showReviews", checked)}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="allowMessages">Allow Messages</Label>
-              <p className="text-sm text-gray-600">Let service providers contact you directly</p>
-            </div>
-            <Switch
-              id="allowMessages"
-              checked={privacy.allowMessages}
-              onCheckedChange={(checked) => handlePrivacyChange("allowMessages", checked)}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   const renderPaymentTab = () => {
     const paymentMethods = [
@@ -477,13 +326,6 @@ const AccountPage = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label>Auto-pay for recurring services</Label>
-                <p className="text-sm text-gray-600">Automatically charge your default payment method</p>
-              </div>
-              <Switch />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
                 <Label>Payment notifications</Label>
                 <p className="text-sm text-gray-600">Get notified when payments are processed</p>
               </div>
@@ -553,18 +395,6 @@ const AccountPage = () => {
         </div>
 
         <div className="border-t pt-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Two-Factor Authentication</h3>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
-            </div>
-            <Button variant="outline">
-              Enable 2FA
-            </Button>
-          </div>
-        </div>
-
-        <div className="border-t pt-6">
           <h3 className="font-semibold text-red-600 mb-4">Danger Zone</h3>
           <div className="space-y-4">
             <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
@@ -622,8 +452,6 @@ const AccountPage = () => {
               {/* Main Content */}
               <div className="flex-1">
                 {activeTab === "profile" && renderProfileTab()}
-                {activeTab === "notifications" && renderNotificationsTab()}
-                {activeTab === "privacy" && renderPrivacyTab()}
                 {activeTab === "security" && renderSecurityTab()}
                 {activeTab === "payment" && renderPaymentTab()}
               </div>

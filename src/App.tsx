@@ -53,12 +53,8 @@ import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
 import CategoriesPage from "./pages/customer/CategoriesPage";
 import AllServicesPage from "./pages/customer/AllServicesPage";
-import FavoritesPage from "./pages/customer/FavoritesPage";
-import RecentlyViewedPage from "./pages/customer/RecentlyViewedPage";
 import AccountPage from "./pages/customer/AccountPage";
 import HelpSupportPage from "./pages/customer/HelpSupportPage";
-import LocationBrowsePage from "./pages/customer/LocationBrowsePage";
-import DealsOffersPage from "./pages/customer/DealsOffersPage";
 import ServiceRequestsPage from "./pages/customer/ServiceRequestsPage";
 import ServiceRequestDetailsPage from "./pages/customer/ServiceRequestDetailsPage";
 import RequestServicePage from "./pages/customer/RequestServicePage";
@@ -105,12 +101,8 @@ const App = () => (
           <Route path="/marketplace/services" element={<AllServicesPage />} />
           <Route path="/marketplace/services/:serviceName" element={<ServiceDetailsPage />} />
           <Route path="/marketplace/checkout/:serviceName" element={<CheckoutPage />} />
-          <Route path="/marketplace/favorites" element={<FavoritesPage />} />
-          <Route path="/marketplace/recent" element={<RecentlyViewedPage />} />
           <Route path="/marketplace/account" element={<AccountPage />} />
           <Route path="/marketplace/help" element={<HelpSupportPage />} />
-          <Route path="/marketplace/location" element={<LocationBrowsePage />} />
-          <Route path="/marketplace/deals" element={<DealsOffersPage />} />
           <Route path="/marketplace/requests" element={<ServiceRequestsPage />} />
           <Route path="/marketplace/requests/:requestId" element={<ServiceRequestDetailsPage />} />
           <Route path="/marketplace/request-service/:serviceName" element={<RequestServicePage />} />

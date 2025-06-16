@@ -25,8 +25,8 @@ const NotificationsPage = () => {
     {
       id: 1,
       type: "order",
-      title: "Service Completed",
-      message: "Your home painting service has been completed by Brush Strokes Pro",
+      title: "Job Done",
+      message: "Your home painting service has been completed",
       time: "2 hours ago",
       read: false,
       icon: CheckCircle,
@@ -35,58 +35,36 @@ const NotificationsPage = () => {
     },
     {
       id: 2,
-      type: "deal",
-      title: "Flash Sale Alert",
-      message: "50% off emergency plumbing services - Limited time offer!",
+      type: "message",
+      title: "Reply Message",
+      message: "You have a new message from your service provider",
       time: "4 hours ago",
       read: false,
-      icon: Gift,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100"
-    },
-    {
-      id: 3,
-      type: "review",
-      title: "Review Request",
-      message: "Please rate your experience with Sparkling Spaces cleaning service",
-      time: "1 day ago",
-      read: true,
-      icon: Star,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100"
-    },
-    {
-      id: 4,
-      type: "message",
-      title: "New Message",
-      message: "Rapid Plumbers sent you a message about your upcoming appointment",
-      time: "2 days ago",
-      read: true,
       icon: MessageCircle,
       color: "text-blue-600",
       bgColor: "bg-blue-100"
     },
     {
-      id: 5,
-      type: "favorite",
-      title: "Price Drop Alert",
-      message: "A service in your favorites list has reduced their price by 25%",
-      time: "3 days ago",
+      id: 3,
+      type: "order",
+      title: "Job Started",
+      message: "Your cleaning service has started",
+      time: "1 day ago",
       read: true,
-      icon: Heart,
-      color: "text-red-600",
-      bgColor: "bg-red-100"
+      icon: CheckCircle,
+      color: "text-green-600",
+      bgColor: "bg-green-100"
     },
     {
-      id: 6,
-      type: "system",
-      title: "Account Security",
-      message: "Your password was successfully updated",
-      time: "1 week ago",
+      id: 4,
+      type: "message",
+      title: "New Message",
+      message: "Service provider sent you a message",
+      time: "2 days ago",
       read: true,
-      icon: AlertCircle,
-      color: "text-gray-600",
-      bgColor: "bg-gray-100"
+      icon: MessageCircle,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100"
     }
   ]);
 
@@ -114,14 +92,10 @@ const NotificationsPage = () => {
     switch (notification.type) {
       case "order":
         return () => navigate('/marketplace/orders');
-      case "deal":
-        return () => navigate('/marketplace/deals');
       case "review":
         return () => navigate('/marketplace/reviews');
       case "message":
         return () => navigate('/marketplace/messages');
-      case "favorite":
-        return () => navigate('/marketplace/favorites');
       default:
         return () => {};
     }
