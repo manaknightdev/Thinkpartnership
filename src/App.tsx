@@ -35,6 +35,7 @@ import ClientReportsPage from "./pages/client/ClientReportsPage";
 import ClientVendorManagementPage from "./pages/client/ClientVendorManagementPage";
 import ClientCustomersPage from "./pages/client/ClientCustomersPage";
 import ClientInviteSystemPage from "./pages/client/ClientInviteSystemPage";
+import ClientSubscriptionPage from "./pages/client/ClientSubscriptionPage";
 import ClientPricingBillingPage from "./pages/client/ClientPricingBillingPage";
 import ClientWalletPage from "./pages/client/ClientWalletPage";
 import ClientNotificationsPage from "./pages/client/ClientNotificationsPage";
@@ -134,6 +135,7 @@ const App = () => (
             <Route path="vendors" element={<ClientVendorManagementPage />} />
             <Route path="customers" element={<ClientCustomersPage />} />
             <Route path="invites" element={<ClientInviteSystemPage />} />
+            <Route path="subscription" element={<ClientSubscriptionPage />} />
             <Route path="pricing" element={<ClientPricingBillingPage />} />
             <Route path="wallet" element={<ClientWalletPage />} />
             <Route path="notifications" element={<ClientNotificationsPage />} />

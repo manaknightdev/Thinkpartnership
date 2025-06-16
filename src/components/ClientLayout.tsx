@@ -46,6 +46,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/client-portal/customers", icon: User, exact: false },
     { name: "Invite System", path: "/client-portal/invites", icon: UserPlus, exact: false },
+    { name: "Platform Subscription", path: "/client-portal/subscription", icon: Crown, exact: false },
     { name: "Pricing & Billing", path: "/client-portal/pricing", icon: DollarSign, exact: false },
     { name: "Wallet & Payments", path: "/client-portal/wallet", icon: Wallet, exact: false },
     { name: "Set Rules", path: "/client-portal/rules", icon: Settings, exact: false },

@@ -395,9 +395,10 @@ const ClientPricingBillingPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="vendor-plans" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="vendor-plans">Vendor Plans</TabsTrigger>
               <TabsTrigger value="commission-fees">Commission Fees</TabsTrigger>
+              <TabsTrigger value="featured-upsells">Featured Upsells</TabsTrigger>
               <TabsTrigger value="revenue-tracking">Revenue Tracking</TabsTrigger>
             </TabsList>
 
@@ -601,6 +602,281 @@ const ClientPricingBillingPage = () => {
                       <p>• Vendors receive the remaining amount after commission is taken</p>
                       <p>• Commission rates apply to all vendors equally</p>
                       <p>• You can adjust rates anytime, changes apply to new transactions</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="featured-upsells" className="mt-6">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Featured Vendor Upsells</h3>
+                  <p className="text-sm text-gray-600">Manage premium placement options for vendors</p>
+                </div>
+
+                {/* Revenue from Featured Placements */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="border-l-4 border-l-orange-500">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-orange-100 rounded-lg">
+                          <TrendingUp className="h-6 w-6 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">This Month</p>
+                          <p className="text-xl font-bold text-orange-600">$1,890</p>
+                          <p className="text-xs text-orange-500">Featured placement revenue</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-l-4 border-l-purple-500">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-purple-100 rounded-lg">
+                          <Crown className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Active Featured</p>
+                          <p className="text-xl font-bold text-purple-600">12</p>
+                          <p className="text-xs text-purple-500">Vendors with featured placement</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-l-4 border-l-blue-500">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                          <Calendar className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Avg Duration</p>
+                          <p className="text-xl font-bold text-blue-600">14 days</p>
+                          <p className="text-xs text-blue-500">Average placement length</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Featured Placement Pricing */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Featured Placement Pricing
+                    </CardTitle>
+                    <CardDescription>
+                      Set pricing for vendor featured placement options
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <Card className="border border-gray-200">
+                        <CardHeader className="text-center">
+                          <CardTitle className="text-lg">3-Day Featured</CardTitle>
+                          <div className="text-2xl font-bold text-blue-600">$29</div>
+                          <CardDescription>Quick visibility boost</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Top placement for 3 days
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Featured badge on listings
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              300% visibility increase
+                            </li>
+                          </ul>
+                          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <div className="text-sm text-blue-800">
+                              <strong>Your Share:</strong> $8.70 (30%)
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-2 border-purple-200 relative">
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-purple-600 text-white">Most Popular</Badge>
+                        </div>
+                        <CardHeader className="text-center">
+                          <CardTitle className="text-lg">7-Day Featured</CardTitle>
+                          <div className="text-2xl font-bold text-purple-600">$69</div>
+                          <CardDescription>Perfect for promotions</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Top placement for 7 days
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Featured badge on listings
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              400% visibility increase
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Email promotion to customers
+                            </li>
+                          </ul>
+                          <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                            <div className="text-sm text-purple-800">
+                              <strong>Your Share:</strong> $20.70 (30%)
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border border-gray-200">
+                        <CardHeader className="text-center">
+                          <CardTitle className="text-lg">30-Day Featured</CardTitle>
+                          <div className="text-2xl font-bold text-green-600">$199</div>
+                          <CardDescription>Maximum exposure</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Top placement for 30 days
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Featured badge on listings
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              500% visibility increase
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Email & social promotion
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              Dedicated account support
+                            </li>
+                          </ul>
+                          <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                            <div className="text-sm text-green-800">
+                              <strong>Your Share:</strong> $59.70 (30%)
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Current Featured Vendors */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Crown className="h-5 w-5 text-orange-600" />
+                      Currently Featured Vendors
+                    </CardTitle>
+                    <CardDescription>
+                      Vendors with active featured placements
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                            <Building className="h-5 w-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">Elite Kitchen Designs</p>
+                            <p className="text-sm text-gray-600">7-Day Featured • 3 days remaining</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-orange-500 text-white mb-1">Featured</Badge>
+                          <div className="text-sm text-gray-600">Your share: $20.70</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <Building className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">TechHome Solutions</p>
+                            <p className="text-sm text-gray-600">30-Day Featured • 18 days remaining</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-purple-500 text-white mb-1">Premium Featured</Badge>
+                          <div className="text-sm text-gray-600">Your share: $59.70</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Building className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">Sparkling Spaces</p>
+                            <p className="text-sm text-gray-600">3-Day Featured • 1 day remaining</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-blue-500 text-white mb-1">Featured</Badge>
+                          <div className="text-sm text-gray-600">Your share: $8.70</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-green-50 border-green-200">
+                  <CardContent className="p-6">
+                    <h4 className="font-semibold text-green-900 mb-3">Featured Placement Benefits</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-green-800">
+                      <ul className="space-y-2">
+                        <li className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4" />
+                          Increased vendor revenue and satisfaction
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Additional revenue stream for your marketplace
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Crown className="h-4 w-4" />
+                          Premium positioning drives more customer engagement
+                        </li>
+                      </ul>
+                      <ul className="space-y-2">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4" />
+                          Automatic revenue sharing (30% to you)
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Flexible duration options for vendors
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Settings className="h-4 w-4" />
+                          Easy management through vendor portal
+                        </li>
+                      </ul>
                     </div>
                   </CardContent>
                 </Card>
