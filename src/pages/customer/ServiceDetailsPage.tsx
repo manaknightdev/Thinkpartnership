@@ -425,7 +425,7 @@ const ServiceDetailsPage = () => {
             )}
 
             {/* Product Cards */}
-            {service.products && service.products.length > 0 && (
+            {/* {service.products && service.products.length > 0 && (
               <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-2xl flex items-center gap-2">
@@ -455,7 +455,7 @@ const ServiceDetailsPage = () => {
                   </div>
                 </CardContent>
               </Card>
-            )}
+            )} */}
           </div>
 
           {/* Right Column - Pricing & Contact */}
