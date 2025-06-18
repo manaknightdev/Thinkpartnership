@@ -140,7 +140,7 @@ const ClientHelpSupportPage = () => {
         <p className="text-lg text-gray-700 mb-4">
           Get help with your marketplace management and find answers to common questions.
         </p>
-        <div className="flex flex-wrap gap-3">
+        {/* <div className="flex flex-wrap gap-3">
           <Button className="bg-green-600 hover:bg-green-700">
             <MessageCircle className="mr-2 h-4 w-4" />
             Live Chat
@@ -153,11 +153,11 @@ const ClientHelpSupportPage = () => {
             <Mail className="mr-2 h-4 w-4" />
             Email Support
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-green-500">
           <CardContent className="p-6 text-center">
             <MessageCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
@@ -184,7 +184,7 @@ const ClientHelpSupportPage = () => {
             <Badge className="bg-purple-100 text-purple-800">Always Updated</Badge>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       {/* Main Content Tabs */}
       <Card className="hover:shadow-lg transition-shadow duration-200">
@@ -243,7 +243,7 @@ const ClientHelpSupportPage = () => {
                   <h4 className="font-medium text-blue-900 mb-2">Before submitting a ticket:</h4>
                   <ul className="text-sm text-blue-800 space-y-1">
                     <li>• Check our FAQ section for quick answers</li>
-                    <li>• Try our live chat for immediate assistance</li>
+                    {/* <li>• Try our live chat for immediate assistance</li> */}
                     <li>• Include as much detail as possible in your description</li>
                   </ul>
                 </div>

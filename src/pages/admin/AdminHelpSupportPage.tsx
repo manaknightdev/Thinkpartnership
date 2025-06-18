@@ -246,11 +246,11 @@ const AdminHelpSupportPage = () => {
               <div className="p-2 bg-purple-100 rounded-lg">
                 <MessageCircle className="h-5 w-5 text-purple-600" />
               </div>
-              <div>
+              {/* <div>
                 <p className="font-medium text-gray-900">Live Chat</p>
                 <p className="text-sm text-gray-600">Available 24/7</p>
                 <p className="text-xs text-gray-500">Instant response</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </CardContent>

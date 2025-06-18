@@ -226,7 +226,7 @@ const VendorHelpSupportPage = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {quickActions.map((action, index) => (
           <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleQuickAction(action.action)}>
             <CardContent className="p-6 text-center">
@@ -238,7 +238,7 @@ const VendorHelpSupportPage = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
 
       {/* FAQ Section */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -333,7 +333,7 @@ const VendorHelpSupportPage = () => {
       {/* Contact Support Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contact-form">
         {/* Contact Information */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Get in Touch</CardTitle>
             <p className="text-gray-600">Our vendor success team is here to help you succeed.</p>
@@ -371,10 +371,10 @@ const VendorHelpSupportPage = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Contact Form */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Send us a Message</CardTitle>
           </CardHeader>
@@ -445,7 +445,7 @@ const VendorHelpSupportPage = () => {
               </Button>
             </form>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );
