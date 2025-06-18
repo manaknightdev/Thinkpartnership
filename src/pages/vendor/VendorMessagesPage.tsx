@@ -452,7 +452,7 @@ const VendorMessagesPage = () => {
             </div>
 
             {/* Customer Info Bar */}
-            <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
+            <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-1">
@@ -465,6 +465,7 @@ const VendorMessagesPage = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
+                  {/* Send Quote Button */}
                   <Dialog open={showQuoteModal} onOpenChange={setShowQuoteModal}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
@@ -521,6 +522,115 @@ const VendorMessagesPage = () => {
                       <Button onClick={handleSendQuote} className="w-full">
                         Send Quote
                       </Button>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Create Order Button */}
+                  <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Create Order
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create New Order</DialogTitle>
+                        <DialogDescription>
+                          Create a new order for {selectedCustomer?.name} using your custom service tiers. This will generate a new order ID and send the details to the customer.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="service-tier">Select Your Service Tier</Label>
+                          <Select value={selectedServiceTier} onValueChange={setSelectedServiceTier}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose from your custom service tiers" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {vendorServiceTiers.map((tier) => (
+                                <SelectItem key={tier.id} value={tier.id}>
+                                  <div className="flex flex-col items-start">
+                                    <span className="font-medium">{tier.name} - ${tier.price}</span>
+                                    <span className="text-sm text-gray-500">{tier.description}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-sm text-blue-800">
+                            <strong>Note:</strong> These are your custom service tiers created in the Service page. This will create a new order using the selected tier.
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" onClick={() => setIsCreateOrderOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button onClick={handleCreateOrder}>
+                            Create New Order
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Choose Order Button */}
+                  <Dialog open={isChooseOrderOpen} onOpenChange={setIsChooseOrderOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-1" />
+                        Choose Order
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Choose Order from Service Listings</DialogTitle>
+                        <DialogDescription>
+                          Select an existing order from your Service Listings (Specialized Service) to reference in this conversation.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="existing-order">Select Service Listing Order</Label>
+                          <Select value={selectedExistingOrder} onValueChange={setSelectedExistingOrder}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose from your service listings orders" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {serviceListingOrders.map((order) => (
+                                <SelectItem key={order.id} value={order.id}>
+                                  <div className="flex flex-col items-start">
+                                    <span className="font-medium">{order.id} - {order.service}</span>
+                                    <span className="text-sm text-gray-500">{order.category} - ${order.price} ({order.status})</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <p className="text-sm text-green-800">
+                            <strong>Note:</strong> These are orders from your Service Listings (Specialized Service) page. Use this to discuss existing services you've created.
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" onClick={() => setIsChooseOrderOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button onClick={handleChooseOrder}>
+                            Choose Order
+                          </Button>
+                        </div>
+                      </div>
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -625,117 +735,7 @@ const VendorMessagesPage = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-gray-50 border-t border-gray-200 px-4 py-2">
-              <div className="flex items-center justify-center space-x-3">
-                <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Order
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create New Order</DialogTitle>
-                      <DialogDescription>
-                        Create a new order for {selectedCustomer?.name} using your custom service tiers. This will generate a new order ID and send the details to the customer.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="service-tier">Select Your Service Tier</Label>
-                        <Select value={selectedServiceTier} onValueChange={setSelectedServiceTier}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose from your custom service tiers" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {vendorServiceTiers.map((tier) => (
-                              <SelectItem key={tier.id} value={tier.id}>
-                                <div className="flex flex-col items-start">
-                                  <span className="font-medium">{tier.name} - ${tier.price}</span>
-                                  <span className="text-sm text-gray-500">{tier.description}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-sm text-blue-800">
-                          <strong>Note:</strong> These are your custom service tiers created in the Service page. This will create a new order using the selected tier.
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setIsCreateOrderOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleCreateOrder}>
-                          Create New Order
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
 
-                <Dialog open={isChooseOrderOpen} onOpenChange={setIsChooseOrderOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Choose Order
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Choose Order from Service Listings</DialogTitle>
-                      <DialogDescription>
-                        Select an existing order from your Service Listings (Specialized Service) to reference in this conversation.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="existing-order">Select Service Listing Order</Label>
-                        <Select value={selectedExistingOrder} onValueChange={setSelectedExistingOrder}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose from your service listings orders" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {serviceListingOrders.map((order) => (
-                              <SelectItem key={order.id} value={order.id}>
-                                <div className="flex flex-col items-start">
-                                  <span className="font-medium">{order.id} - {order.service}</span>
-                                  <span className="text-sm text-gray-500">{order.category} - ${order.price} ({order.status})</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-sm text-green-800">
-                          <strong>Note:</strong> These are orders from your Service Listings (Specialized Service) page. Use this to discuss existing services you've created.
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setIsChooseOrderOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleChooseOrder}>
-                          Choose Order
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
 
             {/* Message Input */}
             <div className="bg-white border-t border-gray-200 px-4 py-3">
