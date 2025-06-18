@@ -194,7 +194,7 @@ const HelpSupportPage = () => {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              {quickActions.map((action, index) => (
+              {/* {quickActions.map((action, index) => (
                 <Card 
                   key={index}
                   className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-0"
@@ -208,7 +208,7 @@ const HelpSupportPage = () => {
                     <p className="text-xs text-gray-600">{action.description}</p>
                   </CardContent>
                 </Card>
-              ))}
+              ))} */}
             </div>
           </div>
         </section>
