@@ -242,7 +242,7 @@ const AdminDashboardOverviewPage = () => {
       </Card>
 
       {/* Quick Actions Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
@@ -287,7 +287,7 @@ const AdminDashboardOverviewPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+        {/* <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
               <CheckSquare className="h-5 w-5 text-blue-600 mr-2" />
@@ -317,9 +317,9 @@ const AdminDashboardOverviewPage = () => {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+        {/* <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
               <Activity className="h-5 w-5 text-purple-600 mr-2" />
@@ -339,7 +339,7 @@ const AdminDashboardOverviewPage = () => {
               System Status
             </Button>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Modals */}

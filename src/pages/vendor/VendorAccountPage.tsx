@@ -410,7 +410,7 @@ const VendorAccountPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button variant="outline">Change Password</Button>
-                <Button variant="outline">Two-Factor Authentication</Button>
+                {/* <Button variant="outline">Two-Factor Authentication</Button> */}
                 <div className="border-t pt-4">
                   <h3 className="font-semibold text-red-600 mb-4">Danger Zone</h3>
                   <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">

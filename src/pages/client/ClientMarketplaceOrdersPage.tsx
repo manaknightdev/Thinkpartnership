@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; // Import Textarea
+import { Textarea } from "@/components/ui/textarea";
+import { formatDate } from "@/utils/dateFormat";
+import { ORDER_STATUSES, getOrderStatusVariant, type OrderStatus } from "@/utils/orderStatus";
 
 interface MarketplaceOrder {
   id: string;
@@ -25,36 +27,20 @@ interface MarketplaceOrder {
   service: string;
   date: string;
   amount: string;
-  status: "Completed" | "Pending" | "Cancelled" | "Scheduled" | "In Progress";
+  status: OrderStatus;
   notes?: string;
 }
 
 const initialMockMarketplaceOrders: MarketplaceOrder[] = [
-  { id: "ORDC001", customer: "Alice Wonderland", vendor: "Rapid Plumbers", service: "Emergency Drain Cleaning", date: "2023-11-01", amount: "$250.00", status: "Completed", notes: "Customer reported issue resolved within 2 hours." },
-  { id: "ORDC002", customer: "Bob The Builder", vendor: "Brush Strokes Pro", service: "Interior Painting - 2 Rooms", date: "2023-11-03", amount: "$1200.00", status: "Completed", notes: "Color: Sky Blue. Project completed ahead of schedule." },
-  { id: "ORDC003", customer: "Charlie Chaplin", vendor: "Climate Control Experts", service: "HVAC Check-up", date: "2023-11-05", amount: "$120.00", status: "Scheduled", notes: "Scheduled for next week. Awaiting customer confirmation." },
-  { id: "ORDC004", customer: "Diana Prince", vendor: "Certified Inspectors Inc.", service: "Full Home Inspection", date: "2023-11-06", amount: "$350.00", status: "Completed" },
-  { id: "ORDC005", customer: "Edward Scissorhands", vendor: "Green Thumb Landscaping", service: "Lawn Mowing & Edging", date: "2023-11-08", amount: "$80.00", status: "Cancelled", notes: "Customer requested cancellation due to weather." },
-  { id: "ORDC006", customer: "Fiona Gallagher", vendor: "Sparky Electric", service: "Outlet Installation", date: "2023-11-10", amount: "$180.00", status: "In Progress" },
+  { id: "ORDC001", customer: "Alice Wonderland", vendor: "Rapid Plumbers", service: "Emergency Drain Cleaning", date: "2024-01-01", amount: "$250.00", status: "completed", notes: "Customer reported issue resolved within 2 hours." },
+  { id: "ORDC002", customer: "Bob The Builder", vendor: "Brush Strokes Pro", service: "Interior Painting - 2 Rooms", date: "2024-01-03", amount: "$1200.00", status: "completed", notes: "Color: Sky Blue. Project completed ahead of schedule." },
+  { id: "ORDC003", customer: "Charlie Chaplin", vendor: "Climate Control Experts", service: "HVAC Check-up", date: "2024-01-05", amount: "$120.00", status: "processing", notes: "Scheduled for next week. Awaiting customer confirmation." },
+  { id: "ORDC004", customer: "Diana Prince", vendor: "Certified Inspectors Inc.", service: "Full Home Inspection", date: "2024-01-06", amount: "$350.00", status: "paid" },
+  { id: "ORDC005", customer: "Edward Scissorhands", vendor: "Green Thumb Landscaping", service: "Lawn Mowing & Edging", date: "2024-01-08", amount: "$80.00", status: "cancelled", notes: "Customer requested cancellation due to weather." },
+  { id: "ORDC006", customer: "Fiona Gallagher", vendor: "Sparky Electric", service: "Outlet Installation", date: "2024-01-10", amount: "$180.00", status: "not paid" },
 ];
 
-const orderStatuses: MarketplaceOrder["status"][] = ["Pending", "Scheduled", "In Progress", "Completed", "Cancelled"];
 
-const getStatusVariant = (status: MarketplaceOrder["status"]) => {
-  switch (status) {
-    case "Completed":
-      return "default";
-    case "Pending":
-    case "Scheduled":
-      return "secondary";
-    case "In Progress":
-      return "outline";
-    case "Cancelled":
-      return "destructive";
-    default:
-      return "outline";
-  }
-};
 
 const ClientMarketplaceOrdersPage = () => {
   const [orders, setOrders] = useState<MarketplaceOrder[]>(initialMockMarketplaceOrders);
@@ -159,10 +145,10 @@ const ClientMarketplaceOrdersPage = () => {
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{order.vendor}</TableCell>
                     <TableCell>{order.service}</TableCell>
-                    <TableCell>{order.date}</TableCell>
+                    <TableCell>{formatDate(order.date)}</TableCell>
                     <TableCell>{order.amount}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                      <Badge variant={getOrderStatusVariant(order.status)} className="capitalize">{order.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleViewOrderDetails(order); }}>
@@ -190,7 +176,7 @@ const ClientMarketplaceOrdersPage = () => {
             <DialogHeader>
               <DialogTitle>Order Details: {selectedOrder.id}</DialogTitle>
               <DialogDescription>
-                Detailed information for order placed on {selectedOrder.date}.
+                Detailed information for order placed on {formatDate(selectedOrder.date)}.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -199,10 +185,10 @@ const ClientMarketplaceOrdersPage = () => {
                 <p className="font-semibold">Customer:</p><p>{selectedOrder.customer}</p>
                 <p className="font-semibold">Vendor:</p><p>{selectedOrder.vendor}</p>
                 <p className="font-semibold">Service:</p><p>{selectedOrder.service}</p>
-                <p className="font-semibold">Date:</p><p>{selectedOrder.date}</p>
+                <p className="font-semibold">Date:</p><p>{formatDate(selectedOrder.date)}</p>
                 <p className="font-semibold">Amount:</p><p>{selectedOrder.amount}</p>
                 <p className="font-semibold">Current Status:</p>
-                <p><Badge variant={getStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge></p>
+                <p><Badge variant={getOrderStatusVariant(selectedOrder.status)} className="capitalize">{selectedOrder.status}</Badge></p>
               </div>
               
               <div className="space-y-2 mt-2">
@@ -223,8 +209,8 @@ const ClientMarketplaceOrdersPage = () => {
                     <SelectValue placeholder="Select new status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {orderStatuses.map(status => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    {ORDER_STATUSES.map(status => (
+                      <SelectItem key={status} value={status} className="capitalize">{status}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -2,51 +2,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import React, { useState } from "react"; // Added useState
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter, // Added DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Added Button
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/utils/dateFormat";
+import { ORDER_STATUSES, getOrderStatusVariant, type OrderStatus } from "@/utils/orderStatus";
 
-interface CustomerOrder { // Renamed interface for clarity
+interface CustomerOrder {
   id: string;
   service: string;
   vendor: string;
   date: string;
-  status: "Completed" | "Pending" | "Cancelled" | "Scheduled" | "In Progress"; // Added more statuses
+  status: OrderStatus;
   amount: string;
-  notes?: string; // Optional notes for more detail
+  notes?: string;
 }
 
 const mockOrders: CustomerOrder[] = [
-  { id: "ORD001", service: "Interior Painting", vendor: "Brush Strokes Pro", date: "2023-10-28", status: "Completed", amount: "$1200.00", notes: "Excellent job, very clean." },
-  { id: "ORD002", service: "Emergency Drain Cleaning", vendor: "Rapid Plumbers", date: "2023-10-25", status: "Completed", amount: "$250.00" },
-  { id: "ORD003", service: "HVAC Check-up", vendor: "Climate Control Experts", date: "2023-10-20", status: "Scheduled", amount: "$120.00", notes: "Technician arriving between 2-4 PM." },
-  { id: "ORD004", service: "Full Home Inspection", vendor: "Certified Inspectors Inc.", date: "2023-10-15", status: "Completed", amount: "$350.00" },
-  { id: "ORD005", service: "Lawn Mowing Service", vendor: "Green Thumb Landscaping", date: "2023-10-10", status: "Cancelled", amount: "$80.00", notes: "Rescheduled due to rain." },
-  { id: "ORD006", service: "Appliance Repair", vendor: "FixItQuick", date: "2023-11-01", status: "In Progress", amount: "$180.00", notes: "Waiting for part delivery." },
+  { id: "ORD001", service: "Interior Painting", vendor: "Brush Strokes Pro", date: "2024-01-28", status: "completed", amount: "$1200.00", notes: "Excellent job, very clean." },
+  { id: "ORD002", service: "Emergency Drain Cleaning", vendor: "Rapid Plumbers", date: "2024-01-25", status: "completed", amount: "$250.00" },
+  { id: "ORD003", service: "HVAC Check-up", vendor: "Climate Control Experts", date: "2024-01-20", status: "processing", amount: "$120.00", notes: "Technician arriving between 2-4 PM." },
+  { id: "ORD004", service: "Full Home Inspection", vendor: "Certified Inspectors Inc.", date: "2024-01-15", status: "paid", amount: "$350.00" },
+  { id: "ORD005", service: "Lawn Mowing Service", vendor: "Green Thumb Landscaping", date: "2024-01-10", status: "cancelled", amount: "$80.00", notes: "Rescheduled due to rain." },
+  { id: "ORD006", service: "Appliance Repair", vendor: "FixItQuick", date: "2024-01-01", status: "not paid", amount: "$180.00", notes: "Waiting for payment." },
 ];
 
-const getStatusVariant = (status: CustomerOrder["status"]) => {
-  switch (status) {
-    case "Completed":
-      return "default";
-    case "Pending":
-    case "Scheduled":
-      return "secondary";
-    case "In Progress":
-      return "outline";
-    case "Cancelled":
-      return "destructive";
-    default:
-      return "outline";
-  }
-};
+
 
 const CustomerOrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState<CustomerOrder | null>(null);
@@ -93,9 +81,9 @@ const CustomerOrdersPage = () => {
                       <TableCell className="font-medium">{order.id}</TableCell>
                       <TableCell>{order.service}</TableCell>
                       <TableCell>{order.vendor}</TableCell>
-                      <TableCell>{order.date}</TableCell>
+                      <TableCell>{formatDate(order.date)}</TableCell>
                       <TableCell>
-                        <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                        <Badge variant={getOrderStatusVariant(order.status)} className="capitalize">{order.status}</Badge>
                       </TableCell>
                       <TableCell className="text-right">{order.amount}</TableCell>
                     </TableRow>
@@ -115,7 +103,7 @@ const CustomerOrdersPage = () => {
             <DialogHeader>
               <DialogTitle>Order Details: {selectedOrder.id}</DialogTitle>
               <DialogDescription>
-                Information for your service order placed on {selectedOrder.date}.
+                Information for your service order placed on {formatDate(selectedOrder.date)}.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -123,10 +111,10 @@ const CustomerOrdersPage = () => {
                 <p className="font-semibold">Order ID:</p><p>{selectedOrder.id}</p>
                 <p className="font-semibold">Service:</p><p>{selectedOrder.service}</p>
                 <p className="font-semibold">Vendor:</p><p>{selectedOrder.vendor}</p>
-                <p className="font-semibold">Date:</p><p>{selectedOrder.date}</p>
+                <p className="font-semibold">Date:</p><p>{formatDate(selectedOrder.date)}</p>
                 <p className="font-semibold">Amount:</p><p>{selectedOrder.amount}</p>
                 <p className="font-semibold">Status:</p>
-                <p><Badge variant={getStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge></p>
+                <p><Badge variant={getOrderStatusVariant(selectedOrder.status)} className="capitalize">{selectedOrder.status}</Badge></p>
               </div>
               {selectedOrder.notes && (
                 <div className="mt-2">

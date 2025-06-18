@@ -22,6 +22,7 @@ import {
   HelpCircle,
   CreditCard,
   Wallet,
+  Package,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,14 +40,15 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
 
   const sidebarItems = [
     { name: "Profile Setup", path: "/vendor-portal/profile", icon: Building, exact: false },
-    { name: "Service Listings", path: "/vendor-portal/services", icon: List, exact: false },
-    { name: "Service Requests", path: "/vendor-portal/requests", icon: FileText, exact: false },
+    { name: "Specialized Service", path: "/vendor-portal/services", icon: List, exact: false },
+    { name: "Service", path: "/vendor-portal/service-tiers", icon: Package, exact: false },
+    // { name: "Service Requests", path: "/vendor-portal/requests", icon: FileText, exact: false },
     { name: "Messages", path: "/vendor-portal/messages", icon: MessageCircle, exact: false },
     { name: "My Customers", path: "/vendor-portal/customers", icon: User, exact: false },
     { name: "Wallet", path: "/vendor-portal/wallet", icon: Wallet, exact: false },
     { name: "Referral Dashboard", path: "/vendor-portal/referrals", icon: DollarSign, exact: false },
     { name: "Invite System", path: "/vendor-portal/invite", icon: Mail, exact: false },
-    { name: "Subscription", path: "/vendor-portal/subscription", icon: Crown, exact: false },
+    // { name: "Subscription", path: "/vendor-portal/subscription", icon: Crown, exact: false },
   ];
 
   const isActive = (path: string, exact: boolean = false) => {
@@ -146,14 +148,14 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
                   <Building className="mr-2 h-4 w-4" />
                   Company Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/vendor-portal/account')}>
+                {/* <DropdownMenuItem onClick={() => navigate('/vendor-portal/account')}>
                   <Settings className="mr-2 h-4 w-4" />
                   Account Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/vendor-portal/subscription')}>
+                </DropdownMenuItem> */}
+                {/* <DropdownMenuItem onClick={() => navigate('/vendor-portal/subscription')}>
                   <Crown className="mr-2 h-4 w-4" />
                   Subscription
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => navigate('/vendor-portal/notifications')}>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications

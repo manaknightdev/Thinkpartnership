@@ -65,8 +65,8 @@ const AdminProfilePage = () => {
   const tabs = [
     { id: "profile", name: "Profile Info", icon: User },
     { id: "security", name: "Security", icon: Shield },
-    { id: "system", name: "System Settings", icon: Settings },
-    { id: "permissions", name: "Permissions", icon: Key }
+    // { id: "system", name: "System Settings", icon: Settings },
+    // { id: "permissions", name: "Permissions", icon: Key }
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -265,7 +265,7 @@ const AdminProfilePage = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-purple-600" />
@@ -294,7 +294,7 @@ const AdminProfilePage = () => {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 

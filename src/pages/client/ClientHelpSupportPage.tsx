@@ -197,10 +197,10 @@ const ClientHelpSupportPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="faq" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="faq">FAQ</TabsTrigger>
-              <TabsTrigger value="ticket">Submit Ticket</TabsTrigger>
-              <TabsTrigger value="resources">Resources</TabsTrigger>
+              {/* <TabsTrigger value="ticket">Submit Ticket</TabsTrigger>
+              <TabsTrigger value="resources">Resources</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="faq" className="mt-6">

@@ -46,19 +46,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const sidebarItems = [
     { name: "Dashboard Overview", path: "/admin-portal/overview", icon: LayoutDashboard, exact: false },
     { name: "Admin Profile", path: "/admin-portal/profile", icon: User, exact: false },
-    { name: "Tasks & Follow-ups", path: "/admin-portal/tasks", icon: CheckSquare, exact: false },
-    { name: "All Clients", path: "/admin-portal/clients", icon: Building, exact: false },
+    // { name: "Tasks & Follow-ups", path: "/admin-portal/tasks", icon: CheckSquare, exact: false },
+    { name: "Client", path: "/admin-portal/clients", icon: Building, exact: false },
     { name: "All Vendors", path: "/admin-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/admin-portal/customers", icon: UserCheck, exact: false },
     { name: "All Transactions", path: "/admin-portal/transactions", icon: DollarSign, exact: false },
     { name: "Vendor Approvals", path: "/admin-portal/vendor-approvals", icon: Shield, exact: false },
     { name: "Global Revenue Rules", path: "/admin-portal/revenue-rules", icon: Settings, exact: false },
-    { name: "Usage Reports", path: "/admin-portal/reports", icon: BarChart, exact: false },
-    { name: "Manual Commissions", path: "/admin-portal/manual-commissions", icon: PlusCircle, exact: false },
-    { name: "License Management", path: "/admin-portal/license-management", icon: Key, exact: false },
-    { name: "Subscription Plans", path: "/admin-portal/subscription-plans", icon: Crown, exact: false },
-    { name: "Integrations", path: "/admin-portal/integrations", icon: Code, exact: false },
-    { name: "Help & Support", path: "/admin-portal/help", icon: HelpCircle, exact: false },
+    // { name: "Usage Reports", path: "/admin-portal/reports", icon: BarChart, exact: false },
+    // { name: "Manual Commissions", path: "/admin-portal/manual-commissions", icon: PlusCircle, exact: false },
+    // { name: "License Management", path: "/admin-portal/license-management", icon: Key, exact: false },
+    // { name: "Subscription Plans", path: "/admin-portal/subscription-plans", icon: Crown, exact: false },
+    // { name: "Integrations", path: "/admin-portal/integrations", icon: Code, exact: false },
+    // { name: "Help & Support", path: "/admin-portal/help", icon: HelpCircle, exact: false },
   ];
 
   const isActive = (path: string, exact: boolean = false) => {
@@ -138,18 +138,18 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   <User className="mr-2 h-4 w-4" />
                   Admin Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/admin-portal/tasks')}>
+                {/* <DropdownMenuItem onClick={() => navigate('/admin-portal/tasks')}>
                   <CheckSquare className="mr-2 h-4 w-4" />
                   Tasks & Follow-ups
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/admin-portal/reports')}>
+                </DropdownMenuItem> */}
+                {/* <DropdownMenuItem onClick={() => navigate('/admin-portal/reports')}>
                   <BarChart className="mr-2 h-4 w-4" />
                   Usage Reports
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/admin-portal/help')}>
                   <HelpCircle className="mr-2 h-4 w-4" />
                   Help & Support
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />

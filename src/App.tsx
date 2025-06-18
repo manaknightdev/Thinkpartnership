@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/AdminDashboard"; // Import AdminDashboard
 // Import new vendor sub-pages
 import VendorProfilePage from "./pages/vendor/VendorProfilePage";
 import VendorServicesPage from "./pages/vendor/VendorServicesPage";
+import VendorServiceTiersPage from "./pages/vendor/VendorServiceTiersPage";
 import VendorRequestsPage from "./pages/vendor/VendorRequestsPage";
 import VendorMessagesPage from "./pages/vendor/VendorMessagesPage";
 import VendorCustomersPage from "./pages/vendor/VendorCustomersPage";
@@ -142,6 +143,7 @@ const App = () => (
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<VendorProfilePage />} />
             <Route path="services" element={<VendorServicesPage />} />
+            <Route path="service-tiers" element={<VendorServiceTiersPage />} />
             <Route path="requests" element={<VendorRequestsPage />} />
             <Route path="messages" element={<VendorMessagesPage />} />
             <Route path="messages/:customerId" element={<VendorMessagesPage />} />

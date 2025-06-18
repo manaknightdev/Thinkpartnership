@@ -186,7 +186,7 @@ const ClientCustomersPage = () => {
       </div>
 
       {/* Summary Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-purple-500">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -232,7 +232,7 @@ const ClientCustomersPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500">
+        {/* <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-orange-100 rounded-lg">
@@ -247,7 +247,7 @@ const ClientCustomersPage = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Filters and Search */}

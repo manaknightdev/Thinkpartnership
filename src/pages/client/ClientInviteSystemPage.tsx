@@ -128,10 +128,10 @@ const ClientInviteSystemPage = () => {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case "Accepted": return "default";
+      case "Accepted": return "white";
       case "Opened": return "secondary";
       case "Sent": return "outline";
-      case "Expired": return "destructive";
+      case "Expired": return "white";
       default: return "outline";
     }
   };

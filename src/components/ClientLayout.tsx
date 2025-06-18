@@ -41,13 +41,13 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   const sidebarItems = [
     { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard, exact: false },
-    { name: "Tasks & Follow-ups", path: "/client-portal/tasks", icon: CheckSquare, exact: false },
+    // { name: "Tasks & Follow-ups", path: "/client-portal/tasks", icon: CheckSquare, exact: false },
     { name: "Reports", path: "/client-portal/reports", icon: BarChart, exact: false },
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/client-portal/customers", icon: User, exact: false },
     { name: "Invite System", path: "/client-portal/invites", icon: UserPlus, exact: false },
-    { name: "Platform Subscription", path: "/client-portal/subscription", icon: Crown, exact: false },
-    { name: "Pricing & Billing", path: "/client-portal/pricing", icon: DollarSign, exact: false },
+    // { name: "Platform Subscription", path: "/client-portal/subscription", icon: Crown, exact: false },
+    // { name: "Pricing & Billing", path: "/client-portal/pricing", icon: DollarSign, exact: false },
     { name: "Wallet & Payments", path: "/client-portal/wallet", icon: Wallet, exact: false },
     { name: "Set Rules", path: "/client-portal/rules", icon: Settings, exact: false },
     { name: "Branding", path: "/client-portal/branding", icon: Palette, exact: false },
@@ -148,10 +148,10 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                   <p className="text-sm font-medium text-gray-900">{userName}</p>
                   <p className="text-xs text-gray-500">Client Portal Admin</p>
                 </div>
-                <DropdownMenuItem onClick={() => navigate('/client-portal/tasks')}>
+                {/* <DropdownMenuItem onClick={() => navigate('/client-portal/tasks')}>
                   <CheckSquare className="mr-2 h-4 w-4" />
                   Tasks & Follow-ups
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => navigate('/client-portal/vendors')}>
                   <Users className="mr-2 h-4 w-4" />
                   Manage Vendors
@@ -160,10 +160,10 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                   <UserPlus className="mr-2 h-4 w-4" />
                   Invite System
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/client-portal/reports')}>
+                {/* <DropdownMenuItem onClick={() => navigate('/client-portal/reports')}>
                   <BarChart className="mr-2 h-4 w-4" />
                   Reports & Analytics
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => navigate('/client-portal/help')}>
                   <HelpCircle className="mr-2 h-4 w-4" />
                   Help & Support

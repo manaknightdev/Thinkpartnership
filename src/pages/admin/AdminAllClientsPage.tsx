@@ -52,62 +52,62 @@ const mockClients = [
     joinDate: "2023-01-15",
     lastActive: "2024-01-10"
   },
-  { 
-    id: "c002", 
-    name: "HomeServices Pro", 
-    email: "contact@homeservices.com", 
-    phone: "+1 (555) 234-5678",
-    website: "www.homeservices.com",
-    status: "Active", 
-    plan: "Professional",
-    vendors: 18, 
-    customers: 850,
-    totalRevenue: "$320,000",
-    joinDate: "2023-03-22",
-    lastActive: "2024-01-09"
-  },
-  { 
-    id: "c003", 
-    name: "Local Connect", 
-    email: "info@localconnect.com", 
-    phone: "+1 (555) 345-6789",
-    website: "www.localconnect.com",
-    status: "Suspended", 
-    plan: "Basic",
-    vendors: 8, 
-    customers: 320,
-    totalRevenue: "$85,000",
-    joinDate: "2023-06-10",
-    lastActive: "2023-12-15"
-  },
-  { 
-    id: "c004", 
-    name: "ServiceHub Inc", 
-    email: "admin@servicehub.com", 
-    phone: "+1 (555) 456-7890",
-    website: "www.servicehub.com",
-    status: "Active", 
-    plan: "Professional",
-    vendors: 22, 
-    customers: 980,
-    totalRevenue: "$380,000",
-    joinDate: "2023-02-08",
-    lastActive: "2024-01-11"
-  },
-  { 
-    id: "c005", 
-    name: "QuickFix Network", 
-    email: "support@quickfix.com", 
-    phone: "+1 (555) 567-8901",
-    website: "www.quickfix.com",
-    status: "Trial", 
-    plan: "Trial",
-    vendors: 5, 
-    customers: 150,
-    totalRevenue: "$12,000",
-    joinDate: "2023-12-01",
-    lastActive: "2024-01-11"
-  }
+  // { 
+  //   id: "c002", 
+  //   name: "HomeServices Pro", 
+  //   email: "contact@homeservices.com", 
+  //   phone: "+1 (555) 234-5678",
+  //   website: "www.homeservices.com",
+  //   status: "Active", 
+  //   plan: "Professional",
+  //   vendors: 18, 
+  //   customers: 850,
+  //   totalRevenue: "$320,000",
+  //   joinDate: "2023-03-22",
+  //   lastActive: "2024-01-09"
+  // },
+  // { 
+  //   id: "c003", 
+  //   name: "Local Connect", 
+  //   email: "info@localconnect.com", 
+  //   phone: "+1 (555) 345-6789",
+  //   website: "www.localconnect.com",
+  //   status: "Suspended", 
+  //   plan: "Basic",
+  //   vendors: 8, 
+  //   customers: 320,
+  //   totalRevenue: "$85,000",
+  //   joinDate: "2023-06-10",
+  //   lastActive: "2023-12-15"
+  // },
+  // { 
+  //   id: "c004", 
+  //   name: "ServiceHub Inc", 
+  //   email: "admin@servicehub.com", 
+  //   phone: "+1 (555) 456-7890",
+  //   website: "www.servicehub.com",
+  //   status: "Active", 
+  //   plan: "Professional",
+  //   vendors: 22, 
+  //   customers: 980,
+  //   totalRevenue: "$380,000",
+  //   joinDate: "2023-02-08",
+  //   lastActive: "2024-01-11"
+  // },
+  // { 
+  //   id: "c005", 
+  //   name: "QuickFix Network", 
+  //   email: "support@quickfix.com", 
+  //   phone: "+1 (555) 567-8901",
+  //   website: "www.quickfix.com",
+  //   status: "Trial", 
+  //   plan: "Trial",
+  //   vendors: 5, 
+  //   customers: 150,
+  //   totalRevenue: "$12,000",
+  //   joinDate: "2023-12-01",
+  //   lastActive: "2024-01-11"
+  // }
 ];
 
 const getStatusVariant = (status: string) => {
@@ -227,16 +227,16 @@ const AdminAllClientsPage = () => {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">All Clients</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Client</h1>
           <p className="text-gray-600 mt-2">
             Manage and monitor all client organizations across the platform
           </p>
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
-          <Button variant="outline" size="sm" onClick={handleAdvancedFilters}>
+          {/* <Button variant="outline" size="sm" onClick={handleAdvancedFilters}>
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Advanced Filters
-          </Button>
+          </Button> */}
           <Button variant="outline" size="sm">
             <Building className="h-4 w-4 mr-2" />
             Export Data
@@ -322,7 +322,7 @@ const AdminAllClientsPage = () => {
         <CardContent className="pt-0">
           <div className="space-y-4 mb-6">
             {/* Basic Filters */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
+            {/* <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
               <div className="flex flex-col sm:flex-row w-full lg:w-auto space-y-2 sm:space-y-0 sm:space-x-2">
                 <div className="relative flex-grow lg:w-80">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -363,7 +363,7 @@ const AdminAllClientsPage = () => {
                   </Button>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (

@@ -32,7 +32,10 @@ import {
   Menu,
   CheckCircle,
   AlertCircle,
+  Plus,
+  ShoppingCart,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -74,6 +77,74 @@ const VendorMessagesPage = () => {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showCustomerList, setShowCustomerList] = useState(true);
+  const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false);
+  const [isChooseOrderOpen, setIsChooseOrderOpen] = useState(false);
+  const [selectedServiceTier, setSelectedServiceTier] = useState("");
+  const [selectedExistingOrder, setSelectedExistingOrder] = useState("");
+
+  // Vendor's custom service tiers (created by vendor in Service Tiers page)
+  const vendorServiceTiers = [
+    { id: "plumbing-basic", name: "Basic Plumbing", price: 120, description: "Standard plumbing repairs and maintenance" },
+    { id: "plumbing-premium", name: "Premium Plumbing", price: 280, description: "Emergency plumbing with 24/7 support" },
+    { id: "electrical-standard", name: "Standard Electrical", price: 200, description: "Electrical installations and repairs" }
+  ];
+
+  // Orders from Service Listings (Specialized Service) page
+  const serviceListingOrders = [
+    { id: "SL001", service: "Emergency Drain Cleaning", category: "Plumbing", price: 150, customer: "John Doe", status: "Active", dateCreated: "2024-01-15" },
+    { id: "SL002", service: "Interior House Painting", category: "Painting", price: 800, customer: "Jane Smith", status: "Completed", dateCreated: "2024-01-10" },
+    { id: "SL003", service: "HVAC System Maintenance", category: "HVAC", price: 200, customer: "Bob Johnson", status: "In Progress", dateCreated: "2024-01-12" },
+    { id: "SL004", service: "Electrical Panel Upgrade", category: "Electrical", price: 1200, customer: "Alice Wilson", status: "Pending", dateCreated: "2024-01-18" }
+  ];
+
+  const handleCreateOrder = () => {
+    if (!selectedServiceTier || !selectedCustomer) {
+      toast.error("Please select a service tier");
+      return;
+    }
+    const tier = vendorServiceTiers.find(t => t.id === selectedServiceTier);
+    const orderId = `ORD${Date.now().toString().slice(-6)}`;
+
+    // Create a new order using vendor's custom tier
+    toast.success(`New order created! Order ID: ${orderId} - ${tier?.name} ($${tier?.price}) for ${selectedCustomer.name}`);
+
+    // Send order creation message
+    const orderMessage: Message = {
+      id: messages.length + 1,
+      sender: "vendor",
+      content: `I've created a new order for you using my custom service tier:\n\nOrder ID: ${orderId}\nService Tier: ${tier?.name}\nPrice: $${tier?.price}\nDescription: ${tier?.description}\n\nPlease confirm to proceed.`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: "sent",
+      type: "text"
+    };
+
+    setMessages(prev => [...prev, orderMessage]);
+    setIsCreateOrderOpen(false);
+    setSelectedServiceTier("");
+  };
+
+  const handleChooseOrder = () => {
+    if (!selectedExistingOrder || !selectedCustomer) {
+      toast.error("Please select an existing service listing order");
+      return;
+    }
+    const order = serviceListingOrders.find(o => o.id === selectedExistingOrder);
+    toast.success(`Selected service listing order: ${order?.id} - ${order?.service}`);
+
+    // Send order selection message
+    const orderMessage: Message = {
+      id: messages.length + 1,
+      sender: "vendor",
+      content: `I've selected an existing order from my service listings:\n\nOrder ID: ${order?.id}\nService: ${order?.service}\nCategory: ${order?.category}\nPrice: $${order?.price}\nStatus: ${order?.status}\nCreated: ${order?.dateCreated}\n\nLet's discuss this service.`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: "sent",
+      type: "text"
+    };
+
+    setMessages(prev => [...prev, orderMessage]);
+    setIsChooseOrderOpen(false);
+    setSelectedExistingOrder("");
+  };
 
   // Mock customers data
   const [customers] = useState<Customer[]>([
@@ -552,6 +623,118 @@ const VendorMessagesPage = () => {
               )}
 
               <div ref={messagesEndRef} />
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-gray-50 border-t border-gray-200 px-4 py-2">
+              <div className="flex items-center justify-center space-x-3">
+                <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Order
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Order</DialogTitle>
+                      <DialogDescription>
+                        Create a new order for {selectedCustomer?.name} using your custom service tiers. This will generate a new order ID and send the details to the customer.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="service-tier">Select Your Service Tier</Label>
+                        <Select value={selectedServiceTier} onValueChange={setSelectedServiceTier}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose from your custom service tiers" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {vendorServiceTiers.map((tier) => (
+                              <SelectItem key={tier.id} value={tier.id}>
+                                <div className="flex flex-col items-start">
+                                  <span className="font-medium">{tier.name} - ${tier.price}</span>
+                                  <span className="text-sm text-gray-500">{tier.description}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                          <strong>Note:</strong> These are your custom service tiers created in the Service page. This will create a new order using the selected tier.
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setIsCreateOrderOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleCreateOrder}>
+                          Create New Order
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={isChooseOrderOpen} onOpenChange={setIsChooseOrderOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Choose Order
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Choose Order from Service Listings</DialogTitle>
+                      <DialogDescription>
+                        Select an existing order from your Service Listings (Specialized Service) to reference in this conversation.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="existing-order">Select Service Listing Order</Label>
+                        <Select value={selectedExistingOrder} onValueChange={setSelectedExistingOrder}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose from your service listings orders" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {serviceListingOrders.map((order) => (
+                              <SelectItem key={order.id} value={order.id}>
+                                <div className="flex flex-col items-start">
+                                  <span className="font-medium">{order.id} - {order.service}</span>
+                                  <span className="text-sm text-gray-500">{order.category} - ${order.price} ({order.status})</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-sm text-green-800">
+                          <strong>Note:</strong> These are orders from your Service Listings (Specialized Service) page. Use this to discuss existing services you've created.
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setIsChooseOrderOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleChooseOrder}>
+                          Choose Order
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
 
             {/* Message Input */}

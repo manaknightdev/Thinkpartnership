@@ -114,7 +114,7 @@ const VendorProfilePage = () => {
     contactPhone: "(555) 123-4567",
     website: "https://www.rapidplumbers.com",
     address: "123 Main Street, Anytown, ST 12345",
-    businessHours: "24/7 Emergency Service",
+    businessHours: "7 days in a week",
     yearsInBusiness: "15",
     teamSize: "12",
     serviceAreas: ["Toronto", "Mississauga", "Brampton"],
@@ -302,7 +302,7 @@ const VendorProfilePage = () => {
                   />
                 </div>
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="team-size">Team Size</Label>
                 <Input
                   id="team-size"
@@ -311,7 +311,7 @@ const VendorProfilePage = () => {
                   value={profileData.teamSize}
                   onChange={(e) => handleInputChange('teamSize', e.target.value)}
                 />
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>
@@ -340,10 +340,10 @@ const VendorProfilePage = () => {
                   <Clock className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600">{profileData.yearsInBusiness} years in business</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
+                {/* <div className="flex items-center gap-2 text-sm">
                   <Users className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600">{profileData.teamSize} team members</span>
-                </div>
+                </div> */}
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600">Multiple service cities</span>

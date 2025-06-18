@@ -130,7 +130,7 @@ const ClientOverviewPage = () => {
 
       {/* Tasks & Follow-ups Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
+        {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="p-2 bg-orange-100 rounded-lg">
@@ -159,7 +159,7 @@ const ClientOverviewPage = () => {
               <Link to="/client-portal/tasks">View All Tasks</Link>
             </Button>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-teal-500">
           <CardHeader>

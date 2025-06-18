@@ -13,9 +13,9 @@ const ClientRevenueRulesPage = () => {
   const [serviceFeeEnabled, setServiceFeeEnabled] = useState(true); // Toggle for service fee
 
   const mockServiceRules = [
-    { id: "r001", service: "Plumbing", clientShare: "15%", vendorShare: "85%" },
-    { id: "r002", service: "Painting", clientShare: "10%", vendorShare: "90%" },
-    { id: "r003", service: "Inspections", clientShare: "20%", vendorShare: "80%" },
+    { id: "r001", service: "Plumbing", clientShare: "15%", vendorShare: "80%", platformShare: "5%" },
+    { id: "r002", service: "Painting", clientShare: "10%", vendorShare: "85%", platformShare: "5%" },
+    { id: "r003", service: "Inspections", clientShare: "20%", vendorShare: "75%", platformShare: "5%" },
   ];
 
   const handleSaveGlobalRules = () => {
@@ -72,7 +72,7 @@ const ClientRevenueRulesPage = () => {
                 }
               </p>
             </div>
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <span className="text-sm font-medium text-gray-700">
                 {serviceFeeEnabled ? "Enabled" : "Disabled"}
               </span>
@@ -85,7 +85,7 @@ const ClientRevenueRulesPage = () => {
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
@@ -173,6 +173,7 @@ const ClientRevenueRulesPage = () => {
                     <TableHead>Service Category</TableHead>
                     <TableHead>Your Share</TableHead>
                     <TableHead>Vendor Share</TableHead>
+                    <TableHead>Platform Share</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -182,12 +183,13 @@ const ClientRevenueRulesPage = () => {
                       <TableCell className="font-medium">{rule.service}</TableCell>
                       <TableCell>{rule.clientShare}</TableCell>
                       <TableCell>{rule.vendorShare}</TableCell>
+                      <TableCell>{rule.platformShare}</TableCell>
                       <TableCell className="text-right">
                         <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">Edit</Button>
                         <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ))} 
                 </TableBody>
               </Table>
             </div>
@@ -218,6 +220,10 @@ const ClientRevenueRulesPage = () => {
             <div>
               <Label htmlFor="new-vendor-share">Vendor Share (%)</Label>
               <Input id="new-vendor-share" type="number" placeholder="e.g., 85" />
+            </div>
+            <div>
+              <Label htmlFor="new-platform-share">Platform Share (%)</Label>
+              <Input id="new-platform-share" type="number" placeholder="e.g., 5" />
             </div>
           </div>
           <Button onClick={handleAddCustomRule} className="mt-4">Add Custom Rule</Button>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -382,33 +382,47 @@ const VendorWalletPage = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="payments">Payment Methods</TabsTrigger>
-          <TabsTrigger value="settings">Payment Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Quick Actions */}
+          {/* Stripe Connection */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                Stripe Connection
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-20 flex-col gap-2" onClick={handleConnectStripe}>
-                  <Shield className="h-6 w-6 text-blue-600" />
-                  <span>Connect Stripe</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2" onClick={handleAddPaymentMethod}>
-                  <Plus className="h-6 w-6 text-green-600" />
-                  <span>Add Payment Method</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2">
-                  <Download className="h-6 w-6 text-purple-600" />
-                  <span>Download Statement</span>
-                </Button>
+              <div className="text-center space-y-4">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <Shield className="h-10 w-10 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Stripe</h3>
+                  <p className="text-gray-600 mb-4">
+                    Connect your Stripe account to receive payouts securely and efficiently.
+                  </p>
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
+                    onClick={handleConnectStripe}
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Connect with Stripe
+                  </Button>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <h4 className="font-semibold text-green-900">Secure & Trusted</h4>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    Stripe provides bank-level security for all your payment transactions and payouts.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -447,15 +461,18 @@ const VendorWalletPage = () => {
         <TabsContent value="transactions" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>All Transactions</CardTitle>
+              <CardTitle>Payout Transactions</CardTitle>
+              <CardDescription>
+                View your Stripe payout history and transaction details
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {transactions.map((transaction) => (
+                {transactions.filter(t => t.type === 'payout').map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                        {getTransactionIcon(transaction.type)}
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <ArrowUpRight className="h-6 w-6 text-blue-600" />
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">{transaction.description}</p>
@@ -474,197 +491,21 @@ const VendorWalletPage = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={cn("text-lg font-semibold", getTransactionColor(transaction.type))}>
-                        {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toFixed(2)}
+                      <p className="text-lg font-semibold text-green-600">
+                        +${Math.abs(transaction.amount).toFixed(2)}
                       </p>
                       {getStatusBadge(transaction.status)}
                     </div>
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="payments" className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Payment Methods</CardTitle>
-              <Button onClick={handleAddPaymentMethod} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Method
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paymentMethods.map((method) => (
-                  <div key={method.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                        <CreditCard className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-gray-900">
-                            {method.brand} ****{method.last4}
-                          </p>
-                          {method.isDefault && (
-                            <Badge className="bg-blue-100 text-blue-800 text-xs">Default</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Expires {method.expiryMonth.toString().padStart(2, '0')}/{method.expiryYear} • {method.name}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!method.isDefault && (
-                        <Button variant="outline" size="sm">
-                          Set as Default
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                        Remove
-                      </Button>
-                    </div>
+                {transactions.filter(t => t.type === 'payout').length === 0 && (
+                  <div className="text-center py-8">
+                    <ArrowUpRight className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No payouts yet</h3>
+                    <p className="text-gray-600">Your payout transactions will appear here once you start earning.</p>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Stripe Integration Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-blue-600" />
-                Stripe Integration
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-blue-900">Stripe Connect Status</p>
-                    <p className="text-sm text-blue-700">Your account is connected and verified</p>
-                  </div>
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Connected
-                  </Badge>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="font-medium text-gray-900">Processing Fees</p>
-                    <p className="text-gray-600">2.9% + $0.30 per transaction</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Payout Schedule</p>
-                    <p className="text-gray-600">Daily (1-2 business days)</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Settings</CardTitle>
-              <p className="text-gray-600">Configure your payment preferences and automation.</p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Automatic Payments</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Auto-pay for recurring services</Label>
-                      <p className="text-sm text-gray-600">Automatically charge your default payment method for subscription fees</p>
-                    </div>
-                    <Switch
-                      checked={paymentSettings.autoPayRecurring}
-                      onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, autoPayRecurring: checked})}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Auto-withdrawal</Label>
-                      <p className="text-sm text-gray-600">Automatically withdraw funds when balance reaches threshold</p>
-                    </div>
-                    <Switch
-                      checked={paymentSettings.autoWithdrawal}
-                      onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, autoWithdrawal: checked})}
-                    />
-                  </div>
-                  {paymentSettings.autoWithdrawal && (
-                    <div className="ml-6 p-3 bg-blue-50 rounded-lg">
-                      <Label htmlFor="withdrawal-threshold">Withdrawal Threshold</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm">$</span>
-                        <Input
-                          id="withdrawal-threshold"
-                          type="number"
-                          value={paymentSettings.withdrawalThreshold}
-                          onChange={(e) => setPaymentSettings({...paymentSettings, withdrawalThreshold: parseInt(e.target.value) || 0})}
-                          className="w-32"
-                        />
-                      </div>
-                      <p className="text-xs text-blue-600 mt-1">
-                        Funds will be automatically withdrawn to your default payment method when your balance reaches this amount.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Notifications</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Payment notifications</Label>
-                      <p className="text-sm text-gray-600">Get notified when payments are processed or withdrawals complete</p>
-                    </div>
-                    <Switch
-                      checked={paymentSettings.paymentNotifications}
-                      onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, paymentNotifications: checked})}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Security</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Save payment methods</Label>
-                      <p className="text-sm text-gray-600">Securely store cards for faster payments and withdrawals</p>
-                    </div>
-                    <Switch
-                      checked={paymentSettings.savePaymentMethods}
-                      onCheckedChange={(checked) => setPaymentSettings({...paymentSettings, savePaymentMethods: checked})}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-5 w-5 text-green-600" />
-                    <h4 className="font-semibold text-green-900">Secure Payment Processing</h4>
-                  </div>
-                  <p className="text-sm text-green-700">
-                    All payment methods are securely stored and processed by Stripe. Your financial information is encrypted and protected with bank-level security.
-                  </p>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>

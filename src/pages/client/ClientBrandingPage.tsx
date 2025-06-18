@@ -96,7 +96,7 @@ const ClientBrandingPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="mb-8">
+      {/* <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" /> Custom Domain / Subdomain
@@ -116,7 +116,7 @@ const ClientBrandingPage = () => {
             For a fully custom domain (e.g., `marketplace.yourcompany.com`), you would typically configure DNS settings with your domain provider.
           </p>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <div className="text-center mt-10">
         <Button size="lg" onClick={handleSaveBranding}>
