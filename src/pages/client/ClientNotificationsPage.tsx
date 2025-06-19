@@ -223,9 +223,9 @@ const ClientNotificationsPage = () => {
               <TabsTrigger value="notifications">
                 Notifications ({notifications.length})
               </TabsTrigger>
-              <TabsTrigger value="settings">
+              {/* <TabsTrigger value="settings">
                 Settings
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="notifications" className="mt-6">

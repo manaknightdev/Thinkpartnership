@@ -73,10 +73,10 @@ const AdminDashboardOverviewPage = () => {
           </p>
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
-          <Button variant="outline" size="sm" onClick={handleViewReports}>
+          {/* <Button variant="outline" size="sm" onClick={handleViewReports}>
             <Activity className="h-4 w-4 mr-2" />
             View Reports
-          </Button>
+          </Button> */}
           <Button onClick={handleExportData} className="bg-purple-600 hover:bg-purple-700" size="sm">
             <ArrowUpRight className="h-4 w-4 mr-2" />
             Export Data
@@ -158,7 +158,7 @@ const AdminDashboardOverviewPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">5</div>
+            <div className="text-2xl font-bold text-gray-900">1</div>
             <div className="flex items-center mt-1">
               <CheckCircle className="h-3 w-3 text-emerald-500 mr-1" />
               <p className="text-xs text-emerald-600 font-medium">Marketplaces live</p>

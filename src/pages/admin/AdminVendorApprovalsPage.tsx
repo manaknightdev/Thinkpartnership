@@ -13,27 +13,25 @@ import { VendorSubscriptionModal } from "@/components/modals/VendorSubscriptionM
 import { ViewEditVendorModal } from "@/components/modals/ViewEditVendorModal";
 
 const mockAllVendors = [
-  { id: "v001", name: "Rapid Plumbers", email: "rapid@example.com", status: "Active", services: "Plumbing", client: "TechCorp Solutions", currentPlan: "professional", phone: "(555) 123-4567", location: "New York, NY" },
-  { id: "v002", name: "Brush Strokes Pro", email: "brush@example.com", status: "Active", services: "Painting", client: "HomeServices Pro", currentPlan: "basic", phone: "(555) 234-5678", location: "Los Angeles, CA" },
-  { id: "v003", name: "Certified Inspectors Inc.", email: "inspect@example.com", status: "Active", services: "Inspections", client: "TechCorp Solutions", currentPlan: "enterprise", phone: "(555) 345-6789", location: "Chicago, IL" },
-  { id: "v004", name: "Green Thumb Landscaping", email: "green@example.com", status: "Active", services: "Landscaping", client: "Local Connect", currentPlan: "professional", phone: "(555) 456-7890", location: "Austin, TX" },
-  { id: "v005", name: "Sparky Electric", email: "sparky@example.com", status: "Suspended", services: "Electrical", client: "ServiceHub Inc", currentPlan: "basic", phone: "(555) 567-8901", location: "Miami, FL" },
-  { id: "v006", name: "Climate Control Experts", email: "climate@example.com", status: "Active", services: "HVAC", client: "QuickFix Network", currentPlan: "professional", phone: "(555) 678-9012", location: "Phoenix, AZ" },
+  { id: "v001", name: "Rapid Plumbers", email: "rapid@example.com", status: "Active", services: "Plumbing", phone: "(555) 123-4567", location: "New York, NY" },
+  { id: "v002", name: "Brush Strokes Pro", email: "brush@example.com", status: "Active", services: "Painting", phone: "(555) 234-5678", location: "Los Angeles, CA" },
+  { id: "v003", name: "Certified Inspectors Inc.", email: "inspect@example.com", status: "Active", services: "Inspections", phone: "(555) 345-6789", location: "Chicago, IL" },
+  { id: "v004", name: "Green Thumb Landscaping", email: "green@example.com", status: "Active", services: "Landscaping", phone: "(555) 456-7890", location: "Austin, TX" },
+  { id: "v005", name: "Sparky Electric", email: "sparky@example.com", status: "Suspended", services: "Electrical", phone: "(555) 567-8901", location: "Miami, FL" },
+  { id: "v006", name: "Climate Control Experts", email: "climate@example.com", status: "Active", services: "HVAC", phone: "(555) 678-9012", location: "Phoenix, AZ" },
 ];
 
 const mockPendingVendorApplications = [
-  { id: "p001", name: "Clean Sweep Services", email: "clean@example.com", services: "Cleaning", client: "TechCorp Solutions", phone: "(555) 111-2222", location: "Seattle, WA" },
-  { id: "p002", name: "Move It Right", email: "move@example.com", services: "Moving", client: "Local Connect", phone: "(555) 222-3333", location: "Denver, CO" },
-  { id: "p003", name: "Quick Fix Handyman", email: "fixit@example.com", services: "General Repair", client: "HomeServices Pro", phone: "(555) 333-4444", location: "Boston, MA" },
+  { id: "p001", name: "Clean Sweep Services", email: "clean@example.com", services: "Cleaning", phone: "(555) 111-2222", location: "Seattle, WA" },
+  { id: "p002", name: "Move It Right", email: "move@example.com", services: "Moving", phone: "(555) 222-3333", location: "Denver, CO" },
+  { id: "p003", name: "Quick Fix Handyman", email: "fixit@example.com", services: "General Repair", phone: "(555) 333-4444", location: "Boston, MA" },
 ];
 
 const AdminVendorApprovalsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [clientFilter, setClientFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
-  const [planFilter, setPlanFilter] = useState("all");
 
   // Modal states
   const [isVendorDetailsOpen, setIsVendorDetailsOpen] = useState(false);
@@ -51,7 +49,7 @@ const AdminVendorApprovalsPage = () => {
     const vendor = pendingApplications.find(v => v.id === vendorId);
     if (vendor) {
       // Move from pending to active vendors
-      const newVendor = { ...vendor, status: "Active", currentPlan: "basic" };
+      const newVendor = { ...vendor, status: "Active" };
       setVendors(prev => [...prev, newVendor]);
       setPendingApplications(prev => prev.filter(v => v.id !== vendorId));
       toast.success(`Approved ${vendor.name}.`);
@@ -93,9 +91,7 @@ const AdminVendorApprovalsPage = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setClientFilter("all");
     setLocationFilter("all");
-    setPlanFilter("all");
     toast.info("All filters cleared");
   };
 
@@ -125,10 +121,9 @@ const AdminVendorApprovalsPage = () => {
     }
   };
 
-  const handleUpdateSubscription = (vendorId: string, planId: string) => {
-    setVendors(prev => prev.map(vendor =>
-      vendor.id === vendorId ? { ...vendor, currentPlan: planId } : vendor
-    ));
+  const handleUpdateSubscription = (_vendorId: string, _planId: string) => {
+    // Subscription functionality removed
+    toast.info("Subscription management has been removed");
   };
 
   const handleUpdateVendor = (updatedVendor: any) => {
@@ -145,11 +140,9 @@ const AdminVendorApprovalsPage = () => {
       vendor.services.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || vendor.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesClient = clientFilter === "all" || vendor.client === clientFilter;
     const matchesLocation = locationFilter === "all" || vendor.location?.toLowerCase().includes(locationFilter.toLowerCase());
-    const matchesPlan = planFilter === "all" || vendor.currentPlan === planFilter;
 
-    return matchesSearch && matchesStatus && matchesClient && matchesLocation && matchesPlan;
+    return matchesSearch && matchesStatus && matchesLocation;
   });
 
   // Calculate stats based on filtered data
@@ -280,7 +273,7 @@ const AdminVendorApprovalsPage = () => {
                     <SelectItem value="suspended">Suspended</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={clientFilter} onValueChange={setClientFilter}>
+                {/* <Select value={clientFilter} onValueChange={setClientFilter}>
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Client" />
                   </SelectTrigger>
@@ -292,8 +285,8 @@ const AdminVendorApprovalsPage = () => {
                     <SelectItem value="ServiceHub Inc">ServiceHub Inc</SelectItem>
                     <SelectItem value="QuickFix Network">QuickFix Network</SelectItem>
                   </SelectContent>
-                </Select>
-                {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || locationFilter !== "all" || planFilter !== "all") && (
+                </Select> */}
+                {(searchTerm || statusFilter !== "all" || locationFilter !== "all") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-2" />
                     Clear
@@ -311,7 +304,7 @@ const AdminVendorApprovalsPage = () => {
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="text-xs font-medium text-gray-700 mb-1 block">Location</label>
                     <Select value={locationFilter} onValueChange={setLocationFilter}>
@@ -330,20 +323,6 @@ const AdminVendorApprovalsPage = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">Subscription Plan</label>
-                    <Select value={planFilter} onValueChange={setPlanFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Plans" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Plans</SelectItem>
-                        <SelectItem value="basic">Basic</SelectItem>
-                        <SelectItem value="professional">Professional</SelectItem>
-                        <SelectItem value="enterprise">Enterprise</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
             )}
@@ -354,11 +333,9 @@ const AdminVendorApprovalsPage = () => {
               <TableHeader>
                 <TableRow className="bg-gray-50">
                   <TableHead className="font-semibold text-gray-900">Vendor Name</TableHead>
-                  <TableHead className="font-semibold text-gray-900">Client Marketplace</TableHead>
                   <TableHead className="font-semibold text-gray-900">Email</TableHead>
                   <TableHead className="font-semibold text-gray-900">Services</TableHead>
                   <TableHead className="font-semibold text-gray-900">Location</TableHead>
-                  <TableHead className="font-semibold text-gray-900">Plan</TableHead>
                   <TableHead className="font-semibold text-gray-900">Status</TableHead>
                   <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
                 </TableRow>
@@ -372,19 +349,9 @@ const AdminVendorApprovalsPage = () => {
                     }`}
                   >
                     <TableCell className="font-medium text-gray-900">{vendor.name}</TableCell>
-                    <TableCell className="text-gray-700">{vendor.client}</TableCell>
                     <TableCell className="text-gray-600">{vendor.email}</TableCell>
                     <TableCell className="text-gray-700">{vendor.services}</TableCell>
                     <TableCell className="text-gray-600">{vendor.location}</TableCell>
-                    <TableCell>
-                      <Badge className={`${
-                        vendor.currentPlan === 'enterprise' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' :
-                        vendor.currentPlan === 'professional' ? 'bg-purple-100 text-purple-800 hover:bg-purple-100' :
-                        'bg-blue-100 text-blue-800 hover:bg-blue-100'
-                      }`}>
-                        {vendor.currentPlan?.charAt(0).toUpperCase() + vendor.currentPlan?.slice(1)}
-                      </Badge>
-                    </TableCell>
                     <TableCell>
                       <Badge
                         variant={vendor.status === "Active" ? "default" : "destructive"}
@@ -465,9 +432,6 @@ const AdminVendorApprovalsPage = () => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="font-semibold text-gray-900 text-lg">{vendor.name}</h3>
-                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                        {vendor.client}
-                      </Badge>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-600 flex items-center">

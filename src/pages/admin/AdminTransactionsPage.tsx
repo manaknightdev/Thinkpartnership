@@ -9,16 +9,16 @@ import { toast } from "sonner";
 import { Search, Download, Filter, DollarSign, TrendingUp, Users, Calendar, X, SlidersHorizontal } from "lucide-react";
 
 const mockTransactions = [
-  { id: "TXN001", client: "TechCorp Solutions", vendor: "Rapid Plumbers", customer: "Alice Smith", service: "Emergency Plumbing", amount: "$250.00", date: "2024-01-15", status: "Completed", paymentMethod: "Credit Card" },
-  { id: "TXN002", client: "HomeServices Pro", vendor: "Brush Strokes Pro", customer: "Bob Johnson", service: "Interior Painting", amount: "$1200.00", date: "2024-01-14", status: "Completed", paymentMethod: "Bank Transfer" },
-  { id: "TXN003", client: "TechCorp Solutions", vendor: "Certified Inspectors Inc.", customer: "Charlie Brown", service: "Home Inspection", amount: "$350.00", date: "2024-01-13", status: "Pending", paymentMethod: "Credit Card" },
-  { id: "TXN004", client: "Local Connect", vendor: "Green Thumb Landscaping", customer: "Diana Prince", service: "Lawn Mowing", amount: "$80.00", date: "2024-01-12", status: "Completed", paymentMethod: "PayPal" },
-  { id: "TXN005", client: "HomeServices Pro", vendor: "Sparky Electric", customer: "Eve Adams", service: "Electrical Repair", amount: "$180.00", date: "2024-01-11", status: "Cancelled", paymentMethod: "Credit Card" },
-  { id: "TXN006", client: "TechCorp Solutions", vendor: "Climate Control Experts", customer: "Frank White", service: "HVAC Tune-up", amount: "$120.00", date: "2024-01-10", status: "Completed", paymentMethod: "Debit Card" },
-  { id: "TXN007", client: "Local Connect", vendor: "Rapid Plumbers", customer: "Grace Lee", service: "Drain Cleaning", amount: "$150.00", date: "2024-01-09", status: "Completed", paymentMethod: "Credit Card" },
-  { id: "TXN008", client: "ServiceHub Inc", vendor: "Climate Control Experts", customer: "Henry Davis", service: "AC Installation", amount: "$2500.00", date: "2024-01-08", status: "Completed", paymentMethod: "Bank Transfer" },
-  { id: "TXN009", client: "QuickFix Network", vendor: "Move It Right", customer: "Ivy Chen", service: "Moving Service", amount: "$450.00", date: "2024-01-07", status: "Pending", paymentMethod: "Credit Card" },
-  { id: "TXN010", client: "HomeServices Pro", vendor: "Brush Strokes Pro", customer: "Jack Wilson", service: "Exterior Painting", amount: "$800.00", date: "2024-01-06", status: "Completed", paymentMethod: "PayPal" },
+  { id: "TXN001", vendor: "Rapid Plumbers", customer: "Alice Smith", service: "Emergency Plumbing", amount: "$250.00", date: "2024-01-15", status: "Completed", paymentMethod: "Credit Card" },
+  { id: "TXN002", vendor: "Brush Strokes Pro", customer: "Bob Johnson", service: "Interior Painting", amount: "$1200.00", date: "2024-01-14", status: "Completed", paymentMethod: "Bank Transfer" },
+  { id: "TXN003", vendor: "Certified Inspectors Inc.", customer: "Charlie Brown", service: "Home Inspection", amount: "$350.00", date: "2024-01-13", status: "Pending", paymentMethod: "Credit Card" },
+  { id: "TXN004", vendor: "Green Thumb Landscaping", customer: "Diana Prince", service: "Lawn Mowing", amount: "$80.00", date: "2024-01-12", status: "Completed", paymentMethod: "PayPal" },
+  { id: "TXN005", vendor: "Sparky Electric", customer: "Eve Adams", service: "Electrical Repair", amount: "$180.00", date: "2024-01-11", status: "Cancelled", paymentMethod: "Credit Card" },
+  { id: "TXN006", vendor: "Climate Control Experts", customer: "Frank White", service: "HVAC Tune-up", amount: "$120.00", date: "2024-01-10", status: "Completed", paymentMethod: "Debit Card" },
+  { id: "TXN007", vendor: "Rapid Plumbers", customer: "Grace Lee", service: "Drain Cleaning", amount: "$150.00", date: "2024-01-09", status: "Completed", paymentMethod: "Credit Card" },
+  { id: "TXN008", vendor: "Climate Control Experts", customer: "Henry Davis", service: "AC Installation", amount: "$2500.00", date: "2024-01-08", status: "Completed", paymentMethod: "Bank Transfer" },
+  { id: "TXN009", vendor: "Move It Right", customer: "Ivy Chen", service: "Moving Service", amount: "$450.00", date: "2024-01-07", status: "Pending", paymentMethod: "Credit Card" },
+  { id: "TXN010", vendor: "Brush Strokes Pro", customer: "Jack Wilson", service: "Exterior Painting", amount: "$800.00", date: "2024-01-06", status: "Completed", paymentMethod: "PayPal" },
 ];
 
 const getStatusVariant = (status: string) => {
@@ -37,7 +37,7 @@ const getStatusVariant = (status: string) => {
 const AdminTransactionsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [clientFilter, setClientFilter] = useState("all");
+
   const [vendorFilter, setVendorFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [dateRangeFilter, setDateRangeFilter] = useState("all");
@@ -56,7 +56,6 @@ const AdminTransactionsPage = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setClientFilter("all");
     setVendorFilter("all");
     setDateRangeFilter("all");
     setAmountRangeFilter("all");
@@ -73,7 +72,6 @@ const AdminTransactionsPage = () => {
       transaction.service.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || transaction.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesClient = clientFilter === "all" || transaction.client === clientFilter;
     const matchesVendor = vendorFilter === "all" || transaction.vendor === vendorFilter;
     const matchesPaymentMethod = paymentMethodFilter === "all" || transaction.paymentMethod === paymentMethodFilter;
 
@@ -117,7 +115,7 @@ const AdminTransactionsPage = () => {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesClient && matchesVendor &&
+    return matchesSearch && matchesStatus && matchesVendor &&
            matchesPaymentMethod && matchesDateRange && matchesAmountRange;
   });
 
@@ -136,7 +134,7 @@ const AdminTransactionsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Transaction Management</h1>
           <p className="text-gray-600 mt-2">
-            Monitor and manage all marketplace transactions across clients and vendors
+            Monitor and manage all marketplace transactions across vendors
           </p>
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
@@ -247,7 +245,7 @@ const AdminTransactionsPage = () => {
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={clientFilter} onValueChange={setClientFilter}>
+                {/* <Select value={clientFilter} onValueChange={setClientFilter}>
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Client" />
                   </SelectTrigger>
@@ -259,8 +257,8 @@ const AdminTransactionsPage = () => {
                     <SelectItem value="ServiceHub Inc">ServiceHub Inc</SelectItem>
                     <SelectItem value="QuickFix Network">QuickFix Network</SelectItem>
                   </SelectContent>
-                </Select>
-                {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || vendorFilter !== "all" ||
+                </Select> */}
+                {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" ||
                   dateRangeFilter !== "all" || amountRangeFilter !== "all" || paymentMethodFilter !== "all") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-2" />
@@ -351,7 +349,6 @@ const AdminTransactionsPage = () => {
               <TableHeader>
                 <TableRow className="bg-gray-50">
                   <TableHead className="font-semibold text-gray-900">Transaction ID</TableHead>
-                  <TableHead className="font-semibold text-gray-900">Client</TableHead>
                   <TableHead className="font-semibold text-gray-900">Vendor</TableHead>
                   <TableHead className="font-semibold text-gray-900">Customer</TableHead>
                   <TableHead className="font-semibold text-gray-900">Service</TableHead>
@@ -370,7 +367,6 @@ const AdminTransactionsPage = () => {
                     }`}
                   >
                     <TableCell className="font-medium text-purple-600">{txn.id}</TableCell>
-                    <TableCell className="text-gray-900">{txn.client}</TableCell>
                     <TableCell className="text-gray-900">{txn.vendor}</TableCell>
                     <TableCell className="text-gray-900">{txn.customer}</TableCell>
                     <TableCell className="text-gray-700">{txn.service}</TableCell>
@@ -399,7 +395,7 @@ const AdminTransactionsPage = () => {
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
               Showing {filteredTransactions.length} of {mockTransactions.length} transactions
-              {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || vendorFilter !== "all" ||
+              {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" ||
                 dateRangeFilter !== "all" || amountRangeFilter !== "all" || paymentMethodFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }

@@ -24,7 +24,7 @@ import {
   Ban,
   CheckCircle,
   AlertTriangle,
-  Building,
+
   Plus,
   X,
   SlidersHorizontal
@@ -38,14 +38,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const mockVendors = [
-  { 
-    id: "v001", 
-    name: "Rapid Plumbers", 
-    email: "contact@rapidplumbers.com", 
+  {
+    id: "v001",
+    name: "Rapid Plumbers",
+    email: "contact@rapidplumbers.com",
     phone: "+1 (555) 111-2222",
     location: "New York, NY",
-    client: "TechCorp Solutions",
-    status: "Active", 
+    status: "Active",
     services: "Plumbing, Emergency Repairs",
 
     totalJobs: 245,
@@ -53,14 +52,13 @@ const mockVendors = [
     joinDate: "2023-02-15",
     lastActive: "2024-01-11"
   },
-  { 
-    id: "v002", 
-    name: "Brush Strokes Pro", 
-    email: "info@brushstrokes.com", 
+  {
+    id: "v002",
+    name: "Brush Strokes Pro",
+    email: "info@brushstrokes.com",
     phone: "+1 (555) 222-3333",
     location: "Los Angeles, CA",
-    client: "HomeServices Pro",
-    status: "Active", 
+    status: "Active",
     services: "Interior Painting, Exterior Painting",
 
     totalJobs: 189,
@@ -68,61 +66,53 @@ const mockVendors = [
     joinDate: "2023-01-20",
     lastActive: "2024-01-10"
   },
-  { 
-    id: "v003", 
-    name: "Certified Inspectors Inc.", 
-    email: "admin@certifiedinspectors.com", 
+  {
+    id: "v003",
+    name: "Certified Inspectors Inc.",
+    email: "admin@certifiedinspectors.com",
     phone: "+1 (555) 333-4444",
     location: "Chicago, IL",
-    client: "TechCorp Solutions",
-    status: "Active", 
+    status: "Active",
     services: "Home Inspections, Commercial Inspections",
-    rating: 4.7,
     totalJobs: 156,
     revenue: "$68,000",
     joinDate: "2023-03-10",
     lastActive: "2024-01-09"
   },
-  { 
-    id: "v004", 
-    name: "Green Thumb Landscaping", 
-    email: "contact@greenthumb.com", 
+  {
+    id: "v004",
+    name: "Green Thumb Landscaping",
+    email: "contact@greenthumb.com",
     phone: "+1 (555) 444-5555",
     location: "Austin, TX",
-    client: "Local Connect",
-    status: "Suspended", 
+    status: "Suspended",
     services: "Landscaping, Lawn Care",
-    rating: 4.2,
     totalJobs: 98,
     revenue: "$45,000",
     joinDate: "2023-04-05",
     lastActive: "2023-12-20"
   },
-  { 
-    id: "v005", 
-    name: "Sparky Electric", 
-    email: "service@sparkyelectric.com", 
+  {
+    id: "v005",
+    name: "Sparky Electric",
+    email: "service@sparkyelectric.com",
     phone: "+1 (555) 555-6666",
     location: "Miami, FL",
-    client: "ServiceHub Inc",
-    status: "Pending", 
+    status: "Pending",
     services: "Electrical Repairs, Installations",
-    rating: 4.6,
     totalJobs: 67,
     revenue: "$38,000",
     joinDate: "2023-11-15",
     lastActive: "2024-01-08"
   },
-  { 
-    id: "v006", 
-    name: "Climate Control Experts", 
-    email: "info@climatecontrol.com", 
+  {
+    id: "v006",
+    name: "Climate Control Experts",
+    email: "info@climatecontrol.com",
     phone: "+1 (555) 666-7777",
     location: "Phoenix, AZ",
-    client: "QuickFix Network",
-    status: "Active", 
+    status: "Active",
     services: "HVAC, Air Conditioning",
-    rating: 4.5,
     totalJobs: 134,
     revenue: "$58,000",
     joinDate: "2023-05-22",
@@ -146,7 +136,6 @@ const getStatusVariant = (status: string) => {
 const AdminAllVendorsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [clientFilter, setClientFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
 
@@ -200,7 +189,6 @@ const AdminAllVendorsPage = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setClientFilter("all");
     setLocationFilter("all");
 
     setServiceFilter("all");
@@ -213,12 +201,11 @@ const AdminAllVendorsPage = () => {
                          vendor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vendor.services.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || vendor.status.toLowerCase() === statusFilter;
-    const matchesClient = clientFilter === "all" || vendor.client.toLowerCase().includes(clientFilter.toLowerCase());
     const matchesLocation = locationFilter === "all" || vendor.location.toLowerCase().includes(locationFilter.toLowerCase());
 
     const matchesService = serviceFilter === "all" || vendor.services.toLowerCase().includes(serviceFilter.toLowerCase());
 
-    return matchesSearch && matchesStatus && matchesClient && matchesLocation && matchesService;
+    return matchesSearch && matchesStatus && matchesLocation && matchesService;
   });
 
   // Calculate summary stats based on filtered data
@@ -234,7 +221,7 @@ const AdminAllVendorsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">All Vendors</h1>
           <p className="text-gray-600 mt-2">
-            Comprehensive view of all vendors across all client marketplaces
+            Comprehensive view of all vendors in the platform
           </p>
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
@@ -319,7 +306,7 @@ const AdminAllVendorsPage = () => {
             <div>
               <CardTitle className="text-xl font-semibold text-gray-900">Vendor Directory</CardTitle>
               <CardDescription className="text-gray-600 mt-1">
-                Complete list of all vendors across all client marketplaces
+                Complete list of all vendors across marketplaces
               </CardDescription>
             </div>
           </div>
@@ -349,7 +336,7 @@ const AdminAllVendorsPage = () => {
                     <SelectItem value="suspended">Suspended</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={clientFilter} onValueChange={setClientFilter}>
+                {/* <Select value={clientFilter} onValueChange={setClientFilter}>
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Client" />
                   </SelectTrigger>
@@ -361,8 +348,8 @@ const AdminAllVendorsPage = () => {
                     <SelectItem value="servicehub">ServiceHub Inc</SelectItem>
                     <SelectItem value="quickfix">QuickFix Network</SelectItem>
                   </SelectContent>
-                </Select>
-                {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || locationFilter !== "all" || ratingFilter !== "all" || serviceFilter !== "all") && (
+                </Select> */}
+                {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-2" />
                     Clear
@@ -427,10 +414,8 @@ const AdminAllVendorsPage = () => {
                 <TableHeader className="sticky top-0 bg-gray-50 z-10">
                   <TableRow>
                     <TableHead className="font-semibold text-gray-900">Vendor Name</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Client</TableHead>
                     <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
                     <TableHead className="font-semibold text-gray-900">Services</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Rating</TableHead>
                     <TableHead className="font-semibold text-gray-900">Jobs</TableHead>
                     <TableHead className="font-semibold text-gray-900">Revenue</TableHead>
                     <TableHead className="font-semibold text-gray-900">Status</TableHead>
@@ -454,12 +439,7 @@ const AdminAllVendorsPage = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Building className="h-4 w-4 mr-2 text-gray-400" />
-                          <span className="text-gray-900">{vendor.client}</span>
-                        </div>
-                      </TableCell>
+
                       <TableCell>
                         <div className="space-y-1">
                           <div className="flex items-center text-sm text-gray-600">
@@ -477,7 +457,6 @@ const AdminAllVendorsPage = () => {
                           {vendor.services}
                         </p>
                       </TableCell>
-
                       <TableCell className="text-gray-900 font-medium">{vendor.totalJobs}</TableCell>
                       <TableCell className="text-gray-900 font-semibold">{vendor.revenue}</TableCell>
                       <TableCell>
@@ -536,7 +515,7 @@ const AdminAllVendorsPage = () => {
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
               Showing {filteredVendors.length} of {vendors.length} vendors
-              {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || locationFilter !== "all" || ratingFilter !== "all" || serviceFilter !== "all") &&
+              {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }
             </p>

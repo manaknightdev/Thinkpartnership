@@ -23,7 +23,7 @@ import {
   Edit,
   Ban,
   UserCheck,
-  Building,
+
 
   Plus,
   X,
@@ -37,14 +37,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Mock data for vendors by client
-const mockVendorsByClient = {
-  "TechCorp Solutions": ["Rapid Plumbers", "Certified Inspectors Inc.", "Climate Control Experts"],
-  "HomeServices Pro": ["Brush Strokes Pro", "Green Thumb Landscaping"],
-  "Local Connect": ["Green Thumb Landscaping", "Quick Fix Handyman"],
-  "ServiceHub Inc": ["Sparky Electric", "Climate Control Experts"],
-  "QuickFix Network": ["Climate Control Experts", "Move It Right"]
-};
+// Mock data for available vendors
+const mockAvailableVendors = [
+  "Rapid Plumbers", "Certified Inspectors Inc.", "Climate Control Experts",
+  "Brush Strokes Pro", "Green Thumb Landscaping", "Quick Fix Handyman",
+  "Sparky Electric", "Move It Right"
+];
 
 const mockCustomers = [
   {
@@ -53,7 +51,7 @@ const mockCustomers = [
     email: "alice.johnson@email.com",
     phone: "+1 (555) 111-1111",
     location: "New York, NY",
-    client: "TechCorp Solutions",
+
     vendor: "Rapid Plumbers",
     status: "Active",
     totalOrders: 12,
@@ -69,7 +67,7 @@ const mockCustomers = [
     email: "bob.smith@email.com",
     phone: "+1 (555) 222-2222",
     location: "Los Angeles, CA",
-    client: "HomeServices Pro",
+
     vendor: "Brush Strokes Pro",
     status: "Active",
     totalOrders: 8,
@@ -85,7 +83,7 @@ const mockCustomers = [
     email: "carol.davis@email.com",
     phone: "+1 (555) 333-3333",
     location: "Chicago, IL",
-    client: "TechCorp Solutions",
+
     vendor: "Certified Inspectors Inc.",
     status: "Active",
     totalOrders: 15,
@@ -101,7 +99,7 @@ const mockCustomers = [
     email: "david.wilson@email.com",
     phone: "+1 (555) 444-4444",
     location: "Austin, TX",
-    client: "Local Connect",
+
     vendor: "Green Thumb Landscaping",
     status: "Inactive",
     totalOrders: 3,
@@ -117,7 +115,7 @@ const mockCustomers = [
     email: "emma.brown@email.com",
     phone: "+1 (555) 555-5555",
     location: "Miami, FL",
-    client: "ServiceHub Inc",
+
     vendor: "Sparky Electric",
     status: "Active",
     totalOrders: 6,
@@ -133,7 +131,7 @@ const mockCustomers = [
     email: "frank.miller@email.com",
     phone: "+1 (555) 666-6666",
     location: "Phoenix, AZ",
-    client: "QuickFix Network",
+
     vendor: "Climate Control Experts",
     status: "Active",
     totalOrders: 9,
@@ -149,7 +147,7 @@ const mockCustomers = [
     email: "grace.lee@email.com",
     phone: "+1 (555) 777-7777",
     location: "Seattle, WA",
-    client: "TechCorp Solutions",
+
     vendor: "Rapid Plumbers",
     status: "Suspended",
     totalOrders: 2,
@@ -177,7 +175,7 @@ const getStatusVariant = (status: string) => {
 const AdminAllCustomersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [clientFilter, setClientFilter] = useState("all");
+
   const [vendorFilter, setVendorFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
@@ -188,20 +186,8 @@ const AdminAllCustomersPage = () => {
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
   const [customers, setCustomers] = useState(mockCustomers);
 
-  // Get available vendors based on selected client
-  const availableVendors = useMemo(() => {
-    if (clientFilter === "all") {
-      return Object.values(mockVendorsByClient).flat();
-    }
-    return mockVendorsByClient[clientFilter] || [];
-  }, [clientFilter]);
-
-  // Reset vendor filter when client changes
-  React.useEffect(() => {
-    if (clientFilter !== "all" && !availableVendors.includes(vendorFilter)) {
-      setVendorFilter("all");
-    }
-  }, [clientFilter, availableVendors, vendorFilter]);
+  // Get available vendors
+  const availableVendors = mockAvailableVendors;
 
   const handleViewCustomer = (customer: any) => {
     setSelectedCustomer(customer);
@@ -244,7 +230,6 @@ const AdminAllCustomersPage = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setClientFilter("all");
     setVendorFilter("all");
     setLocationFilter("all");
     setSpendingFilter("all");
@@ -257,7 +242,6 @@ const AdminAllCustomersPage = () => {
                          customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.preferredServices.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || customer.status.toLowerCase() === statusFilter;
-    const matchesClient = clientFilter === "all" || customer.client === clientFilter;
     const matchesVendor = vendorFilter === "all" || customer.vendor === vendorFilter;
     const matchesLocation = locationFilter === "all" || customer.location.toLowerCase().includes(locationFilter.toLowerCase());
 
@@ -267,7 +251,7 @@ const AdminAllCustomersPage = () => {
                            (spendingFilter === "medium" && spentAmount >= 1500 && spentAmount < 3000) ||
                            (spendingFilter === "low" && spentAmount < 1500);
 
-    return matchesSearch && matchesStatus && matchesClient && matchesVendor && matchesLocation && matchesSpending;
+    return matchesSearch && matchesStatus && matchesVendor && matchesLocation && matchesSpending;
   });
 
   // Calculate summary stats based on filtered data
@@ -286,7 +270,7 @@ const AdminAllCustomersPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">All Customers</h1>
           <p className="text-gray-600 mt-2">
-            Complete overview of all customers across all client marketplaces
+            Complete overview of all customers in the platform
           </p>
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
@@ -385,7 +369,7 @@ const AdminAllCustomersPage = () => {
             <div>
               <CardTitle className="text-xl font-semibold text-gray-900">Customer Directory</CardTitle>
               <CardDescription className="text-gray-600 mt-1">
-                Complete list of all customers across all client marketplaces
+                Complete list of all customers across marketplaces
               </CardDescription>
             </div>
           </div>
@@ -415,7 +399,7 @@ const AdminAllCustomersPage = () => {
                     <SelectItem value="suspended">Suspended</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={clientFilter} onValueChange={setClientFilter}>
+                {/* <Select value={clientFilter} onValueChange={setClientFilter}>
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Client" />
                   </SelectTrigger>
@@ -427,11 +411,10 @@ const AdminAllCustomersPage = () => {
                     <SelectItem value="ServiceHub Inc">ServiceHub Inc</SelectItem>
                     <SelectItem value="QuickFix Network">QuickFix Network</SelectItem>
                   </SelectContent>
-                </Select>
+                </Select> */}
                 <Select
                   value={vendorFilter}
                   onValueChange={setVendorFilter}
-                  disabled={clientFilter === "all"}
                 >
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Vendor" />
@@ -443,7 +426,7 @@ const AdminAllCustomersPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || vendorFilter !== "all" || locationFilter !== "all" || spendingFilter !== "all") && (
+                {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" || locationFilter !== "all" || spendingFilter !== "all") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-2" />
                     Clear
@@ -505,7 +488,6 @@ const AdminAllCustomersPage = () => {
                 <TableHeader className="sticky top-0 bg-gray-50 z-10">
                   <TableRow>
                     <TableHead className="font-semibold text-gray-900">Customer Name</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Client</TableHead>
                     <TableHead className="font-semibold text-gray-900">Vendor</TableHead>
                     <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
                     <TableHead className="font-semibold text-gray-900">Orders</TableHead>
@@ -533,12 +515,7 @@ const AdminAllCustomersPage = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Building className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className="text-gray-900">{customer.client}</span>
-                      </div>
-                    </TableCell>
+
                     <TableCell>
                       <div className="flex items-center">
                         <Users className="h-4 w-4 mr-2 text-gray-400" />
@@ -622,7 +599,7 @@ const AdminAllCustomersPage = () => {
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
               Showing {filteredCustomers.length} of {customers.length} customers
-              {(searchTerm || statusFilter !== "all" || clientFilter !== "all" || vendorFilter !== "all" || locationFilter !== "all" || spendingFilter !== "all") &&
+              {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" || locationFilter !== "all" || spendingFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }
             </p>
