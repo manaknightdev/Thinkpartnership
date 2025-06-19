@@ -161,7 +161,7 @@ const HelpSupportPage = () => {
               How can we help you?
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Find answers to common questions, get support, or contact our team directly.
+              Find answers to common questions.
             </p>
 
             {/* Search Bar */}

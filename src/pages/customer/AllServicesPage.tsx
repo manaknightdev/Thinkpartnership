@@ -13,8 +13,6 @@ import {
   MapPin,
   Clock,
   ChevronDown,
-  Eye,
-  Verified,
   Loader2,
   ChevronLeft,
   ChevronRight
@@ -37,12 +35,11 @@ const AllServicesPage = () => {
   // Extended mock services data
   const allServices = [
     {
-      title: "Premium Home Painting",
+      id: 1,
+      title: "Home Painting",
       vendor: "Brush Strokes Pro",
-      vendorLevel: "Top Rated",
       description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
       price: "$500",
-      originalPrice: "$650",
       responseTime: "2 hours",
       verified: true,
       deliveryTime: "3-5 days",
@@ -53,12 +50,11 @@ const AllServicesPage = () => {
       category: "Painting"
     },
     {
+      id: 2,
       title: "Emergency Plumbing Repair",
       vendor: "Rapid Plumbers",
-      vendorLevel: "Pro",
       description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
       price: "$150",
-      originalPrice: "$200",
       responseTime: "30 mins",
       verified: true,
       deliveryTime: "Same day",
@@ -69,12 +65,11 @@ const AllServicesPage = () => {
       category: "Plumbing"
     },
     {
+      id: 3,
       title: "Full Home Inspection",
       vendor: "Certified Inspectors Inc.",
-      vendorLevel: "Top Rated",
       description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
       price: "$300",
-      originalPrice: "$400",
       responseTime: "1 day",
       verified: true,
       deliveryTime: "2-3 days",
@@ -85,12 +80,11 @@ const AllServicesPage = () => {
       category: "Inspections"
     },
     {
+      id: 4,
       title: "Professional Lawn Care",
       vendor: "Green Thumb Landscaping",
-      vendorLevel: "Pro",
       description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
       price: "$80",
-      originalPrice: "$120",
       responseTime: "4 hours",
       verified: true,
       deliveryTime: "Weekly",
@@ -101,12 +95,11 @@ const AllServicesPage = () => {
       category: "Landscaping"
     },
     {
+      id: 5,
       title: "HVAC System Tune-up",
       vendor: "Climate Control Experts",
-      vendorLevel: "Top Rated",
       description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
       price: "$120",
-      originalPrice: "$180",
       responseTime: "6 hours",
       verified: true,
       deliveryTime: "1-2 days",
@@ -117,12 +110,11 @@ const AllServicesPage = () => {
       category: "HVAC"
     },
     {
+      id: 6,
       title: "Deep House Cleaning",
       vendor: "Sparkling Spaces",
-      vendorLevel: "Pro",
       description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
       price: "$200",
-      originalPrice: "$280",
       responseTime: "3 hours",
       verified: true,
       deliveryTime: "Same day",
@@ -134,12 +126,11 @@ const AllServicesPage = () => {
     },
     // Add more services to demonstrate pagination
     {
+      id: 7,
       title: "Electrical Wiring Installation",
       vendor: "PowerPro Electricians",
-      vendorLevel: "Top Rated",
       description: "Professional electrical installation and repair services for residential and commercial properties.",
       price: "$180",
-      originalPrice: "$240",
       responseTime: "2 hours",
       verified: true,
       deliveryTime: "1-2 days",
@@ -150,12 +141,11 @@ const AllServicesPage = () => {
       category: "Electrical"
     },
     {
+      id: 8,
       title: "Professional Moving Service",
       vendor: "Swift Movers",
-      vendorLevel: "Pro",
       description: "Full-service moving company with packing, loading, and transportation services.",
       price: "$350",
-      originalPrice: "$450",
       responseTime: "1 day",
       verified: true,
       deliveryTime: "Flexible",
@@ -168,12 +158,7 @@ const AllServicesPage = () => {
   ];
 
   // Duplicate services to simulate more data
-  const extendedServices = [...allServices, ...allServices.map(service => ({
-    ...service,
-    title: service.title + " (Premium)",
-    price: `$${parseInt(service.price.replace('$', '')) + 50}`,
-    vendor: service.vendor + " Plus"
-  }))];
+  const extendedServices = [...allServices, ...allServices];
 
   const categories = ["all", ...Array.from(new Set(allServices.map(service => service.category))).sort()];
 
@@ -322,7 +307,7 @@ const AllServicesPage = () => {
                     </SelectContent>
                   </Select>
 
-                  <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                  {/* <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                     <SelectTrigger className="w-36">
                       <SelectValue placeholder="Location" />
                     </SelectTrigger>
@@ -333,7 +318,7 @@ const AllServicesPage = () => {
                       <SelectItem value="county">Within County</SelectItem>
                       <SelectItem value="state">Within State</SelectItem>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
 
 
 
@@ -435,18 +420,7 @@ const AllServicesPage = () => {
                     
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    <div className="absolute top-4 left-4">
-                      <Badge className={`${service.vendorLevel === 'Top Rated' ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} text-white text-sm px-3 py-1 rounded-full shadow-lg`}>
-                        {service.vendorLevel === 'Top Rated' && <Verified className="w-3 h-3 mr-1" />}
-                        {service.vendorLevel}
-                      </Badge>
-                    </div>
 
-                    <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                      <Button size="sm" className="bg-white/90 text-gray-700 hover:bg-white rounded-full w-10 h-10 p-0">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
                   </div>
 
                   <CardContent className="p-6">
@@ -459,12 +433,7 @@ const AllServicesPage = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                          Verified Pro
-                        </Badge>
-                      </div>
+                    <div className="flex items-center justify-end mb-4">
                       <div className="flex items-center space-x-1 text-xs text-gray-500">
                         <Clock className="w-3 h-3" />
                         <span>{service.responseTime} response</span>
@@ -483,9 +452,6 @@ const AllServicesPage = () => {
                       <div>
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="text-xl font-bold text-gray-900">{service.price}</span>
-                          {service.originalPrice && (
-                            <span className="text-sm text-gray-500 line-through">{service.originalPrice}</span>
-                          )}
                         </div>
                         <div className="flex items-center space-x-1 text-xs text-gray-500">
                           <Clock className="w-3 h-3" />

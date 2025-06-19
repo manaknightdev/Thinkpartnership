@@ -611,7 +611,7 @@ const ChatPage = () => {
                 <h2 className="font-semibold text-gray-900 truncate">{vendor.name}</h2>
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
                   <span className="hidden sm:inline">{vendor.lastSeen}</span>
-                  <span className="hidden sm:inline">•</span>
+                  
 
                 </div>
               </div>
@@ -662,9 +662,9 @@ const ChatPage = () => {
                 </div>
                 <div className="text-right text-sm">
                   <div className="font-semibold text-gray-900">{vendor.completedJobs} jobs completed</div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                  {/* <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                     Verified Pro
-                  </Badge>
+                  </Badge> */}
                 </div>
               </div>
             </CardContent>

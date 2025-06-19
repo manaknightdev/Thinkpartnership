@@ -85,7 +85,7 @@ const VendorMessagesPage = () => {
   // Vendor's custom service tiers (created by vendor in Service Tiers page)
   const vendorServiceTiers = [
     { id: "plumbing-basic", name: "Basic Plumbing", price: 120, description: "Standard plumbing repairs and maintenance" },
-    { id: "plumbing-premium", name: "Premium Plumbing", price: 280, description: "Emergency plumbing with 24/7 support" },
+    { id: "plumbing-advanced", name: "Advanced Plumbing", price: 280, description: "Emergency plumbing with 24/7 support" },
     { id: "electrical-standard", name: "Standard Electrical", price: 200, description: "Electrical installations and repairs" }
   ];
 
@@ -427,7 +427,7 @@ const VendorMessagesPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">{selectedCustomer.name}</h3>
                     <p className="text-sm text-gray-600">
-                      {selectedCustomer.status === "online" ? "Active now" : "Last seen recently"} • {selectedCustomer.location}
+                      {selectedCustomer.status === "online" ? "Active now" : "Last seen recently"}  {selectedCustomer.location}
                     </p>
                   </div>
                 </div>

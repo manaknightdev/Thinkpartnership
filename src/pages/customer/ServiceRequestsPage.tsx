@@ -15,7 +15,6 @@ import {
   MapPin,
   User,
   AlertCircle,
-  Eye,
   Trash2
 } from "lucide-react";
 
@@ -266,7 +265,6 @@ const ServiceRequestsPage = () => {
                               size="sm"
                               onClick={() => handleViewDetails(request.id)}
                             >
-                              <Eye className="w-4 h-4 mr-2" />
                               View Details
                             </Button>
                             

@@ -5,29 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { 
-  Bell, 
-  CheckCircle, 
-  AlertCircle, 
-  Info, 
+import {
+  Bell,
   DollarSign,
-  Users,
-  UserPlus,
-  BarChart,
-  Settings,
   Mail,
   Smartphone,
   Clock,
   Eye,
   EyeOff,
-  Trash2,
-  Filter
+  Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Notification {
   id: string;
-  type: "success" | "warning" | "info" | "payment" | "vendor" | "customer" | "system";
+  type: "payment" | "message";
   title: string;
   message: string;
   timestamp: string;
@@ -38,16 +30,7 @@ interface Notification {
 const ClientNotificationsPage = () => {
   const [notifications, setNotifications] = useState<Notification[]>([
     {
-      id: "n001",
-      type: "vendor",
-      title: "New Vendor Application",
-      message: "Rapid Plumbers has submitted an application to join your marketplace. Review their profile and approve or reject their application.",
-      timestamp: "2024-01-25T10:30:00Z",
-      read: false,
-      priority: "high"
-    },
-    {
-      id: "n002", 
+      id: "n002",
       type: "payment",
       title: "Commission Payment Processed",
       message: "Monthly commission payment of $2,450.00 has been processed to your account ending in ****1234.",
@@ -57,36 +40,27 @@ const ClientNotificationsPage = () => {
     },
     {
       id: "n003",
-      type: "customer",
-      title: "New Customer Registration",
-      message: "Sarah Johnson has joined your marketplace through the referral link. They're ready to browse services.",
+      type: "message",
+      title: "New Message from Vendor",
+      message: "Rapid Plumbers sent you a message regarding their service listing approval.",
       timestamp: "2024-01-24T16:45:00Z",
       read: true,
       priority: "low"
     },
     {
-      id: "n004",
-      type: "system",
-      title: "Monthly Report Available",
-      message: "Your January marketplace performance report is now available in the Reports section.",
-      timestamp: "2024-01-24T08:00:00Z",
-      read: true,
-      priority: "medium"
-    },
-    {
       id: "n005",
-      type: "warning",
-      title: "Vendor Performance Alert",
-      message: "Sparky Electric has received multiple customer complaints. Consider reviewing their service quality.",
+      type: "payment",
+      title: "Payment Notification",
+      message: "Transaction fee of $125.50 has been processed for marketplace transactions this week.",
       timestamp: "2024-01-23T14:20:00Z",
       read: false,
       priority: "high"
     },
     {
       id: "n006",
-      type: "success",
-      title: "Marketplace Milestone",
-      message: "Congratulations! Your marketplace has reached 100 completed orders this month.",
+      type: "message",
+      title: "Customer Support Message",
+      message: "You have a new message from customer support regarding your marketplace setup.",
       timestamp: "2024-01-23T11:30:00Z",
       read: true,
       priority: "low"
@@ -95,10 +69,8 @@ const ClientNotificationsPage = () => {
 
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
-  const [vendorNotifications, setVendorNotifications] = useState(true);
-  const [customerNotifications, setCustomerNotifications] = useState(true);
+  const [messageNotifications, setMessageNotifications] = useState(true);
   const [paymentNotifications, setPaymentNotifications] = useState(true);
-  const [systemNotifications, setSystemNotifications] = useState(true);
 
   const unreadCount = notifications.filter(n => !n.read).length;
   const todayNotifications = notifications.filter(n => {
@@ -109,13 +81,8 @@ const ClientNotificationsPage = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case "success": return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case "warning": return <AlertCircle className="h-5 w-5 text-orange-600" />;
-      case "info": return <Info className="h-5 w-5 text-blue-600" />;
       case "payment": return <DollarSign className="h-5 w-5 text-green-600" />;
-      case "vendor": return <Users className="h-5 w-5 text-blue-600" />;
-      case "customer": return <UserPlus className="h-5 w-5 text-purple-600" />;
-      case "system": return <BarChart className="h-5 w-5 text-gray-600" />;
+      case "message": return <Mail className="h-5 w-5 text-blue-600" />;
       default: return <Bell className="h-5 w-5 text-gray-600" />;
     }
   };
@@ -169,7 +136,7 @@ const ClientNotificationsPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
             <p className="text-lg text-gray-700">
-              Stay updated with your marketplace activities and important alerts.
+              Payment and messaging notifications for your marketplace.
             </p>
           </div>
           <div className="text-right">
@@ -373,31 +340,16 @@ const ClientNotificationsPage = () => {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <Users className="h-5 w-5 text-blue-600" />
+                            <Mail className="h-5 w-5 text-blue-600" />
                             <div>
-                              <Label htmlFor="vendor-notifications" className="text-sm font-medium">Vendor Activities</Label>
-                              <p className="text-xs text-gray-500">New applications, status changes</p>
+                              <Label htmlFor="message-notifications" className="text-sm font-medium">Messages</Label>
+                              <p className="text-xs text-gray-500">Messages from vendors and support</p>
                             </div>
                           </div>
                           <Switch
-                            id="vendor-notifications"
-                            checked={vendorNotifications}
-                            onCheckedChange={setVendorNotifications}
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <UserPlus className="h-5 w-5 text-purple-600" />
-                            <div>
-                              <Label htmlFor="customer-notifications" className="text-sm font-medium">Customer Activities</Label>
-                              <p className="text-xs text-gray-500">New registrations, orders</p>
-                            </div>
-                          </div>
-                          <Switch
-                            id="customer-notifications"
-                            checked={customerNotifications}
-                            onCheckedChange={setCustomerNotifications}
+                            id="message-notifications"
+                            checked={messageNotifications}
+                            onCheckedChange={setMessageNotifications}
                           />
                         </div>
 
@@ -416,20 +368,7 @@ const ClientNotificationsPage = () => {
                           />
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <BarChart className="h-5 w-5 text-gray-600" />
-                            <div>
-                              <Label htmlFor="system-notifications" className="text-sm font-medium">System & Reports</Label>
-                              <p className="text-xs text-gray-500">System updates, report availability</p>
-                            </div>
-                          </div>
-                          <Switch
-                            id="system-notifications"
-                            checked={systemNotifications}
-                            onCheckedChange={setSystemNotifications}
-                          />
-                        </div>
+
                       </CardContent>
                     </Card>
                   </div>

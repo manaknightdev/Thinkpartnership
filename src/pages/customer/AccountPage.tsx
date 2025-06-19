@@ -82,9 +82,9 @@ const AccountPage = () => {
                   <Calendar className="w-4 h-4" />
                   Member since {new Date(userProfile.memberSince).toLocaleDateString()}
                 </span>
-                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                {/* <Badge variant="secondary" className="bg-green-100 text-green-700">
                   Verified Customer
-                </Badge>
+                </Badge> */}
               </div>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
@@ -95,10 +95,10 @@ const AccountPage = () => {
                   <div className="text-2xl font-bold text-green-600">${userProfile.totalSpent}</div>
                   <div className="text-sm text-gray-600">Total Spent</div>
                 </div>
-                <div>
+                {/* <div>
                   <div className="text-2xl font-bold text-green-600">4.8</div>
                   <div className="text-sm text-gray-600">Avg Rating</div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

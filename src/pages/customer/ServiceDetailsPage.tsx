@@ -22,9 +22,9 @@ const ServiceDetailsPage = () => {
 
   // Mock data for service details - in a real app, this would come from an API
   const mockServiceDetails = {
-    "Premium Home Painting": {
+    "Home Painting": {
       vendor: "Brush Strokes Pro",
-      description: "Transform your home with high-quality interior and exterior painting services. Our experienced team ensures a flawless finish, using premium paints and meticulous preparation. We handle everything from color consultation to final touch-ups, ensuring your satisfaction.",
+      description: "Transform your home with high-quality interior and exterior painting services. Our experienced team ensures a flawless finish, using quality paints and meticulous preparation. We handle everything from color consultation to final touch-ups, ensuring your satisfaction.",
       pricingTiers: [
         {
           name: "Basic Interior",

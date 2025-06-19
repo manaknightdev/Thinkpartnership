@@ -20,10 +20,7 @@ import {
   Clock,
   Shield,
   Users,
-  ArrowRight,
-  Eye,
-  Verified,
-  Crown
+  ArrowRight
 } from "lucide-react";
 
 const CustomerBrowseServicesPage = () => {
@@ -103,12 +100,10 @@ const CustomerBrowseServicesPage = () => {
 
   const mockFeaturedServices = [
     {
-      title: "Premium Home Painting",
+      title: "Home Painting",
       vendor: "Brush Strokes Pro",
-      vendorLevel: "Top Rated",
       description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
       price: "$500",
-      originalPrice: "$650",
       responseTime: "2 hours",
       verified: true,
       deliveryTime: "3-5 days",
@@ -120,10 +115,8 @@ const CustomerBrowseServicesPage = () => {
     {
       title: "Emergency Plumbing Repair",
       vendor: "Rapid Plumbers",
-      vendorLevel: "Pro",
       description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
       price: "$150",
-      originalPrice: "$200",
       responseTime: "30 mins",
       verified: true,
       deliveryTime: "Same day",
@@ -135,10 +128,8 @@ const CustomerBrowseServicesPage = () => {
     {
       title: "Full Home Inspection",
       vendor: "Certified Inspectors Inc.",
-      vendorLevel: "Top Rated",
       description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
       price: "$300",
-      originalPrice: "$400",
       responseTime: "1 day",
       verified: true,
       deliveryTime: "2-3 days",
@@ -150,10 +141,8 @@ const CustomerBrowseServicesPage = () => {
     {
       title: "Professional Lawn Care",
       vendor: "Green Thumb Landscaping",
-      vendorLevel: "Pro",
       description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
       price: "$80",
-      originalPrice: "$120",
       responseTime: "4 hours",
       verified: true,
       deliveryTime: "Weekly",
@@ -165,10 +154,8 @@ const CustomerBrowseServicesPage = () => {
     {
       title: "HVAC System Tune-up",
       vendor: "Climate Control Experts",
-      vendorLevel: "Top Rated",
       description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
       price: "$120",
-      originalPrice: "$180",
       responseTime: "6 hours",
       verified: true,
       deliveryTime: "1-2 days",
@@ -180,10 +167,8 @@ const CustomerBrowseServicesPage = () => {
     {
       title: "Deep House Cleaning",
       vendor: "Sparkling Spaces",
-      vendorLevel: "Pro",
       description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
       price: "$200",
-      originalPrice: "$280",
       responseTime: "3 hours",
       verified: true,
       deliveryTime: "Same day",
@@ -208,8 +193,8 @@ const CustomerBrowseServicesPage = () => {
               </span>
               for your home
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Connect with trusted professionals in your area. Quality guaranteed, satisfaction promised.
+            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Connect with trusted professionals. Quality guaranteed, satisfaction promised.
             </p>
 
             {/* Enhanced Search Bar */}
@@ -292,32 +277,20 @@ const CustomerBrowseServicesPage = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Premium Top-Rated Services Section */}
+        {/* Featured Services Section */}
         <section className="mb-20">
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Crown className="h-6 w-6 text-yellow-500" />
-              <Badge className="bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 px-4 py-2 rounded-full font-semibold">Premium Services</Badge>
-            </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Top-Rated Premium Services
+              Featured Services
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Discover our exclusive premium services from the highest-rated professionals. Quality guaranteed with priority support.
+              Discover quality services from trusted professionals.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {mockFeaturedServices.map((service, index) => (
               <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl relative">
-                {/* Premium Badge */}
-                <div className="absolute top-2 left-2 z-10">
-                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs px-2 py-1 rounded-full shadow-lg">
-                    <Crown className="w-3 h-3 mr-1" />
-                    Premium
-                  </Badge>
-                </div>
-
                 <div className="relative overflow-hidden rounded-t-2xl">
                   <img
                     src={service.image}
@@ -328,20 +301,7 @@ const CustomerBrowseServicesPage = () => {
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  {/* Vendor Level Badge */}
-                  <div className="absolute top-4 left-16">
-                    <Badge className={`${service.vendorLevel === 'Top Rated' ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} text-white text-sm px-3 py-1 rounded-full shadow-lg`}>
-                      {service.vendorLevel === 'Top Rated' && <Verified className="w-3 h-3 mr-1" />}
-                      {service.vendorLevel}
-                    </Badge>
-                  </div>
 
-                  {/* Quick Action Buttons */}
-                  <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                    <Button size="sm" className="bg-white/90 text-gray-700 hover:bg-white rounded-full w-10 h-10 p-0">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
 
                   {/* Vendor Info */}
                   <div className="absolute bottom-4 left-4 flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
@@ -367,12 +327,7 @@ const CustomerBrowseServicesPage = () => {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                        Verified Pro
-                      </Badge>
-                    </div>
+                  <div className="flex items-center justify-end mb-4">
                     <div className="flex items-center space-x-1 text-xs text-gray-500">
                       <Clock className="w-3 h-3" />
                       <span>{service.responseTime} response</span>
@@ -392,9 +347,6 @@ const CustomerBrowseServicesPage = () => {
                     <div>
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="text-xl font-bold text-gray-900">{service.price}</span>
-                        {service.originalPrice && (
-                          <span className="text-sm text-gray-500 line-through">{service.originalPrice}</span>
-                        )}
                       </div>
                       <div className="flex items-center space-x-1 text-xs text-gray-500">
                         <Clock className="w-3 h-3" />
@@ -404,9 +356,9 @@ const CustomerBrowseServicesPage = () => {
                     <Button
                       size="sm"
                       onClick={() => handleViewDetails(service.title)}
-                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
-                      View Premium
+                      View Details
                     </Button>
                   </div>
                 </CardContent>
@@ -419,10 +371,9 @@ const CustomerBrowseServicesPage = () => {
             <Button
               variant="outline"
               size="lg"
-              className="rounded-full border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all duration-300 px-8 py-3 text-lg font-semibold"
+              className="rounded-full border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-all duration-300 px-8 py-3 text-lg font-semibold"
               onClick={() => navigate('/marketplace/services')}
             >
-              {/* <Crown className="w-5 h-5 mr-2" /> */}
               View All Services
             </Button>
           </div>
@@ -488,7 +439,7 @@ const CustomerBrowseServicesPage = () => {
                 Ready to Get Started?
               </h3>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Connect with our top-rated service providers in your area. Quality work from trusted professionals.
+                Connect with service providers in your area. Quality work from trusted professionals.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button

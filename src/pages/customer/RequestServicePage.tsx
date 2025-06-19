@@ -282,7 +282,7 @@ const RequestServicePage = () => {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-gray-200">
+                  {/* <div className="pt-4 border-t border-gray-200">
                     <div className="text-sm text-gray-600 mb-2">What happens next?</div>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-start gap-2">
@@ -304,7 +304,7 @@ const RequestServicePage = () => {
                         <span className="text-gray-700">Choose your preferred professional and schedule</span>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
             </div>

@@ -109,12 +109,17 @@ const ClientRevenueRulesPage = () => {
             <div>
               <Label htmlFor="client-commission">Your Commission (%)</Label>
               <Input id="client-commission" type="number" placeholder="e.g., 10" defaultValue={10} />
-              <p className="text-xs text-gray-500 mt-1">Applied to amount after platform fees</p>
+              
+            </div>
+            <div>
+              <Label htmlFor="vendor-commission">Platform Commission (%)</Label>
+              <Input id="vendor-commission" type="number" placeholder="e.g., 5" defaultValue={5} />
+              
             </div>
             <div>
               <Label htmlFor="vendor-commission">Vendor Commission (%)</Label>
-              <Input id="vendor-commission" type="number" placeholder="e.g., 90" defaultValue={90} />
-              <p className="text-xs text-gray-500 mt-1">Remaining amount after your commission</p>
+              <Input id="vendor-commission" type="number" placeholder="e.g., 85" defaultValue={85} />
+           
             </div>
           </div>
 

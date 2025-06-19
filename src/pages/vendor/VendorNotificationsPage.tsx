@@ -8,11 +8,8 @@ import {
   Clock,
   DollarSign,
   MessageCircle,
-  Star,
-  AlertCircle,
   Trash2,
   Mail,
-  Filter,
   Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface Notification {
   id: string;
-  type: "request" | "message" | "payment" | "review" | "system";
+  type: "message" | "payment";
   title: string;
   message: string;
   timestamp: string;
@@ -39,17 +36,6 @@ const VendorNotificationsPage = () => {
   const [filterStatus, setFilterStatus] = useState("all");
 
   const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "notif001",
-      type: "request",
-      title: "New Service Request",
-      message: "John Doe has requested Interior Painting service. Budget: $400-600",
-      timestamp: "2 minutes ago",
-      isRead: false,
-      priority: "high",
-      actionUrl: "/vendor-portal/requests",
-      customerName: "John Doe",
-    },
     {
       id: "notif002",
       type: "message",
@@ -72,33 +58,22 @@ const VendorNotificationsPage = () => {
       customerName: "David Martinez",
       amount: "$320",
     },
-
     {
       id: "notif005",
-      type: "request",
-      title: "Quote Accepted",
-      message: "Mike Johnson accepted your quote of $2,450 for Bathroom Renovation",
+      type: "payment",
+      title: "Payment Processed",
+      message: "Payment of $2,450 for Bathroom Renovation has been processed to your account",
       timestamp: "1 day ago",
       isRead: true,
       priority: "high",
-      actionUrl: "/vendor-portal/requests",
+      actionUrl: "/vendor-portal/wallet",
       customerName: "Mike Johnson",
       amount: "$2,450",
     },
     {
-      id: "notif006",
-      type: "system",
-      title: "Subscription Renewal",
-      message: "Your Premium Placement subscription will renew in 3 days",
-      timestamp: "2 days ago",
-      isRead: false,
-      priority: "normal",
-      actionUrl: "/vendor-portal/subscription",
-    },
-    {
       id: "notif007",
       type: "message",
-      title: "New Message",
+      title: "Customer Message",
       message: "Alex Thompson: 'Could you provide references from previous work?'",
       timestamp: "3 days ago",
       isRead: true,
@@ -110,22 +85,16 @@ const VendorNotificationsPage = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case "request": return <Bell className="h-5 w-5 text-blue-600" />;
       case "message": return <MessageCircle className="h-5 w-5 text-green-600" />;
       case "payment": return <DollarSign className="h-5 w-5 text-emerald-600" />;
-      case "review": return <Star className="h-5 w-5 text-yellow-600" />;
-      case "system": return <AlertCircle className="h-5 w-5 text-purple-600" />;
       default: return <Bell className="h-5 w-5 text-gray-600" />;
     }
   };
 
   const getNotificationColor = (type: string) => {
     switch (type) {
-      case "request": return "bg-blue-100";
       case "message": return "bg-green-100";
       case "payment": return "bg-emerald-100";
-      case "review": return "bg-yellow-100";
-      case "system": return "bg-purple-100";
       default: return "bg-gray-100";
     }
   };
@@ -178,11 +147,8 @@ const VendorNotificationsPage = () => {
   const unreadCount = notifications.filter(notif => !notif.isRead).length;
   const typeStats = {
     all: notifications.length,
-    request: notifications.filter(n => n.type === "request").length,
     message: notifications.filter(n => n.type === "message").length,
     payment: notifications.filter(n => n.type === "payment").length,
-    review: notifications.filter(n => n.type === "review").length,
-    system: notifications.filter(n => n.type === "system").length,
   };
 
   return (
@@ -192,7 +158,7 @@ const VendorNotificationsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
           <p className="text-gray-600 mt-1">
-            Stay updated with your business activities and customer interactions.
+            Payment and messaging notifications for your business.
           </p>
         </div>
         
@@ -208,17 +174,11 @@ const VendorNotificationsPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{typeStats.all}</div>
             <div className="text-sm text-gray-600">Total</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{typeStats.request}</div>
-            <div className="text-sm text-gray-600">Requests</div>
           </CardContent>
         </Card>
         <Card>
@@ -231,18 +191,6 @@ const VendorNotificationsPage = () => {
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-emerald-600">{typeStats.payment}</div>
             <div className="text-sm text-gray-600">Payments</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{typeStats.review}</div>
-            <div className="text-sm text-gray-600">Reviews</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{typeStats.system}</div>
-            <div className="text-sm text-gray-600">System</div>
           </CardContent>
         </Card>
       </div>
@@ -269,11 +217,8 @@ const VendorNotificationsPage = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types ({typeStats.all})</SelectItem>
-                <SelectItem value="request">Requests ({typeStats.request})</SelectItem>
                 <SelectItem value="message">Messages ({typeStats.message})</SelectItem>
                 <SelectItem value="payment">Payments ({typeStats.payment})</SelectItem>
-                <SelectItem value="review">Reviews ({typeStats.review})</SelectItem>
-                <SelectItem value="system">System ({typeStats.system})</SelectItem>
               </SelectContent>
             </Select>
             

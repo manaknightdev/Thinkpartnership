@@ -5,16 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, Clock, Shield, Verified } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Shield } from "lucide-react";
 
 const mockServiceDetails = {
-  "Premium Home Painting": {
+  "Home Painting": {
     vendor: "Brush Strokes Pro",
-    vendorLevel: "Top Rated",
     description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
     price: 500,
-    originalPrice: 650,
-
     responseTime: "2 hours",
     deliveryTime: "3-5 days",
     image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
@@ -24,11 +21,8 @@ const mockServiceDetails = {
   },
   "Emergency Plumbing Repair": {
     vendor: "Rapid Plumbers",
-    vendorLevel: "Pro",
     description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
     price: 150,
-    originalPrice: 200,
-
     responseTime: "30 mins",
     deliveryTime: "Same day",
     image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
@@ -38,11 +32,8 @@ const mockServiceDetails = {
   },
   "Full Home Inspection": {
     vendor: "Certified Inspectors Inc.",
-    vendorLevel: "Top Rated",
     description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
     price: 300,
-    originalPrice: 400,
-
     responseTime: "1 day",
     deliveryTime: "2-3 days",
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
@@ -52,11 +43,8 @@ const mockServiceDetails = {
   },
   "Professional Lawn Care": {
     vendor: "Green Thumb Landscaping",
-    vendorLevel: "Pro",
     description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
     price: 80,
-    originalPrice: 120,
-
     responseTime: "4 hours",
     deliveryTime: "Weekly",
     image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
@@ -66,11 +54,8 @@ const mockServiceDetails = {
   },
   "HVAC System Tune-up": {
     vendor: "Climate Control Experts",
-    vendorLevel: "Top Rated",
     description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
     price: 120,
-    originalPrice: 180,
-
     responseTime: "6 hours",
     deliveryTime: "1-2 days",
     image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
@@ -80,11 +65,8 @@ const mockServiceDetails = {
   },
   "Deep House Cleaning": {
     vendor: "Sparkling Spaces",
-    vendorLevel: "Pro",
     description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
     price: 200,
-    originalPrice: 280,
-
     responseTime: "3 hours",
     deliveryTime: "Same day",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
@@ -206,12 +188,7 @@ const CheckoutPage = () => {
                         alt={serviceName}
                         className="w-full h-48 object-cover rounded-xl"
                       />
-                      <div className="absolute top-4 left-4">
-                        <Badge className={`${service.vendorLevel === 'Top Rated' ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} text-white text-sm px-3 py-1 rounded-full shadow-lg`}>
-                          {service.vendorLevel === 'Top Rated' && <Verified className="w-3 h-3 mr-1" />}
-                          {service.vendorLevel}
-                        </Badge>
-                      </div>
+
                     </div>
 
                     <div>
@@ -250,9 +227,6 @@ const CheckoutPage = () => {
                           <span className="text-gray-600">Service Price</span>
                           <div className="flex items-center space-x-2">
                             <span className="text-lg font-bold text-gray-900">${service.price}</span>
-                            {service.originalPrice && (
-                              <span className="text-sm text-gray-500 line-through">${service.originalPrice}</span>
-                            )}
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-sm text-gray-600">

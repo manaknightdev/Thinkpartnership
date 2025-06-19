@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import {
   Handshake, DollarSign, ShieldCheck, Lightbulb, Quote,
   Palette, Zap, ArrowRight,
-  Globe, Sparkles, CheckCircle, Play, Eye, Building2, Heart, Wrench
+  Globe, Sparkles, CheckCircle, Play, Building2, Heart, Wrench
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
@@ -13,7 +13,7 @@ const Index = () => {
   const clientMarketplaces = [
     {
       name: "HomePro Network",
-      description: "Premium home services marketplace",
+      description: "Home services marketplace",
       category: "Real Estate & Home Services",
       logo: "🏠",
       color: "from-blue-500 to-cyan-500",
@@ -205,7 +205,7 @@ const Index = () => {
                   </div>
                   <Button variant="outline" className="flex items-center space-x-2" asChild>
                     <Link to="/signup">
-                      <Eye className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4" />
                       <span>Visit Marketplace</span>
                     </Link>
                   </Button>

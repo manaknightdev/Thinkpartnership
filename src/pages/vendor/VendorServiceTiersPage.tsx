@@ -10,7 +10,6 @@ import {
   Check,
   Star,
   Package,
-  Crown,
   Zap,
   Plus,
   Edit,

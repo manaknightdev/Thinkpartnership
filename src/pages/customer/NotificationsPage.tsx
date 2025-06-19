@@ -9,12 +9,8 @@ import {
   Check,
   X,
   Clock,
-  Star,
-  ShoppingCart,
   MessageCircle,
-  Gift,
-  AlertCircle,
-  CheckCircle,
+  DollarSign,
   Trash2
 } from "lucide-react";
 
@@ -23,19 +19,19 @@ const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
-      type: "order",
-      title: "Job Done",
-      message: "Your home painting service has been completed",
+      type: "payment",
+      title: "Payment Processed",
+      message: "Your payment of $320 for home painting service has been processed successfully",
       time: "2 hours ago",
       read: false,
-      icon: CheckCircle,
+      icon: DollarSign,
       color: "text-green-600",
       bgColor: "bg-green-100"
     },
     {
       id: 2,
       type: "message",
-      title: "Reply Message",
+      title: "New Message",
       message: "You have a new message from your service provider",
       time: "4 hours ago",
       read: false,
@@ -45,20 +41,20 @@ const NotificationsPage = () => {
     },
     {
       id: 3,
-      type: "order",
-      title: "Job Started",
-      message: "Your cleaning service has started",
+      type: "payment",
+      title: "Payment Confirmation",
+      message: "Payment receipt for cleaning service ($150) has been sent to your email",
       time: "1 day ago",
       read: true,
-      icon: CheckCircle,
+      icon: DollarSign,
       color: "text-green-600",
       bgColor: "bg-green-100"
     },
     {
       id: 4,
       type: "message",
-      title: "New Message",
-      message: "Service provider sent you a message",
+      title: "Message Reply",
+      message: "Service provider replied to your message about scheduling",
       time: "2 days ago",
       read: true,
       icon: MessageCircle,
@@ -89,10 +85,8 @@ const NotificationsPage = () => {
 
   const getNotificationAction = (notification: any) => {
     switch (notification.type) {
-      case "order":
+      case "payment":
         return () => navigate('/marketplace/orders');
-      case "review":
-        return () => navigate('/marketplace/reviews');
       case "message":
         return () => navigate('/marketplace/messages');
       default:
@@ -114,7 +108,7 @@ const NotificationsPage = () => {
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
                   <p className="text-gray-600">
-                    {unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
+                    Payment and messaging notifications - {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
                   </p>
                 </div>
               </div>
@@ -244,7 +238,7 @@ const NotificationsPage = () => {
                 Notification Preferences
               </h3>
               <p className="text-gray-600 mb-6">
-                Manage how and when you receive notifications
+                Manage payment and messaging notification preferences
               </p>
               <Button 
                 variant="outline"
