@@ -11,7 +11,6 @@ import {
   Clock,
   Star,
   ShoppingCart,
-  Heart,
   MessageCircle,
   Gift,
   AlertCircle,

@@ -36,7 +36,6 @@ import {
   Home,
   Grid3X3,
   List,
-  Heart,
   Settings,
   HelpCircle,
   Search,

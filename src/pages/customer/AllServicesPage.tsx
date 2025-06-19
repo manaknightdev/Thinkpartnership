@@ -13,9 +13,7 @@ import {
   MapPin,
   Clock,
   ChevronDown,
-  Heart,
   Eye,
-  Bookmark,
   Verified,
   Loader2,
   ChevronLeft,
@@ -51,7 +49,6 @@ const AllServicesPage = () => {
       tags: ["Interior", "Exterior", "Eco-friendly"],
       image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      isLiked: false,
       completedOrders: 150,
       category: "Painting"
     },
@@ -68,7 +65,6 @@ const AllServicesPage = () => {
       tags: ["24/7", "Emergency", "Licensed"],
       image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      isLiked: true,
       completedOrders: 89,
       category: "Plumbing"
     },
@@ -85,7 +81,6 @@ const AllServicesPage = () => {
       tags: ["Certified", "Detailed Reports", "Pre-purchase"],
       image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-      isLiked: false,
       completedOrders: 200,
       category: "Inspections"
     },
@@ -102,7 +97,6 @@ const AllServicesPage = () => {
       tags: ["Weekly Service", "Organic", "Seasonal"],
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      isLiked: false,
       completedOrders: 300,
       category: "Landscaping"
     },
@@ -119,7 +113,6 @@ const AllServicesPage = () => {
       tags: ["Maintenance", "Energy Efficient", "Warranty"],
       image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      isLiked: true,
       completedOrders: 120,
       category: "HVAC"
     },
@@ -136,7 +129,6 @@ const AllServicesPage = () => {
       tags: ["Deep Clean", "Eco-friendly", "Insured"],
       image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      isLiked: false,
       completedOrders: 250,
       category: "Cleaning"
     },
@@ -154,7 +146,6 @@ const AllServicesPage = () => {
       tags: ["Licensed", "Insured", "Emergency"],
       image: "https://images.unsplash.com/photo-1621905252472-e8b1c8e7e8e8?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      isLiked: false,
       completedOrders: 180,
       category: "Electrical"
     },
@@ -171,7 +162,6 @@ const AllServicesPage = () => {
       tags: ["Full Service", "Insured", "Packing"],
       image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop&crop=center",
       vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      isLiked: true,
       completedOrders: 95,
       category: "Moving"
     }
@@ -445,10 +435,6 @@ const AllServicesPage = () => {
                     
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    <button className="absolute top-4 right-4 w-10 h-10 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg">
-                      <Heart className={`w-5 h-5 ${service.isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-                    </button>
-
                     <div className="absolute top-4 left-4">
                       <Badge className={`${service.vendorLevel === 'Top Rated' ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} text-white text-sm px-3 py-1 rounded-full shadow-lg`}>
                         {service.vendorLevel === 'Top Rated' && <Verified className="w-3 h-3 mr-1" />}
@@ -459,9 +445,6 @@ const AllServicesPage = () => {
                     <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                       <Button size="sm" className="bg-white/90 text-gray-700 hover:bg-white rounded-full w-10 h-10 p-0">
                         <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" className="bg-white/90 text-gray-700 hover:bg-white rounded-full w-10 h-10 p-0">
-                        <Bookmark className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

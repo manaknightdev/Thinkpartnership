@@ -157,7 +157,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
             </Button>
 
             {/* Service Requests */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               className="relative"
@@ -170,7 +170,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                   {requestCount}
                 </Badge>
               )}
-            </Button>
+            </Button> */}
 
             {/* User Menu */}
             <DropdownMenu>
