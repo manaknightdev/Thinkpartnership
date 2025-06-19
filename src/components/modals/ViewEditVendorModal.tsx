@@ -340,17 +340,7 @@ export const ViewEditVendorModal: React.FC<ViewEditVendorModalProps> = ({
 
           <TabsContent value="stats" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="border-0 shadow-md">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-600" />
-                    Rating
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-2xl font-bold text-gray-900">{vendor.rating}</p>
-                </CardContent>
-              </Card>
+
 
               <Card className="border-0 shadow-md">
                 <CardHeader className="pb-3">

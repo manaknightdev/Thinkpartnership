@@ -33,7 +33,7 @@ import {
   Send,
   ThumbsUp,
   ThumbsDown,
-  Star,
+
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -57,7 +57,7 @@ interface ServiceRequest {
   customerStatus: "submitted" | "pending" | "quoted" | "confirmed" | "in_progress" | "completed" | "cancelled";
   requestDate: string;
   lastUpdated: string;
-  customerRating?: number;
+
   isRepeatCustomer: boolean;
   quoteAmount?: string;
   quoteSentDate?: string;
@@ -100,7 +100,7 @@ const VendorRequestsPage = () => {
       customerStatus: "pending",
       requestDate: "2024-01-20",
       lastUpdated: "2024-01-20",
-      customerRating: 4.8,
+
       isRepeatCustomer: false
     },
     {
@@ -121,7 +121,7 @@ const VendorRequestsPage = () => {
       customerStatus: "quoted",
       requestDate: "2024-01-20",
       lastUpdated: "2024-01-20",
-      customerRating: 5.0,
+
       isRepeatCustomer: true,
       quoteAmount: "$180",
       quoteSentDate: "2024-01-20"
@@ -144,7 +144,7 @@ const VendorRequestsPage = () => {
       customerStatus: "confirmed",
       requestDate: "2024-01-19",
       lastUpdated: "2024-01-20",
-      customerRating: 4.9,
+
       isRepeatCustomer: false,
       quoteAmount: "$2,450",
       quoteSentDate: "2024-01-19",
@@ -168,7 +168,7 @@ const VendorRequestsPage = () => {
       customerStatus: "in_progress",
       requestDate: "2024-01-18",
       lastUpdated: "2024-01-21",
-      customerRating: 4.7,
+
       isRepeatCustomer: false,
       quoteAmount: "$420",
       quoteSentDate: "2024-01-18",
@@ -193,7 +193,7 @@ const VendorRequestsPage = () => {
       customerStatus: "completed",
       requestDate: "2024-01-15",
       lastUpdated: "2024-01-19",
-      customerRating: 4.6,
+
       isRepeatCustomer: true,
       quoteAmount: "$320",
       quoteSentDate: "2024-01-15",
@@ -511,7 +511,7 @@ const VendorRequestsPage = () => {
                     />
                     {request.isRepeatCustomer && (
                       <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <Star className="h-3 w-3 text-white fill-current" />
+                        <span className="text-xs font-bold text-white">R</span>
                       </div>
                     )}
                   </div>
@@ -533,12 +533,7 @@ const VendorRequestsPage = () => {
                             <User className="w-4 h-4 text-gray-500" />
                             <span className="text-gray-700">{request.customerName}</span>
                           </div>
-                          {request.customerRating && (
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span className="text-sm text-gray-600">{request.customerRating}</span>
-                            </div>
-                          )}
+
                           <div className="flex items-center gap-1">
                             <div className={cn("w-2 h-2 rounded-full", getUrgencyColor(request.urgency))}></div>
                             <span className="text-sm text-gray-600 capitalize">{request.urgency}</span>

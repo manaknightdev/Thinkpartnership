@@ -11,8 +11,7 @@ import {
   Clock,
   ChevronDown,
   ChevronRight,
-  ThumbsUp,
-  ThumbsDown,
+
   Shield,
   CreditCard,
   Users,
@@ -42,64 +41,51 @@ const HelpSupportPage = () => {
       category: "getting-started",
       question: "How do I create an account?",
       answer: "Creating an account is simple! Click the 'Sign Up' button, enter your email and create a password. You'll receive a verification email to confirm your account.",
-      helpful: 24,
-      notHelpful: 2
+
     },
     {
       id: 2,
       category: "booking",
       question: "How do I book a service?",
       answer: "Browse our services, select the one you need, choose your preferred date and time, and complete the booking process. You'll receive confirmation via email and SMS.",
-      helpful: 31,
-      notHelpful: 1
+
     },
     {
       id: 3,
       category: "payments",
       question: "What payment methods do you accept?",
       answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and bank transfers. All payments are processed securely through Stripe.",
-      helpful: 28,
-      notHelpful: 3
+
     },
     {
       id: 4,
       category: "booking",
       question: "Can I cancel or reschedule my booking?",
       answer: "Yes! You can cancel or reschedule up to 24 hours before your appointment. Go to 'My Orders' in your account to make changes. Cancellation fees may apply depending on the service provider's policy.",
-      helpful: 19,
-      notHelpful: 4
     },
     {
       id: 5,
       category: "safety",
       question: "How do you verify service providers?",
-      answer: "All service providers undergo background checks, license verification, and insurance validation. We also monitor customer reviews and ratings to maintain quality standards.",
-      helpful: 35,
-      notHelpful: 1
+      answer: "All service providers undergo background checks, license verification, and insurance validation. We also monitor customer reviews and ratings to maintain quality standards."
     },
     {
       id: 6,
       category: "payments",
       question: "When will I be charged?",
-      answer: "Payment is processed when you confirm your booking. For some services, a deposit may be required upfront with the balance due upon completion.",
-      helpful: 22,
-      notHelpful: 2
+      answer: "Payment is processed when you confirm your booking. For some services, a deposit may be required upfront with the balance due upon completion."
     },
     {
       id: 7,
       category: "account",
       question: "How do I update my profile information?",
-      answer: "Go to Account Settings in your profile menu. You can update your personal information, contact details, and preferences at any time.",
-      helpful: 15,
-      notHelpful: 1
+      answer: "Go to Account Settings in your profile menu. You can update your personal information, contact details, and preferences at any time."
     },
     {
       id: 8,
       category: "safety",
       question: "What if I'm not satisfied with a service?",
-      answer: "We offer a satisfaction guarantee. Contact our support team within 48 hours of service completion, and we'll work with you and the provider to resolve any issues.",
-      helpful: 27,
-      notHelpful: 3
+      answer: "We offer a satisfaction guarantee. Contact our support team within 48 hours of service completion, and we'll work with you and the provider to resolve any issues."
     }
   ];
 
@@ -265,20 +251,7 @@ const HelpSupportPage = () => {
                         {expandedFaq === faq.id && (
                           <div className="px-6 pb-6 border-t border-gray-100">
                             <p className="text-gray-600 mb-4 pt-4">{faq.answer}</p>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <span className="text-sm text-gray-500">Was this helpful?</span>
-                                <div className="flex items-center gap-2">
-                                  <Button size="sm" variant="outline" className="flex items-center gap-1">
-                                    <ThumbsUp className="w-4 h-4" />
-                                    {faq.helpful}
-                                  </Button>
-                                  <Button size="sm" variant="outline" className="flex items-center gap-1">
-                                    <ThumbsDown className="w-4 h-4" />
-                                    {faq.notHelpful}
-                                  </Button>
-                                </div>
-                              </div>
+                            <div className="flex items-center justify-end">
                               <Badge variant="secondary" className="text-xs">
                                 {helpCategories.find(c => c.id === faq.category)?.name}
                               </Badge>

@@ -24,7 +24,7 @@ const ClientReportsPage = () => {
       services: "Plumbing",
       totalRevenue: 45000,
       completedJobs: 89,
-      rating: 4.8,
+
       status: "Active",
       joinDate: "2024-01-15"
     },
@@ -34,7 +34,7 @@ const ClientReportsPage = () => {
       services: "Painting",
       totalRevenue: 32000,
       completedJobs: 67,
-      rating: 4.6,
+
       status: "Active",
       joinDate: "2024-02-20"
     },
@@ -44,7 +44,7 @@ const ClientReportsPage = () => {
       services: "Inspections",
       totalRevenue: 28000,
       completedJobs: 45,
-      rating: 4.9,
+
       status: "Active",
       joinDate: "2024-01-10"
     },
@@ -54,7 +54,7 @@ const ClientReportsPage = () => {
       services: "Landscaping",
       totalRevenue: 22000,
       completedJobs: 34,
-      rating: 4.7,
+
       status: "Active",
       joinDate: "2024-03-05"
     },
@@ -217,15 +217,7 @@ const ClientReportsPage = () => {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-yellow-50 border-yellow-200">
-                <CardContent className="p-4 text-center">
-                  <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Avg Rating</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {(mockAllVendors.reduce((sum, v) => sum + v.rating, 0) / mockAllVendors.length).toFixed(1)}
-                  </p>
-                </CardContent>
-              </Card>
+
             </div>
 
             <div className="overflow-x-auto">
@@ -254,12 +246,7 @@ const ClientReportsPage = () => {
                       <TableCell className="text-blue-600 font-semibold">
                         {vendor.completedJobs}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{vendor.rating}</span>
-                        </div>
-                      </TableCell>
+
                       <TableCell>
                         <Badge variant={vendor.status === "Active" ? "default" : "destructive"}>
                           {vendor.status}

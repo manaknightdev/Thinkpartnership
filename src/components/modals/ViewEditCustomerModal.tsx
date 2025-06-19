@@ -417,17 +417,7 @@ export const ViewEditCustomerModal: React.FC<ViewEditCustomerModalProps> = ({
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-md">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-600" />
-                    Avg Rating
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-2xl font-bold text-gray-900">{customer.avgRating}</p>
-                </CardContent>
-              </Card>
+
 
               <Card className="border-0 shadow-md">
                 <CardHeader className="pb-3">

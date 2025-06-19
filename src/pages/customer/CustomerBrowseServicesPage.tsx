@@ -16,7 +16,7 @@ import {
   Truck,
   Building2,
   CheckCircle,
-  Star,
+
   Clock,
   Shield,
   Users,
@@ -275,7 +275,7 @@ const CustomerBrowseServicesPage = () => {
               </div>
               <div className="flex items-center justify-center gap-3 text-gray-700">
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <Star className="h-6 w-6 text-yellow-600" />
+                  <CheckCircle className="h-6 w-6 text-yellow-600" />
                 </div>
                 <div>
                   <div className="font-semibold">Quality Guaranteed</div>

@@ -85,29 +85,7 @@ const CustomerPortal = () => {
           </div>
         </section>
 
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">What Our Customers Say</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <Card className="text-left">
-              <CardContent className="pt-6">
-                <p className="italic text-gray-700 dark:text-gray-300 mb-4">
-                  "Found a fantastic painter through this portal! The process was smooth and the quality was excellent."
-                </p>
-                <p className="font-semibold text-gray-800 dark:text-gray-200">- Jane D.</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Service: Painting</p>
-              </CardContent>
-            </Card>
-            <Card className="text-left">
-              <CardContent className="pt-6">
-                <p className="italic text-gray-700 dark:text-gray-300 mb-4">
-                  "Quick and reliable plumbing service. Highly recommend using this platform to find local pros."
-                </p>
-                <p className="font-semibold text-gray-800 dark:text-gray-200">- Mark S.</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Service: Plumbing</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+
       </main>
     </div>
   );

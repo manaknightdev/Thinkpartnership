@@ -218,7 +218,7 @@ const VendorServicePage = () => {
         
         <Card>
           <CardContent className="p-6 text-center">
-            <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+            <TrendingUp className="h-8 w-8 text-blue-600 mx-auto mb-2" />
             <p className="text-sm text-gray-600">Most Popular Tier</p>
             <p className="text-2xl font-bold text-gray-900">Standard</p>
           </CardContent>

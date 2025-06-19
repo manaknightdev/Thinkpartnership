@@ -72,16 +72,7 @@ const VendorNotificationsPage = () => {
       customerName: "David Martinez",
       amount: "$320",
     },
-    {
-      id: "notif004",
-      type: "review",
-      title: "New Review",
-      message: "Emily Chen left a 5-star review for Kitchen Cabinet Painting",
-      timestamp: "3 hours ago",
-      isRead: true,
-      priority: "normal",
-      customerName: "Emily Chen",
-    },
+
     {
       id: "notif005",
       type: "request",

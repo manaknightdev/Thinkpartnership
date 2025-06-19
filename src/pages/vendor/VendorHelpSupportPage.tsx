@@ -17,8 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
   Star,
-  ThumbsUp,
-  ThumbsDown,
+
   Send,
   FileText,
   Shield,
@@ -63,64 +62,49 @@ const VendorHelpSupportPage = () => {
       category: "getting-started",
       question: "How do I set up my vendor profile?",
       answer: "Complete your business profile by adding company information, services offered, pricing, and verification documents. A complete profile increases your visibility to customers.",
-      helpful: 45,
-      notHelpful: 2
+
     },
     {
       id: 2,
       category: "requests",
       question: "How do I respond to service requests?",
       answer: "When you receive a request, review the details and either send a quote or decline. Quick responses improve your acceptance rate and customer satisfaction.",
-      helpful: 38,
-      notHelpful: 1
     },
     {
       id: 3,
       category: "payments",
       question: "When do I get paid for completed services?",
-      answer: "Payments are processed within 2-3 business days after service completion and customer approval. Funds are deposited directly to your connected bank account.",
-      helpful: 52,
-      notHelpful: 3
+      answer: "Payments are processed within 2-3 business days after service completion and customer approval. Funds are deposited directly to your connected bank account."
     },
     {
       id: 4,
       category: "profile",
       question: "How can I improve my service visibility?",
-      answer: "Maintain a complete profile, respond quickly to requests, provide excellent service, and consider upgrading to a premium subscription for better placement.",
-      helpful: 29,
-      notHelpful: 1
+      answer: "Maintain a complete profile, respond quickly to requests, provide excellent service, and consider upgrading to a premium subscription for better placement."
     },
     {
       id: 5,
       category: "requests",
       question: "What should I include in my quotes?",
-      answer: "Include detailed pricing, scope of work, estimated timeline, and any terms or conditions. Clear quotes help customers make informed decisions.",
-      helpful: 33,
-      notHelpful: 2
+      answer: "Include detailed pricing, scope of work, estimated timeline, and any terms or conditions. Clear quotes help customers make informed decisions."
     },
     {
       id: 6,
       category: "payments",
       question: "What are the platform fees?",
-      answer: "Platform fees vary by subscription plan. Basic plans have higher transaction fees, while premium plans offer reduced fees and additional benefits.",
-      helpful: 41,
-      notHelpful: 4
+      answer: "Platform fees vary by subscription plan. Basic plans have higher transaction fees, while premium plans offer reduced fees and additional benefits."
     },
     {
       id: 7,
       category: "account",
       question: "How do I update my business information?",
-      answer: "Go to Profile Setup in your vendor portal. You can update company details, contact information, and service offerings at any time.",
-      helpful: 25,
-      notHelpful: 1
+      answer: "Go to Profile Setup in your vendor portal. You can update company details, contact information, and service offerings at any time."
     },
     {
       id: 8,
       category: "technical",
       question: "I'm having trouble with notifications",
-      answer: "Check your notification settings in Account Settings. Ensure your email and phone number are verified, and check your spam folder for missed notifications.",
-      helpful: 18,
-      notHelpful: 2
+      answer: "Check your notification settings in Account Settings. Ensure your email and phone number are verified, and check your spam folder for missed notifications."
     }
   ];
 
@@ -305,21 +289,7 @@ const VendorHelpSupportPage = () => {
                     {expandedFaq === faq.id && (
                       <div className="px-4 pb-4 border-t border-gray-100">
                         <p className="text-gray-700 mb-4 pt-4">{faq.answer}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <span className="text-sm text-gray-600">Was this helpful?</span>
-                            <div className="flex items-center space-x-2">
-                              <Button variant="outline" size="sm">
-                                <ThumbsUp className="w-4 h-4 mr-1" />
-                                {faq.helpful}
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <ThumbsDown className="w-4 h-4 mr-1" />
-                                {faq.notHelpful}
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
+
                       </div>
                     )}
                   </div>

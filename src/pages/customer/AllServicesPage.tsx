@@ -11,7 +11,6 @@ import {
   Filter,
   SlidersHorizontal,
   MapPin,
-  Star,
   Clock,
   ChevronDown,
   Heart,
@@ -31,7 +30,7 @@ const AllServicesPage = () => {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'all');
-  const [selectedRating, setSelectedRating] = useState(searchParams.get('rating') || 'all');
+
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState(searchParams.get('delivery') || 'all');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'best-match');
   
@@ -195,16 +194,13 @@ const AllServicesPage = () => {
     const matchesCategory = selectedCategory === "all" || service.category.toLowerCase() === selectedCategory.toLowerCase();
 
     // Add more filter logic here
-    const matchesRating = selectedRating === "all" ||
-                         (service.rating && service.rating >= parseFloat(selectedRating));
-
     const matchesDeliveryTime = selectedDeliveryTime === "all" ||
                                (selectedDeliveryTime === "same-day" && service.deliveryTime.toLowerCase().includes("same day")) ||
                                (selectedDeliveryTime === "1-day" && (service.deliveryTime.toLowerCase().includes("same day") || service.deliveryTime.toLowerCase().includes("1") || service.deliveryTime.toLowerCase().includes("24"))) ||
                                (selectedDeliveryTime === "3-days" && !service.deliveryTime.toLowerCase().includes("week")) ||
                                (selectedDeliveryTime === "1-week");
 
-    return matchesSearch && matchesCategory && matchesRating && matchesDeliveryTime;
+    return matchesSearch && matchesCategory && matchesDeliveryTime;
   });
 
   // Sort the filtered services
@@ -214,8 +210,7 @@ const AllServicesPage = () => {
         return parseInt(a.price.replace('$', '')) - parseInt(b.price.replace('$', ''));
       case 'price-high':
         return parseInt(b.price.replace('$', '')) - parseInt(a.price.replace('$', ''));
-      case 'rating':
-        return (b.rating || 0) - (a.rating || 0);
+
       case 'newest':
         return b.id - a.id; // Assuming higher ID means newer
       case 'popular':
@@ -350,18 +345,7 @@ const AllServicesPage = () => {
                     </SelectContent>
                   </Select>
 
-                  <Select value={selectedRating} onValueChange={setSelectedRating}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Any Rating</SelectItem>
-                      <SelectItem value="4.5">4.5+ Stars</SelectItem>
-                      <SelectItem value="4.0">4.0+ Stars</SelectItem>
-                      <SelectItem value="3.5">3.5+ Stars</SelectItem>
-                      <SelectItem value="3.0">3.0+ Stars</SelectItem>
-                    </SelectContent>
-                  </Select>
+
 
                   <Select value={selectedDeliveryTime} onValueChange={setSelectedDeliveryTime}>
                     <SelectTrigger className="w-40">
@@ -384,7 +368,7 @@ const AllServicesPage = () => {
                       <SelectItem value="best-match">Best Match</SelectItem>
                       <SelectItem value="price-low">Price: Low to High</SelectItem>
                       <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      <SelectItem value="rating">Highest Rated</SelectItem>
+
                       <SelectItem value="newest">Newest First</SelectItem>
                       <SelectItem value="popular">Most Popular</SelectItem>
                     </SelectContent>
@@ -392,7 +376,7 @@ const AllServicesPage = () => {
                 </div>
 
                 {/* Active Filters Display */}
-                {(selectedCategory !== "all" || selectedLocation !== "all" || selectedRating !== "all" || selectedDeliveryTime !== "all" || sortBy !== "best-match") && (
+                {(selectedCategory !== "all" || selectedLocation !== "all" || selectedDeliveryTime !== "all" || sortBy !== "best-match") && (
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm text-gray-600">Active filters:</span>
                     {selectedCategory !== "all" && (
@@ -407,12 +391,7 @@ const AllServicesPage = () => {
                         <button onClick={() => setSelectedLocation("all")} className="ml-1 hover:text-blue-900">×</button>
                       </Badge>
                     )}
-                    {selectedRating !== "all" && (
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-                        {selectedRating}+ stars
-                        <button onClick={() => setSelectedRating("all")} className="ml-1 hover:text-yellow-900">×</button>
-                      </Badge>
-                    )}
+
                     {selectedDeliveryTime !== "all" && (
                       <Badge variant="secondary" className="bg-purple-100 text-purple-700">
                         {selectedDeliveryTime}
@@ -425,7 +404,7 @@ const AllServicesPage = () => {
                       onClick={() => {
                         setSelectedCategory("all");
                         setSelectedLocation("all");
-                        setSelectedRating("all");
+
                         setSelectedDeliveryTime("all");
                         setSortBy("best-match");
                       }}

@@ -17,7 +17,7 @@ import {
   Phone, 
   MapPin, 
   Building, 
-  Star, 
+
   Calendar,
   FileText,
   CheckCircle,
@@ -273,17 +273,7 @@ export const VendorDetailsModal: React.FC<VendorDetailsModalProps> = ({
           <TabsContent value="performance" className="space-y-6">
             {!isPending ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-0 shadow-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                      <Star className="h-4 w-4 text-yellow-600" />
-                      Rating
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-2xl font-bold text-gray-900">{vendorDetails.rating || "4.8"}</p>
-                  </CardContent>
-                </Card>
+
 
                 <Card className="border-0 shadow-md">
                   <CardHeader className="pb-3">

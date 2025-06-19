@@ -68,7 +68,7 @@ const ChatPage = () => {
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
     status: "online",
     lastSeen: "Active now",
-    rating: 4.9,
+
     completedJobs: 127,
     responseTime: "Usually responds within 30 minutes",
     location: "Downtown Area"
@@ -613,10 +613,7 @@ const ChatPage = () => {
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
                   <span className="hidden sm:inline">{vendor.lastSeen}</span>
                   <span className="hidden sm:inline">•</span>
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    <span>{vendor.rating}</span>
-                  </div>
+
                 </div>
               </div>
             </div>

@@ -47,7 +47,7 @@ const mockVendors = [
     client: "TechCorp Solutions",
     status: "Active", 
     services: "Plumbing, Emergency Repairs",
-    rating: 4.8,
+
     totalJobs: 245,
     revenue: "$85,000",
     joinDate: "2023-02-15",
@@ -62,7 +62,7 @@ const mockVendors = [
     client: "HomeServices Pro",
     status: "Active", 
     services: "Interior Painting, Exterior Painting",
-    rating: 4.9,
+
     totalJobs: 189,
     revenue: "$72,000",
     joinDate: "2023-01-20",
@@ -149,7 +149,7 @@ const AdminAllVendorsPage = () => {
   const [clientFilter, setClientFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
-  const [ratingFilter, setRatingFilter] = useState("all");
+
   const [serviceFilter, setServiceFilter] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
@@ -202,7 +202,7 @@ const AdminAllVendorsPage = () => {
     setStatusFilter("all");
     setClientFilter("all");
     setLocationFilter("all");
-    setRatingFilter("all");
+
     setServiceFilter("all");
     toast.info("All filters cleared");
   };
@@ -215,13 +215,10 @@ const AdminAllVendorsPage = () => {
     const matchesStatus = statusFilter === "all" || vendor.status.toLowerCase() === statusFilter;
     const matchesClient = clientFilter === "all" || vendor.client.toLowerCase().includes(clientFilter.toLowerCase());
     const matchesLocation = locationFilter === "all" || vendor.location.toLowerCase().includes(locationFilter.toLowerCase());
-    const matchesRating = ratingFilter === "all" ||
-                         (ratingFilter === "high" && vendor.rating >= 4.5) ||
-                         (ratingFilter === "medium" && vendor.rating >= 4.0 && vendor.rating < 4.5) ||
-                         (ratingFilter === "low" && vendor.rating < 4.0);
+
     const matchesService = serviceFilter === "all" || vendor.services.toLowerCase().includes(serviceFilter.toLowerCase());
 
-    return matchesSearch && matchesStatus && matchesClient && matchesLocation && matchesRating && matchesService;
+    return matchesSearch && matchesStatus && matchesClient && matchesLocation && matchesService;
   });
 
   // Calculate summary stats based on filtered data
@@ -401,20 +398,7 @@ const AdminAllVendorsPage = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">Rating</label>
-                    <Select value={ratingFilter} onValueChange={setRatingFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Ratings" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Ratings</SelectItem>
-                        <SelectItem value="high">4.5+ Stars</SelectItem>
-                        <SelectItem value="medium">4.0-4.4 Stars</SelectItem>
-                        <SelectItem value="low">Below 4.0 Stars</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+
                   <div>
                     <label className="text-xs font-medium text-gray-700 mb-1 block">Service Type</label>
                     <Select value={serviceFilter} onValueChange={setServiceFilter}>
@@ -493,12 +477,7 @@ const AdminAllVendorsPage = () => {
                           {vendor.services}
                         </p>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 mr-1" />
-                          <span className="font-medium text-gray-900">{vendor.rating}</span>
-                        </div>
-                      </TableCell>
+
                       <TableCell className="text-gray-900 font-medium">{vendor.totalJobs}</TableCell>
                       <TableCell className="text-gray-900 font-semibold">{vendor.revenue}</TableCell>
                       <TableCell>

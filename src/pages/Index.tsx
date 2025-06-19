@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   Handshake, DollarSign, ShieldCheck, Lightbulb, Quote,
-  Palette, Zap, Star, ArrowRight,
+  Palette, Zap, ArrowRight,
   Globe, Sparkles, CheckCircle, Play, Eye, Building2, Heart, Wrench
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
@@ -22,21 +22,21 @@ const Index = () => {
           name: "Kitchen Renovation",
           vendor: "Elite Kitchen Designs",
           price: "From $15,000",
-          rating: 4.9,
+
           image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&crop=center"
         },
         {
           name: "Smart Home Installation",
           vendor: "TechHome Solutions",
           price: "From $2,500",
-          rating: 4.8,
+
           image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center"
         },
         {
           name: "Landscape Design",
           vendor: "GreenSpace Architects",
           price: "From $5,000",
-          rating: 5.0,
+
           image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center"
         },
       ],
@@ -52,14 +52,14 @@ const Index = () => {
           name: "Emergency Plumbing",
           vendor: "Rapid Plumbers",
           price: "From $150",
-          rating: 4.9,
+
           image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop&crop=center"
         },
         {
           name: "HVAC Repair & Installation",
           vendor: "Climate Control Experts",
           price: "From $200",
-          rating: 4.8,
+
           image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center"
         },
         {
@@ -82,14 +82,14 @@ const Index = () => {
           name: "Property Management",
           vendor: "Elite Property Solutions",
           price: "From $150/month",
-          rating: 4.9,
+
           image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center"
         },
         {
           name: "Home Inspection",
           vendor: "TrustPoint Inspectors",
           price: "From $400",
-          rating: 4.8,
+
           image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=300&fit=crop&crop=center"
         },
         {
@@ -221,10 +221,7 @@ const Index = () => {
                           alt={service.name}
                           className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                         />
-                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          <span className="text-sm font-medium">{service.rating}</span>
-                        </div>
+
                       </div>
                       <CardContent className="p-6">
                         <h4 className="text-xl font-semibold mb-2 text-gray-900">{service.name}</h4>
@@ -544,11 +541,7 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Testimonial 1 */}
               <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
+
                 <Quote className="w-8 h-8 text-gray-300 mb-4" />
                 <p className="text-gray-700 mb-6 leading-relaxed">
                   "ThinkPartnership transformed our real estate business. We launched HomePro Network and now earn $15K+ monthly from vendor partnerships. Game-changer!"
@@ -566,11 +559,7 @@ const Index = () => {
 
               {/* Testimonial 2 */}
               <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
+
                 <Quote className="w-8 h-8 text-gray-300 mb-4" />
                 <p className="text-gray-700 mb-6 leading-relaxed">
                   "Joining ServicePro Hub transformed my plumbing business. I've gained 150+ new customers and earn great referral commissions. Best decision ever!"
@@ -588,11 +577,7 @@ const Index = () => {
 
               {/* Testimonial 3 */}
               <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
+
                 <Quote className="w-8 h-8 text-gray-300 mb-4" />
                 <p className="text-gray-700 mb-6 leading-relaxed">
                   "PropertyPro Network launched in 48 hours with 30+ real estate service providers. Our agents love the seamless referral system and extra income!"

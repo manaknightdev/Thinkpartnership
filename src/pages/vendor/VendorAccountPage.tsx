@@ -250,17 +250,7 @@ const VendorAccountPage = () => {
                 onCheckedChange={(checked) => handleNotificationChange("emailPayments", checked)}
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="emailReviews">Reviews & Ratings</Label>
-                <p className="text-sm text-gray-600">New customer reviews and ratings</p>
-              </div>
-              <Switch
-                id="emailReviews"
-                checked={notifications.emailReviews}
-                onCheckedChange={(checked) => handleNotificationChange("emailReviews", checked)}
-              />
-            </div>
+
           </div>
         </div>
 

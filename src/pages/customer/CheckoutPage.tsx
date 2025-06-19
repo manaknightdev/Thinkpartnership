@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, Star, Clock, Shield, Verified } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Shield, Verified } from "lucide-react";
 
 const mockServiceDetails = {
   "Premium Home Painting": {
@@ -14,8 +14,7 @@ const mockServiceDetails = {
     description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
     price: 500,
     originalPrice: 650,
-    rating: 4.9,
-    reviews: 127,
+
     responseTime: "2 hours",
     deliveryTime: "3-5 days",
     image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
@@ -29,8 +28,7 @@ const mockServiceDetails = {
     description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
     price: 150,
     originalPrice: 200,
-    rating: 4.8,
-    reviews: 89,
+
     responseTime: "30 mins",
     deliveryTime: "Same day",
     image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
@@ -44,8 +42,7 @@ const mockServiceDetails = {
     description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
     price: 300,
     originalPrice: 400,
-    rating: 4.9,
-    reviews: 156,
+
     responseTime: "1 day",
     deliveryTime: "2-3 days",
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
@@ -59,8 +56,7 @@ const mockServiceDetails = {
     description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
     price: 80,
     originalPrice: 120,
-    rating: 4.7,
-    reviews: 203,
+
     responseTime: "4 hours",
     deliveryTime: "Weekly",
     image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
@@ -74,8 +70,7 @@ const mockServiceDetails = {
     description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
     price: 120,
     originalPrice: 180,
-    rating: 4.8,
-    reviews: 94,
+
     responseTime: "6 hours",
     deliveryTime: "1-2 days",
     image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
@@ -89,8 +84,7 @@ const mockServiceDetails = {
     description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
     price: 200,
     originalPrice: 280,
-    rating: 4.9,
-    reviews: 178,
+
     responseTime: "3 hours",
     deliveryTime: "Same day",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
@@ -225,11 +219,6 @@ const CheckoutPage = () => {
                       <p className="text-gray-600 mb-4">{service.description}</p>
 
                       <div className="flex items-center space-x-4 mb-4">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-bold text-gray-900">{service.rating}</span>
-                          <span className="text-sm text-gray-500">({service.reviews} reviews)</span>
-                        </div>
                         <div className="flex items-center space-x-1 text-sm text-gray-500">
                           <Clock className="w-4 h-4" />
                           <span>{service.responseTime} response</span>

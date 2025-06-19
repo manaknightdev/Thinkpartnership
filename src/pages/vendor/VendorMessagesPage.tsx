@@ -22,7 +22,7 @@ import {
   MoreVertical,
   Search,
   Filter,
-  Star,
+
   Clock,
   DollarSign,
   FileText,
@@ -63,7 +63,7 @@ interface Customer {
   unreadCount: number;
   status: "online" | "offline";
   location: string;
-  rating?: number;
+
   totalSpent?: string;
 }
 
@@ -157,7 +157,7 @@ const VendorMessagesPage = () => {
       unreadCount: 2,
       status: "online",
       location: "Downtown Area",
-      rating: 4.8,
+
       totalSpent: "$2,450"
     },
     {
@@ -169,7 +169,7 @@ const VendorMessagesPage = () => {
       unreadCount: 0,
       status: "offline",
       location: "Suburbs",
-      rating: 5.0,
+
       totalSpent: "$1,200"
     },
     {
@@ -181,7 +181,7 @@ const VendorMessagesPage = () => {
       unreadCount: 1,
       status: "online",
       location: "Industrial District",
-      rating: 4.9,
+
       totalSpent: "$3,800"
     },
     {
@@ -193,7 +193,7 @@ const VendorMessagesPage = () => {
       unreadCount: 0,
       status: "offline",
       location: "Downtown Area",
-      rating: 4.7,
+
       totalSpent: "$950"
     }
   ]);
@@ -386,12 +386,7 @@ const VendorMessagesPage = () => {
                   <p className="text-sm text-gray-600 truncate mt-1">{customer.lastMessage}</p>
                   <div className="flex items-center space-x-2 mt-1">
                     <span className="text-xs text-gray-500">{customer.location}</span>
-                    {customer.rating && (
-                      <div className="flex items-center">
-                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                        <span className="text-xs text-gray-500 ml-1">{customer.rating}</span>
-                      </div>
-                    )}
+
                   </div>
                 </div>
               </div>
@@ -455,10 +450,7 @@ const VendorMessagesPage = () => {
             <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-gray-700">{selectedCustomer.rating} rating</span>
-                  </div>
+
                   <div className="flex items-center space-x-1">
                     <DollarSign className="h-4 w-4 text-green-600" />
                     <span className="text-gray-700">{selectedCustomer.totalSpent} total spent</span>

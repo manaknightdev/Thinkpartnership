@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Crown, CheckCircle, DollarSign, Star, Zap, Calendar, TrendingUp } from "lucide-react";
+import { Crown, CheckCircle, DollarSign, Zap, Calendar, TrendingUp } from "lucide-react";
 import { useState } from "react";
 
 interface SubscriptionPlan {
@@ -240,7 +240,7 @@ const VendorSubscriptionPage = () => {
             <Card className="border-l-4 border-l-orange-500 shadow-lg bg-gradient-to-r from-orange-50 to-yellow-50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-orange-600" />
+                  <TrendingUp className="h-5 w-5 text-orange-600" />
                   Active Featured Placement
                 </CardTitle>
                 <CardDescription>Your current promotional boost</CardDescription>
@@ -339,7 +339,7 @@ const VendorSubscriptionPage = () => {
                       Instant activation upon purchase
                     </li>
                     <li className="flex items-center gap-2">
-                      <Star className="h-4 w-4" />
+                      <TrendingUp className="h-4 w-4" />
                       Appear at the top of search results
                     </li>
                     <li className="flex items-center gap-2">

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, UserPlus, Search, Eye, Edit, CheckCircle, XCircle, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, Star, TrendingUp } from "lucide-react";
+import { Users, UserPlus, Search, Eye, Edit, CheckCircle, XCircle, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface Vendor {
@@ -23,7 +23,7 @@ interface Vendor {
   joinDate: string;
   totalRevenue: number;
   completedJobs: number;
-  rating: number;
+
   description?: string;
 }
 
@@ -51,7 +51,7 @@ const ClientVendorManagementPage = () => {
       joinDate: "2024-01-15",
       totalRevenue: 45000,
       completedJobs: 89,
-      rating: 4.8,
+
       description: "Professional plumbing services with 24/7 emergency support."
     },
     {
@@ -65,7 +65,7 @@ const ClientVendorManagementPage = () => {
       joinDate: "2024-02-20",
       totalRevenue: 32000,
       completedJobs: 67,
-      rating: 4.6,
+
       description: "Interior and exterior painting specialists."
     },
     {
@@ -79,7 +79,7 @@ const ClientVendorManagementPage = () => {
       joinDate: "2024-01-10",
       totalRevenue: 28000,
       completedJobs: 45,
-      rating: 4.9,
+
       description: "Comprehensive home and commercial inspections."
     },
     {
@@ -93,7 +93,7 @@ const ClientVendorManagementPage = () => {
       joinDate: "2024-03-05",
       totalRevenue: 22000,
       completedJobs: 34,
-      rating: 4.7,
+
       description: "Complete landscaping and garden maintenance services."
     },
     {
@@ -107,7 +107,7 @@ const ClientVendorManagementPage = () => {
       joinDate: "2024-02-01",
       totalRevenue: 15000,
       completedJobs: 23,
-      rating: 4.2,
+
       description: "Licensed electrical contractors for residential and commercial."
     },
   ];
@@ -215,7 +215,7 @@ const ClientVendorManagementPage = () => {
                   <TableHead>Services</TableHead>
                   <TableHead>Revenue</TableHead>
                   <TableHead>Jobs</TableHead>
-                  <TableHead>Rating</TableHead>
+
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -236,12 +236,7 @@ const ClientVendorManagementPage = () => {
                     <TableCell className="text-blue-600 font-semibold">
                       {vendor.completedJobs}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">{vendor.rating}</span>
-                      </div>
-                    </TableCell>
+
                     <TableCell>
                       <Badge variant={vendor.status === "Active" ? "default" : "destructive"}
                              className={vendor.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
@@ -380,13 +375,7 @@ const ClientVendorManagementPage = () => {
                       {new Date(selectedVendor.joinDate).toLocaleDateString()}
                     </p>
                   </div>
-                  <div>
-                    <Label className="text-sm font-medium text-gray-500">Rating</Label>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{selectedVendor.rating}</span>
-                    </div>
-                  </div>
+
                 </div>
               </div>
 
@@ -405,13 +394,7 @@ const ClientVendorManagementPage = () => {
                     <p className="text-xl font-bold text-blue-600">{selectedVendor.completedJobs}</p>
                   </CardContent>
                 </Card>
-                <Card className="bg-yellow-50 border-yellow-200">
-                  <CardContent className="p-4 text-center">
-                    <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Rating</p>
-                    <p className="text-xl font-bold text-yellow-600">{selectedVendor.rating}/5</p>
-                  </CardContent>
-                </Card>
+
               </div>
 
               {selectedVendor.description && (
@@ -555,15 +538,7 @@ const ClientVendorManagementPage = () => {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-yellow-50 border-yellow-200">
-                <CardContent className="p-4 text-center">
-                  <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Avg Rating</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {(mockVendors.reduce((sum, v) => sum + v.rating, 0) / mockVendors.length).toFixed(1)}
-                  </p>
-                </CardContent>
-              </Card>
+
             </div>
 
             <div className="overflow-x-auto">
@@ -592,12 +567,7 @@ const ClientVendorManagementPage = () => {
                       <TableCell className="text-blue-600 font-semibold">
                         {vendor.completedJobs}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{vendor.rating}</span>
-                        </div>
-                      </TableCell>
+
                       <TableCell>
                         <Badge variant={vendor.status === "Active" ? "default" : "destructive"}>
                           {vendor.status}

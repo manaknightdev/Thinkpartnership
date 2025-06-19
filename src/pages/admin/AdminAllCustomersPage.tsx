@@ -24,7 +24,7 @@ import {
   Ban,
   UserCheck,
   Building,
-  Star,
+
   Plus,
   X,
   SlidersHorizontal
@@ -58,7 +58,7 @@ const mockCustomers = [
     status: "Active",
     totalOrders: 12,
     totalSpent: "$3,450",
-    avgRating: 4.8,
+
     joinDate: "2023-03-15",
     lastOrder: "2024-01-08",
     preferredServices: "Plumbing, HVAC"
@@ -74,7 +74,7 @@ const mockCustomers = [
     status: "Active",
     totalOrders: 8,
     totalSpent: "$2,180",
-    avgRating: 4.6,
+
     joinDate: "2023-05-20",
     lastOrder: "2024-01-10",
     preferredServices: "Painting, Landscaping"
@@ -90,7 +90,7 @@ const mockCustomers = [
     status: "Active",
     totalOrders: 15,
     totalSpent: "$4,200",
-    avgRating: 4.9,
+
     joinDate: "2023-01-10",
     lastOrder: "2024-01-11",
     preferredServices: "Home Inspection, Electrical"
@@ -106,7 +106,7 @@ const mockCustomers = [
     status: "Inactive",
     totalOrders: 3,
     totalSpent: "$890",
-    avgRating: 4.2,
+
     joinDate: "2023-08-15",
     lastOrder: "2023-11-20",
     preferredServices: "Landscaping"
@@ -122,7 +122,7 @@ const mockCustomers = [
     status: "Active",
     totalOrders: 6,
     totalSpent: "$1,650",
-    avgRating: 4.7,
+
     joinDate: "2023-06-30",
     lastOrder: "2024-01-09",
     preferredServices: "Electrical, HVAC"
@@ -138,7 +138,7 @@ const mockCustomers = [
     status: "Active",
     totalOrders: 9,
     totalSpent: "$2,750",
-    avgRating: 4.5,
+
     joinDate: "2023-04-12",
     lastOrder: "2024-01-07",
     preferredServices: "HVAC, Plumbing"
@@ -154,7 +154,7 @@ const mockCustomers = [
     status: "Suspended",
     totalOrders: 2,
     totalSpent: "$420",
-    avgRating: 3.8,
+
     joinDate: "2023-09-05",
     lastOrder: "2023-12-01",
     preferredServices: "Cleaning"
@@ -510,7 +510,7 @@ const AdminAllCustomersPage = () => {
                     <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
                     <TableHead className="font-semibold text-gray-900">Orders</TableHead>
                     <TableHead className="font-semibold text-gray-900">Total Spent</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Rating</TableHead>
+
                     <TableHead className="font-semibold text-gray-900">Last Order</TableHead>
                     <TableHead className="font-semibold text-gray-900">Status</TableHead>
                     <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
@@ -564,12 +564,7 @@ const AdminAllCustomersPage = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-900 font-semibold">{customer.totalSpent}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 mr-1" />
-                        <span className="font-medium text-gray-900">{customer.avgRating}</span>
-                      </div>
-                    </TableCell>
+
                     <TableCell className="text-gray-600">{customer.lastOrder}</TableCell>
                     <TableCell>
                       <Badge 

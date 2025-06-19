@@ -66,7 +66,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
         client: formData.client,
         status: 'Pending',
         services: formData.services,
-        rating: 0,
+
         totalJobs: 0,
         revenue: '$0',
         joinDate: new Date().toISOString().split('T')[0],

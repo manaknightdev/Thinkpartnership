@@ -17,7 +17,7 @@ import {
   MessageCircle,
   FileText,
   DollarSign,
-  Star,
+
   Edit
 } from "lucide-react";
 
@@ -52,7 +52,6 @@ const ServiceRequestDetailsPage = () => {
         urgency: "Normal"
       },
       vendorInfo: {
-        rating: 4.9,
         completedJobs: 127,
         responseTime: "Usually responds within 30 minutes",
         verified: true
@@ -83,7 +82,6 @@ const ServiceRequestDetailsPage = () => {
         urgency: "Urgent"
       },
       vendorInfo: {
-        rating: 4.7,
         completedJobs: 89,
         responseTime: "Usually responds within 15 minutes",
         verified: true
@@ -293,8 +291,6 @@ const ServiceRequestDetailsPage = () => {
                     <div>
                       <h3 className="font-semibold text-gray-900">{request.vendor}</h3>
                       <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm text-gray-600">{request.vendorInfo.rating}</span>
                         <span className="text-sm text-gray-500">({request.vendorInfo.completedJobs} jobs)</span>
                       </div>
                       {request.vendorInfo.verified && (
