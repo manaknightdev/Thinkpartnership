@@ -89,12 +89,12 @@ const VendorMessagesPage = () => {
     { id: "electrical-standard", name: "Standard Electrical", price: 200, description: "Electrical installations and repairs" }
   ];
 
-  // Orders from Service Listings (Specialized Service) page
-  const serviceListingOrders = [
-    { id: "SL001", service: "Emergency Drain Cleaning", category: "Plumbing", price: 150, customer: "John Doe", status: "Active", dateCreated: "2024-01-15" },
-    { id: "SL002", service: "Interior House Painting", category: "Painting", price: 800, customer: "Jane Smith", status: "Completed", dateCreated: "2024-01-10" },
-    { id: "SL003", service: "HVAC System Maintenance", category: "HVAC", price: 200, customer: "Bob Johnson", status: "In Progress", dateCreated: "2024-01-12" },
-    { id: "SL004", service: "Electrical Panel Upgrade", category: "Electrical", price: 1200, customer: "Alice Wilson", status: "Pending", dateCreated: "2024-01-18" }
+  // Specialized Services (from Specialized Service page)
+  const specializedServices = [
+    { id: "s001", name: "Emergency Plumbing Repair", category: "Plumbing", price: "$120", originalPrice: "$150", hasDiscount: true, status: "Active", description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes." },
+    { id: "s002", name: "Interior & Exterior Painting", category: "Painting", price: "$500", hasDiscount: false, status: "Active", description: "Transform your home with high-quality interior and exterior painting services." },
+    { id: "s003", name: "Full Home Inspection", category: "Inspections", price: "$225", originalPrice: "$300", hasDiscount: true, status: "Draft", description: "Comprehensive home inspections for buyers and sellers." },
+    { id: "s004", name: "HVAC System Maintenance", category: "HVAC", price: "$200", hasDiscount: false, status: "Active", description: "Professional HVAC maintenance and repair services." }
   ];
 
   const handleCreateOrder = () => {
@@ -125,23 +125,23 @@ const VendorMessagesPage = () => {
 
   const handleChooseOrder = () => {
     if (!selectedExistingOrder || !selectedCustomer) {
-      toast.error("Please select an existing service listing order");
+      toast.error("Please select a specialized service");
       return;
     }
-    const order = serviceListingOrders.find(o => o.id === selectedExistingOrder);
-    toast.success(`Selected service listing order: ${order?.id} - ${order?.service}`);
+    const service = specializedServices.find(s => s.id === selectedExistingOrder);
+    toast.success(`Selected specialized service: ${service?.id} - ${service?.name}`);
 
-    // Send order selection message
-    const orderMessage: Message = {
+    // Send service selection message
+    const serviceMessage: Message = {
       id: messages.length + 1,
       sender: "vendor",
-      content: `I've selected an existing order from my service listings:\n\nOrder ID: ${order?.id}\nService: ${order?.service}\nCategory: ${order?.category}\nPrice: $${order?.price}\nStatus: ${order?.status}\nCreated: ${order?.dateCreated}\n\nLet's discuss this service.`,
+      content: `I'd like to discuss one of my specialized services:\n\nService: ${service?.name}\nCategory: ${service?.category}\nPrice: ${service?.price}${service?.hasDiscount && service?.originalPrice ? ` (was ${service?.originalPrice})` : ''}\nStatus: ${service?.status}\nDescription: ${service?.description}\n\nWould you like to know more about this service?`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: "sent",
       type: "text"
     };
 
-    setMessages(prev => [...prev, orderMessage]);
+    setMessages(prev => [...prev, serviceMessage]);
     setIsChooseOrderOpen(false);
     setSelectedExistingOrder("");
   };
@@ -580,29 +580,29 @@ const VendorMessagesPage = () => {
                         className="border-blue-600 text-blue-600 hover:bg-blue-50"
                       >
                         <ShoppingCart className="h-4 w-4 mr-1" />
-                        Choose Order
+                        Choose Service
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Choose Order from Service Listings</DialogTitle>
+                        <DialogTitle>Choose Specialized Service</DialogTitle>
                         <DialogDescription>
-                          Select an existing order from your Service Listings (Specialized Service) to reference in this conversation.
+                          Select one of your specialized services to discuss with this customer.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="existing-order">Select Service Listing Order</Label>
+                          <Label htmlFor="existing-service">Select Specialized Service</Label>
                           <Select value={selectedExistingOrder} onValueChange={setSelectedExistingOrder}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Choose from your service listings orders" />
+                              <SelectValue placeholder="Choose from your specialized services" />
                             </SelectTrigger>
                             <SelectContent>
-                              {serviceListingOrders.map((order) => (
-                                <SelectItem key={order.id} value={order.id}>
+                              {specializedServices.filter(service => service.status === "Active").map((service) => (
+                                <SelectItem key={service.id} value={service.id}>
                                   <div className="flex flex-col items-start">
-                                    <span className="font-medium">{order.id} - {order.service}</span>
-                                    <span className="text-sm text-gray-500">{order.category} - ${order.price} ({order.status})</span>
+                                    <span className="font-medium">{service.name}</span>
+                                    <span className="text-sm text-gray-500">{service.category} - {service.price}{service.hasDiscount && service.originalPrice ? ` (was ${service.originalPrice})` : ''}</span>
                                   </div>
                                 </SelectItem>
                               ))}
@@ -611,7 +611,7 @@ const VendorMessagesPage = () => {
                         </div>
                         <div className="bg-green-50 p-3 rounded-lg">
                           <p className="text-sm text-green-800">
-                            <strong>Note:</strong> These are orders from your Service Listings (Specialized Service) page. Use this to discuss existing services you've created.
+                            <strong>Note:</strong> These are your active specialized services from your Specialized Service page. Use this to discuss your service offerings with customers.
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -619,7 +619,7 @@ const VendorMessagesPage = () => {
                             Cancel
                           </Button>
                           <Button onClick={handleChooseOrder}>
-                            Choose Order
+                            Choose Service
                           </Button>
                         </div>
                       </div>

@@ -13,7 +13,8 @@ import {
   Zap,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  Crown
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -259,38 +260,7 @@ const VendorServiceTiersPage = () => {
         </div>
       )}
 
-      {/* How It Works */}
-      <Card>
-        <CardHeader>
-          <CardTitle>How Your Custom Service Tiers Work</CardTitle>
-          <CardDescription>
-            Understanding how your custom service tiers integrate with order creation and customer communication.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-3">Creating Orders</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>• Use "Create Order" in Messages to create new orders</li>
-                <li>• Select from your custom tiers shown above</li>
-                <li>• Orders are sent directly to customers</li>
-                <li>• Each order gets a unique ID</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-3">Service Listings vs Tiers</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>• Service Listings: Specific services you offer</li>
-                <li>• Service Tiers: Pricing packages for new orders</li>
-                <li>• Use "Choose Order" to reference Service Listings</li>
-                <li>• Use "Create Order" to use these tiers</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+      
       {/* Usage Notes */}
       <Card className="bg-green-50 border-green-200">
         <CardContent className="p-6">
