@@ -3,9 +3,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Building, Mail, Phone, Globe, MapPin, Clock, Award, Users, Plus } from "lucide-react";
+import { Building, Phone, MapPin, Clock, Award, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -106,6 +106,24 @@ const citiesByProvince = {
   ]
 };
 
+// Service categories available in the marketplace
+const serviceCategories = [
+  "Appliance Repair",
+  "Carpentry",
+  "Cleaning",
+  "Electrical",
+  "Flooring",
+  "HVAC",
+  "Inspections",
+  "Landscaping",
+  "Moving",
+  "Painting",
+  "Plumbing",
+  "Roofing",
+  "Security",
+  "Windows & Doors"
+];
+
 const VendorProfilePage = () => {
   const [profileData, setProfileData] = useState({
     companyName: "Rapid Plumbers",
@@ -118,6 +136,7 @@ const VendorProfilePage = () => {
     yearsInBusiness: "15",
     teamSize: "12",
     serviceAreas: ["Toronto", "Mississauga", "Brampton"],
+    primaryCategory: "Plumbing",
   });
 
   const [selectedProvince, setSelectedProvince] = useState("Ontario");
@@ -197,6 +216,24 @@ const VendorProfilePage = () => {
                   value={profileData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
                 />
+              </div>
+              <div>
+                <Label htmlFor="primary-category">Primary Service Category *</Label>
+                <Select
+                  value={profileData.primaryCategory}
+                  onValueChange={(value) => handleInputChange('primaryCategory', value)}
+                >
+                  <SelectTrigger id="primary-category">
+                    <SelectValue placeholder="Select your main service category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {serviceCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="company-bio">Company Description *</Label>
@@ -332,10 +369,14 @@ const VendorProfilePage = () => {
                   <Building className="h-10 w-10 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-lg">{profileData.companyName}</h3>
-                <p className="text-sm text-gray-600">Professional Service Provider</p>
+                <p className="text-sm text-gray-600">{profileData.primaryCategory} Service Provider</p>
               </div>
 
               <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm">
+                  <Building className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-600">{profileData.primaryCategory} Services</span>
+                </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600">{profileData.yearsInBusiness} years in business</span>
