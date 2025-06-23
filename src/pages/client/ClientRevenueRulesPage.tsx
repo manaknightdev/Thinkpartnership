@@ -104,7 +104,7 @@ const ClientRevenueRulesPage = () => {
             </div>
             <div>
               <Label htmlFor="platform-commission">Platform Commission (%)</Label>
-              <Input id="platform-commission" type="number" placeholder="e.g., 3" defaultValue={3} />
+              <Input id="platform-commission" type="number" placeholder="e.g., 3" defaultValue={3} readOnly className="bg-gray-50 cursor-not-allowed" />
             </div>
             <div>
               <Label htmlFor="vendor-commission">Vendor Commission (%)</Label>
@@ -217,7 +217,7 @@ const ClientRevenueRulesPage = () => {
             </div>
             <div>
               <Label htmlFor="new-platform-share">Platform Share (%)</Label>
-              <Input id="new-platform-share" type="number" placeholder="e.g., 5" />
+              <Input id="new-platform-share" type="number" placeholder="e.g., 3" defaultValue={3} readOnly className="bg-gray-50 cursor-not-allowed" />
             </div>
           </div>
           <Button onClick={handleAddCustomRule} className="mt-4">Add Custom Rule</Button>
