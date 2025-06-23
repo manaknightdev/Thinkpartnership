@@ -4,13 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+
 import { Settings, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
 
 const ClientRevenueRulesPage = () => {
-  const [serviceFeeEnabled, setServiceFeeEnabled] = useState(true); // Toggle for service fee
+  const serviceFeeEnabled = true; // Service fee is enabled by default
 
   const mockServiceRules = [
     { id: "r001", service: "Plumbing", clientShare: "15%", vendorShare: "80%", platformShare: "5%" },
@@ -34,14 +33,7 @@ const ClientRevenueRulesPage = () => {
     toast.success("Custom rule added!");
   };
 
-  const handleToggleServiceFee = (enabled: boolean) => {
-    setServiceFeeEnabled(enabled);
-    if (enabled) {
-      toast.success("Service fee enabled. Admin will manage marketplace operations for 2.5% fee.");
-    } else {
-      toast.info("Service fee disabled. You will manage marketplace operations independently.");
-    }
-  };
+
 
   return (
     <div className="p-6">
@@ -105,21 +97,18 @@ const ClientRevenueRulesPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="client-commission">Your Commission (%)</Label>
               <Input id="client-commission" type="number" placeholder="e.g., 10" defaultValue={10} />
-              
             </div>
             <div>
-              <Label htmlFor="vendor-commission">Platform Commission (%)</Label>
-              <Input id="vendor-commission" type="number" placeholder="e.g., 5" defaultValue={5} />
-              
+              <Label htmlFor="platform-commission">Platform Commission (%)</Label>
+              <Input id="platform-commission" type="number" placeholder="e.g., 3" defaultValue={3} />
             </div>
             <div>
               <Label htmlFor="vendor-commission">Vendor Commission (%)</Label>
               <Input id="vendor-commission" type="number" placeholder="e.g., 85" defaultValue={85} />
-           
             </div>
           </div>
 
@@ -203,7 +192,7 @@ const ClientRevenueRulesPage = () => {
           )}
           
           <h3 className="text-xl font-semibold mb-4">Add New Rule</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="new-service-category">Service Category</Label>
               <Select>

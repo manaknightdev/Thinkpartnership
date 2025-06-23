@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,21 +17,14 @@ import {
 import {
   MessageCircle,
   Send,
-  Phone,
-  Video,
   MoreVertical,
   Search,
-  Filter,
-
   Clock,
   DollarSign,
   FileText,
   Smile,
-  Paperclip,
-  ArrowLeft,
   Menu,
   CheckCircle,
-  AlertCircle,
   Plus,
   ShoppingCart,
 } from "lucide-react";
@@ -434,12 +427,6 @@ const VendorMessagesPage = () => {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" className="text-green-600 hover:bg-green-50">
-                  <Phone className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                  <Video className="h-5 w-5" />
-                </Button>
                 <Button variant="ghost" size="sm">
                   <MoreVertical className="h-5 w-5" />
                 </Button>
@@ -732,10 +719,6 @@ const VendorMessagesPage = () => {
             {/* Message Input */}
             <div className="bg-white border-t border-gray-200 px-4 py-3">
               <div className="flex items-center space-x-3">
-                <Button variant="ghost" size="sm" className="text-gray-500">
-                  <Paperclip className="h-5 w-5" />
-                </Button>
-
                 <div className="flex-1 relative">
                   <Input
                     value={message}

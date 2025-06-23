@@ -16,11 +16,7 @@ import {
 import {
   ArrowLeft,
   Send,
-  Phone,
-  Video,
   MoreVertical,
-  Paperclip,
-  Image,
   Smile,
   Check,
   CheckCheck,
@@ -67,9 +63,7 @@ const ChatPage = () => {
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
     status: "online",
     lastSeen: "Active now",
-
     completedJobs: 127,
-    responseTime: "Usually responds within 30 minutes",
     location: "Downtown Area"
   };
 
@@ -205,17 +199,7 @@ const ChatPage = () => {
     setMessage(reply);
   };
 
-  const handlePhoneCall = () => {
-    // In a real app, this would initiate a phone call
-    console.log("Initiating phone call with", vendor.name);
-    alert(`Calling ${vendor.name}...`);
-  };
 
-  const handleVideoCall = () => {
-    // In a real app, this would start a video call
-    console.log("Starting video call with", vendor.name);
-    alert(`Starting video call with ${vendor.name}...`);
-  };
 
   const handleAcceptQuote = () => {
     const acceptMessage = {
@@ -619,24 +603,6 @@ const ChatPage = () => {
           </div>
           
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-1.5 sm:p-2 hover:bg-green-50 hover:text-green-600"
-              onClick={handlePhoneCall}
-              title="Call vendor"
-            >
-              <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-1.5 sm:p-2 hover:bg-blue-50 hover:text-blue-600"
-              onClick={handleVideoCall}
-              title="Video call"
-            >
-              <Video className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
             <Button variant="ghost" size="sm" className="p-1.5 sm:p-2">
               <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
@@ -653,10 +619,6 @@ const ChatPage = () => {
                     <div className="flex items-center space-x-2 mb-1">
                       <MapPin className="w-3 h-3 text-gray-500" />
                       <span className="text-gray-600">{vendor.location}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-3 h-3 text-gray-500" />
-                      <span className="text-gray-600">{vendor.responseTime}</span>
                     </div>
                   </div>
                 </div>
@@ -690,7 +652,7 @@ const ChatPage = () => {
                   </div>
                 )}
                 
-                {msg.type === "quote" ? (
+                {msg.type === "quote" && typeof msg.content === "object" ? (
                   /* Quote Card */
                   <Card className="border border-gray-200 bg-white max-w-[280px] sm:max-w-sm">
                     <CardHeader className="pb-3">
@@ -756,7 +718,7 @@ const ChatPage = () => {
                         : "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
                     }`}
                   >
-                    <p className="text-sm">{msg.content}</p>
+                    <p className="text-sm">{typeof msg.content === "string" ? msg.content : ""}</p>
                   </div>
                 )}
                 
@@ -811,13 +773,6 @@ const ChatPage = () => {
         {/* Message Input */}
         <div className="bg-white border-t border-gray-200 px-2 sm:px-3 lg:px-4 py-3 w-full">
           <div className="flex items-center space-x-2 sm:space-x-3 w-full max-w-full">
-            <Button variant="ghost" size="sm" className="p-2 text-gray-500">
-              <Paperclip className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="p-2 text-gray-500">
-              <Image className="w-5 h-5" />
-            </Button>
-            
             <div className="flex-1 relative">
               <Input
                 value={message}
