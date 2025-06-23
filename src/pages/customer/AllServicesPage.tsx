@@ -307,18 +307,27 @@ const AllServicesPage = () => {
                     </SelectContent>
                   </Select>
 
-                  {/* <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                  <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                     <SelectTrigger className="w-36">
                       <SelectValue placeholder="Location" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Areas</SelectItem>
-                      <SelectItem value="nearby">Nearby (5 miles)</SelectItem>
-                      <SelectItem value="city">Within City</SelectItem>
-                      <SelectItem value="county">Within County</SelectItem>
-                      <SelectItem value="state">Within State</SelectItem>
+                      <SelectItem value="all">All Canada</SelectItem>
+                      <SelectItem value="alberta">Alberta</SelectItem>
+                      <SelectItem value="british-columbia">British Columbia</SelectItem>
+                      <SelectItem value="manitoba">Manitoba</SelectItem>
+                      <SelectItem value="new-brunswick">New Brunswick</SelectItem>
+                      <SelectItem value="newfoundland-labrador">Newfoundland and Labrador</SelectItem>
+                      <SelectItem value="northwest-territories">Northwest Territories</SelectItem>
+                      <SelectItem value="nova-scotia">Nova Scotia</SelectItem>
+                      <SelectItem value="nunavut">Nunavut</SelectItem>
+                      <SelectItem value="ontario">Ontario</SelectItem>
+                      <SelectItem value="prince-edward-island">Prince Edward Island</SelectItem>
+                      <SelectItem value="quebec">Quebec</SelectItem>
+                      <SelectItem value="saskatchewan">Saskatchewan</SelectItem>
+                      <SelectItem value="yukon">Yukon</SelectItem>
                     </SelectContent>
-                  </Select> */}
+                  </Select>
 
 
 

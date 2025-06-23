@@ -15,11 +15,11 @@ import {
   Truck,
   Building2,
   CheckCircle,
-
   Clock,
   Shield,
   Users,
-  ArrowRight
+  ArrowRight,
+  Crown
 } from "lucide-react";
 
 const CustomerBrowseServicesPage = () => {
@@ -279,17 +279,29 @@ const CustomerBrowseServicesPage = () => {
         {/* Featured Services Section */}
         <section className="mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Featured Services
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Crown className="h-8 w-8 text-yellow-500" />
+              <h2 className="text-4xl font-bold text-gray-900">
+                Featured Services
+              </h2>
+              <Crown className="h-8 w-8 text-yellow-500" />
+            </div>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Discover quality services from trusted professionals.
+              Premium services from top-rated professionals. These vendors have invested in featured placement for maximum visibility.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {mockFeaturedServices.map((service, index) => (
-              <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl relative">
+              <Card key={index} className="group overflow-hidden border-2 border-yellow-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl relative">
+                {/* Featured Badge */}
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 font-semibold px-3 py-1 rounded-full shadow-lg">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Featured
+                  </Badge>
+                </div>
+
                 <div className="relative overflow-hidden rounded-t-2xl">
                   <img
                     src={service.image}
