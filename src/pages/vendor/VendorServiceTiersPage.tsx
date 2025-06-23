@@ -152,7 +152,7 @@ const VendorServiceTiersPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Service Tiers</h1>
+          <h1 className="text-3xl font-bold text-gray-900">My Custom Service Tiers</h1>
           <p className="text-gray-600 mt-1">
             Create and manage your custom service tiers. These tiers will be available when creating new orders for customers.
           </p>

@@ -9,8 +9,7 @@ import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import {
   Search,
   Home,
-  Wrench,
-  Paintbrush,
+  Hammer,
   Leaf,
   Lightbulb,
   Truck,
@@ -41,60 +40,60 @@ const CustomerBrowseServicesPage = () => {
 
   const mockCategories = [
     {
-      name: "Cleaning",
+      name: "Plumbing",
       icon: CheckCircle,
-      count: 32,
-      color: "bg-green-500",
-      description: "Deep clean, maintenance"
+      count: 28,
+      color: "bg-blue-500",
+      description: "Pipes, fixtures, repairs"
     },
     {
       name: "Electrical",
       icon: Lightbulb,
-      count: 18,
+      count: 24,
       color: "bg-yellow-500",
       description: "Wiring, outlets, lighting"
     },
     {
       name: "HVAC",
       icon: Home,
-      count: 12,
+      count: 18,
       color: "bg-orange-500",
       description: "Heating, cooling, ventilation"
     },
     {
-      name: "Inspections",
+      name: "Roofing",
       icon: Building2,
-      count: 9,
-      color: "bg-indigo-500",
-      description: "Home, safety, compliance"
+      count: 16,
+      color: "bg-gray-600",
+      description: "Repair, replacement, gutters"
     },
     {
-      name: "Landscaping",
+      name: "Flooring",
       icon: Leaf,
-      count: 15,
-      color: "bg-emerald-500",
-      description: "Lawn care, garden design"
-    },
-    {
-      name: "Moving",
-      icon: Truck,
-      count: 8,
-      color: "bg-red-500",
-      description: "Relocation, packing, storage"
+      count: 22,
+      color: "bg-amber-600",
+      description: "Hardwood, tile, carpet"
     },
     {
       name: "Painting",
-      icon: Paintbrush,
-      count: 21,
+      icon: Truck,
+      count: 20,
       color: "bg-purple-500",
       description: "Interior, exterior, touch-ups"
     },
     {
-      name: "Plumbing",
-      icon: Wrench,
-      count: 24,
-      color: "bg-blue-500",
-      description: "Pipes, leaks, installations"
+      name: "Landscaping",
+      icon: Leaf,
+      count: 19,
+      color: "bg-green-600",
+      description: "Lawn care, garden design"
+    },
+    {
+      name: "Handyman",
+      icon: Hammer,
+      count: 25,
+      color: "bg-gray-500",
+      description: "General repairs, maintenance"
     },
   ];
 
@@ -223,7 +222,7 @@ const CustomerBrowseServicesPage = () => {
             {/* Popular Searches */}
             <div className="flex flex-wrap justify-center gap-4 mb-12">
               <span className="text-gray-500 text-base font-medium">Popular:</span>
-              {["Home Cleaning", "Plumbing", "Painting", "Landscaping", "HVAC", "Electrical"].map((term) => (
+              {["Plumbing", "Electrical", "HVAC", "Roofing", "Flooring", "Painting"].map((term) => (
                 <Button
                   key={term}
                   variant="outline"
@@ -380,7 +379,7 @@ const CustomerBrowseServicesPage = () => {
         </section>
 
         {/* Enhanced Categories Section */}
-        <section className="mb-20">
+        {/* <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Explore Popular Categories
@@ -422,7 +421,7 @@ const CustomerBrowseServicesPage = () => {
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
-        </section>
+        </section> */}
 
 
 

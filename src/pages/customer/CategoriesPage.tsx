@@ -15,22 +15,16 @@ import {
   Truck,
   Building2,
   CheckCircle,
-  Car,
   Hammer,
   Shield,
-  Camera,
-  Laptop,
-  Heart,
-  Baby,
-  GraduationCap,
-  Utensils,
-  Dumbbell,
-  Music,
-  Scissors,
   ArrowRight,
-  Filter,
   Grid3X3,
-  List
+  List,
+  Square,
+  Key,
+  Waves,
+  Triangle,
+  DoorOpen
 } from "lucide-react";
 
 const CategoriesPage = () => {
@@ -40,45 +34,29 @@ const CategoriesPage = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
 
   const allCategories = [
-    // Automotive (alphabetical)
-    { name: "Auto Repair", icon: Car, count: 16, color: "bg-blue-600", description: "Mechanical, electrical repairs", category: "automotive" },
-    { name: "Car Detailing", icon: Car, count: 11, color: "bg-cyan-500", description: "Washing, waxing, interior", category: "automotive" },
-
-    // Events & Entertainment (alphabetical)
-    { name: "Catering", icon: Utensils, count: 12, color: "bg-orange-600", description: "Events, parties, corporate", category: "events" },
-    { name: "Music Lessons", icon: Music, count: 15, color: "bg-purple-600", description: "Instruments, voice, theory", category: "events" },
-
     // Home Services (alphabetical)
-    { name: "Cleaning", icon: CheckCircle, count: 32, color: "bg-green-500", description: "Deep clean, maintenance", category: "home" },
-    { name: "Electrical", icon: Lightbulb, count: 18, color: "bg-yellow-500", description: "Wiring, outlets, lighting", category: "home" },
-    { name: "Handyman", icon: Hammer, count: 28, color: "bg-gray-600", description: "General repairs, maintenance", category: "home" },
-    { name: "HVAC", icon: Home, count: 12, color: "bg-orange-500", description: "Heating, cooling, ventilation", category: "home" },
-    { name: "Inspections", icon: Building2, count: 9, color: "bg-indigo-500", description: "Home, safety, compliance", category: "home" },
-    { name: "Landscaping", icon: Leaf, count: 15, color: "bg-emerald-500", description: "Lawn care, garden design", category: "home" },
-    { name: "Moving", icon: Truck, count: 8, color: "bg-red-500", description: "Relocation, packing, storage", category: "home" },
-    { name: "Painting", icon: Paintbrush, count: 21, color: "bg-purple-500", description: "Interior, exterior, touch-ups", category: "home" },
-    { name: "Plumbing", icon: Wrench, count: 24, color: "bg-blue-500", description: "Pipes, leaks, installations", category: "home" },
-    { name: "Security", icon: Shield, count: 14, color: "bg-slate-600", description: "Alarms, cameras, locks", category: "home" },
-
-    // Personal Services (alphabetical)
-    { name: "Childcare", icon: Baby, count: 13, color: "bg-yellow-400", description: "Babysitting, nanny services", category: "personal" },
-    { name: "Hair & Beauty", icon: Scissors, count: 26, color: "bg-pink-600", description: "Styling, cuts, treatments", category: "personal" },
-    { name: "Health & Wellness", icon: Heart, count: 25, color: "bg-red-400", description: "Fitness, therapy, nutrition", category: "personal" },
-    { name: "Personal Training", icon: Dumbbell, count: 20, color: "bg-green-600", description: "Fitness, nutrition, coaching", category: "personal" },
-    { name: "Tutoring", icon: GraduationCap, count: 17, color: "bg-blue-400", description: "Academic, test prep, skills", category: "personal" },
-
-    // Technology (alphabetical)
-    { name: "Computer Repair", icon: Laptop, count: 19, color: "bg-gray-700", description: "Hardware, software, networking", category: "technology" },
-    { name: "Photography", icon: Camera, count: 22, color: "bg-pink-500", description: "Events, portraits, commercial", category: "technology" },
+    { name: "Appliance Repair", icon: Wrench, count: 15, color: "bg-blue-600", description: "Washer, dryer, refrigerator", category: "home" },
+    { name: "Carpentry", icon: Hammer, count: 22, color: "bg-amber-600", description: "Custom work, repairs, installation", category: "home" },
+    { name: "Cleaning", icon: CheckCircle, count: 28, color: "bg-green-500", description: "Deep clean, maintenance", category: "home" },
+    { name: "Electrical", icon: Lightbulb, count: 24, color: "bg-yellow-500", description: "Wiring, outlets, lighting", category: "home" },
+    { name: "Flooring", icon: Square, count: 20, color: "bg-amber-700", description: "Hardwood, tile, carpet", category: "home" },
+    { name: "Handyman", icon: Hammer, count: 32, color: "bg-gray-600", description: "General repairs, maintenance", category: "home" },
+    { name: "HVAC", icon: Home, count: 18, color: "bg-orange-500", description: "Heating, cooling, ventilation", category: "home" },
+    { name: "Inspections", icon: Building2, count: 12, color: "bg-indigo-500", description: "Home, safety, compliance", category: "home" },
+    { name: "Landscaping", icon: Leaf, count: 19, color: "bg-emerald-500", description: "Lawn care, garden design", category: "home" },
+    { name: "Locksmith", icon: Key, count: 11, color: "bg-yellow-600", description: "Lock installation, key services", category: "home" },
+    { name: "Moving", icon: Truck, count: 14, color: "bg-red-500", description: "Relocation, packing, storage", category: "home" },
+    { name: "Painting", icon: Paintbrush, count: 26, color: "bg-purple-500", description: "Interior, exterior, touch-ups", category: "home" },
+    { name: "Plumbing", icon: Wrench, count: 30, color: "bg-blue-500", description: "Pipes, leaks, installations", category: "home" },
+    { name: "Pool Services", icon: Waves, count: 8, color: "bg-cyan-500", description: "Cleaning, maintenance, repair", category: "home" },
+    { name: "Roofing", icon: Triangle, count: 16, color: "bg-slate-700", description: "Repair, replacement, gutters", category: "home" },
+    { name: "Security", icon: Shield, count: 13, color: "bg-slate-600", description: "Alarms, cameras, locks", category: "home" },
+    { name: "Windows & Doors", icon: DoorOpen, count: 17, color: "bg-indigo-600", description: "Installation, repair, replacement", category: "home" },
   ];
 
   const categoryFilters = [
     { id: "all", name: "All Categories", count: allCategories.length },
     { id: "home", name: "Home Services", count: allCategories.filter(c => c.category === "home").length },
-    { id: "automotive", name: "Automotive", count: allCategories.filter(c => c.category === "automotive").length },
-    { id: "technology", name: "Technology", count: allCategories.filter(c => c.category === "technology").length },
-    { id: "personal", name: "Personal Services", count: allCategories.filter(c => c.category === "personal").length },
-    { id: "events", name: "Events & Entertainment", count: allCategories.filter(c => c.category === "events").length },
   ];
 
   const filteredCategories = allCategories.filter(category => {
@@ -100,10 +78,10 @@ const CategoriesPage = () => {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Browse All Categories
+                Home & Real Estate Services
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover services across all categories. Find the perfect professional for any task.
+                Discover professional home services and real estate solutions. Find trusted experts for all your property needs.
               </p>
             </div>
 

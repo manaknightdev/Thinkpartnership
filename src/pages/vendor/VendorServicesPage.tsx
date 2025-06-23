@@ -253,9 +253,9 @@ const VendorServicesPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Specialized Service</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Flat fee Service</h1>
           <p className="text-gray-600 mt-1">
-            Manage your specialized service offerings and pricing. These will be visible to customers in the marketplace.
+            Manage your flat fee service offerings and pricing. These will be visible to customers in the marketplace.
           </p>
         </div>
         

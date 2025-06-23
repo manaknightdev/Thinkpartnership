@@ -36,8 +36,9 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
 
   const sidebarItems = [
     { name: "Browse", path: "/marketplace", icon: Home, exact: true },
-    { name: "Categories", path: "/marketplace/categories", icon: Grid3X3 },
+    // { name: "Categories", path: "/marketplace/categories", icon: Grid3X3 },
     { name: "All Services", path: "/marketplace/services", icon: List },
+    { name: "Service Requests", path: "/marketplace/requests", icon: FileText },
     { name: "Messages", path: "/marketplace/chat/Certified%20Inspectors%20Inc.", icon: MessageCircle },
     { name: "Account", path: "/marketplace/account", icon: Settings },
     { name: "Help", path: "/marketplace/help", icon: HelpCircle },
@@ -60,9 +61,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     navigate('/marketplace/notifications');
   };
 
-  const handleRequestsClick = () => {
-    navigate('/marketplace/requests');
-  };
+
 
   const handleLogout = () => {
     // In a real app, this would clear auth tokens and redirect
@@ -156,21 +155,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
               )}
             </Button>
 
-            {/* Service Requests */}
-            {/* <Button
-              variant="ghost"
-              size="sm"
-              className="relative"
-              onClick={handleRequestsClick}
-              title="View service requests"
-            >
-              <FileText className="h-5 w-5" />
-              {requestCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
-                  {requestCount}
-                </Badge>
-              )}
-            </Button> */}
+
 
             {/* User Menu */}
             <DropdownMenu>
@@ -232,6 +217,16 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                 <item.icon className={cn("flex-shrink-0", sidebarCollapsed ? "h-5 w-5" : "h-5 w-5")} />
                 {!sidebarCollapsed && <span>{item.name}</span>}
 
+                {/* Badge for Service Requests */}
+                {item.name === "Service Requests" && requestCount > 0 && (
+                  <Badge className={cn(
+                    "h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0",
+                    sidebarCollapsed ? "absolute -top-1 -right-1" : "ml-auto"
+                  )}>
+                    {requestCount}
+                  </Badge>
+                )}
+
                 {/* Tooltip for collapsed state */}
                 {sidebarCollapsed && (
                   <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
@@ -264,6 +259,13 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                   >
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
+
+                    {/* Badge for Service Requests */}
+                    {item.name === "Service Requests" && requestCount > 0 && (
+                      <Badge className="ml-auto h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
+                        {requestCount}
+                      </Badge>
+                    )}
                   </Link>
                 ))}
               </nav>

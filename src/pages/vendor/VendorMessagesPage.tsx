@@ -125,17 +125,17 @@ const VendorMessagesPage = () => {
 
   const handleChooseOrder = () => {
     if (!selectedExistingOrder || !selectedCustomer) {
-      toast.error("Please select a specialized service");
+      toast.error("Please select a flat fee service");
       return;
     }
     const service = specializedServices.find(s => s.id === selectedExistingOrder);
-    toast.success(`Selected specialized service: ${service?.id} - ${service?.name}`);
+    toast.success(`Selected flat fee service: ${service?.id} - ${service?.name}`);
 
     // Send service selection message
     const serviceMessage: Message = {
       id: messages.length + 1,
       sender: "vendor",
-      content: `I'd like to discuss one of my specialized services:\n\nService: ${service?.name}\nCategory: ${service?.category}\nPrice: ${service?.price}${service?.hasDiscount && service?.originalPrice ? ` (was ${service?.originalPrice})` : ''}\nStatus: ${service?.status}\nDescription: ${service?.description}\n\nWould you like to know more about this service?`,
+      content: `I'd like to discuss one of my flat fee services:\n\nService: ${service?.name}\nCategory: ${service?.category}\nPrice: ${service?.price}${service?.hasDiscount && service?.originalPrice ? ` (was ${service?.originalPrice})` : ''}\nStatus: ${service?.status}\nDescription: ${service?.description}\n\nWould you like to know more about this service?`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: "sent",
       type: "text"
@@ -585,17 +585,17 @@ const VendorMessagesPage = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Choose Specialized Service</DialogTitle>
+                        <DialogTitle>Choose Flat fee Service</DialogTitle>
                         <DialogDescription>
-                          Select one of your specialized services to discuss with this customer.
+                          Select one of your Flat fee services to discuss with this customer.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="existing-service">Select Specialized Service</Label>
+                          <Label htmlFor="existing-service">Select Flat fee Service</Label>
                           <Select value={selectedExistingOrder} onValueChange={setSelectedExistingOrder}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Choose from your specialized services" />
+                              <SelectValue placeholder="Choose from your flat fee services" />
                             </SelectTrigger>
                             <SelectContent>
                               {specializedServices.filter(service => service.status === "Active").map((service) => (
@@ -611,7 +611,7 @@ const VendorMessagesPage = () => {
                         </div>
                         <div className="bg-green-50 p-3 rounded-lg">
                           <p className="text-sm text-green-800">
-                            <strong>Note:</strong> These are your active specialized services from your Specialized Service page. Use this to discuss your service offerings with customers.
+                            <strong>Note:</strong> These are your active flat fee services from your Flat fee Service page. Use this to discuss your service offerings with customers.
                           </p>
                         </div>
                         <div className="flex gap-2">
