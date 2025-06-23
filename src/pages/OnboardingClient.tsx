@@ -283,14 +283,14 @@ const OnboardingClient = () => {
                     className="flex-grow border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     disabled={currentStep < 3}
                   />
-                  <span className="text-gray-600 font-medium">.thinkpartnerships.com</span>
+                  <span className="text-gray-600 font-medium">.realpartneros.com</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">This will be your unique marketplace address. Only lowercase letters, numbers, and hyphens allowed.</p>
                 {formData.subdomain && (
                   <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-700">
                       <strong>Your marketplace will be available at:</strong><br />
-                      <span className="font-mono">https://{formData.subdomain}.thinkpartnerships.com</span>
+                      <span className="font-mono">https://{formData.subdomain}.realpartneros.com</span>
                     </p>
                   </div>
                 )}

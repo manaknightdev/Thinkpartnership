@@ -47,7 +47,7 @@ const AdminIntegrationsPage = () => {
           </ul>
           <div className="space-y-2">
             <Label htmlFor="notification-email">Admin Notification Email</Label>
-            <Input id="notification-email" type="email" placeholder="admin@yourcompany.com" defaultValue="admin@thinkpartnerships.com" />
+            <Input id="notification-email" type="email" placeholder="admin@yourcompany.com" defaultValue="admin@realpartneros.com" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="notification-sms">Admin Notification Phone (for SMS)</Label>

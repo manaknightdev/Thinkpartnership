@@ -103,11 +103,11 @@ const AdminLicenseManagementPage = () => {
                             onChange={(e) => setCurrentSubdomainValue(e.target.value)}
                             className="w-32"
                           />
-                          <span className="text-gray-600 dark:text-gray-400">.thinkpartnerships.com</span>
+                          <span className="text-gray-600 dark:text-gray-400">.realpartneros.com</span>
                         </div>
                       ) : (
-                        <a href={`https://${client.subdomain}.thinkpartnerships.com`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600 dark:text-blue-400">
-                          {client.subdomain}.thinkpartnerships.com
+                        <a href={`https://${client.subdomain}.realpartneros.com`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600 dark:text-blue-400">
+                          {client.subdomain}.realpartneros.com
                         </a>
                       )}
                     </TableCell>

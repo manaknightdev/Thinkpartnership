@@ -325,7 +325,7 @@ const VendorHelpSupportPage = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Email Support</h3>
-                <p className="text-gray-600">vendors@thinkpartnership.com</p>
+                <p className="text-gray-600">vendors@realpartneros.com</p>
                 <p className="text-sm text-gray-500">Response within 4-6 hours</p>
               </div>
             </div>

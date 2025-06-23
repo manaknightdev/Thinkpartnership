@@ -37,7 +37,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(3);
-  const [userName] = useState("ThinkPartnership Corp"); // In real app, this would come from auth context
+  const [userName] = useState("RealPartnersOS Corp"); // In real app, this would come from auth context
 
   const sidebarItems = [
     { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard, exact: false },

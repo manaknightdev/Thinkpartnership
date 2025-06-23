@@ -106,7 +106,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
 
             {/* Logo */}
             <Link to="/marketplace" className="text-xl font-bold text-green-600">
-              ThinkPartnership
+              RealPartnersOS
             </Link>
           </div>
 

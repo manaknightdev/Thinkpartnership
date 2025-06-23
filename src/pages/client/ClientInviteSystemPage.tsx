@@ -46,8 +46,8 @@ const ClientInviteSystemPage = () => {
   const [isViewInviteOpen, setIsViewInviteOpen] = useState(false);
 
   // Referral links
-  const customerReferralLink = "https://thinkpartnerships.com/join/customer/your-client-id";
-  const vendorReferralLink = "https://thinkpartnerships.com/join/vendor/your-client-id";
+  const customerReferralLink = "https://realpartneros.com/join/customer/your-client-id";
+  const vendorReferralLink = "https://realpartneros.com/join/vendor/your-client-id";
 
   const mockInvites: Invite[] = [
     {

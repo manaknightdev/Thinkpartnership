@@ -183,7 +183,7 @@ const Index = () => {
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Explore real services from our most successful client marketplaces. Each one is a unique branded experience
-                powered by ThinkPartnership's platform.
+                powered by RealPartnersOS platform.
               </p>
             </div>
 
@@ -303,7 +303,7 @@ const Index = () => {
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                     </div>
                     <div className="flex-1 bg-white rounded-md px-3 py-1 text-sm text-gray-500 ml-4">
-                      yourbrand.thinkpartnership.com
+                      yourbrand.realpartneros.com
                     </div>
                   </div>
 
@@ -364,7 +364,7 @@ const Index = () => {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-20">
               <h2 className="text-5xl font-bold mb-6 text-gray-900">
-                How ThinkPartnership Works
+                How RealPartnersOS Works
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 A simple, powerful platform that connects everyone in the marketplace ecosystem
@@ -544,7 +544,7 @@ const Index = () => {
 
                 <Quote className="w-8 h-8 text-gray-300 mb-4" />
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  "ThinkPartnership transformed our real estate business. We launched HomePro Network and now earn $15K+ monthly from vendor partnerships. Game-changer!"
+                  "RealPartnersOS transformed our real estate business. We launched HomePro Network and now earn $15K+ monthly from vendor partnerships. Game-changer!"
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold mr-4">

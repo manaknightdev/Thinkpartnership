@@ -24,7 +24,7 @@ export const GlobalNavbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-20 border-b p-4 flex justify-between items-center bg-white dark:bg-gray-900">
       <Link to="/" className="text-2xl font-bold text-gray-900 dark:text-white">
-        ThinkPartnerships
+        RealPartnersOS
       </Link>
 
       {/* Desktop Navigation */}
@@ -59,7 +59,7 @@ export const GlobalNavbar = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <MobileSheet title="ThinkPartnerships"> {/* Pass logo text as title */}
+      <MobileSheet title="RealPartnersOS"> {/* Pass logo text as title */}
         <nav className="flex flex-col space-y-2">
           {mainNavItems.map((item) => (
             <Button

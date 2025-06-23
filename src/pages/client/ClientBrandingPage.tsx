@@ -108,7 +108,7 @@ const ClientBrandingPage = () => {
             <Label htmlFor="subdomain">Your Sub-marketplace URL</Label>
             <div className="flex items-center space-x-2">
               <Input id="subdomain" type="text" placeholder="yourbrand" value={subdomain} onChange={(e) => setSubdomain(e.target.value)} className="flex-grow" />
-              <span className="text-gray-600 dark:text-gray-400">.thinkpartnerships.com</span>
+              <span className="text-gray-600 dark:text-gray-400">.realpartneros.com</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">This will be your unique marketplace address.</p>
           </div>

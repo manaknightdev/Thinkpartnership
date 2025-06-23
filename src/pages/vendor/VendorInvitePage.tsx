@@ -7,7 +7,7 @@ import { Copy, Mail, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 const VendorInvitePage = () => {
-  const referralLink = "https://thinkpartnerships.com/invite/yourcompanyid"; // Placeholder link
+  const referralLink = "https://realpartneros.com/invite/yourcompanyid"; // Placeholder link
 
   const mockSentInvites = [
     { id: "inv001", email: "customer1@example.com", dateSent: "2023-10-25", status: "Sent", conversion: "No" },

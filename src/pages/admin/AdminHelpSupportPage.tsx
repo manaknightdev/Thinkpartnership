@@ -237,7 +237,7 @@ const AdminHelpSupportPage = () => {
               </div>
               <div>
                 <p className="font-medium text-gray-900">Email Support</p>
-                <p className="text-sm text-gray-600">admin@thinkpartnerships.com</p>
+                <p className="text-sm text-gray-600">admin@realpartneros.com</p>
                 <p className="text-xs text-gray-500">Response within 24 hours</p>
               </div>
             </div>

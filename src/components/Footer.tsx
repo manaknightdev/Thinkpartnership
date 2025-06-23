@@ -7,7 +7,7 @@ export const Footer = () => {
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         {/* Company Info */}
         <div className="col-span-1 sm:col-span-2">
-          <h3 className="text-2xl font-bold text-white mb-4">ThinkPartnerships</h3>
+          <h3 className="text-2xl font-bold text-white mb-4">RealPartnersOS</h3>
           <p className="text-gray-400 text-sm">
             Your ultimate referral ecosystem for seamless connections, managed programs, and new revenue streams.
           </p>
@@ -50,7 +50,7 @@ export const Footer = () => {
       </div>
 
       <div className="border-t border-gray-700 dark:border-gray-800 mt-8 pt-6 text-center text-sm text-gray-500">
-        &copy; {new Date().getFullYear()} ThinkPartnerships. All rights reserved.
+        &copy; {new Date().getFullYear()} RealPartnersOS. All rights reserved.
       </div>
     </footer>
   );
