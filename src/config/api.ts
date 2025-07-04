@@ -14,6 +14,12 @@ export const API_CONFIG = {
       LOGIN: '/api/marketplace/vendor/auth/login',
       PROFILE: '/api/marketplace/vendor/auth/profile',
     },
+    // Client Authentication
+    CLIENT_AUTH: {
+      REGISTER: '/api/marketplace/client/auth/register',
+      LOGIN: '/api/marketplace/client/auth/login',
+      PROFILE: '/api/marketplace/client/auth/profile',
+    },
     // Services
     SERVICES: {
       LIST: '/api/marketplace/services',

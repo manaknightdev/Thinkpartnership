@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,137 +9,103 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, UserPlus, Search, Eye, Edit, CheckCircle, XCircle, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, TrendingUp } from "lucide-react";
+import { Users, UserPlus, Search, Eye, Edit, CheckCircle, XCircle, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface Vendor {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  status: "Active" | "Suspended" | "Inactive";
-  services: string;
-  joinDate: string;
-  totalRevenue: number;
-  completedJobs: number;
-
-  description?: string;
-}
-
-
+import ClientAPI, { ClientVendor } from '@/services/ClientAPI';
+import { showSuccess, showError } from '@/utils/toast';
 
 const ClientVendorManagementPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<ClientVendor | null>(null);
   const [isViewVendorOpen, setIsViewVendorOpen] = useState(false);
   const [isEditVendorOpen, setIsEditVendorOpen] = useState(false);
   const [isAllVendorsOpen, setIsAllVendorsOpen] = useState(false);
   const [isAllApplicationsOpen, setIsAllApplicationsOpen] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Vendor>>({});
+  const [editForm, setEditForm] = useState<Partial<ClientVendor>>({});
+  const [vendors, setVendors] = useState<ClientVendor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const mockVendors: Vendor[] = [
-    {
-      id: "v001",
-      name: "Rapid Plumbers",
-      email: "rapid@example.com",
-      phone: "(555) 123-4567",
-      address: "123 Main St, Springfield, IL 62701",
-      status: "Active",
-      services: "Plumbing",
-      joinDate: "2024-01-15",
-      totalRevenue: 45000,
-      completedJobs: 89,
+  useEffect(() => {
+    fetchVendors();
+  }, []);
 
-      description: "Professional plumbing services with 24/7 emergency support."
-    },
-    {
-      id: "v002",
-      name: "Brush Strokes Pro",
-      email: "brush@example.com",
-      phone: "(555) 234-5678",
-      address: "456 Oak Ave, Springfield, IL 62702",
-      status: "Active",
-      services: "Painting",
-      joinDate: "2024-02-20",
-      totalRevenue: 32000,
-      completedJobs: 67,
+  const fetchVendors = async () => {
+    try {
+      setLoading(true);
+      const data = await ClientAPI.getVendors();
+      setVendors(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to load vendors';
+      setError(errorMessage);
+      showError(errorMessage);
+      setVendors([]); // Ensure vendors is always an array
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      description: "Interior and exterior painting specialists."
-    },
-    {
-      id: "v003",
-      name: "Certified Inspectors Inc.",
-      email: "inspect@example.com",
-      phone: "(555) 345-6789",
-      address: "789 Pine St, Springfield, IL 62703",
-      status: "Active",
-      services: "Inspections",
-      joinDate: "2024-01-10",
-      totalRevenue: 28000,
-      completedJobs: 45,
+  const handleStatusUpdate = async (vendorId: string, newStatus: string) => {
+    try {
+      await ClientAPI.updateVendorStatus(vendorId, newStatus);
+      showSuccess(`Vendor status updated to ${newStatus}`);
+      fetchVendors(); // Refresh the list
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to update vendor status';
+      showError(errorMessage);
+    }
+  };
 
-      description: "Comprehensive home and commercial inspections."
-    },
-    {
-      id: "v004",
-      name: "Green Thumb Landscaping",
-      email: "green@example.com",
-      phone: "(555) 456-7890",
-      address: "321 Elm St, Springfield, IL 62704",
-      status: "Active",
-      services: "Landscaping",
-      joinDate: "2024-03-05",
-      totalRevenue: 22000,
-      completedJobs: 34,
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
 
-      description: "Complete landscaping and garden maintenance services."
-    },
-    {
-      id: "v005",
-      name: "Sparky Electric",
-      email: "sparky@example.com",
-      phone: "(555) 567-8901",
-      address: "654 Maple Ave, Springfield, IL 62705",
-      status: "Suspended",
-      services: "Electrical",
-      joinDate: "2024-02-01",
-      totalRevenue: 15000,
-      completedJobs: 23,
-
-      description: "Licensed electrical contractors for residential and commercial."
-    },
-  ];
-
-  const mockPendingVendors = [
-    { id: "p001", name: "Clean Sweep Services", email: "clean@example.com", services: "Cleaning", phone: "(555) 678-9012", description: "Professional cleaning services for homes and offices." },
-    { id: "p002", name: "Move It Right", email: "move@example.com", services: "Moving", phone: "(555) 789-0123", description: "Full-service moving company with packing and storage." },
-  ];
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
 
 
 
 
-  const handleViewVendor = (vendor: Vendor) => {
+
+
+  const handleViewVendor = (vendor: ClientVendor) => {
     setSelectedVendor(vendor);
     setIsViewVendorOpen(true);
   };
 
-  const handleEditVendor = (vendor: Vendor) => {
+  const handleEditVendor = (vendor: ClientVendor) => {
     setSelectedVendor(vendor);
     setEditForm(vendor);
     setIsEditVendorOpen(true);
   };
 
-
-
-  const handleApproveVendor = (vendorName: string) => {
-    toast.success(`Approved ${vendorName}.`);
+  const handleApproveVendor = async (vendorId: string, vendorName: string) => {
+    try {
+      await handleStatusUpdate(vendorId, 'active');
+      toast.success(`Approved ${vendorName}.`);
+    } catch (error) {
+      toast.error(`Failed to approve ${vendorName}.`);
+    }
   };
 
-  const handleRejectVendor = (vendorName: string) => {
-    toast.error(`Rejected ${vendorName}.`);
+  const handleRejectVendor = async (vendorId: string, vendorName: string) => {
+    try {
+      await handleStatusUpdate(vendorId, 'rejected');
+      toast.error(`Rejected ${vendorName}.`);
+    } catch (error) {
+      toast.error(`Failed to reject ${vendorName}.`);
+    }
   };
 
   const handleReviewAllApplications = () => {
@@ -150,16 +116,38 @@ const ClientVendorManagementPage = () => {
     setIsAllVendorsOpen(true);
   };
 
-  const handleSaveVendor = () => {
-    toast.success("Vendor saved successfully!");
-    setIsEditVendorOpen(false);
+  const handleSaveVendor = async () => {
+    if (!selectedVendor || !editForm) return;
+
+    try {
+      await ClientAPI.updateVendor(selectedVendor.id, editForm);
+      showSuccess("Vendor updated successfully!");
+      setIsEditVendorOpen(false);
+      fetchVendors(); // Refresh the list
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to update vendor';
+      showError(errorMessage);
+    }
   };
 
-  const filteredVendors = mockVendors.filter(vendor =>
-    vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vendor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vendor.services.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredVendors = (vendors || []).filter(vendor =>
+    vendor?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor?.contact_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const pendingVendors = (vendors || []).filter(vendor => vendor?.status === 'pending');
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <span className="text-gray-600">Loading vendors...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8">
@@ -223,24 +211,24 @@ const ClientVendorManagementPage = () => {
               <TableBody>
                 {filteredVendors.map((vendor) => (
                   <TableRow key={vendor.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">{vendor.name}</TableCell>
+                    <TableCell className="font-medium">{vendor.company_name}</TableCell>
                     <TableCell className="text-gray-600">{vendor.email}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        {vendor.services}
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        {vendor.business_type || 'Service Provider'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-green-600 font-semibold">
-                      ${vendor.totalRevenue.toLocaleString()}
+                      {formatCurrency(vendor.total_revenue || 0)}
                     </TableCell>
                     <TableCell className="text-blue-600 font-semibold">
-                      {vendor.completedJobs}
+                      {vendor.completed_jobs || 0}
                     </TableCell>
 
                     <TableCell>
-                      <Badge variant={vendor.status === "Active" ? "default" : "destructive"}
-                             className={vendor.status === "Active" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
-                        {vendor.status}
+                      <Badge variant={vendor.status === "active" ? "default" : "destructive"}
+                             className={vendor.status === "active" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
+                        {vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -266,29 +254,29 @@ const ClientVendorManagementPage = () => {
               <UserPlus className="h-5 w-5 text-orange-600" />
             </div>
             Pending Approvals
-            {mockPendingVendors.length > 0 && (
+            {pendingVendors.length > 0 && (
               <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-                {mockPendingVendors.length}
+                {pendingVendors.length}
               </Badge>
             )}
           </CardTitle>
           <CardDescription>Review new vendor applications.</CardDescription>
         </CardHeader>
         <CardContent>
-          {mockPendingVendors.length > 0 ? (
+          {pendingVendors.length > 0 ? (
             <div className="space-y-4">
-              {mockPendingVendors.map((vendor) => (
+              {pendingVendors.map((vendor) => (
                 <div key={vendor.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors duration-200">
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{vendor.name}</p>
-                    <p className="text-sm text-gray-500">{vendor.email}</p>
+                    <p className="font-medium text-gray-900">{vendor?.company_name || vendor?.contact_name}</p>
+                    <p className="text-sm text-gray-500">{vendor?.email}</p>
                     <Badge variant="outline" className="mt-1 bg-blue-50 text-blue-700 border-blue-200">
-                      {vendor.services}
+                      {vendor?.services_count || 0} services
                     </Badge>
                   </div>
                   <div className="flex space-x-2 mt-3 sm:mt-0">
                     <Button
-                      onClick={() => handleApproveVendor(vendor.name)}
+                      onClick={() => handleApproveVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
                       className="bg-green-600 hover:bg-green-700"
                       size="sm"
                     >
@@ -296,7 +284,7 @@ const ClientVendorManagementPage = () => {
                       Approve
                     </Button>
                     <Button
-                      onClick={() => handleRejectVendor(vendor.name)}
+                      onClick={() => handleRejectVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
                       variant="outline"
                       size="sm"
                       className="text-red-600 border-red-200 hover:bg-red-50"
@@ -517,7 +505,7 @@ const ClientVendorManagementPage = () => {
                 <CardContent className="p-4 text-center">
                   <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Vendors</p>
-                  <p className="text-2xl font-bold text-blue-600">{mockVendors.length}</p>
+                  <p className="text-2xl font-bold text-blue-600">{(vendors || []).length}</p>
                 </CardContent>
               </Card>
               <Card className="bg-green-50 border-green-200">
@@ -525,7 +513,7 @@ const ClientVendorManagementPage = () => {
                   <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Revenue</p>
                   <p className="text-2xl font-bold text-green-600">
-                    ${mockVendors.reduce((sum, v) => sum + v.totalRevenue, 0).toLocaleString()}
+                    ${(vendors || []).reduce((sum, v) => sum + (v?.total_revenue || 0), 0).toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
@@ -534,7 +522,7 @@ const ClientVendorManagementPage = () => {
                   <CheckCircle className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Jobs</p>
                   <p className="text-2xl font-bold text-purple-600">
-                    {mockVendors.reduce((sum, v) => sum + v.completedJobs, 0)}
+                    {(vendors || []).reduce((sum, v) => sum + (v?.services_count || 0), 0)}
                   </p>
                 </CardContent>
               </Card>
@@ -555,25 +543,25 @@ const ClientVendorManagementPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockVendors.map((vendor) => (
-                    <TableRow key={vendor.id}>
-                      <TableCell className="font-medium">{vendor.name}</TableCell>
+                  {(vendors || []).map((vendor) => (
+                    <TableRow key={vendor?.id}>
+                      <TableCell className="font-medium">{vendor?.company_name || vendor?.contact_name}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{vendor.services}</Badge>
+                        <Badge variant="outline">{vendor?.services_count || 0} services</Badge>
                       </TableCell>
                       <TableCell className="text-green-600 font-semibold">
-                        ${vendor.totalRevenue.toLocaleString()}
+                        ${(vendor?.total_revenue || 0).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-blue-600 font-semibold">
-                        {vendor.completedJobs}
+                        {vendor?.services_count || 0}
                       </TableCell>
 
                       <TableCell>
-                        <Badge variant={vendor.status === "Active" ? "default" : "destructive"}>
-                          {vendor.status}
+                        <Badge variant={vendor?.status === "active" ? "default" : "destructive"}>
+                          {vendor?.status || 'unknown'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{new Date(vendor.joinDate).toLocaleDateString()}</TableCell>
+                      <TableCell>{vendor?.created_at ? new Date(vendor.created_at).toLocaleDateString() : 'N/A'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -597,38 +585,37 @@ const ClientVendorManagementPage = () => {
             <DialogDescription>Review all pending vendor applications.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {mockPendingVendors.length > 0 ? (
-              mockPendingVendors.map((vendor) => (
+            {pendingVendors.length > 0 ? (
+              pendingVendors.map((vendor) => (
                 <Card key={vendor.id} className="border-l-4 border-l-orange-500">
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold">{vendor.name}</h3>
+                        <h3 className="text-lg font-semibold">{vendor?.company_name || vendor?.contact_name}</h3>
                         <p className="text-gray-600 flex items-center gap-2 mt-1">
                           <Mail className="h-4 w-4" />
-                          {vendor.email}
+                          {vendor?.email}
                         </p>
-                        <p className="text-gray-600 flex items-center gap-2 mt-1">
-                          <Phone className="h-4 w-4" />
-                          {vendor.phone}
-                        </p>
-                        <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200">
-                          {vendor.services}
-                        </Badge>
-                        {vendor.description && (
-                          <p className="text-gray-700 mt-2">{vendor.description}</p>
+                        {vendor?.phone && (
+                          <p className="text-gray-600 flex items-center gap-2 mt-1">
+                            <Phone className="h-4 w-4" />
+                            {vendor.phone}
+                          </p>
                         )}
+                        <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200">
+                          {vendor?.services_count || 0} services
+                        </Badge>
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => handleApproveVendor(vendor.name)}
+                          onClick={() => handleApproveVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <CheckCircle className="mr-1 h-4 w-4" />
                           Approve
                         </Button>
                         <Button
-                          onClick={() => handleRejectVendor(vendor.name)}
+                          onClick={() => handleRejectVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
                           variant="outline"
                           className="text-red-600 border-red-200 hover:bg-red-50"
                         >

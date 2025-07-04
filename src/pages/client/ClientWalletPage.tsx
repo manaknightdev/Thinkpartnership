@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,76 +15,50 @@ import {
   ArrowDownLeft,
   Clock,
   Shield,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from "lucide-react";
 import { formatDate } from "@/utils/dateFormat";
-
-interface Transaction {
-  id: string;
-  type: "commission" | "withdrawal" | "refund" | "fee";
-  amount: number;
-  description: string;
-  date: string;
-  status: "completed" | "pending" | "failed";
-  paymentMethod?: string;
-}
+import ClientAPI, { WalletBalance, WalletTransaction } from "@/services/ClientAPI";
+import { toast } from "sonner";
 
 const ClientWalletPage = () => {
-  const [balance] = useState(12450.75);
-  const [pendingBalance] = useState(2340.50);
+  const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
 
-  const transactions: Transaction[] = [
-    {
-      id: "txn_001",
-      type: "commission",
-      amount: 2450.00,
-      description: "Monthly commission from marketplace transactions",
-      date: "2024-01-25",
-      status: "completed"
-    },
-    {
-      id: "txn_002",
-      type: "withdrawal",
-      amount: -1500.00,
-      description: "Withdrawal to Visa ****4242",
-      date: "2024-01-24",
-      status: "completed",
-      paymentMethod: "Visa ****4242"
-    },
-    {
-      id: "txn_003",
-      type: "commission",
-      amount: 890.25,
-      description: "Weekly commission from vendor referrals",
-      date: "2024-01-22",
-      status: "completed"
-    },
-    {
-      id: "txn_004",
-      type: "withdrawal",
-      amount: -2000.00,
-      description: "Withdrawal to Mastercard ****8888",
-      date: "2024-01-20",
-      status: "pending",
-      paymentMethod: "Mastercard ****8888"
-    },
-    {
-      id: "txn_005",
-      type: "fee",
-      amount: -25.00,
-      description: "Platform service fee",
-      date: "2024-01-20",
-      status: "completed"
+  // Load wallet data on component mount
+  useEffect(() => {
+    loadWalletData();
+  }, []);
+
+  const loadWalletData = async () => {
+    try {
+      setLoading(true);
+      const [balanceData, transactionData] = await Promise.all([
+        ClientAPI.getWalletBalance(),
+        ClientAPI.getWalletTransactions()
+      ]);
+
+      setWalletBalance(balanceData);
+      setTransactions(transactionData || []);
+    } catch (error) {
+      console.error('Error loading wallet data:', error);
+      toast.error('Failed to load wallet data');
+      setWalletBalance(null);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   // Calculate totals
-  const totalIncome = transactions
+  const totalIncome = (transactions || [])
     .filter(t => t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalWithdrawals = Math.abs(transactions
+  const totalWithdrawals = Math.abs((transactions || [])
     .filter(t => t.amount < 0 && t.type === "withdrawal")
     .reduce((sum, t) => sum + t.amount, 0));
 
@@ -159,8 +133,15 @@ const ClientWalletPage = () => {
               <div>
                 <p className="text-sm text-gray-600">Available Balance</p>
                 <div className="flex items-center gap-2">
-                  {isBalanceVisible ? (
-                    <p className="text-3xl font-bold text-green-600">${balance.toLocaleString()}</p>
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                      <p className="text-3xl font-bold text-gray-400">Loading...</p>
+                    </div>
+                  ) : isBalanceVisible ? (
+                    <p className="text-3xl font-bold text-green-600">
+                      ${walletBalance?.balance?.toLocaleString() || '0.00'}
+                    </p>
                   ) : (
                     <p className="text-3xl font-bold text-gray-400">••••••</p>
                   )}
@@ -185,7 +166,16 @@ const ClientWalletPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending Balance</p>
-                <p className="text-3xl font-bold text-orange-600">${pendingBalance.toLocaleString()}</p>
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                    <p className="text-xl font-bold text-gray-400">Loading...</p>
+                  </div>
+                ) : (
+                  <p className="text-3xl font-bold text-orange-600">
+                    ${walletBalance?.pending_balance?.toLocaleString() || '0.00'}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500">Processing in 2-3 days</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-lg">
@@ -266,7 +256,21 @@ const ClientWalletPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((transaction) => (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                        <p>Loading transactions...</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        No transactions found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    transactions.map((transaction) => (
                     <TableRow key={transaction.id} className="hover:bg-gray-50">
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -282,10 +286,11 @@ const ClientWalletPage = () => {
                           {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toLocaleString()}
                         </span>
                       </TableCell>
-                      <TableCell>{formatDate(transaction.date)}</TableCell>
+                      <TableCell>{formatDate(transaction.created_at)}</TableCell>
                       <TableCell>{getStatusBadge(transaction.status)}</TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>

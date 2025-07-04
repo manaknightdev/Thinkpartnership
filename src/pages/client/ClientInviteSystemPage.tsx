@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,32 +9,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { 
-  UserPlus, 
-  Users, 
-  Copy, 
-  Mail, 
-  Send, 
-  Link as LinkIcon, 
+import {
+  UserPlus,
+  Users,
+  Copy,
+  Mail,
+  Send,
+  Link as LinkIcon,
   Calendar,
   CheckCircle,
   XCircle,
   Eye,
   Building,
-  Share
+  Share,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Invite {
-  id: string;
-  email: string;
-  type: "customer" | "vendor";
-  dateSent: string;
-  status: "Sent" | "Opened" | "Accepted" | "Expired";
-  name?: string;
-  company?: string;
-  services?: string;
-}
+import ClientAPI, { ClientInvite } from "@/services/ClientAPI";
 
 const ClientInviteSystemPage = () => {
   const [activeTab, setActiveTab] = useState("customers");
@@ -42,88 +33,102 @@ const ClientInviteSystemPage = () => {
   const [inviteType, setInviteType] = useState<"customer" | "vendor">("customer");
   const [bulkEmails, setBulkEmails] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
-  const [selectedInvite, setSelectedInvite] = useState<Invite | null>(null);
+  const [selectedInvite, setSelectedInvite] = useState<ClientInvite | null>(null);
   const [isViewInviteOpen, setIsViewInviteOpen] = useState(false);
+  const [invites, setInvites] = useState<ClientInvite[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
 
   // Referral links
   const customerReferralLink = "https://realpartneros.com/join/customer/your-client-id";
   const vendorReferralLink = "https://realpartneros.com/join/vendor/your-client-id";
 
-  const mockInvites: Invite[] = [
-    {
-      id: "inv001",
-      email: "sarah.johnson@email.com",
-      type: "customer",
-      dateSent: "2024-01-20",
-      status: "Accepted",
-      name: "Sarah Johnson"
-    },
-    {
-      id: "inv002", 
-      email: "mike.chen@email.com",
-      type: "customer",
-      dateSent: "2024-01-18",
-      status: "Sent",
-      name: "Mike Chen"
-    },
-    {
-      id: "inv003",
-      email: "rapidplumbers@email.com",
-      type: "vendor",
-      dateSent: "2024-01-15",
-      status: "Accepted",
-      name: "John Smith",
-      company: "Rapid Plumbers",
-      services: "Plumbing"
-    },
-    {
-      id: "inv004",
-      email: "brushstrokes@email.com", 
-      type: "vendor",
-      dateSent: "2024-01-12",
-      status: "Opened",
-      name: "Maria Garcia",
-      company: "Brush Strokes Pro",
-      services: "Painting"
-    },
-    {
-      id: "inv005",
-      email: "lisa.rodriguez@email.com",
-      type: "customer", 
-      dateSent: "2024-01-10",
-      status: "Expired",
-      name: "Lisa Rodriguez"
-    }
-  ];
+  // Load invites on component mount
+  useEffect(() => {
+    loadInvites();
+  }, []);
 
-  const customerInvites = mockInvites.filter(invite => invite.type === "customer");
-  const vendorInvites = mockInvites.filter(invite => invite.type === "vendor");
+  const loadInvites = async () => {
+    try {
+      setLoading(true);
+      const inviteData = await ClientAPI.getInvites();
+      setInvites(inviteData || []);
+    } catch (error) {
+      console.error('Error loading invites:', error);
+      toast.error('Failed to load invites');
+      setInvites([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const customerInvites = (invites || []).filter(invite => invite?.type === "customer");
+  const vendorInvites = (invites || []).filter(invite => invite?.type === "vendor");
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`${type} referral link copied to clipboard!`);
   };
 
-  const handleSendInvites = () => {
+  const handleSendInvites = async () => {
     const emails = bulkEmails.split('\n').filter(email => email.trim());
     if (emails.length === 0) {
       toast.error("Please enter at least one email address.");
       return;
     }
 
-    toast.success(`${emails.length} ${inviteType} invite(s) sent successfully!`);
-    setBulkEmails("");
-    setInviteMessage("");
-    setIsInviteDialogOpen(false);
+    try {
+      setSending(true);
+      const inviteData = emails.map(email => ({
+        email: email.trim(),
+        type: inviteType
+      }));
+
+      await ClientAPI.sendInvites(inviteData);
+      toast.success(`${emails.length} ${inviteType} invite(s) sent successfully!`);
+      setBulkEmails("");
+      setInviteMessage("");
+      setIsInviteDialogOpen(false);
+
+      // Reload invites to show the new ones
+      await loadInvites();
+    } catch (error) {
+      console.error('Error sending invites:', error);
+      toast.error('Failed to send invites. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
-  const handleViewInvite = (invite: Invite) => {
+  const handleViewInvite = (invite: ClientInvite) => {
     setSelectedInvite(invite);
     setIsViewInviteOpen(true);
   };
 
-  const handleResendInvite = (invite: Invite) => {
-    toast.success(`Invite resent to ${invite.email}`);
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  // const getStatusBadgeVariant = (status: string) => {
+  //   switch (status?.toLowerCase()) {
+  //     case 'accepted': return 'default';
+  //     case 'sent': return 'secondary';
+  //     case 'opened': return 'outline';
+  //     case 'expired': return 'destructive';
+  //     default: return 'secondary';
+  //   }
+  // };
+
+  const handleResendInvite = async (invite: ClientInvite) => {
+    try {
+      await ClientAPI.sendInvites([{ email: invite.email, type: invite.type }]);
+      toast.success(`Invite resent to ${invite.email}`);
+      await loadInvites();
+    } catch (error) {
+      console.error('Error resending invite:', error);
+      toast.error('Failed to resend invite. Please try again.');
+    }
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -136,14 +141,9 @@ const ClientInviteSystemPage = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Accepted": return "text-green-600";
-      case "Opened": return "text-blue-600";
-      case "Sent": return "text-orange-600";
-      case "Expired": return "text-red-600";
-      default: return "text-gray-600";
-    }
+  const handleOpenInviteDialog = (type: "customer" | "vendor") => {
+    setInviteType(type);
+    setIsInviteDialogOpen(true);
   };
 
   return (
@@ -280,30 +280,45 @@ const ClientInviteSystemPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customerInvites.map((invite) => (
-                      <TableRow key={invite.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{invite.name || "N/A"}</TableCell>
-                        <TableCell>{invite.email}</TableCell>
-                        <TableCell>{new Date(invite.dateSent).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusBadgeVariant(invite.status)} className={getStatusColor(invite.status)}>
-                            {invite.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleViewInvite(invite)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {invite.status !== "Accepted" && (
-                              <Button variant="ghost" size="sm" onClick={() => handleResendInvite(invite)}>
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                          <p>Loading invites...</p>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : customerInvites.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                          No customer invites found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      customerInvites.map((invite) => (
+                        <TableRow key={invite.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">{invite.email}</TableCell>
+                          <TableCell>{invite.email}</TableCell>
+                          <TableCell>{formatDate(invite.sent_at)}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(invite.status)}>
+                              {invite.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="sm" onClick={() => handleViewInvite(invite)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              {invite.status !== "accepted" && (
+                                <Button variant="ghost" size="sm" onClick={() => handleResendInvite(invite)}>
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -324,38 +339,51 @@ const ClientInviteSystemPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {vendorInvites.map((invite) => (
-                      <TableRow key={invite.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{invite.name || "N/A"}</TableCell>
-                        <TableCell>{invite.company || "N/A"}</TableCell>
-                        <TableCell>{invite.email}</TableCell>
-                        <TableCell>
-                          {invite.services && (
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                              {invite.services}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>{new Date(invite.dateSent).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusBadgeVariant(invite.status)} className={getStatusColor(invite.status)}>
-                            {invite.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => handleViewInvite(invite)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {invite.status !== "Accepted" && (
-                              <Button variant="ghost" size="sm" onClick={() => handleResendInvite(invite)}>
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                          <p>Loading invites...</p>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : vendorInvites.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                          No vendor invites found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      vendorInvites.map((invite) => (
+                        <TableRow key={invite.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">{invite.email}</TableCell>
+                          <TableCell>Vendor</TableCell>
+                          <TableCell>{invite.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              Services
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{formatDate(invite.sent_at)}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(invite.status)}>
+                              {invite.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="sm" onClick={() => handleViewInvite(invite)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              {invite.status !== "accepted" && (
+                                <Button variant="ghost" size="sm" onClick={() => handleResendInvite(invite)}>
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -424,9 +452,22 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
             <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSendInvites} className="bg-green-600 hover:bg-green-700">
-              <Send className="mr-2 h-4 w-4" />
-              Send Invites
+            <Button
+              onClick={handleSendInvites}
+              disabled={sending}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Invites
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -454,8 +495,8 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{selectedInvite.name || "Unknown"}</h3>
-                  <p className="text-gray-600">{selectedInvite.email}</p>
+                  <h3 className="text-lg font-semibold">{selectedInvite.email}</h3>
+                  <p className="text-gray-600">{selectedInvite.type} invite</p>
                   <Badge variant={getStatusBadgeVariant(selectedInvite.status)} className="mt-1">
                     {selectedInvite.status}
                   </Badge>
@@ -471,7 +512,7 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
                   <Label className="text-sm font-medium text-gray-500">Date Sent</Label>
                   <p className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    {new Date(selectedInvite.dateSent).toLocaleDateString()}
+                    {formatDate(selectedInvite.sent_at)}
                   </p>
                 </div>
               </div>
@@ -497,25 +538,25 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
 
               <div className="pt-4 border-t">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  {selectedInvite.status === "Accepted" && (
+                  {selectedInvite.status === "accepted" && (
                     <>
                       <CheckCircle className="h-4 w-4 text-green-600" />
                       <span>Successfully joined your marketplace</span>
                     </>
                   )}
-                  {selectedInvite.status === "Sent" && (
+                  {selectedInvite.status === "sent" && (
                     <>
                       <Mail className="h-4 w-4 text-blue-600" />
                       <span>Invitation sent, waiting for response</span>
                     </>
                   )}
-                  {selectedInvite.status === "Opened" && (
+                  {selectedInvite.status === "opened" && (
                     <>
                       <Eye className="h-4 w-4 text-orange-600" />
                       <span>Invitation opened, but not yet accepted</span>
                     </>
                   )}
-                  {selectedInvite.status === "Expired" && (
+                  {selectedInvite.status === "expired" && (
                     <>
                       <XCircle className="h-4 w-4 text-red-600" />
                       <span>Invitation expired after 30 days</span>
@@ -526,7 +567,7 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
             </div>
           )}
           <DialogFooter>
-            {selectedInvite && selectedInvite.status !== "Accepted" && (
+            {selectedInvite && selectedInvite.status !== "accepted" && (
               <Button onClick={() => handleResendInvite(selectedInvite)} className="bg-green-600 hover:bg-green-700">
                 <Send className="mr-2 h-4 w-4" />
                 Resend Invite

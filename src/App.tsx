@@ -67,6 +67,8 @@ import CustomerLogin from "./pages/customer/CustomerLogin";
 import CustomerSignup from "./pages/customer/CustomerSignup";
 import VendorLogin from "./pages/vendor/VendorLogin";
 import VendorSignup from "./pages/vendor/VendorSignup";
+import ClientLogin from "./pages/client/ClientLogin";
+import ClientSignup from "./pages/client/ClientSignup";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Import new admin sub-pages
@@ -112,6 +114,10 @@ const App = () => (
           {/* Vendor Authentication Routes */}
           <Route path="/vendor/login" element={<VendorLogin />} />
           <Route path="/vendor/signup" element={<VendorSignup />} />
+
+          {/* Client Authentication Routes */}
+          <Route path="/client/login" element={<ClientLogin />} />
+          <Route path="/client/signup" element={<ClientSignup />} />
 
           {/* Protected Marketplace Routes */}
           <Route path="/marketplace" element={<ProtectedRoute><CustomerBrowseServicesPage /></ProtectedRoute>} />

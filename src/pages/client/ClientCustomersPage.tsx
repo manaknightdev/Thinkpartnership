@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,144 +7,97 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, Search, Eye, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, TrendingUp, Star, UserPlus } from "lucide-react";
+import { Users, Search, Eye, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, TrendingUp, Star, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  joinDate: string;
-  totalSpent: number;
-  ordersCount: number;
-  lastOrderDate: string;
-  status: "active" | "inactive";
-  referredBy?: string;
-  avatar?: string;
-}
+import ClientAPI, { ClientCustomer } from '@/services/ClientAPI';
+import { showSuccess, showError } from '@/utils/toast';
 
 const ClientCustomersPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("totalSpent");
+  const [sortBy, setSortBy] = useState("total_spent");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterReferral, setFilterReferral] = useState("all");
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<ClientCustomer | null>(null);
   const [isViewCustomerOpen, setIsViewCustomerOpen] = useState(false);
+  const [customers, setCustomers] = useState<ClientCustomer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const mockCustomers: Customer[] = [
-    {
-      id: "c001",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@email.com",
-      phone: "(555) 111-2222",
-      address: "123 Customer St, Springfield, IL 62701",
-      joinDate: "2024-01-20",
-      totalSpent: 2450.00,
-      ordersCount: 8,
-      lastOrderDate: "2024-01-25",
-      status: "active",
-      referredBy: "Rapid Plumbers",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "c002",
-      name: "Mike Chen",
-      email: "mike.chen@email.com",
-      phone: "(555) 222-3333",
-      address: "456 Client Ave, Springfield, IL 62702",
-      joinDate: "2024-02-15",
-      totalSpent: 1800.00,
-      ordersCount: 5,
-      lastOrderDate: "2024-02-20",
-      status: "active",
-      referredBy: "Brush Strokes Pro",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "c003",
-      name: "Lisa Rodriguez",
-      email: "lisa.rodriguez@email.com",
-      phone: "(555) 333-4444",
-      address: "789 Buyer Blvd, Springfield, IL 62703",
-      joinDate: "2024-01-30",
-      totalSpent: 3200.00,
-      ordersCount: 12,
-      lastOrderDate: "2024-02-01",
-      status: "active",
-      referredBy: "Green Thumb Landscaping",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "c004",
-      name: "David Wilson",
-      email: "david.wilson@email.com",
-      phone: "(555) 444-5555",
-      address: "321 Patron Place, Springfield, IL 62704",
-      joinDate: "2024-03-10",
-      totalSpent: 950.00,
-      ordersCount: 3,
-      lastOrderDate: "2024-03-15",
-      status: "active",
-      referredBy: "Certified Inspectors Inc."
-    },
-    {
-      id: "c005",
-      name: "Emily Davis",
-      email: "emily.davis@email.com",
-      phone: "(555) 555-6666",
-      address: "654 Consumer Court, Springfield, IL 62705",
-      joinDate: "2024-02-05",
-      totalSpent: 1650.00,
-      ordersCount: 6,
-      lastOrderDate: "2024-02-10",
-      status: "inactive"
-    },
-    {
-      id: "c006",
-      name: "Robert Brown",
-      email: "robert.brown@email.com",
-      phone: "(555) 666-7777",
-      address: "987 Shopper Street, Springfield, IL 62706",
-      joinDate: "2024-01-05",
-      totalSpent: 4100.00,
-      ordersCount: 15,
-      lastOrderDate: "2024-01-10",
-      status: "active",
-      referredBy: "Rapid Plumbers"
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const data = await ClientAPI.getCustomers();
+      setCustomers(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to load customers';
+      setError(errorMessage);
+      showError(errorMessage);
+      setCustomers([]); // Ensure customers is always an array
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const formatCurrency = (amount: number | undefined) => {
+    if (amount === undefined || amount === null) {
+      return '$0.00';
+    }
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) {
+      return 'N/A';
+    }
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+
 
   // Calculate summary stats
-  const totalCustomers = mockCustomers.length;
-  const activeCustomers = mockCustomers.filter(c => c.status === "active").length;
-  const totalRevenue = mockCustomers.reduce((sum, customer) => sum + customer.totalSpent, 0);
-  const avgSpendPerCustomer = totalRevenue / totalCustomers;
-  const totalOrders = mockCustomers.reduce((sum, customer) => sum + customer.ordersCount, 0);
+  const totalCustomers = (customers || []).length;
+  const activeCustomers = (customers || []).filter(c => c?.status === "active").length;
+  const totalRevenue = (customers || []).reduce((sum, customer) => sum + (customer?.total_spent || 0), 0);
+  const avgSpendPerCustomer = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
+  const totalOrders = (customers || []).reduce((sum, customer) => sum + (customer?.orders_count || 0), 0);
 
-  const filteredCustomers = mockCustomers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || customer.status === filterStatus;
-    const matchesReferral = filterReferral === "all" || 
-                           (filterReferral === "direct" && !customer.referredBy) ||
-                           (filterReferral !== "direct" && customer.referredBy === filterReferral);
+  const filteredCustomers = (customers || []).filter(customer => {
+    const fullName = `${customer?.first_name || ''} ${customer?.last_name || ''}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
+                         customer?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "all" || customer?.status === filterStatus;
+    const matchesReferral = filterReferral === "all" ||
+                           (filterReferral === "direct" && !customer?.referred_by) ||
+                           (filterReferral !== "direct" && customer?.referred_by === filterReferral);
 
     return matchesSearch && matchesStatus && matchesReferral;
   });
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
     switch (sortBy) {
-      case "totalSpent":
-        return b.totalSpent - a.totalSpent;
-      case "ordersCount":
-        return b.ordersCount - a.ordersCount;
-      case "joinDate":
-        return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
+      case "total_spent":
+        return (b?.total_spent || 0) - (a?.total_spent || 0);
+      case "orders_count":
+        return (b?.orders_count || 0) - (a?.orders_count || 0);
+      case "created_at":
+        return new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime();
       case "name":
-        return a.name.localeCompare(b.name);
+        const aName = `${a?.first_name || ''} ${a?.last_name || ''}`;
+        const bName = `${b?.first_name || ''} ${b?.last_name || ''}`;
+        return aName.localeCompare(bName);
       default:
         return 0;
     }
@@ -163,7 +116,18 @@ const ClientCustomersPage = () => {
     navigate("/client-portal/invites");
   };
 
-  const uniqueReferrers = [...new Set(mockCustomers.map(c => c.referredBy).filter(Boolean))];
+  const uniqueReferrers = [...new Set(customers.map(c => c.referred_by).filter(Boolean))];
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <span className="text-gray-600">Loading customers...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8">
@@ -241,7 +205,7 @@ const ClientCustomersPage = () => {
               <div>
                 <p className="text-sm text-gray-600">Referral Rate</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {Math.round((mockCustomers.filter(c => c.referredBy).length / totalCustomers) * 100)}%
+                  {totalCustomers > 0 ? Math.round((customers.filter(c => c.referred_by).length / totalCustomers) * 100) : 0}%
                 </p>
                 <p className="text-xs text-orange-600">customers referred by vendors</p>
               </div>

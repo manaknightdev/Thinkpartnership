@@ -1,9 +1,63 @@
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake, CheckSquare, Clock, AlertTriangle } from "lucide-react"; // Importing new icons
+import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake, CheckSquare, Clock, AlertTriangle, Loader2 } from "lucide-react";
+
+import ClientAPI, { DashboardStats } from '@/services/ClientAPI';
+import { showError } from '@/utils/toast';
 
 const ClientOverviewPage = () => {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const data = await ClientAPI.getDashboardStats();
+      setStats(data);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to load dashboard statistics';
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number | undefined) => {
+    if (amount === undefined || amount === null) {
+      return '$0.00';
+    }
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatGrowth = (growth: number | undefined) => {
+    if (growth === undefined || growth === null) {
+      return '+0.0%';
+    }
+    const sign = growth >= 0 ? '+' : '';
+    return `${sign}${growth.toFixed(1)}%`;
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <span className="text-gray-600">Loading dashboard...</span>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
@@ -26,7 +80,7 @@ const ClientOverviewPage = () => {
       </div>
 
       {/* Quick Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -35,8 +89,12 @@ const ClientOverviewPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">$45,231.89</div>
-            <p className="text-xs text-green-600 font-medium">+20.1% from last month</p>
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(stats?.total_revenue)}
+            </div>
+            <p className={`text-xs font-medium ${stats && stats.monthly_growth && stats.monthly_growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatGrowth(stats?.monthly_growth)} from last month
+            </p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-lg transition-shadow duration-200">
@@ -47,20 +105,44 @@ const ClientOverviewPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">235</div>
-            <p className="text-xs text-blue-600 font-medium">+18 new vendors this quarter</p>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats?.active_vendors?.toLocaleString() || '0'}
+            </div>
+            <p className={`text-xs font-medium ${stats && stats.vendor_growth && stats.vendor_growth >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              {formatGrowth(stats?.vendor_growth)} growth this quarter
+            </p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
             <div className="p-2 bg-purple-100 rounded-full">
               <TrendingUp className="h-4 w-4 text-purple-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">1,578</div>
-            <p className="text-xs text-purple-600 font-medium">+5.2% from last month</p>
+            <div className="text-2xl font-bold text-purple-600">
+              {stats?.total_customers?.toLocaleString() || '0'}
+            </div>
+            <p className={`text-xs font-medium ${stats && stats.customer_growth && stats.customer_growth >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+              {formatGrowth(stats?.customer_growth)} from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="hover:shadow-lg transition-shadow duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+            <div className="p-2 bg-orange-100 rounded-full">
+              <Clock className="h-4 w-4 text-orange-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {stats?.pending_orders?.toLocaleString() || '0'}
+            </div>
+            <p className={`text-xs font-medium ${stats && stats.order_growth && stats.order_growth >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
+              {formatGrowth(stats?.order_growth)} order growth
+            </p>
           </CardContent>
         </Card>
       </div>

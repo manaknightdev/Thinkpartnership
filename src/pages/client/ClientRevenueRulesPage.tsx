@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,32 +6,89 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { Settings, CheckCircle } from "lucide-react";
+import { Settings, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
+interface RevenueRule {
+  id: string;
+  service: string;
+  clientShare: string;
+  vendorShare: string;
+  platformShare: string;
+}
+
 const ClientRevenueRulesPage = () => {
-  const serviceFeeEnabled = true; // Service fee is enabled by default
+  const [loading, setLoading] = useState(true);
+  const [revenueRules, setRevenueRules] = useState<RevenueRule[]>([]);
+  const [serviceFeeEnabled, setServiceFeeEnabled] = useState(true);
 
-  const mockServiceRules = [
-    { id: "r001", service: "Plumbing", clientShare: "15%", vendorShare: "80%", platformShare: "5%" },
-    { id: "r002", service: "Painting", clientShare: "10%", vendorShare: "85%", platformShare: "5%" },
-    { id: "r003", service: "Inspections", clientShare: "20%", vendorShare: "75%", platformShare: "5%" },
-  ];
+  // Load revenue rules on component mount
+  useEffect(() => {
+    loadRevenueRules();
+  }, []);
 
-  const handleSaveGlobalRules = () => {
-    toast.success("Global rules saved!");
+  const loadRevenueRules = async () => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call when client revenue rule endpoints are created
+      // const rulesData = await ClientAPI.getRevenueRules();
+
+      // For now, using mock data since no client-specific revenue rule APIs exist
+      const mockServiceRules = [
+        { id: "r001", service: "Plumbing", clientShare: "15%", vendorShare: "80%", platformShare: "5%" },
+        { id: "r002", service: "Painting", clientShare: "10%", vendorShare: "85%", platformShare: "5%" },
+        { id: "r003", service: "Inspections", clientShare: "20%", vendorShare: "75%", platformShare: "5%" },
+      ];
+
+      setRevenueRules(mockServiceRules);
+    } catch (error) {
+      console.error('Error loading revenue rules:', error);
+      toast.error('Failed to load revenue rules');
+      setRevenueRules([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditRule = (service: string) => {
-    toast.info(`Editing rule for ${service}...`);
+  const handleSaveGlobalRules = async () => {
+    try {
+      // TODO: Replace with actual API call when client revenue rule endpoints are created
+      // await ClientAPI.updateRevenueRules(revenueRules);
+      toast.success("Global rules saved!");
+    } catch (error) {
+      console.error('Error saving rules:', error);
+      toast.error('Failed to save rules');
+    }
   };
 
-  const handleDeleteRule = (service: string) => {
-    toast.error(`Deleted rule for ${service}.`);
+  const handleEditRule = async (service: string) => {
+    try {
+      // TODO: Replace with actual API call when client revenue rule endpoints are created
+      toast.info(`Editing rule for ${service}...`);
+    } catch (error) {
+      console.error('Error editing rule:', error);
+      toast.error('Failed to edit rule');
+    }
   };
 
-  const handleAddCustomRule = () => {
-    toast.success("Custom rule added!");
+  const handleDeleteRule = async (service: string) => {
+    try {
+      // TODO: Replace with actual API call when client revenue rule endpoints are created
+      toast.error(`Deleted rule for ${service}.`);
+    } catch (error) {
+      console.error('Error deleting rule:', error);
+      toast.error('Failed to delete rule');
+    }
+  };
+
+  const handleAddCustomRule = async () => {
+    try {
+      // TODO: Replace with actual API call when client revenue rule endpoints are created
+      toast.success("Custom rule added!");
+    } catch (error) {
+      console.error('Error adding rule:', error);
+      toast.error('Failed to add rule');
+    }
   };
 
 
@@ -38,9 +96,26 @@ const ClientRevenueRulesPage = () => {
   return (
     <div className="p-6">
       <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Revenue & Commission Rules</h2>
-      <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
+      <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
         Configure how commissions are split and managed within your marketplace.
       </p>
+
+      {/* API Notice */}
+      <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <div>
+              <p className="text-sm font-medium text-yellow-800">
+                API Integration Pending
+              </p>
+              <p className="text-xs text-yellow-700">
+                Client-specific revenue rule endpoints need to be created in the backend. Currently displaying mock data.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Service Fee Toggle */}
       <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
@@ -172,18 +247,33 @@ const ClientRevenueRulesPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockServiceRules.map((rule) => (
-                    <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.service}</TableCell>
-                      <TableCell>{rule.clientShare}</TableCell>
-                      <TableCell>{rule.vendorShare}</TableCell>
-                      <TableCell>{rule.platformShare}</TableCell>
-                      <TableCell className="text-right">
-                        <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">Edit</Button>
-                        <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                        <p>Loading revenue rules...</p>
                       </TableCell>
                     </TableRow>
-                  ))} 
+                  ) : revenueRules.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        No revenue rules found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    revenueRules.map((rule) => (
+                      <TableRow key={rule.id}>
+                        <TableCell className="font-medium">{rule.service}</TableCell>
+                        <TableCell>{rule.clientShare}</TableCell>
+                        <TableCell>{rule.vendorShare}</TableCell>
+                        <TableCell>{rule.platformShare}</TableCell>
+                        <TableCell className="text-right">
+                          <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">Edit</Button>
+                          <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
