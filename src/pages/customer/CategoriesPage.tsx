@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import ServicesAPI, { Category } from "@/services/ServicesAPI";
 import {
   Search,
   Home,
@@ -114,7 +117,7 @@ const CategoriesPage = () => {
                   </Button>
                 ))}
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">View:</span>
                 <Button
@@ -152,8 +155,8 @@ const CategoriesPage = () => {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {filteredCategories.map((category) => (
-                  <Card 
-                    key={category.name} 
+                  <Card
+                    key={category.name}
                     className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 rounded-2xl overflow-hidden"
                     onClick={() => handleCategoryClick(category.name)}
                   >
@@ -177,7 +180,7 @@ const CategoriesPage = () => {
             ) : (
               <div className="space-y-4">
                 {filteredCategories.map((category) => (
-                  <Card 
+                  <Card
                     key={category.name}
                     className="group cursor-pointer transition-all duration-300 hover:shadow-lg border border-gray-200 hover:border-green-300"
                     onClick={() => handleCategoryClick(category.name)}

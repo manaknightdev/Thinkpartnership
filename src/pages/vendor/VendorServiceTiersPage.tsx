@@ -152,9 +152,9 @@ const VendorServiceTiersPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Custom Service Tiers</h1>
+          <h1 className="text-3xl font-bold text-gray-900">My Custom Service</h1>
           <p className="text-gray-600 mt-1">
-            Create and manage your custom service tiers. These tiers will be available when creating new orders for customers.
+            Create and manage your custom service. These services will be available when creating new orders for customers.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ const VendorServiceTiersPage = () => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Custom Tier
+                Add Custom Service
               </Button>
             </DialogTrigger>
           </Dialog>
@@ -178,15 +178,15 @@ const VendorServiceTiersPage = () => {
         <Card className="text-center py-12">
           <CardContent>
             <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Service Tiers Yet</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Services Yet</h3>
             <p className="text-gray-600 mb-6">
-              Create your first custom service tier to start offering structured pricing to your customers.
+              Create your first service to start offering custom pricing to your customers.
             </p>
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Tier
+                  Create Your First Service
                 </Button>
               </DialogTrigger>
             </Dialog>
@@ -260,29 +260,12 @@ const VendorServiceTiersPage = () => {
         </div>
       )}
 
-      
-      {/* Usage Notes */}
-      <Card className="bg-green-50 border-green-200">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Zap className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-green-900 mb-2">Custom Tier Benefits</h4>
-              <p className="text-sm text-green-800">
-                Create tiers that match your specific services and pricing structure. These tiers will be available when creating new orders for customers in the Messages section. You can add, edit, or remove tiers as your business needs change.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Add Tier Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Custom Service Tier</DialogTitle>
+            <DialogTitle>Add Custom Service</DialogTitle>
             <DialogDescription>
               Create a new service tier with custom pricing and features.
             </DialogDescription>
@@ -300,7 +283,7 @@ const VendorServiceTiersPage = () => {
             </div>
 
             <div>
-              <Label htmlFor="tier-price">Price ($)</Label>
+              <Label htmlFor="tier-price">Starting at ($)</Label>
               <Input
                 id="tier-price"
                 type="number"
@@ -359,7 +342,7 @@ const VendorServiceTiersPage = () => {
                 Cancel
               </Button>
               <Button onClick={handleAddTier}>
-                Add Tier
+                Add Service
               </Button>
             </div>
           </div>

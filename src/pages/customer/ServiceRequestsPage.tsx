@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import ServiceRequestsAPI, { ServiceRequest } from "@/services/ServiceRequestsAPI";
 import {
   FileText,
   Clock,
@@ -15,105 +18,50 @@ import {
   MapPin,
   User,
   AlertCircle,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 
 const ServiceRequestsPage = () => {
   const navigate = useNavigate();
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      serviceName: "Premium Home Painting",
-      vendor: "Brush Strokes Pro",
-      status: "pending",
-      requestDate: "2024-01-15",
-      scheduledDate: "2024-01-20",
-      price: "$500",
-      description: "Interior painting for living room and bedroom",
-      vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      location: "Downtown Area",
-      urgency: "normal"
-    },
-    {
-      id: 2,
-      serviceName: "Emergency Plumbing Repair",
-      vendor: "Rapid Plumbers",
-      status: "confirmed",
-      requestDate: "2024-01-14",
-      scheduledDate: "2024-01-16",
-      price: "$150",
-      description: "Fix leaking kitchen faucet",
-      vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      location: "Midtown",
-      urgency: "urgent"
-    },
-    {
-      id: 3,
-      serviceName: "Deep House Cleaning",
-      vendor: "Sparkling Spaces",
-      status: "completed",
-      requestDate: "2024-01-10",
-      scheduledDate: "2024-01-12",
-      price: "$180",
-      description: "Full house deep cleaning service",
-      vendorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      location: "Suburbs North",
-      urgency: "normal"
-    },
-    {
-      id: 4,
-      serviceName: "HVAC System Tune-up",
-      vendor: "Climate Control Experts",
-      status: "cancelled",
-      requestDate: "2024-01-08",
-      scheduledDate: "2024-01-15",
-      price: "$120",
-      description: "Annual HVAC maintenance and inspection",
-      vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      location: "Suburbs South",
-      urgency: "normal"
-    }
-  ]);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "confirmed":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  // Fetch service requests
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await ServiceRequestsAPI.getServiceRequests();
+        if (response.error) {
+          throw new Error('Failed to load service requests');
+        }
+
+        setRequests(response.requests);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load service requests');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
+
+  // Helper functions
+  const getStatusColor = (status: number) => {
+    return ServiceRequestsAPI.getStatusColor(status);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="w-4 h-4" />;
-      case "confirmed":
-        return <CheckCircle className="w-4 h-4" />;
-      case "completed":
-        return <CheckCircle className="w-4 h-4" />;
-      case "cancelled":
-        return <XCircle className="w-4 h-4" />;
-      default:
-        return <AlertCircle className="w-4 h-4" />;
-    }
+  const getStatusText = (status: number) => {
+    return ServiceRequestsAPI.getStatusText(status);
   };
 
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case "urgent":
-        return "bg-red-500";
-      case "normal":
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
+  const getUrgencyText = (urgency: number) => {
+    return ServiceRequestsAPI.getUrgencyText(urgency);
   };
 
   const handleViewDetails = (requestId: number) => {
@@ -128,8 +76,46 @@ const ServiceRequestsPage = () => {
     setRequests(requests.filter(req => req.id !== requestId));
   };
 
-  const pendingCount = requests.filter(req => req.status === "pending").length;
-  const confirmedCount = requests.filter(req => req.status === "confirmed").length;
+  // Helper functions for status display
+  const getStatusIcon = (status: number) => {
+    switch (status) {
+      case 0: // Pending
+        return <Clock className="w-4 h-4" />;
+      case 1: // Accepted
+        return <CheckCircle className="w-4 h-4" />;
+      case 2: // In Progress
+        return <Clock className="w-4 h-4" />;
+      case 3: // Completed
+        return <CheckCircle className="w-4 h-4" />;
+      case 4: // Cancelled
+        return <XCircle className="w-4 h-4" />;
+      case 5: // Rejected
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <AlertCircle className="w-4 h-4" />;
+    }
+  };
+
+  const getUrgencyColor = (urgency: number) => {
+    switch (urgency) {
+      case 1: // Urgent
+        return "bg-red-500";
+      case 2: // High
+        return "bg-orange-500";
+      case 3: // Normal
+        return "bg-green-500";
+      case 4: // Low
+        return "bg-blue-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  // Calculate counts for stats
+  const pendingCount = requests.filter(req => req.status === 0).length;
+  const confirmedCount = requests.filter(req => req.status === 1).length;
+  const completedCount = requests.filter(req => req.status === 3).length;
+  const cancelledCount = requests.filter(req => req.status === 4).length;
 
   return (
     <MarketplaceLayout>
@@ -147,8 +133,8 @@ const ServiceRequestsPage = () => {
                   <p className="text-gray-600">{requests.length} total requests</p>
                 </div>
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={() => navigate('/marketplace')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -167,15 +153,11 @@ const ServiceRequestsPage = () => {
                 <div className="text-sm text-blue-700">Confirmed</div>
               </div>
               <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  {requests.filter(req => req.status === "completed").length}
-                </div>
+                <div className="text-2xl font-bold text-green-600">{completedCount}</div>
                 <div className="text-sm text-green-700">Completed</div>
               </div>
               <div className="bg-red-50 p-4 rounded-lg">
-                <div className="text-2xl font-bold text-red-600">
-                  {requests.filter(req => req.status === "cancelled").length}
-                </div>
+                <div className="text-2xl font-bold text-red-600">{cancelledCount}</div>
                 <div className="text-sm text-red-700">Cancelled</div>
               </div>
             </div>
@@ -183,7 +165,39 @@ const ServiceRequestsPage = () => {
         </section>
 
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {requests.length === 0 ? (
+          {error && (
+            <Alert className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {loading ? (
+            /* Loading State */
+            <div className="space-y-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="border border-gray-200">
+                  <CardContent className="p-6">
+                    <div className="flex gap-4">
+                      <Skeleton className="w-16 h-16 rounded-full" />
+                      <div className="flex-1">
+                        <Skeleton className="h-6 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-4" />
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-full" />
+                        </div>
+                        <div className="flex justify-between">
+                          <Skeleton className="h-8 w-20" />
+                          <Skeleton className="h-8 w-24" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : requests.length === 0 ? (
             /* Empty State */
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -191,7 +205,7 @@ const ServiceRequestsPage = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">No service requests</h2>
               <p className="text-gray-600 mb-8">You haven't requested any services yet. Browse our marketplace to get started.</p>
-              <Button 
+              <Button
                 onClick={() => navigate('/marketplace')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -206,27 +220,27 @@ const ServiceRequestsPage = () => {
                   <CardContent className="p-6">
                     <div className="flex gap-4">
                       <img
-                        src={request.vendorImage}
-                        alt={request.vendor}
+                        src={request.vendor_image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"}
+                        alt={request.vendor_name}
                         className="w-16 h-16 rounded-full object-cover"
                       />
-                      
+
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-1">{request.serviceName}</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-1">{request.service_title}</h3>
                             <div className="flex items-center gap-2 mb-2">
                               <User className="w-4 h-4 text-gray-500" />
-                              <span className="text-gray-700">{request.vendor}</span>
+                              <span className="text-gray-700">{request.vendor_name}</span>
                               <div className={`w-2 h-2 rounded-full ${getUrgencyColor(request.urgency)}`}></div>
-                              <span className="text-sm text-gray-500 capitalize">{request.urgency}</span>
+                              <span className="text-sm text-gray-500 capitalize">{getUrgencyText(request.urgency)}</span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             <Badge className={`${getStatusColor(request.status)} flex items-center gap-1`}>
                               {getStatusIcon(request.status)}
-                              <span className="capitalize">{request.status}</span>
+                              <span className="capitalize">{getStatusText(request.status)}</span>
                             </Badge>
                             <Button
                               variant="ghost"
@@ -244,21 +258,21 @@ const ServiceRequestsPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="w-4 h-4" />
-                            <span>Requested: {new Date(request.requestDate).toLocaleDateString()}</span>
+                            <span>Requested: {new Date(request.created_at).toLocaleDateString()}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Clock className="w-4 h-4" />
-                            <span>Scheduled: {new Date(request.scheduledDate).toLocaleDateString()}</span>
+                            <span>Scheduled: {request.scheduled_date ? new Date(request.scheduled_date).toLocaleDateString() : 'Not scheduled'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="w-4 h-4" />
-                            <span>{request.location}</span>
+                            <Phone className="w-4 h-4" />
+                            <span>{request.vendor_phone}</span>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div className="text-2xl font-bold text-gray-900">{request.price}</div>
-                          
+                          <div className="text-2xl font-bold text-gray-900">${request.service_price}</div>
+
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
@@ -267,20 +281,20 @@ const ServiceRequestsPage = () => {
                             >
                               View Details
                             </Button>
-                            
-                            {(request.status === "pending" || request.status === "confirmed") && (
+
+                            {(request.status === 0 || request.status === 1) && (
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleChatWithVendor(request.vendor)}
+                                onClick={() => handleChatWithVendor(request.vendor_name)}
                                 className="border-blue-600 text-blue-600 hover:bg-blue-50"
                               >
                                 <MessageCircle className="w-4 h-4 mr-2" />
                                 Chat
                               </Button>
                             )}
-                            
-                            {request.status === "confirmed" && (
+
+                            {request.status === 1 && (
                               <Button
                                 size="sm"
                                 className="bg-green-600 hover:bg-green-700"
@@ -310,7 +324,7 @@ const ServiceRequestsPage = () => {
               <p className="text-gray-600 mb-6">
                 Our support team is here to help you manage your service requests
               </p>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => navigate('/marketplace/help')}
                 className="border-gray-300 text-gray-700 hover:bg-gray-50"

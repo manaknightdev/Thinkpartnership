@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,178 +33,198 @@ import {
   Send,
   ThumbsUp,
   ThumbsDown,
-
+  Loader2,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface ServiceRequest {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  customerAvatar: string;
-  serviceName: string;
-  description: string;
-  location: string;
-  address: string;
-  preferredDate: string;
-  preferredTime: string;
-  urgency: "low" | "normal" | "high" | "urgent";
-  budget: string;
-  status: "new" | "viewed" | "quoted" | "accepted" | "in_progress" | "completed" | "declined";
-  customerStatus: "submitted" | "pending" | "quoted" | "confirmed" | "in_progress" | "completed" | "cancelled";
-  requestDate: string;
-  lastUpdated: string;
-
-  isRepeatCustomer: boolean;
-  quoteAmount?: string;
-  quoteSentDate?: string;
-  acceptedDate?: string;
-  startedDate?: string;
-  completedDate?: string;
-}
+import VendorRequestsAPI, { VendorRequest, SendQuoteData } from "@/services/VendorRequestsAPI";
+import { showSuccess, showError } from "@/utils/toast";
 
 const VendorRequestsPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [urgencyFilter, setUrgencyFilter] = useState("all");
-  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<VendorRequest | null>(null);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [quoteData, setQuoteData] = useState({
-    price: "",
-    description: "",
-    validUntil: "",
-    estimatedDuration: ""
+  const [requests, setRequests] = useState<VendorRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSendingQuote, setIsSendingQuote] = useState(false);
+  const [error, setError] = useState("");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0,
   });
 
-  // Mock service requests data
-  const [requests, setRequests] = useState<ServiceRequest[]>([
-    {
-      id: "req001",
-      customerName: "John Doe",
-      customerEmail: "john.doe@example.com",
-      customerPhone: "(555) 123-4567",
-      customerAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      serviceName: "Interior Painting",
-      description: "Need interior painting for living room (300 sq ft) and bedroom (250 sq ft). Looking for neutral colors - light gray for living room and soft beige for bedroom. Quality paint preferred.",
-      location: "Downtown Area",
-      address: "123 Main St, Downtown Area, CA 90210",
-      preferredDate: "2024-01-25",
-      preferredTime: "Morning (9AM-12PM)",
-      urgency: "normal",
-      budget: "$400-600",
-      status: "new",
-      customerStatus: "pending",
-      requestDate: "2024-01-20",
-      lastUpdated: "2024-01-20",
+  const [quoteData, setQuoteData] = useState<SendQuoteData>({
+    vendor_quote: 0,
+    quote_description: "",
+    quote_expires_at: "",
+    estimated_completion_time: "",
+    terms_conditions: "",
+  });
 
-      isRepeatCustomer: false
-    },
-    {
-      id: "req002",
-      customerName: "Sarah Wilson",
-      customerEmail: "sarah.wilson@example.com",
-      customerPhone: "(555) 987-6543",
-      customerAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      serviceName: "Emergency Plumbing Repair",
-      description: "Kitchen sink is completely blocked and water is backing up. Need urgent plumbing repair ASAP. This is affecting daily activities.",
-      location: "Suburbs",
-      address: "456 Oak Ave, Suburbs, CA 90211",
-      preferredDate: "2024-01-21",
-      preferredTime: "ASAP",
-      urgency: "urgent",
-      budget: "$150-250",
-      status: "quoted",
-      customerStatus: "quoted",
-      requestDate: "2024-01-20",
-      lastUpdated: "2024-01-20",
+  // Load requests on component mount
+  useEffect(() => {
+    loadRequests();
+  }, [pagination.page, statusFilter, urgencyFilter]);
 
-      isRepeatCustomer: true,
-      quoteAmount: "$180",
-      quoteSentDate: "2024-01-20"
-    },
-    {
-      id: "req003",
-      customerName: "Mike Johnson",
-      customerEmail: "mike.johnson@example.com",
-      customerPhone: "(555) 456-7890",
-      customerAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      serviceName: "Bathroom Renovation",
-      description: "Complete bathroom renovation including tiles, fixtures, and plumbing. Looking for modern design with quality materials.",
-      location: "Industrial District",
-      address: "789 Industrial Blvd, Industrial District, CA 90212",
-      preferredDate: "2024-02-01",
-      preferredTime: "Flexible",
-      urgency: "normal",
-      budget: "$2000-3000",
-      status: "accepted",
-      customerStatus: "confirmed",
-      requestDate: "2024-01-19",
-      lastUpdated: "2024-01-20",
+  const loadRequests = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
 
-      isRepeatCustomer: false,
-      quoteAmount: "$2,450",
-      quoteSentDate: "2024-01-19",
-      acceptedDate: "2024-01-20"
-    },
-    {
-      id: "req004",
-      customerName: "Emily Chen",
-      customerEmail: "emily.chen@example.com",
-      customerPhone: "(555) 321-0987",
-      customerAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-      serviceName: "Kitchen Cabinet Painting",
-      description: "Paint existing kitchen cabinets. Currently oak finish, want to change to white. About 20 cabinet doors and drawers.",
-      location: "Downtown Area",
-      address: "321 Pine St, Downtown Area, CA 90210",
-      preferredDate: "2024-01-28",
-      preferredTime: "Afternoon (1PM-5PM)",
-      urgency: "low",
-      budget: "$300-500",
-      status: "in_progress",
-      customerStatus: "in_progress",
-      requestDate: "2024-01-18",
-      lastUpdated: "2024-01-21",
+      const filters = {
+        page: pagination.page,
+        limit: pagination.limit,
+        status: statusFilter !== "all" ? getStatusNumber(statusFilter) : undefined,
+        urgency: urgencyFilter !== "all" ? urgencyFilter : undefined,
+      };
 
-      isRepeatCustomer: false,
-      quoteAmount: "$420",
-      quoteSentDate: "2024-01-18",
-      acceptedDate: "2024-01-19",
-      startedDate: "2024-01-21"
-    },
-    {
-      id: "req005",
-      customerName: "David Martinez",
-      customerEmail: "david.martinez@example.com",
-      customerPhone: "(555) 654-3210",
-      customerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      serviceName: "Deck Staining",
-      description: "Stain and seal wooden deck. About 400 sq ft. Deck needs cleaning first, then staining with weather-resistant stain.",
-      location: "Suburbs",
-      address: "567 Maple Dr, Suburbs, CA 90211",
-      preferredDate: "2024-01-30",
-      preferredTime: "Weekend",
-      urgency: "normal",
-      budget: "$200-400",
-      status: "completed",
-      customerStatus: "completed",
-      requestDate: "2024-01-15",
-      lastUpdated: "2024-01-19",
+      const response = await VendorRequestsAPI.getRequests(filters);
 
-      isRepeatCustomer: true,
-      quoteAmount: "$320",
-      quoteSentDate: "2024-01-15",
-      acceptedDate: "2024-01-16",
-      startedDate: "2024-01-18",
-      completedDate: "2024-01-19"
+      if (response.error) {
+        setError(response.message || "Failed to load requests");
+        return;
+      }
+
+      setRequests(response.requests);
+      if (response.pagination) {
+        setPagination(response.pagination);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load requests");
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
-  const getStatusColor = (status: string) => {
+  const getStatusNumber = (status: string): number => {
     switch (status) {
+      case "new": return 0;
+      case "viewed": return 1;
+      case "quoted": return 2;
+      case "accepted": return 3;
+      case "in_progress": return 4;
+      case "completed": return 5;
+      case "declined": return 6;
+      default: return 0;
+    }
+  };
+
+  const getStatusString = (status: number): string => {
+    switch (status) {
+      case 0: return "new";
+      case 1: return "viewed";
+      case 2: return "quoted";
+      case 3: return "accepted";
+      case 4: return "in_progress";
+      case 5: return "completed";
+      case 6: return "declined";
+      default: return "new";
+    }
+  };
+
+  const handleSendQuote = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      setIsSendingQuote(true);
+      setError("");
+
+      const response = await VendorRequestsAPI.sendQuote(selectedRequest.id, quoteData);
+
+      if (response.error) {
+        setError(response.message);
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Quote sent successfully!");
+      setShowQuoteModal(false);
+      resetQuoteData();
+      await loadRequests();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to send quote";
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsSendingQuote(false);
+    }
+  };
+
+  const handleAcceptRequest = async (requestId: number) => {
+    try {
+      const response = await VendorRequestsAPI.acceptRequest(requestId);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Request accepted successfully!");
+      await loadRequests();
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to accept request");
+    }
+  };
+
+  const handleDeclineRequest = async (requestId: number, reason?: string) => {
+    try {
+      const response = await VendorRequestsAPI.declineRequest(requestId, reason);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Request declined successfully!");
+      await loadRequests();
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to decline request");
+    }
+  };
+
+  const handleCompleteRequest = async (requestId: number) => {
+    try {
+      const response = await VendorRequestsAPI.completeRequest(requestId);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Request marked as completed!");
+      await loadRequests();
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to complete request");
+    }
+  };
+
+  const resetQuoteData = () => {
+    setQuoteData({
+      vendor_quote: 0,
+      quote_description: "",
+      quote_expires_at: "",
+      estimated_completion_time: "",
+      terms_conditions: "",
+    });
+  };
+
+  const openQuoteModal = (request: VendorRequest) => {
+    setSelectedRequest(request);
+    setShowQuoteModal(true);
+  };
+
+  const getStatusColor = (status: number) => {
+    const statusString = getStatusString(status);
+    switch (statusString) {
       case "new": return "bg-blue-100 text-blue-800";
       case "viewed": return "bg-yellow-100 text-yellow-800";
       case "quoted": return "bg-purple-100 text-purple-800";
@@ -234,88 +254,47 @@ const VendorRequestsPage = () => {
     }
   };
 
-  const handleStatusUpdate = (requestId: string, newStatus: string) => {
-    const currentDate = new Date().toISOString().split('T')[0];
-
-    // Map vendor status to customer status
-    const getCustomerStatus = (vendorStatus: string) => {
-      switch (vendorStatus) {
-        case "new": return "pending";
-        case "viewed": return "pending";
-        case "quoted": return "quoted";
-        case "accepted": return "confirmed";
-        case "in_progress": return "in_progress";
-        case "completed": return "completed";
-        case "declined": return "cancelled";
-        default: return "pending";
-      }
-    };
-
-    setRequests(requests.map(req => {
-      if (req.id === requestId) {
-        const updatedRequest = {
-          ...req,
-          status: newStatus as any,
-          customerStatus: getCustomerStatus(newStatus) as any,
-          lastUpdated: currentDate
-        };
-
-        // Add timestamps for specific status changes
-        if (newStatus === "accepted" && !req.acceptedDate) {
-          updatedRequest.acceptedDate = currentDate;
-        }
-        if (newStatus === "in_progress" && !req.startedDate) {
-          updatedRequest.startedDate = currentDate;
-        }
-        if (newStatus === "completed" && !req.completedDate) {
-          updatedRequest.completedDate = currentDate;
-        }
-
-        return updatedRequest;
-      }
-      return req;
-    }));
-
-    // Show appropriate success message
-    const statusMessages = {
-      "viewed": "Request marked as viewed",
-      "quoted": "Quote sent to customer",
-      "accepted": "Request accepted - customer will be notified",
-      "in_progress": "Work started - customer can track progress",
-      "completed": "Work completed - customer will be notified",
-      "declined": "Request declined - customer will be notified"
-    };
-
-    toast.success(statusMessages[newStatus as keyof typeof statusMessages] || `Status updated to ${newStatus.replace('_', ' ')}`);
-  };
-
-  const handleSendQuote = () => {
-    if (selectedRequest && quoteData.price && quoteData.description) {
-      const currentDate = new Date().toISOString().split('T')[0];
-
-      // Update the request with quote information
-      setRequests(requests.map(req => {
-        if (req.id === selectedRequest.id) {
-          return {
-            ...req,
-            status: "quoted" as any,
-            customerStatus: "quoted" as any,
-            lastUpdated: currentDate,
-            quoteAmount: quoteData.price,
-            quoteSentDate: currentDate
-          };
-        }
-        return req;
-      }));
-
-      setShowQuoteModal(false);
-      setQuoteData({ price: "", description: "", validUntil: "", estimatedDuration: "" });
-      setSelectedRequest(null);
-      toast.success("Quote sent successfully! Customer will be notified.");
-    } else {
-      toast.error("Please fill in all required quote details.");
-    }
-  };
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-20" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-16 w-full mb-4" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const handleChatWithCustomer = (customerName: string) => {
     // Navigate to messages with customer
@@ -323,24 +302,24 @@ const VendorRequestsPage = () => {
   };
 
   const filteredRequests = requests.filter(request => {
-    const matchesSearch = request.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = request.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         request.service_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || request.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || getStatusString(request.status) === statusFilter;
     const matchesUrgency = urgencyFilter === "all" || request.urgency === urgencyFilter;
-    
+
     return matchesSearch && matchesStatus && matchesUrgency;
   });
 
   const statusCounts = {
     all: requests.length,
-    new: requests.filter(r => r.status === "new").length,
-    viewed: requests.filter(r => r.status === "viewed").length,
-    quoted: requests.filter(r => r.status === "quoted").length,
-    accepted: requests.filter(r => r.status === "accepted").length,
-    in_progress: requests.filter(r => r.status === "in_progress").length,
-    completed: requests.filter(r => r.status === "completed").length,
-    declined: requests.filter(r => r.status === "declined").length,
+    new: requests.filter(r => r.status === 0).length,
+    viewed: requests.filter(r => r.status === 1).length,
+    quoted: requests.filter(r => r.status === 2).length,
+    accepted: requests.filter(r => r.status === 3).length,
+    in_progress: requests.filter(r => r.status === 4).length,
+    completed: requests.filter(r => r.status === 5).length,
+    declined: requests.filter(r => r.status === 6).length,
   };
 
   return (
@@ -392,7 +371,7 @@ const VendorRequestsPage = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -406,7 +385,7 @@ const VendorRequestsPage = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -420,7 +399,7 @@ const VendorRequestsPage = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -484,6 +463,16 @@ const VendorRequestsPage = () => {
         </CardContent>
       </Card>
 
+      {/* Error Display */}
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Requests List */}
       <div className="space-y-4">
         {filteredRequests.length === 0 ? (
@@ -504,34 +493,24 @@ const VendorRequestsPage = () => {
               <CardContent className="p-6">
                 <div className="flex gap-4">
                   <div className="relative">
-                    <img
-                      src={request.customerAvatar}
-                      alt={request.customerName}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    {request.isRepeatCustomer && (
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">R</span>
-                      </div>
-                    )}
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="h-8 w-8 text-gray-500" />
+                    </div>
                   </div>
 
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-xl font-bold text-gray-900">{request.serviceName}</h3>
+                          <h3 className="text-xl font-bold text-gray-900">{request.service_title}</h3>
                           <Badge className={cn("text-xs", getStatusColor(request.status))}>
-                            {request.status.replace('_', ' ')}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            Customer sees: {request.customerStatus.replace('_', ' ')}
+                            {getStatusString(request.status).replace('_', ' ')}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-3 mb-2">
                           <div className="flex items-center gap-1">
                             <User className="w-4 h-4 text-gray-500" />
-                            <span className="text-gray-700">{request.customerName}</span>
+                            <span className="text-gray-700">{request.customer_name}</span>
                           </div>
 
                           <div className="flex items-center gap-1">
@@ -544,7 +523,7 @@ const VendorRequestsPage = () => {
                       <div className="text-right">
                         <div className="flex items-center gap-1 text-green-600 font-semibold mb-1">
                           <DollarSign className="w-4 h-4" />
-                          <span>{request.budget}</span>
+                          <span>${request.budget_min} - ${request.budget_max}</span>
                         </div>
                         <p className="text-sm text-gray-500">Budget</p>
                       </div>
@@ -559,37 +538,29 @@ const VendorRequestsPage = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(request.preferredDate).toLocaleDateString()}</span>
+                        <span>{new Date(request.preferred_date).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        <span>{request.preferredTime}</span>
+                        <span>{request.preferred_time}</span>
                       </div>
-                      {request.quoteAmount && (
+                      {request.vendor_quote && (
                         <div className="flex items-center gap-1 text-green-600 font-semibold">
                           <DollarSign className="w-4 h-4" />
-                          <span>Quoted: {request.quoteAmount}</span>
+                          <span>Quoted: ${request.vendor_quote}</span>
                         </div>
                       )}
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {request.status === "new" && (
+                      {request.status === 0 && (
                         <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleStatusUpdate(request.id, "viewed")}
-                            variant="outline"
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Mark as Viewed
-                          </Button>
                           <Dialog open={showQuoteModal && selectedRequest?.id === request.id} onOpenChange={setShowQuoteModal}>
                             <DialogTrigger asChild>
                               <Button
                                 size="sm"
                                 className="bg-blue-600 hover:bg-blue-700"
-                                onClick={() => setSelectedRequest(request)}
+                                onClick={() => openQuoteModal(request)}
                               >
                                 <Send className="w-4 h-4 mr-1" />
                                 Send Quote
@@ -597,54 +568,76 @@ const VendorRequestsPage = () => {
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[500px]">
                               <DialogHeader>
-                                <DialogTitle>Send Quote to {request.customerName}</DialogTitle>
+                                <DialogTitle>Send Quote to {request.customer_name}</DialogTitle>
                                 <DialogDescription>
                                   Create a detailed quote for this service request.
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="grid gap-4 py-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="quote-price">Price *</Label>
+                                  <Label htmlFor="quote-price">Quote Amount *</Label>
                                   <Input
                                     id="quote-price"
-                                    value={quoteData.price}
-                                    onChange={(e) => setQuoteData({...quoteData, price: e.target.value})}
-                                    placeholder="e.g., $450"
+                                    type="number"
+                                    value={quoteData.vendor_quote}
+                                    onChange={(e) => setQuoteData({...quoteData, vendor_quote: parseFloat(e.target.value) || 0})}
+                                    placeholder="450"
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="quote-description">Description *</Label>
+                                  <Label htmlFor="quote-description">Quote Description *</Label>
                                   <Textarea
                                     id="quote-description"
-                                    value={quoteData.description}
-                                    onChange={(e) => setQuoteData({...quoteData, description: e.target.value})}
+                                    value={quoteData.quote_description}
+                                    onChange={(e) => setQuoteData({...quoteData, quote_description: e.target.value})}
                                     placeholder="Detailed description of work included..."
                                     rows={3}
                                   />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-2">
-                                    <Label htmlFor="quote-valid">Valid Until</Label>
+                                    <Label htmlFor="quote-valid">Quote Expires At</Label>
                                     <Input
                                       id="quote-valid"
                                       type="date"
-                                      value={quoteData.validUntil}
-                                      onChange={(e) => setQuoteData({...quoteData, validUntil: e.target.value})}
+                                      value={quoteData.quote_expires_at}
+                                      onChange={(e) => setQuoteData({...quoteData, quote_expires_at: e.target.value})}
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor="quote-duration">Estimated Duration</Label>
+                                    <Label htmlFor="quote-duration">Estimated Completion Time</Label>
                                     <Input
                                       id="quote-duration"
-                                      value={quoteData.estimatedDuration}
-                                      onChange={(e) => setQuoteData({...quoteData, estimatedDuration: e.target.value})}
+                                      value={quoteData.estimated_completion_time}
+                                      onChange={(e) => setQuoteData({...quoteData, estimated_completion_time: e.target.value})}
                                       placeholder="e.g., 2-3 days"
                                     />
                                   </div>
                                 </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="terms">Terms & Conditions</Label>
+                                  <Textarea
+                                    id="terms"
+                                    value={quoteData.terms_conditions}
+                                    onChange={(e) => setQuoteData({...quoteData, terms_conditions: e.target.value})}
+                                    placeholder="Payment terms, warranty, etc..."
+                                    rows={2}
+                                  />
+                                </div>
                               </div>
-                              <Button onClick={handleSendQuote} className="w-full">
-                                Send Quote
+                              <Button
+                                onClick={handleSendQuote}
+                                disabled={isSendingQuote}
+                                className="w-full"
+                              >
+                                {isSendingQuote ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Sending Quote...
+                                  </>
+                                ) : (
+                                  "Send Quote"
+                                )}
                               </Button>
                             </DialogContent>
                           </Dialog>
@@ -652,7 +645,7 @@ const VendorRequestsPage = () => {
                             size="sm"
                             variant="outline"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleStatusUpdate(request.id, "declined")}
+                            onClick={() => handleDeclineRequest(request.id)}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Decline
@@ -660,72 +653,46 @@ const VendorRequestsPage = () => {
                         </>
                       )}
 
-                      {request.status === "viewed" && (
-                        <>
-                          <Dialog open={showQuoteModal && selectedRequest?.id === request.id} onOpenChange={setShowQuoteModal}>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                className="bg-blue-600 hover:bg-blue-700"
-                                onClick={() => setSelectedRequest(request)}
-                              >
-                                <Send className="w-4 h-4 mr-1" />
-                                Send Quote
-                              </Button>
-                            </DialogTrigger>
-                          </Dialog>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleStatusUpdate(request.id, "declined")}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Decline
-                          </Button>
-                        </>
-                      )}
-
-                      {request.status === "quoted" && (
+                      {request.status === 2 && (
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                            Quote Sent ({request.quoteAmount}) - Awaiting Customer Response
+                            Quote Sent (${request.vendor_quote}) - Awaiting Customer Response
                           </Badge>
-                          {request.quoteSentDate && (
+                          {request.quote_sent_at && (
                             <span className="text-xs text-gray-500">
-                              Sent on {new Date(request.quoteSentDate).toLocaleDateString()}
+                              Sent on {new Date(request.quote_sent_at).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {request.status === "accepted" && (
+                      {request.status === 3 && (
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             className="bg-green-600 hover:bg-green-700"
-                            onClick={() => handleStatusUpdate(request.id, "in_progress")}
+                            onClick={() => handleAcceptRequest(request.id)}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Start Work
                           </Button>
                           <Badge variant="secondary" className="bg-green-100 text-green-700">
-                            Customer Confirmed ({request.quoteAmount})
+                            Customer Confirmed (${request.vendor_quote})
                           </Badge>
-                          {request.acceptedDate && (
+                          {request.accepted_at && (
                             <span className="text-xs text-gray-500">
-                              Accepted on {new Date(request.acceptedDate).toLocaleDateString()}
+                              Accepted on {new Date(request.accepted_at).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {request.status === "in_progress" && (
+                      {request.status === 4 && (
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             className="bg-indigo-600 hover:bg-indigo-700"
-                            onClick={() => handleStatusUpdate(request.id, "completed")}
+                            onClick={() => handleCompleteRequest(request.id)}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Mark Complete
@@ -733,40 +700,40 @@ const VendorRequestsPage = () => {
                           <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
                             Work in Progress
                           </Badge>
-                          {request.startedDate && (
+                          {request.started_at && (
                             <span className="text-xs text-gray-500">
-                              Started on {new Date(request.startedDate).toLocaleDateString()}
+                              Started on {new Date(request.started_at).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {request.status === "completed" && (
+                      {request.status === 5 && (
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="bg-gray-100 text-gray-700">
                             ✅ Work Completed
                           </Badge>
-                          {request.completedDate && (
+                          {request.completed_at && (
                             <span className="text-xs text-gray-500">
-                              Completed on {new Date(request.completedDate).toLocaleDateString()}
+                              Completed on {new Date(request.completed_at).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {request.status === "declined" && (
+                      {request.status === 6 && (
                         <Badge variant="secondary" className="bg-red-100 text-red-700">
                           ❌ Request Declined
                         </Badge>
                       )}
 
                       {/* Chat button - available for all active statuses */}
-                      {!["declined", "completed"].includes(request.status) && (
+                      {![6, 5].includes(request.status) && (
                         <Button
                           size="sm"
                           variant="outline"
                           className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                          onClick={() => handleChatWithCustomer(request.customerName)}
+                          onClick={() => handleChatWithCustomer(request.customer_name)}
                         >
                           <MessageCircle className="w-4 h-4 mr-1" />
                           Chat
@@ -778,7 +745,7 @@ const VendorRequestsPage = () => {
                         size="sm"
                         variant="outline"
                         className="border-green-600 text-green-600 hover:bg-green-50"
-                        onClick={() => window.open(`tel:${request.customerPhone}`)}
+                        onClick={() => window.open(`tel:${request.customer_phone}`)}
                       >
                         <Phone className="w-4 h-4 mr-1" />
                         Call
@@ -791,6 +758,36 @@ const VendorRequestsPage = () => {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.pages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} requests
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={pagination.page === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={pagination.page === pagination.pages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

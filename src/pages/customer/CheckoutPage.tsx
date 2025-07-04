@@ -215,7 +215,7 @@ const CheckoutPage = () => {
                       </div>
 
                       <div className="flex flex-wrap gap-2 mb-6">
-                        {service.tags.map((tag, index) => (
+                        {Array.isArray(service.tags) && service.tags.map((tag, index) => (
                           <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full">
                             {tag}
                           </Badge>

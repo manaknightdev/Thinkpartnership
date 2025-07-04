@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
+import UserAPI, { UserProfile } from "@/services/UserAPI";
+import NotificationsAPI from "@/services/NotificationsAPI";
 import {
   Search,
   FileText,
@@ -31,8 +33,52 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [requestCount, setRequestCount] = useState(2);
-  const [notificationCount, setNotificationCount] = useState(3);
-  const [userName] = useState("John Doe"); // In real app, this would come from auth context
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  // User profile state
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Fetch user profile and notification count
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setProfileLoading(true);
+
+        // Fetch user profile
+        const profileResponse = await UserAPI.getProfile();
+        if (!profileResponse.error) {
+          setUserProfile(profileResponse.user);
+        }
+
+        // Fetch notification count
+        const notificationResponse = await NotificationsAPI.getUnreadCount();
+        if (!notificationResponse.error) {
+          setNotificationCount(notificationResponse.count);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Get display name
+  const getDisplayName = () => {
+    if (!userProfile) return 'User';
+    const firstName = userProfile.first_name || '';
+    const lastName = userProfile.last_name || '';
+    return firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || 'User';
+  };
+
+  // Get first name for header
+  const getFirstName = () => {
+    if (!userProfile) return 'User';
+    return userProfile.first_name || 'User';
+  };
 
   const sidebarItems = [
     { name: "Browse", path: "/marketplace", icon: Home, exact: true },
@@ -161,17 +207,31 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span className="hidden sm:block text-sm font-medium">{userName.split(' ')[0]}</span>
+                  {userProfile?.photo ? (
+                    <img
+                      src={userProfile.photo}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-green-600" />
+                    </div>
+                  )}
+                  <span className="hidden sm:block text-sm font-medium">
+                    {profileLoading ? 'Loading...' : getFirstName()}
+                  </span>
                   <ChevronDown className="h-3 w-3 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-3 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{userName}</p>
-                  <p className="text-xs text-gray-500">john.doe@example.com</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {profileLoading ? 'Loading...' : getDisplayName()}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {profileLoading ? 'Loading...' : userProfile?.email || 'No email'}
+                  </p>
                 </div>
                 <DropdownMenuItem onClick={() => navigate('/marketplace/account')}>
                   <User className="mr-2 h-4 w-4" />

@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
 import {
   Search,
   Filter,
@@ -21,198 +24,111 @@ import {
 const AllServicesPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'all');
-
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState(searchParams.get('delivery') || 'all');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'best-match');
-  
+
+  // API state
+  const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [totalServices, setTotalServices] = useState(0);
+  const [error, setError] = useState('');
+
   const servicesPerPage = 12;
 
-  // Extended mock services data
-  const allServices = [
-    {
-      id: 1,
-      title: "Home Painting",
-      vendor: "Brush Strokes Pro",
-      description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
-      price: "$500",
-      responseTime: "2 hours",
-      verified: true,
-      deliveryTime: "3-5 days",
-      tags: ["Interior", "Exterior", "Eco-friendly"],
-      image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 150,
-      category: "Painting"
-    },
-    {
-      id: 2,
-      title: "Emergency Plumbing Repair",
-      vendor: "Rapid Plumbers",
-      description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
-      price: "$150",
-      responseTime: "30 mins",
-      verified: true,
-      deliveryTime: "Same day",
-      tags: ["24/7", "Emergency", "Licensed"],
-      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 89,
-      category: "Plumbing"
-    },
-    {
-      id: 3,
-      title: "Full Home Inspection",
-      vendor: "Certified Inspectors Inc.",
-      description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
-      price: "$300",
-      responseTime: "1 day",
-      verified: true,
-      deliveryTime: "2-3 days",
-      tags: ["Certified", "Detailed Reports", "Pre-purchase"],
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 200,
-      category: "Inspections"
-    },
-    {
-      id: 4,
-      title: "Professional Lawn Care",
-      vendor: "Green Thumb Landscaping",
-      description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
-      price: "$80",
-      responseTime: "4 hours",
-      verified: true,
-      deliveryTime: "Weekly",
-      tags: ["Weekly Service", "Organic", "Seasonal"],
-      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 300,
-      category: "Landscaping"
-    },
-    {
-      id: 5,
-      title: "HVAC System Tune-up",
-      vendor: "Climate Control Experts",
-      description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
-      price: "$120",
-      responseTime: "6 hours",
-      verified: true,
-      deliveryTime: "1-2 days",
-      tags: ["Maintenance", "Energy Efficient", "Warranty"],
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 120,
-      category: "HVAC"
-    },
-    {
-      id: 6,
-      title: "Deep House Cleaning",
-      vendor: "Sparkling Spaces",
-      description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
-      price: "$200",
-      responseTime: "3 hours",
-      verified: true,
-      deliveryTime: "Same day",
-      tags: ["Deep Clean", "Eco-friendly", "Insured"],
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 250,
-      category: "Cleaning"
-    },
-    // Add more services to demonstrate pagination
-    {
-      id: 7,
-      title: "Electrical Wiring Installation",
-      vendor: "PowerPro Electricians",
-      description: "Professional electrical installation and repair services for residential and commercial properties.",
-      price: "$180",
-      responseTime: "2 hours",
-      verified: true,
-      deliveryTime: "1-2 days",
-      tags: ["Licensed", "Insured", "Emergency"],
-      image: "https://images.unsplash.com/photo-1621905252472-e8b1c8e7e8e8?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 180,
-      category: "Electrical"
-    },
-    {
-      id: 8,
-      title: "Professional Moving Service",
-      vendor: "Swift Movers",
-      description: "Full-service moving company with packing, loading, and transportation services.",
-      price: "$350",
-      responseTime: "1 day",
-      verified: true,
-      deliveryTime: "Flexible",
-      tags: ["Full Service", "Insured", "Packing"],
-      image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 95,
-      category: "Moving"
-    }
-  ];
+  // Fetch services and categories
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  // Duplicate services to simulate more data
-  const extendedServices = [...allServices, ...allServices];
+        // Fetch categories first
+        const categoriesResponse = await ServicesAPI.getCategories();
+        if (categoriesResponse.error) {
+          throw new Error('Failed to load categories');
+        }
+        setCategories(categoriesResponse.categories);
 
-  const categories = ["all", ...Array.from(new Set(allServices.map(service => service.category))).sort()];
+        // Fetch services with current filters
+        const filters = {
+          page: currentPage,
+          limit: servicesPerPage,
+          search: searchTerm || undefined,
+          category: selectedCategory !== 'all' ? selectedCategory : undefined,
+          location: selectedLocation !== 'all' ? selectedLocation : undefined,
+          delivery: selectedDeliveryTime !== 'all' ? selectedDeliveryTime : undefined,
+          sort: sortBy !== 'best-match' ? sortBy : undefined
+        };
 
-  const filteredServices = extendedServices.filter(service => {
-    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.vendor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || service.category.toLowerCase() === selectedCategory.toLowerCase();
+        console.log('🔍 Fetching services with filters:', filters);
+        console.log('📂 Selected category:', selectedCategory);
 
-    // Add more filter logic here
-    const matchesDeliveryTime = selectedDeliveryTime === "all" ||
-                               (selectedDeliveryTime === "same-day" && service.deliveryTime.toLowerCase().includes("same day")) ||
-                               (selectedDeliveryTime === "1-day" && (service.deliveryTime.toLowerCase().includes("same day") || service.deliveryTime.toLowerCase().includes("1") || service.deliveryTime.toLowerCase().includes("24"))) ||
-                               (selectedDeliveryTime === "3-days" && !service.deliveryTime.toLowerCase().includes("week")) ||
-                               (selectedDeliveryTime === "1-week");
+        const servicesResponse = await ServicesAPI.getServices(filters);
+        if (servicesResponse.error) {
+          throw new Error('Failed to load services');
+        }
 
-    return matchesSearch && matchesCategory && matchesDeliveryTime;
-  });
+        setServices(servicesResponse.services);
+        setTotalServices(servicesResponse.total || servicesResponse.services.length);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Sort the filtered services
-  const sortedServices = [...filteredServices].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return parseInt(a.price.replace('$', '')) - parseInt(b.price.replace('$', ''));
-      case 'price-high':
-        return parseInt(b.price.replace('$', '')) - parseInt(a.price.replace('$', ''));
+    fetchData();
+  }, [currentPage, searchTerm, selectedCategory, selectedLocation, selectedDeliveryTime, sortBy]);
 
-      case 'newest':
-        return b.id - a.id; // Assuming higher ID means newer
-      case 'popular':
-        return b.completedOrders - a.completedOrders;
-      default:
-        return 0; // best-match - keep original order
-    }
-  });
+  // Handle search
+  // const handleSearch = () => {
+  //   setCurrentPage(1); // Reset to first page when searching
+  // };
 
-  const totalPages = Math.ceil(sortedServices.length / servicesPerPage);
-  const startIndex = (currentPage - 1) * servicesPerPage;
-  const currentServices = sortedServices.slice(startIndex, startIndex + servicesPerPage);
-
-  const handleViewDetails = (serviceName: string) => {
-    navigate(`/marketplace/services/${encodeURIComponent(serviceName)}`);
+  // Handle service click
+  const handleServiceClick = (serviceId: number) => {
+    navigate(`/marketplace/services/${serviceId}`);
   };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(totalServices / servicesPerPage);
 
   const handlePageChange = (page: number) => {
-    setLoading(true);
     setCurrentPage(page);
-    // Simulate loading
-    setTimeout(() => {
-      setLoading(false);
-      // Scroll to top of results
-      document.getElementById('services-grid')?.scrollIntoView({ behavior: 'smooth' });
-    }, 500);
+    // Scroll to top of results
+    document.getElementById('services-grid')?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // const getVisiblePages = () => {
+  //   const delta = 2;
+  //   const range = [];
+  //   const rangeWithDots = [];
+
+  //   for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+  //     range.push(i);
+  //   }
+
+  //   if (currentPage - delta > 2) {
+  //     rangeWithDots.push(1, '...');
+  //   } else {
+  //     rangeWithDots.push(1);
+  //   }
+
+  //   rangeWithDots.push(...range);
+
+  //   if (currentPage + delta < totalPages - 1) {
+  //     rangeWithDots.push('...', totalPages);
+  //   } else {
+  //     rangeWithDots.push(totalPages);
+  //   }
+
+  //   return rangeWithDots;
+  // };
 
   const getVisiblePages = () => {
     const delta = 2;
@@ -299,9 +215,9 @@ const AllServicesPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {categories.filter(cat => cat !== "all").map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
+                      {categories.map((category) => (
+                        <SelectItem key={category.slug} value={category.slug}>
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -406,29 +322,56 @@ const AllServicesPage = () => {
         {/* Services Grid */}
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="mb-6 flex justify-between items-center">
-              <p className="text-gray-600">
-                Showing {startIndex + 1}-{Math.min(startIndex + servicesPerPage, sortedServices.length)} of {sortedServices.length} services
-                {searchTerm && ` for "${searchTerm}"`}
-                {selectedCategory !== "all" && ` in ${selectedCategory}`}
-              </p>
-              <p className="text-sm text-gray-500">
-                Page {currentPage} of {totalPages}
-              </p>
-            </div>
+            {error && (
+              <Alert className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {!loading && !error && (
+              <div className="mb-6 flex justify-between items-center">
+                <p className="text-gray-600">
+                  Showing {((currentPage - 1) * servicesPerPage) + 1}-{Math.min(currentPage * servicesPerPage, totalServices)} of {totalServices} services
+                  {searchTerm && ` for "${searchTerm}"`}
+                  {selectedCategory !== "all" && ` in ${selectedCategory}`}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Page {currentPage} of {totalPages}
+                </p>
+              </div>
+            )}
 
             <div id="services-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {currentServices.map((service, index) => (
-                <Card key={`${service.title}-${index}`} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl">
+              {loading ? (
+                // Loading skeletons
+                Array.from({ length: servicesPerPage }).map((_, index) => (
+                  <Card key={index} className="overflow-hidden border-0 shadow-lg bg-white rounded-2xl">
+                    <Skeleton className="w-full h-56 rounded-t-2xl" />
+                    <CardContent className="p-6">
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-2/3 mb-4" />
+                      <div className="flex gap-2 mb-4">
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-6 w-20" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-8 w-24" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : services.length > 0 ? (
+                services.map((service, index) => (
+                <Card key={service.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl">
                   <div className="relative overflow-hidden rounded-t-2xl">
                     <img
-                      src={service.image}
+                      src={service.image || "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center"}
                       alt={service.title}
                       className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
 
                   </div>
 
@@ -442,15 +385,13 @@ const AllServicesPage = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-end mb-4">
-                      <div className="flex items-center space-x-1 text-xs text-gray-500">
-                        <Clock className="w-3 h-3" />
-                        <span>{service.responseTime} response</span>
-                      </div>
-                    </div>
-
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {service.tags.slice(0, 2).map((tag, tagIndex) => (
+                      {/* Category Badge */}
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                        {service.category}
+                      </Badge>
+                      {/* Category Tags */}
+                      {Array.isArray(service.category_tags) && service.category_tags.slice(0, 2).map((tag, tagIndex) => (
                         <Badge key={tagIndex} variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full">
                           {tag}
                         </Badge>
@@ -464,12 +405,12 @@ const AllServicesPage = () => {
                         </div>
                         <div className="flex items-center space-x-1 text-xs text-gray-500">
                           <Clock className="w-3 h-3" />
-                          <span>{service.deliveryTime}</span>
+                          <span>{service.delivery_time}</span>
                         </div>
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => handleViewDetails(service.title)}
+                        onClick={() => handleServiceClick(service.id)}
                         className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
                         View Details
@@ -477,7 +418,32 @@ const AllServicesPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+              ) : (
+                // No results state
+                <div className="col-span-full text-center py-12">
+                  <div className="max-w-md mx-auto">
+                    <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No services found</h3>
+                    <p className="text-gray-600 mb-4">
+                      We couldn't find any services matching your criteria. Try adjusting your filters or search terms.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSelectedCategory('all');
+                        setSelectedLocation('all');
+                        setSelectedDeliveryTime('all');
+                        setSortBy('best-match');
+                        setCurrentPage(1);
+                      }}
+                      variant="outline"
+                    >
+                      Clear All Filters
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Enhanced Pagination */}
@@ -486,7 +452,7 @@ const AllServicesPage = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   {/* Page Info */}
                   <div className="text-sm text-gray-600">
-                    Showing {startIndex + 1}-{Math.min(startIndex + servicesPerPage, sortedServices.length)} of {sortedServices.length} results
+                    Showing {((currentPage - 1) * servicesPerPage) + 1}-{Math.min(currentPage * servicesPerPage, totalServices)} of {totalServices} results
                   </div>
 
                   {/* Pagination Controls */}
@@ -573,15 +539,7 @@ const AllServicesPage = () => {
               </div>
             )}
 
-            {sortedServices.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="w-16 h-16 mx-auto" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No services found</h3>
-                <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
-              </div>
-            )}
+
           </div>
         </section>
       </div>

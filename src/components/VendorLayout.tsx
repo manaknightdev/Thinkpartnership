@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
+import VendorAuthAPI, { VendorProfile } from "@/services/VendorAuthAPI";
 import {
   Menu,
   Bell,
   User,
-  Settings,
   LogOut,
   Building,
   DollarSign,
@@ -20,7 +20,6 @@ import {
   FileText,
   ChevronDown,
   HelpCircle,
-  CreditCard,
   Wallet,
   Package,
 } from "lucide-react";
@@ -36,7 +35,33 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(2);
-  const [userName] = useState("Rapid Plumbers"); // In real app, this would come from auth context
+  const [vendorProfile, setVendorProfile] = useState<VendorProfile['vendor'] | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Load vendor profile on component mount
+  useEffect(() => {
+    const loadVendorProfile = async () => {
+      try {
+        setIsLoadingProfile(true);
+        const response = await VendorAuthAPI.getProfile();
+
+        if (!response.error && response.vendor) {
+          setVendorProfile(response.vendor);
+        } else {
+          console.error('Failed to load vendor profile:', response.message);
+          // If profile fails to load, redirect to login
+          navigate('/vendor/login');
+        }
+      } catch (error) {
+        console.error('Error loading vendor profile:', error);
+        navigate('/vendor/login');
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadVendorProfile();
+  }, [navigate]);
 
   const sidebarItems = [
     { name: "Profile Setup", path: "/vendor-portal/profile", icon: Building, exact: false },
@@ -65,9 +90,21 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
   const handleLogout = () => {
     toast.info("Logging out...");
     setTimeout(() => {
-      window.location.href = "/";
+      VendorAuthAPI.logout();
     }, 500);
   };
+
+  // Show loading state while profile is being loaded
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading vendor profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -135,14 +172,20 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-blue-600" />
                   </div>
-                  <span className="hidden sm:inline text-sm font-medium">{userName}</span>
+                  <span className="hidden sm:inline text-sm font-medium">
+                    {isLoadingProfile ? "Loading..." : (vendorProfile?.business_name || "Vendor")}
+                  </span>
                   <ChevronDown className="h-3 w-3 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-3 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{userName}</p>
-                  <p className="text-xs text-gray-500">info@rapidplumbers.com</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {isLoadingProfile ? "Loading..." : (vendorProfile?.business_name || "Vendor")}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {isLoadingProfile ? "Loading..." : (vendorProfile?.email || "vendor@example.com")}
+                  </p>
                 </div>
                 <DropdownMenuItem onClick={() => navigate('/vendor-portal/profile')}>
                   <Building className="mr-2 h-4 w-4" />

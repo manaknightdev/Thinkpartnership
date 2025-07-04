@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Wallet,
   CreditCard,
@@ -28,156 +30,192 @@ import {
   Building,
   Shield,
   Zap,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-interface Transaction {
-  id: string;
-  type: "earning" | "withdrawal" | "fee" | "refund";
-  amount: number;
-  description: string;
-  date: string;
-  status: "completed" | "pending" | "failed";
-  customer?: string;
-  service?: string;
-  stripeTransactionId?: string;
-}
-
-interface PaymentMethod {
-  id: string;
-  type: "card";
-  last4: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-  name: string;
-}
+import VendorWalletAPI, {
+  WalletBalance,
+  Transaction,
+  PaymentMethod,
+  EarningsStats,
+  WithdrawalRequest
+} from "@/services/VendorWalletAPI";
+import { showSuccess, showError } from "@/utils/toast";
 
 const VendorWalletPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showBalance, setShowBalance] = useState(true);
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [error, setError] = useState("");
+
+  // API Data State
+  const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [earningsStats, setEarningsStats] = useState<EarningsStats | null>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0,
+  });
 
   // Payment settings state
   const [paymentSettings, setPaymentSettings] = useState({
-    autoPayRecurring: true,
-    paymentNotifications: true,
-    savePaymentMethods: true,
-    autoWithdrawal: false,
-    withdrawalThreshold: 1000,
+    auto_pay_recurring: true,
+    payment_notifications: true,
+    save_payment_methods: true,
+    auto_withdrawal: false,
+    withdrawal_threshold: 1000,
   });
 
-  // Mock data
-  const [walletBalance] = useState(2847.50);
-  const [pendingBalance] = useState(425.00);
-  const [totalEarnings] = useState(15420.75);
-  const [thisMonthEarnings] = useState(3247.50);
+  // Load data on component mount
+  useEffect(() => {
+    loadWalletData();
+  }, []);
 
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: "txn_001",
-      type: "earning",
-      amount: 150.00,
-      description: "Emergency Plumbing Repair",
-      date: "2024-01-15",
-      status: "completed",
-      customer: "John Doe",
-      service: "Emergency Plumbing",
-      stripeTransactionId: "pi_1234567890"
-    },
-    {
-      id: "txn_002",
-      type: "withdrawal",
-      amount: -500.00,
-      description: "Withdrawal to Visa ****4242",
-      date: "2024-01-14",
-      status: "completed",
-      stripeTransactionId: "po_1234567890"
-    },
-    {
-      id: "txn_003",
-      type: "earning",
-      amount: 320.00,
-      description: "Interior Painting Service",
-      date: "2024-01-13",
-      status: "completed",
-      customer: "Sarah Wilson",
-      service: "Interior Painting",
-      stripeTransactionId: "pi_0987654321"
-    },
-    {
-      id: "txn_004",
-      type: "fee",
-      amount: -15.75,
-      description: "Platform fee (3.5%)",
-      date: "2024-01-13",
-      status: "completed",
-      stripeTransactionId: "fee_1234567890"
-    },
-    {
-      id: "txn_005",
-      type: "withdrawal",
-      amount: -1000.00,
-      description: "Withdrawal to Visa ****4242",
-      date: "2024-01-12",
-      status: "pending",
-      stripeTransactionId: "po_pending123"
-    },
-    {
-      id: "txn_006",
-      type: "earning",
-      amount: 275.00,
-      description: "Home Inspection Service",
-      date: "2024-01-11",
-      status: "completed",
-      customer: "Mike Johnson",
-      service: "Home Inspection",
-      stripeTransactionId: "pi_1122334455"
+  const loadWalletData = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      // Load all wallet data in parallel
+      const [balanceRes, transactionsRes, paymentMethodsRes, statsRes] = await Promise.all([
+        VendorWalletAPI.getWalletBalance(),
+        VendorWalletAPI.getTransactions({ page: pagination.page, limit: pagination.limit }),
+        VendorWalletAPI.getPaymentMethods(),
+        VendorWalletAPI.getEarningsStats(),
+      ]);
+
+      if (balanceRes.error) {
+        setError(balanceRes.message);
+        return;
+      }
+
+      if (balanceRes.data) setWalletBalance(balanceRes.data);
+      if (transactionsRes.data) {
+        setTransactions(transactionsRes.data.transactions);
+        if (transactionsRes.pagination) setPagination(transactionsRes.pagination);
+      }
+      if (paymentMethodsRes.data) setPaymentMethods(paymentMethodsRes.data.payment_methods);
+      if (statsRes.data) setEarningsStats(statsRes.data);
+
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load wallet data");
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
-  const [paymentMethods] = useState<PaymentMethod[]>([
-    {
-      id: "pm_001",
-      type: "card",
-      last4: "4242",
-      brand: "Visa",
-      expiryMonth: 12,
-      expiryYear: 2025,
-      isDefault: true,
-      name: "John Smith"
-    },
-    {
-      id: "pm_002",
-      type: "card",
-      last4: "8888",
-      brand: "Mastercard",
-      expiryMonth: 8,
-      expiryYear: 2026,
-      isDefault: false,
-      name: "John Smith"
-    },
-    {
-      id: "pm_003",
-      type: "card",
-      last4: "1234",
-      brand: "American Express",
-      expiryMonth: 3,
-      expiryYear: 2027,
-      isDefault: false,
-      name: "Rapid Plumbers LLC"
+  const handleWithdrawal = async () => {
+    if (!withdrawalAmount || !selectedPaymentMethod) {
+      showError("Please enter withdrawal amount and select payment method");
+      return;
     }
-  ]);
 
+    const amount = parseFloat(withdrawalAmount);
+    if (amount <= 0) {
+      showError("Please enter a valid withdrawal amount");
+      return;
+    }
+
+    if (walletBalance && amount > walletBalance.available_balance) {
+      showError("Insufficient balance for withdrawal");
+      return;
+    }
+
+    try {
+      setIsWithdrawing(true);
+      setError("");
+
+      const withdrawalData: WithdrawalRequest = {
+        amount,
+        payment_method_id: parseInt(selectedPaymentMethod),
+        description: `Withdrawal to payment method`,
+      };
+
+      const response = await VendorWalletAPI.requestWithdrawal(withdrawalData);
+
+      if (response.error) {
+        setError(response.message);
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Withdrawal request submitted successfully!");
+      setWithdrawalAmount("");
+      setSelectedPaymentMethod("");
+      await loadWalletData(); // Refresh data
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to process withdrawal";
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
+  const handleRemovePaymentMethod = async (paymentMethodId: number) => {
+    try {
+      const response = await VendorWalletAPI.removePaymentMethod(paymentMethodId);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Payment method removed successfully!");
+      await loadWalletData(); // Refresh data
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to remove payment method");
+    }
+  };
+
+  const handleSetDefaultPaymentMethod = async (paymentMethodId: number) => {
+    try {
+      const response = await VendorWalletAPI.setDefaultPaymentMethod(paymentMethodId);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Default payment method updated!");
+      await loadWalletData(); // Refresh data
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to update default payment method");
+    }
+  };
+
+  const handleExportTransactions = async () => {
+    try {
+      const response = await VendorWalletAPI.exportTransactions({ format: 'csv' });
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      if (response.data?.download_url) {
+        window.open(response.data.download_url, '_blank');
+        showSuccess("Transaction export started!");
+      }
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to export transactions");
+    }
+  };
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case "earning": return <ArrowDownLeft className="h-4 w-4 text-green-600" />;
       case "withdrawal": return <ArrowUpRight className="h-4 w-4 text-blue-600" />;
       case "fee": return <Minus className="h-4 w-4 text-red-600" />;
       case "refund": return <ArrowDownLeft className="h-4 w-4 text-orange-600" />;
+      case "bonus": return <Plus className="h-4 w-4 text-purple-600" />;
       default: return <DollarSign className="h-4 w-4 text-gray-600" />;
     }
   };
@@ -188,6 +226,7 @@ const VendorWalletPage = () => {
       case "withdrawal": return "text-blue-600";
       case "fee": return "text-red-600";
       case "refund": return "text-orange-600";
+      case "bonus": return "text-purple-600";
       default: return "text-gray-600";
     }
   };
@@ -205,39 +244,47 @@ const VendorWalletPage = () => {
     }
   };
 
-  const handleWithdrawal = () => {
-    if (!withdrawalAmount || !selectedPaymentMethod) {
-      toast.error("Please enter amount and select payment method");
-      return;
-    }
-
-    const amount = parseFloat(withdrawalAmount);
-    if (amount > walletBalance) {
-      toast.error("Insufficient balance");
-      return;
-    }
-
-    if (amount < 10) {
-      toast.error("Minimum withdrawal amount is $10");
-      return;
-    }
-
-    // Simulate Stripe withdrawal
-    toast.success(`Withdrawal of $${amount} initiated. Funds will arrive in 1-2 business days.`);
-    setWithdrawalAmount("");
-    setSelectedPaymentMethod("");
-  };
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96 mt-2" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-16 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleConnectStripe = () => {
-    // Simulate Stripe Connect onboarding
-    toast.info("Redirecting to Stripe Connect onboarding...");
-    // In real implementation: window.location.href = stripeConnectUrl;
+    // TODO: Implement Stripe Connect onboarding
+    showSuccess("Stripe Connect functionality coming soon!");
   };
 
   const handleAddPaymentMethod = () => {
-    // Simulate adding payment method
-    toast.info("Redirecting to Stripe to add payment method...");
-    // In real implementation: redirect to Stripe setup
+    // TODO: Implement add payment method functionality
+    showSuccess("Add payment method functionality coming soon!");
   };
 
   return (
@@ -250,9 +297,9 @@ const VendorWalletPage = () => {
             Manage your earnings, withdrawals, and payment methods.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportTransactions}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -278,10 +325,10 @@ const VendorWalletPage = () => {
                     onChange={(e) => setWithdrawalAmount(e.target.value)}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Available: ${walletBalance.toFixed(2)} • Min: $10
+                    Available: ${walletBalance?.available_balance?.toFixed(2) || '0.00'} • Min: $10
                   </p>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="payment-method">Payment Method</Label>
                   <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
@@ -290,30 +337,54 @@ const VendorWalletPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {paymentMethods.map((method) => (
-                        <SelectItem key={method.id} value={method.id}>
-                          {`${method.brand} ****${method.last4}`}
-                          {method.isDefault && " (Default)"}
+                        <SelectItem key={method.id} value={method.id.toString()}>
+                          {method.type === 'bank_account'
+                            ? `${method.bank_name} ****${method.last4}`
+                            : `${method.card_brand} ****${method.last4}`
+                          }
+                          {method.is_default && " (Default)"}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="bg-blue-50 p-3 rounded-lg">
                   <p className="text-sm text-blue-800">
                     <Clock className="w-4 h-4 inline mr-1" />
                     Funds typically arrive in 1-2 business days
                   </p>
                 </div>
-                
-                <Button onClick={handleWithdrawal} className="w-full">
-                  Withdraw ${withdrawalAmount || "0.00"}
+
+                <Button
+                  onClick={handleWithdrawal}
+                  disabled={isWithdrawing}
+                  className="w-full"
+                >
+                  {isWithdrawing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    `Withdraw $${withdrawalAmount || "0.00"}`
+                  )}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -334,7 +405,7 @@ const VendorWalletPage = () => {
               </Button>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${walletBalance.toFixed(2)}` : "••••••"}
+              {showBalance ? `$${walletBalance?.available_balance?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
             <p className="text-xs text-gray-500 mt-1">Ready for withdrawal</p>
           </CardContent>
@@ -347,7 +418,7 @@ const VendorWalletPage = () => {
               <span className="text-sm font-medium text-gray-600">Pending</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${pendingBalance.toFixed(2)}` : "••••••"}
+              {showBalance ? `$${walletBalance?.pending_balance?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
             <p className="text-xs text-gray-500 mt-1">Processing payments</p>
           </CardContent>
@@ -360,9 +431,14 @@ const VendorWalletPage = () => {
               <span className="text-sm font-medium text-gray-600">This Month</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${thisMonthEarnings.toFixed(2)}` : "••••••"}
+              {showBalance ? `$${earningsStats?.this_month?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
-            <p className="text-xs text-green-600 mt-1">+12% from last month</p>
+            <p className="text-xs text-green-600 mt-1">
+              {earningsStats?.growth_percentage ?
+                `${earningsStats.growth_percentage > 0 ? '+' : ''}${earningsStats.growth_percentage.toFixed(1)}% from last month` :
+                'No data available'
+              }
+            </p>
           </CardContent>
         </Card>
 
@@ -373,7 +449,7 @@ const VendorWalletPage = () => {
               <span className="text-sm font-medium text-gray-600">Total Earnings</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${totalEarnings.toFixed(2)}` : "••••••"}
+              {showBalance ? `$${walletBalance?.total_earnings?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
             <p className="text-xs text-gray-500 mt-1">All time earnings</p>
           </CardContent>
@@ -442,17 +518,27 @@ const VendorWalletPage = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">{transaction.description}</p>
-                        <p className="text-sm text-gray-500">{transaction.date}</p>
+                        <p className="text-sm text-gray-500">{new Date(transaction.created_at).toLocaleDateString()}</p>
+                        {transaction.customer_name && (
+                          <p className="text-sm text-blue-600">Customer: {transaction.customer_name}</p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
                       <p className={cn("font-semibold", getTransactionColor(transaction.type))}>
-                        {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toFixed(2)}
+                        {transaction.type === 'earning' || transaction.type === 'bonus' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
                       </p>
                       {getStatusBadge(transaction.status)}
                     </div>
                   </div>
                 ))}
+                {transactions.length === 0 && (
+                  <div className="text-center py-8">
+                    <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No transactions yet</h3>
+                    <p className="text-gray-600">Your transaction history will appear here once you start earning.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -461,52 +547,85 @@ const VendorWalletPage = () => {
         <TabsContent value="transactions" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Payout Transactions</CardTitle>
+              <CardTitle>All Transactions</CardTitle>
               <CardDescription>
-                View your Stripe payout history and transaction details
+                View your complete transaction history including earnings, withdrawals, and fees
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {transactions.filter(t => t.type === 'payout').map((transaction) => (
+                {transactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <ArrowUpRight className="h-6 w-6 text-blue-600" />
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        {getTransactionIcon(transaction.type)}
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">{transaction.description}</p>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{transaction.date}</span>
-                          {transaction.stripeTransactionId && (
+                          <span>{new Date(transaction.created_at).toLocaleDateString()}</span>
+                          {transaction.stripe_transaction_id && (
                             <>
                               <span>•</span>
-                              <span>ID: {transaction.stripeTransactionId}</span>
+                              <span>ID: {transaction.stripe_transaction_id}</span>
                             </>
                           )}
                         </div>
-                        {transaction.customer && (
-                          <p className="text-sm text-blue-600">Customer: {transaction.customer}</p>
+                        {transaction.customer_name && (
+                          <p className="text-sm text-blue-600">Customer: {transaction.customer_name}</p>
+                        )}
+                        {transaction.service_title && (
+                          <p className="text-sm text-gray-600">Service: {transaction.service_title}</p>
                         )}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-green-600">
-                        +${Math.abs(transaction.amount).toFixed(2)}
+                      <p className={cn("text-lg font-semibold", getTransactionColor(transaction.type))}>
+                        {transaction.type === 'earning' || transaction.type === 'bonus' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
                       </p>
                       {getStatusBadge(transaction.status)}
                     </div>
                   </div>
                 ))}
 
-                {transactions.filter(t => t.type === 'payout').length === 0 && (
+                {transactions.length === 0 && (
                   <div className="text-center py-8">
-                    <ArrowUpRight className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No payouts yet</h3>
-                    <p className="text-gray-600">Your payout transactions will appear here once you start earning.</p>
+                    <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No transactions yet</h3>
+                    <p className="text-gray-600">Your transaction history will appear here once you start earning.</p>
                   </div>
                 )}
               </div>
+
+              {/* Pagination */}
+              {pagination.pages > 1 && (
+                <div className="flex items-center justify-between mt-6">
+                  <div className="text-sm text-gray-700">
+                    Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} transactions
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                      disabled={pagination.page === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Page {pagination.page} of {pagination.pages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                      disabled={pagination.page === pagination.pages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,26 +1,83 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users, DollarSign, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import VendorReferralAPI from "@/services/VendorReferralAPI";
 
 const VendorReferralsPage = () => {
-  const mockReferralData = [
-    { name: 'Week 1', referrals: 5, commissions: 100 },
-    { name: 'Week 2', referrals: 8, commissions: 150 },
-    { name: 'Week 3', referrals: 12, commissions: 220 },
-    { name: 'Week 4', referrals: 10, commissions: 180 },
-    { name: 'Week 5', referrals: 15, commissions: 300 },
-    { name: 'Week 6', referrals: 13, commissions: 250 },
-  ];
+  // State for API data
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total_referrals: 0,
+    total_commissions: 0,
+    pending_commissions: 0,
+    conversion_rate: 0,
+    monthly_growth: 0
+  });
+  const [chartData, setChartData] = useState([]);
+  const [referralHistory, setReferralHistory] = useState([]);
 
-  const mockReferralHistory = [
-    { id: "ref001", customer: "Alice Smith", service: "Home Painting", date: "2023-10-26", commission: "$50.00", status: "Paid" },
-    { id: "ref002", customer: "Bob Johnson", service: "Emergency Plumbing", date: "2023-10-20", commission: "$25.00", status: "Paid" },
-    { id: "ref003", customer: "Charlie Brown", service: "HVAC Check-up", date: "2023-10-15", commission: "$30.00", status: "Pending" },
-    { id: "ref004", customer: "Diana Prince", service: "Landscaping Design", date: "2023-10-10", commission: "$70.00", status: "Paid" },
-  ];
+  // Load data on component mount
+  useEffect(() => {
+    loadReferralData();
+  }, []);
+
+  const loadReferralData = async () => {
+    setLoading(true);
+    try {
+      // Load stats, referrals, and analytics in parallel
+      const [statsRes, referralsRes, analyticsRes] = await Promise.all([
+        VendorReferralAPI.getReferralStats(),
+        VendorReferralAPI.getReferrals({ limit: 10 }), // Get recent 10 referrals
+        VendorReferralAPI.getReferralAnalytics({ period: 'week' })
+      ]);
+
+      // Update stats
+      if (!statsRes.error && statsRes.data) {
+        setStats({
+          total_referrals: statsRes.data.total_referrals || 0,
+          total_commissions: statsRes.data.total_commission_earned || 0,
+          pending_commissions: statsRes.data.pending_commission || 0,
+          conversion_rate: statsRes.data.conversion_rate || 0,
+          monthly_growth: statsRes.data.this_month_referrals || 0
+        });
+      }
+
+      // Update referral history
+      if (!referralsRes.error && referralsRes.data?.referrals) {
+        setReferralHistory(referralsRes.data.referrals);
+      }
+
+      // Update chart data
+      if (!analyticsRes.error && analyticsRes.data?.chart_data) {
+        setChartData(analyticsRes.data.chart_data);
+      }
+
+    } catch (error) {
+      console.error('Error loading referral data:', error);
+      toast.error('Failed to load referral data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Show loading state for initial load
+  if (loading && stats.total_referrals === 0) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading referral dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -36,8 +93,12 @@ const VendorReferralsPage = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">125</div>
-            <p className="text-xs text-muted-foreground">+15 last 30 days</p>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : stats.total_referrals.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {loading ? 'Loading...' : `+${stats.monthly_growth} last 30 days`}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -46,8 +107,12 @@ const VendorReferralsPage = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$1,250.00</div>
-            <p className="text-xs text-muted-foreground">Pending: $200.00</p>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : `$${stats.total_commissions.toFixed(2)}`}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {loading ? 'Loading...' : `Pending: $${stats.pending_commissions.toFixed(2)}`}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -56,7 +121,9 @@ const VendorReferralsPage = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12.5%</div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : `${stats.conversion_rate.toFixed(1)}%`}
+            </div>
             <p className="text-xs text-muted-foreground">Target: 15%</p>
           </CardContent>
         </Card>
@@ -70,7 +137,7 @@ const VendorReferralsPage = () => {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
-              data={mockReferralData}
+              data={chartData}
               margin={{
                 top: 5,
                 right: 30,
@@ -79,7 +146,7 @@ const VendorReferralsPage = () => {
               }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis dataKey="period" />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -108,15 +175,49 @@ const VendorReferralsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockReferralHistory.map((referral) => (
-                  <TableRow key={referral.id}>
-                    <TableCell className="font-medium">{referral.customer}</TableCell>
-                    <TableCell>{referral.service}</TableCell>
-                    <TableCell>{referral.date}</TableCell>
-                    <TableCell>{referral.commission}</TableCell>
-                    <TableCell>{referral.status}</TableCell>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8">
+                      Loading referral history...
+                    </TableCell>
                   </TableRow>
-                ))}
+                ) : referralHistory.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                      No referrals found. Start referring customers to earn commissions!
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  referralHistory.map((referral: any) => (
+                    <TableRow key={referral.id}>
+                      <TableCell className="font-medium">
+                        {referral.referred_user_name || 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {referral.service_title || 'General Referral'}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(referral.signup_date || referral.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        ${(referral.commission_earned || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          referral.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : referral.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {referral.status === 'completed' ? 'Paid' :
+                           referral.status === 'pending' ? 'Pending' :
+                           referral.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

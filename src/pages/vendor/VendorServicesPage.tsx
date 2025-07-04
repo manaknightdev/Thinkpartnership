@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Percent } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Percent, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,249 +16,263 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface Service {
-  id: string;
-  name: string;
-  category: string;
-  price: string;
-  originalPrice?: string;
-  discountPercentage?: number;
-  hasDiscount: boolean;
-  status: "Active" | "Draft";
-  description: string;
-  imageUrl?: string;
-}
+import VendorServicesAPI, { VendorService, CreateServiceData, UpdateServiceData } from "@/services/VendorServicesAPI";
+import { showSuccess, showError } from "@/utils/toast";
 
 const VendorServicesPage = () => {
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: "s001",
-      name: "Emergency Plumbing Repair",
-      category: "Plumbing",
-      price: "$120",
-      originalPrice: "$150",
-      discountPercentage: 20,
-      hasDiscount: true,
-      status: "Active",
-      description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
-      imageUrl: "https://media.istockphoto.com/id/183953925/photo/young-plumber-fixing-a-sink-in-bathroom.jpg?s=612x612&w=0&k=20&c=Ps2U_U4_Z60mIZsuem-BoaHLlCjsT8wYWiXNWR-TCDA="
-    },
-    {
-      id: "s002",
-      name: "Interior & Exterior Painting",
-      category: "Painting",
-      price: "$500",
-      hasDiscount: false,
-      status: "Active",
-      description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
-      imageUrl: "https://t3.ftcdn.net/jpg/00/96/57/12/360_F_96571267_qfpHjHTvH8siby0Cey6rTpfiJczIxX3e.jpg"
-    },
-    {
-      id: "s003",
-      name: "Full Home Inspection",
-      category: "Inspections",
-      price: "$225",
-      originalPrice: "$300",
-      discountPercentage: 25,
-      hasDiscount: true,
-      status: "Draft",
-      description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
-      imageUrl: "https://www.shutterstock.com/image-photo/mid-adult-woman-architect-wearing-600nw-2060102018.jpg"
-    },
-  ]);
+  const [services, setServices] = useState<VendorService[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editingService, setEditingService] = useState<VendorService | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
-  const [newService, setNewService] = useState<Omit<Service, 'id' | 'status'>>({
-    name: "",
-    category: "",
-    price: "",
-    originalPrice: "",
-    discountPercentage: 0,
-    hasDiscount: false,
+  const [newService, setNewService] = useState<CreateServiceData>({
+    title: "",
     description: "",
-    imageUrl: "",
+    short_description: "",
+    category_id: 0,
+    base_price: 0,
+    pricing_tiers: [],
+    features: [],
+    tags: [],
+    images: [],
+    response_time: "",
+    delivery_time: "",
+    service_areas: [],
+    requirements: "",
   });
-  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-  const [editServiceData, setEditServiceData] = useState<Omit<Service, 'id' | 'status'> | null>(null);
-  const [isEditServiceModalOpen, setIsEditServiceModalOpen] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, isNewService: boolean) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (isNewService) {
-          setNewService({ ...newService, imageUrl: reader.result as string });
-        } else if (editServiceData) {
-          setEditServiceData({ ...editServiceData, imageUrl: reader.result as string });
-        }
+  // Load services and categories on component mount
+  useEffect(() => {
+    loadServices();
+    loadCategories();
+  }, []);
+
+  const loadServices = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await VendorServicesAPI.getServices();
+
+      if (response.error) {
+        setError(response.message || "Failed to load services");
+        return;
+      }
+
+      setServices(response.services);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load services");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await VendorServicesAPI.getCategories();
+      if (!response.error) {
+        setCategories(response.categories);
+      }
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+    }
+  };
+
+  const handleCreateService = async () => {
+    try {
+      setIsCreating(true);
+      setError("");
+
+      const response = await VendorServicesAPI.createService(newService);
+
+      if (response.error) {
+        setError(response.message);
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Service created successfully!");
+      setShowCreateDialog(false);
+      resetNewService();
+      await loadServices();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to create service";
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleUpdateService = async () => {
+    if (!editingService) return;
+
+    try {
+      setIsUpdating(true);
+      setError("");
+
+      const updateData: UpdateServiceData = {
+        title: newService.title,
+        description: newService.description,
+        short_description: newService.short_description,
+        category_id: newService.category_id,
+        base_price: newService.base_price,
+        pricing_tiers: newService.pricing_tiers,
+        features: newService.features,
+        tags: newService.tags,
+        images: newService.images,
+        response_time: newService.response_time,
+        delivery_time: newService.delivery_time,
+        service_areas: newService.service_areas,
+        requirements: newService.requirements,
       };
-      reader.readAsDataURL(file);
+
+      const response = await VendorServicesAPI.updateService(editingService.id, updateData);
+
+      if (response.error) {
+        setError(response.message);
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Service updated successfully!");
+      setShowEditDialog(false);
+      setEditingService(null);
+      resetNewService();
+      await loadServices();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to update service";
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  const calculateDiscountedPrice = (originalPrice: string, discountPercentage: number): string => {
-    const price = parseFloat(originalPrice.replace('$', ''));
-    if (isNaN(price)) return originalPrice;
-    const discountedPrice = price * (1 - discountPercentage / 100);
-    return `$${Math.round(discountedPrice)}`;
-  };
+  const handleDeleteService = async (serviceId: number) => {
+    if (!confirm("Are you sure you want to delete this service?")) return;
 
-  const handleDiscountToggle = (hasDiscount: boolean) => {
-    if (hasDiscount) {
-      // When enabling discount, set original price to current price if not set
-      const originalPrice = newService.originalPrice || newService.price;
-      setNewService({
-        ...newService,
-        hasDiscount: true,
-        originalPrice: originalPrice,
-        discountPercentage: newService.discountPercentage || 10,
-        price: calculateDiscountedPrice(originalPrice, newService.discountPercentage || 10)
-      });
-    } else {
-      // When disabling discount, set price back to original price
-      setNewService({
-        ...newService,
-        hasDiscount: false,
-        price: newService.originalPrice || newService.price,
-        originalPrice: "",
-        discountPercentage: 0
-      });
+    try {
+      const response = await VendorServicesAPI.deleteService(serviceId);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Service deleted successfully!");
+      await loadServices();
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to delete service");
     }
   };
 
-  const handleDiscountPercentageChange = (percentage: number) => {
-    if (newService.hasDiscount && newService.originalPrice) {
-      const discountedPrice = calculateDiscountedPrice(newService.originalPrice, percentage);
-      setNewService({
-        ...newService,
-        discountPercentage: percentage,
-        price: discountedPrice
-      });
+  const handleToggleServiceStatus = async (serviceId: number, currentStatus: number) => {
+    try {
+      const newStatus = currentStatus === 1 ? 0 : 1;
+      const response = await VendorServicesAPI.toggleServiceStatus(serviceId, newStatus);
+
+      if (response.error) {
+        showError(response.message);
+        return;
+      }
+
+      showSuccess(`Service ${newStatus === 1 ? 'activated' : 'deactivated'} successfully!`);
+      await loadServices();
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to update service status");
     }
   };
 
-  const handleAddService = () => {
-    if (newService.name && newService.category && newService.price) {
-      const serviceToAdd: Service = {
-        ...newService,
-        id: `s${Date.now()}`,
-        status: "Active",
-      };
-      setServices([...services, serviceToAdd]);
-      setNewService({
-        name: "",
-        category: "",
-        price: "",
-        originalPrice: "",
-        discountPercentage: 0,
-        hasDiscount: false,
-        description: "",
-        imageUrl: ""
-      });
-      toast.success("Service added successfully!");
-      setIsAddServiceModalOpen(false);
-    } else {
-      toast.error("Please fill in all required fields for the new service.");
-    }
+  const resetNewService = () => {
+    setNewService({
+      title: "",
+      description: "",
+      short_description: "",
+      category_id: 0,
+      base_price: 0,
+      pricing_tiers: [],
+      features: [],
+      tags: [],
+      images: [],
+      response_time: "",
+      delivery_time: "",
+      service_areas: [],
+      requirements: "",
+    });
   };
 
-  const handleEditService = (serviceId: string) => {
-    const serviceToEdit = services.find(s => s.id === serviceId);
-    if (serviceToEdit) {
-      setEditingServiceId(serviceId);
-      setEditServiceData({
-        name: serviceToEdit.name,
-        category: serviceToEdit.category,
-        price: serviceToEdit.price,
-        originalPrice: serviceToEdit.originalPrice,
-        discountPercentage: serviceToEdit.discountPercentage,
-        hasDiscount: serviceToEdit.hasDiscount,
-        description: serviceToEdit.description,
-        imageUrl: serviceToEdit.imageUrl,
-      });
-      setIsEditServiceModalOpen(true);
-    }
+  const openEditDialog = (service: VendorService) => {
+    setEditingService(service);
+    setNewService({
+      title: service.title,
+      description: service.description,
+      short_description: service.short_description || "",
+      category_id: 0, // You might need to map this from service data
+      base_price: service.base_price,
+      pricing_tiers: service.pricing_tiers || [],
+      features: service.features || [],
+      tags: service.tags || [],
+      images: service.images || [],
+      response_time: service.response_time || "",
+      delivery_time: service.delivery_time || "",
+      service_areas: service.service_areas || [],
+      requirements: service.requirements || "",
+    });
+    setShowEditDialog(true);
   };
 
-  const handleEditDiscountToggle = (hasDiscount: boolean) => {
-    if (!editServiceData) return;
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-32 w-full mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-    if (hasDiscount) {
-      // When enabling discount, set original price to current price if not set
-      const originalPrice = editServiceData.originalPrice || editServiceData.price;
-      setEditServiceData({
-        ...editServiceData,
-        hasDiscount: true,
-        originalPrice: originalPrice,
-        discountPercentage: editServiceData.discountPercentage || 10,
-        price: calculateDiscountedPrice(originalPrice, editServiceData.discountPercentage || 10)
-      });
-    } else {
-      // When disabling discount, set price back to original price
-      setEditServiceData({
-        ...editServiceData,
-        hasDiscount: false,
-        price: editServiceData.originalPrice || editServiceData.price,
-        originalPrice: "",
-        discountPercentage: 0
-      });
-    }
-  };
 
-  const handleEditDiscountPercentageChange = (percentage: number) => {
-    if (editServiceData && editServiceData.hasDiscount && editServiceData.originalPrice) {
-      const discountedPrice = calculateDiscountedPrice(editServiceData.originalPrice, percentage);
-      setEditServiceData({
-        ...editServiceData,
-        discountPercentage: percentage,
-        price: discountedPrice
-      });
-    }
-  };
-
-  const handleSaveEditedService = () => {
-    if (editingServiceId && editServiceData && editServiceData.name && editServiceData.category && editServiceData.price) {
-      setServices(services.map(s =>
-        s.id === editingServiceId
-          ? { ...s, ...editServiceData }
-          : s
-      ));
-      toast.success("Service updated successfully!");
-      setIsEditServiceModalOpen(false);
-      setEditingServiceId(null);
-      setEditServiceData(null);
-    } else {
-      toast.error("Please fill in all required fields for the edited service.");
-    }
-  };
-
-  const handleDeleteService = (serviceId: string) => {
-    setServices(services.filter(service => service.id !== serviceId));
-    toast.error("Service deleted.");
-  };
-
-  const toggleServiceStatus = (serviceId: string) => {
-    setServices(services.map(service =>
-      service.id === serviceId
-        ? { ...service, status: service.status === "Active" ? "Draft" : "Active" }
-        : service
-    ));
-    toast.success("Service status updated!");
-  };
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Flat fee Service</h1>
+          <h1 className="text-3xl font-bold text-gray-900">My Services</h1>
           <p className="text-gray-600 mt-1">
-            Manage your flat fee service offerings and pricing. These will be visible to customers in the marketplace.
+            Manage your service offerings and pricing.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {/* View Toggle */}
           <div className="flex items-center border rounded-lg p-1">
@@ -281,7 +295,7 @@ const VendorServicesPage = () => {
           </div>
 
           {/* Add Service Button */}
-          <Dialog open={isAddServiceModalOpen} onOpenChange={setIsAddServiceModalOpen}>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700">
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -297,141 +311,109 @@ const VendorServicesPage = () => {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="new-service-name">Service Name *</Label>
+                  <Label htmlFor="new-service-title">Service Title *</Label>
                   <Input
-                    id="new-service-name"
+                    id="new-service-title"
                     type="text"
                     placeholder="e.g., Emergency Plumbing Repair"
-                    value={newService.name}
-                    onChange={(e) => setNewService({ ...newService, name: e.target.value })}
+                    value={newService.title}
+                    onChange={(e) => setNewService({ ...newService, title: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new-service-category">Category *</Label>
                   <Select
-                    value={newService.category}
-                    onValueChange={(value) => setNewService({ ...newService, category: value })}
+                    value={newService.category_id.toString()}
+                    onValueChange={(value) => setNewService({ ...newService, category_id: parseInt(value) })}
                   >
                     <SelectTrigger id="new-service-category">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cleaning">Cleaning</SelectItem>
-                      <SelectItem value="electrical">Electrical</SelectItem>
-                      <SelectItem value="hvac">HVAC</SelectItem>
-                      <SelectItem value="inspections">Inspections</SelectItem>
-                      <SelectItem value="landscaping">Landscaping</SelectItem>
-                      <SelectItem value="moving">Moving</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                      <SelectItem value="painting">Painting</SelectItem>
-                      <SelectItem value="plumbing">Plumbing</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-price-range">
-                    {newService.hasDiscount ? "Original Price *" : "Fixed Price *"}
-                  </Label>
+                  <Label htmlFor="new-base-price">Base Price *</Label>
                   <Input
-                    id="new-price-range"
-                    type="text"
-                    placeholder="$150"
-                    value={newService.hasDiscount ? newService.originalPrice : newService.price}
-                    onChange={(e) => {
-                      if (newService.hasDiscount) {
-                        const originalPrice = e.target.value;
-                        setNewService({
-                          ...newService,
-                          originalPrice,
-                          price: calculateDiscountedPrice(originalPrice, newService.discountPercentage || 0)
-                        });
-                      } else {
-                        setNewService({ ...newService, price: e.target.value });
-                      }
-                    }}
+                    id="new-base-price"
+                    type="number"
+                    placeholder="150"
+                    value={newService.base_price}
+                    onChange={(e) => setNewService({ ...newService, base_price: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
 
-                {/* Discount Toggle */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="discount-toggle"
-                      checked={newService.hasDiscount}
-                      onChange={(e) => handleDiscountToggle(e.target.checked)}
-                      className="rounded border-gray-300"
-                    />
-                    <Label htmlFor="discount-toggle" className="text-sm font-medium">
-                      Offer discount on this service
-                    </Label>
-                  </div>
-
-                  {newService.hasDiscount && (
-                    <div className="space-y-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="space-y-2">
-                        <Label htmlFor="discount-percentage">Discount Percentage *</Label>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            id="discount-percentage"
-                            type="number"
-                            min="1"
-                            max="90"
-                            placeholder="10"
-                            value={newService.discountPercentage || ""}
-                            onChange={(e) => handleDiscountPercentageChange(parseInt(e.target.value) || 0)}
-                            className="w-20"
-                          />
-                          <span className="text-sm text-gray-600">%</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Final Price:</span>
-                        <span className="font-bold text-green-600 text-lg">{newService.price}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">You save customers:</span>
-                        <span className="font-medium text-red-600">
-                          {newService.originalPrice && newService.price ?
-                            `$${parseFloat(newService.originalPrice.replace('$', '')) - parseFloat(newService.price.replace('$', ''))}`
-                            : '$0'}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-service-description">Service Description</Label>
+                  <Label htmlFor="new-service-description">Service Description *</Label>
                   <Textarea
                     id="new-service-description"
-                    placeholder="Describe your service offering..."
-                    rows={3}
+                    placeholder="Describe your service offering in detail..."
+                    rows={4}
                     value={newService.description}
                     onChange={(e) => setNewService({ ...newService, description: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-service-image">Service Image</Label>
+                  <Label htmlFor="new-service-short-description">Short Description</Label>
                   <Input
-                    id="new-service-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, true)}
+                    id="new-service-short-description"
+                    placeholder="Brief summary of your service"
+                    value={newService.short_description}
+                    onChange={(e) => setNewService({ ...newService, short_description: e.target.value })}
                   />
-                  {newService.imageUrl && (
-                    <img src={newService.imageUrl} alt="Service Preview" className="mt-2 h-24 w-24 object-cover rounded-md" />
-                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="response-time">Response Time</Label>
+                    <Input
+                      id="response-time"
+                      placeholder="e.g., 24 hours"
+                      value={newService.response_time}
+                      onChange={(e) => setNewService({ ...newService, response_time: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="delivery-time">Delivery Time</Label>
+                    <Input
+                      id="delivery-time"
+                      placeholder="e.g., 3-5 days"
+                      value={newService.delivery_time}
+                      onChange={(e) => setNewService({ ...newService, delivery_time: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
-              <Button onClick={handleAddService} className="w-full">
-                Create Service
+              <Button
+                onClick={handleCreateService}
+                disabled={isCreating}
+                className="w-full"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Service"
+                )}
               </Button>
             </DialogContent>
           </Dialog>
         </div>
       </div>
+
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Services Display */}
       {services.length > 0 ? (
@@ -440,10 +422,10 @@ const VendorServicesPage = () => {
             {services.map((service) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video relative overflow-hidden">
-                  {service.imageUrl ? (
-                    <img 
-                      src={service.imageUrl} 
-                      alt={service.name} 
+                  {service.images && service.images.length > 0 ? (
+                    <img
+                      src={service.images[0]}
+                      alt={service.title}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -453,60 +435,48 @@ const VendorServicesPage = () => {
                   )}
                   <Badge
                     className={`absolute top-2 right-2 ${
-                      service.status === "Active"
+                      service.status === 1
                         ? "bg-green-500 hover:bg-green-600"
                         : "bg-gray-500 hover:bg-gray-600"
                     }`}
                   >
-                    {service.status}
+                    {service.status === 1 ? "Active" : "Inactive"}
                   </Badge>
                 </div>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg line-clamp-1">{service.name}</CardTitle>
-                      <p className="text-sm text-gray-600 mt-1">{service.category}</p>
+                      <CardTitle className="text-lg line-clamp-1">{service.title}</CardTitle>
+                      <p className="text-sm text-gray-600 mt-1">{service.short_description}</p>
                     </div>
                     <div className="text-right">
-                      {service.hasDiscount ? (
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="text-sm text-gray-500 line-through">{service.originalPrice}</span>
-                            <Badge className="bg-red-500 text-white text-xs">
-                              -{service.discountPercentage}%
-                            </Badge>
-                          </div>
-                          <p className="text-lg font-bold text-green-600">{service.price}</p>
-                        </div>
-                      ) : (
-                        <p className="text-lg font-bold text-blue-600">{service.price}</p>
-                      )}
+                      <p className="text-lg font-bold text-blue-600">${service.base_price}</p>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <p className="text-sm text-gray-600 line-clamp-2 mb-4">{service.description}</p>
                   <div className="flex gap-2">
-                    <Button 
-                      onClick={() => handleEditService(service.id)} 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      onClick={() => openEditDialog(service)}
+                      variant="outline"
+                      size="sm"
                       className="flex-1"
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
-                    <Button 
-                      onClick={() => toggleServiceStatus(service.id)} 
-                      variant="outline" 
+                    <Button
+                      onClick={() => handleToggleServiceStatus(service.id, service.status)}
+                      variant="outline"
                       size="sm"
                       className="flex-1"
                     >
-                      {service.status === "Active" ? "Deactivate" : "Activate"}
+                      {service.status === 1 ? "Deactivate" : "Activate"}
                     </Button>
-                    <Button 
-                      onClick={() => handleDeleteService(service.id)} 
-                      variant="outline" 
+                    <Button
+                      onClick={() => handleDeleteService(service.id)}
+                      variant="outline"
                       size="sm"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
@@ -526,10 +496,10 @@ const VendorServicesPage = () => {
                   <div className="flex items-center gap-4">
                     {/* Service Image */}
                     <div className="w-20 h-20 flex-shrink-0 relative overflow-hidden rounded-lg">
-                      {service.imageUrl ? (
+                      {service.images && service.images.length > 0 ? (
                         <img
-                          src={service.imageUrl}
-                          alt={service.name}
+                          src={service.images[0]}
+                          alt={service.title}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -543,19 +513,19 @@ const VendorServicesPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{service.name}</h3>
-                          <p className="text-sm text-gray-600">{service.category}</p>
+                          <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{service.title}</h3>
+                          <p className="text-sm text-gray-600">{service.short_description}</p>
                         </div>
 
                         {/* Status Badge */}
                         <Badge
                           className={`ml-2 ${
-                            service.status === "Active"
+                            service.status === 1
                               ? "bg-green-100 text-green-800"
                               : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {service.status}
+                          {service.status === 1 ? "Active" : "Inactive"}
                         </Badge>
                       </div>
 
@@ -565,23 +535,13 @@ const VendorServicesPage = () => {
                       <div className="flex items-center justify-between">
                         {/* Price Display */}
                         <div className="flex items-center gap-3">
-                          {service.hasDiscount ? (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-500 line-through">{service.originalPrice}</span>
-                              <Badge className="bg-red-500 text-white text-xs">
-                                -{service.discountPercentage}%
-                              </Badge>
-                              <span className="text-lg font-bold text-green-600">{service.price}</span>
-                            </div>
-                          ) : (
-                            <span className="text-lg font-bold text-blue-600">{service.price}</span>
-                          )}
+                          <span className="text-lg font-bold text-blue-600">${service.base_price}</span>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex gap-2">
                           <Button
-                            onClick={() => handleEditService(service.id)}
+                            onClick={() => openEditDialog(service)}
                             variant="outline"
                             size="sm"
                           >
@@ -589,11 +549,11 @@ const VendorServicesPage = () => {
                             Edit
                           </Button>
                           <Button
-                            onClick={() => toggleServiceStatus(service.id)}
+                            onClick={() => handleToggleServiceStatus(service.id, service.status)}
                             variant="outline"
                             size="sm"
                           >
-                            {service.status === "Active" ? "Deactivate" : "Activate"}
+                            {service.status === 1 ? "Deactivate" : "Activate"}
                           </Button>
                           <Button
                             onClick={() => handleDeleteService(service.id)}
@@ -618,7 +578,7 @@ const VendorServicesPage = () => {
             <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No services yet</h3>
             <p className="text-gray-600 mb-4">Create your first service to start attracting customers.</p>
-            <Button onClick={() => setIsAddServiceModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Your First Service
             </Button>
@@ -627,7 +587,7 @@ const VendorServicesPage = () => {
       )}
 
       {/* Edit Service Dialog */}
-      <Dialog open={isEditServiceModalOpen} onOpenChange={setIsEditServiceModalOpen}>
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Edit Service</DialogTitle>
@@ -635,138 +595,67 @@ const VendorServicesPage = () => {
               Update your service details and pricing.
             </DialogDescription>
           </DialogHeader>
-          {editServiceData && (
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-service-name">Service Name *</Label>
-                <Input
-                  id="edit-service-name"
-                  type="text"
-                  value={editServiceData.name}
-                  onChange={(e) => setEditServiceData({ ...editServiceData, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-service-category">Category *</Label>
-                <Select
-                  value={editServiceData.category}
-                  onValueChange={(value) => setEditServiceData({ ...editServiceData, category: value })}
-                >
-                  <SelectTrigger id="edit-service-category">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cleaning">Cleaning</SelectItem>
-                    <SelectItem value="electrical">Electrical</SelectItem>
-                    <SelectItem value="hvac">HVAC</SelectItem>
-                    <SelectItem value="inspections">Inspections</SelectItem>
-                    <SelectItem value="landscaping">Landscaping</SelectItem>
-                    <SelectItem value="moving">Moving</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="painting">Painting</SelectItem>
-                    <SelectItem value="plumbing">Plumbing</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-price-range">
-                  {editServiceData.hasDiscount ? "Original Price *" : "Fixed Price *"}
-                </Label>
-                <Input
-                  id="edit-price-range"
-                  type="text"
-                  value={editServiceData.hasDiscount ? editServiceData.originalPrice : editServiceData.price}
-                  onChange={(e) => {
-                    if (editServiceData.hasDiscount) {
-                      const originalPrice = e.target.value;
-                      setEditServiceData({
-                        ...editServiceData,
-                        originalPrice,
-                        price: calculateDiscountedPrice(originalPrice, editServiceData.discountPercentage || 0)
-                      });
-                    } else {
-                      setEditServiceData({ ...editServiceData, price: e.target.value });
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Edit Discount Toggle */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="edit-discount-toggle"
-                    checked={editServiceData.hasDiscount}
-                    onChange={(e) => handleEditDiscountToggle(e.target.checked)}
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor="edit-discount-toggle" className="text-sm font-medium">
-                    Offer discount on this service
-                  </Label>
-                </div>
-
-                {editServiceData.hasDiscount && (
-                  <div className="space-y-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <div className="space-y-2">
-                      <Label htmlFor="edit-discount-percentage">Discount Percentage *</Label>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          id="edit-discount-percentage"
-                          type="number"
-                          min="1"
-                          max="90"
-                          placeholder="10"
-                          value={editServiceData.discountPercentage || ""}
-                          onChange={(e) => handleEditDiscountPercentageChange(parseInt(e.target.value) || 0)}
-                          className="w-20"
-                        />
-                        <span className="text-sm text-gray-600">%</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Final Price:</span>
-                      <span className="font-bold text-green-600 text-lg">{editServiceData.price}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">You save customers:</span>
-                      <span className="font-medium text-red-600">
-                        {editServiceData.originalPrice && editServiceData.price ?
-                          `$${parseFloat(editServiceData.originalPrice.replace('$', '')) - parseFloat(editServiceData.price.replace('$', ''))}`
-                          : '$0'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-service-description">Service Description</Label>
-                <Textarea
-                  id="edit-service-description"
-                  placeholder="Describe your service offering..."
-                  rows={3}
-                  value={editServiceData.description}
-                  onChange={(e) => setEditServiceData({ ...editServiceData, description: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-service-image">Service Image</Label>
-                <Input
-                  id="edit-service-image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, false)}
-                />
-                {editServiceData.imageUrl && (
-                  <img src={editServiceData.imageUrl} alt="Service Preview" className="mt-2 h-24 w-24 object-cover rounded-md" />
-                )}
-              </div>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-service-title">Service Title *</Label>
+              <Input
+                id="edit-service-title"
+                type="text"
+                value={newService.title}
+                onChange={(e) => setNewService({ ...newService, title: e.target.value })}
+              />
             </div>
-          )}
-          <Button onClick={handleSaveEditedService} className="w-full">
-            Save Changes
+            <div className="space-y-2">
+              <Label htmlFor="edit-service-category">Category *</Label>
+              <Select
+                value={newService.category_id.toString()}
+                onValueChange={(value) => setNewService({ ...newService, category_id: parseInt(value) })}
+              >
+                <SelectTrigger id="edit-service-category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-base-price">Base Price *</Label>
+              <Input
+                id="edit-base-price"
+                type="number"
+                value={newService.base_price}
+                onChange={(e) => setNewService({ ...newService, base_price: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-service-description">Service Description *</Label>
+              <Textarea
+                id="edit-service-description"
+                placeholder="Describe your service offering in detail..."
+                rows={4}
+                value={newService.description}
+                onChange={(e) => setNewService({ ...newService, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <Button
+            onClick={handleUpdateService}
+            disabled={isUpdating}
+            className="w-full"
+          >
+            {isUpdating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              "Update Service"
+            )}
           </Button>
         </DialogContent>
       </Dialog>

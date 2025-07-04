@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
   Search,
@@ -24,164 +26,93 @@ import {
   Phone,
   MapPin,
   Clock,
+  Loader2,
+  AlertCircle,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  joinDate: string;
-  totalSpent: number;
-  ordersCount: number;
-  lastOrderDate: string;
-  status: "active" | "inactive";
-  avatar?: string;
-}
+import VendorCustomersAPI, { VendorCustomer } from "@/services/VendorCustomersAPI";
+import { showSuccess, showError } from "@/utils/toast";
 
 const VendorCustomersPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("totalSpent");
+  const [sortBy, setSortBy] = useState("total_spent");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<VendorCustomer | null>(null);
+  const [customers, setCustomers] = useState<VendorCustomer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0,
+  });
 
-  // Mock data for customers brought by this vendor
-  const [customers] = useState<Customer[]>([
-    {
-      id: "cust_001",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@email.com",
-      phone: "(555) 123-4567",
-      address: "123 Oak Street, Springfield, IL 62701",
-      joinDate: "2024-01-15",
-      totalSpent: 2450.00,
-      ordersCount: 8,
-      lastOrderDate: "2024-01-20",
-      status: "active",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "cust_002",
-      name: "Michael Chen",
-      email: "michael.chen@email.com",
-      phone: "(555) 234-5678",
-      address: "456 Pine Avenue, Chicago, IL 60601",
-      joinDate: "2024-01-10",
-      totalSpent: 1875.50,
-      ordersCount: 12,
-      lastOrderDate: "2024-01-18",
-      status: "active",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "cust_003",
-      name: "Emily Rodriguez",
-      email: "emily.rodriguez@email.com",
-      phone: "(555) 345-6789",
-      address: "789 Maple Drive, Austin, TX 73301",
-      joinDate: "2024-01-08",
-      totalSpent: 3200.75,
-      ordersCount: 15,
-      lastOrderDate: "2024-01-19",
-      status: "active",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "cust_004",
-      name: "David Wilson",
-      email: "david.wilson@email.com",
-      phone: "(555) 456-7890",
-      address: "321 Elm Street, Denver, CO 80201",
-      joinDate: "2024-01-05",
-      totalSpent: 890.25,
-      ordersCount: 4,
-      lastOrderDate: "2024-01-12",
-      status: "active",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "cust_005",
-      name: "Lisa Thompson",
-      email: "lisa.thompson@email.com",
-      phone: "(555) 567-8901",
-      address: "654 Cedar Lane, Seattle, WA 98101",
-      joinDate: "2023-12-20",
-      totalSpent: 1650.00,
-      ordersCount: 9,
-      lastOrderDate: "2024-01-16",
-      status: "active",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      id: "cust_006",
-      name: "Robert Martinez",
-      email: "robert.martinez@email.com",
-      phone: "(555) 678-9012",
-      address: "987 Birch Road, Phoenix, AZ 85001",
-      joinDate: "2023-12-15",
-      totalSpent: 425.50,
-      ordersCount: 2,
-      lastOrderDate: "2023-12-28",
-      status: "inactive"
-    },
-    {
-      id: "cust_007",
-      name: "Jennifer Lee",
-      email: "jennifer.lee@email.com",
-      phone: "(555) 789-0123",
-      address: "147 Willow Court, Miami, FL 33101",
-      joinDate: "2024-01-12",
-      totalSpent: 2100.00,
-      ordersCount: 11,
-      lastOrderDate: "2024-01-21",
-      status: "active",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face"
+  // Load customers on component mount
+  useEffect(() => {
+    loadCustomers();
+  }, [pagination.page, sortBy, filterStatus]);
+
+  const loadCustomers = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const filters = {
+        page: pagination.page,
+        limit: pagination.limit,
+        sort_by: sortBy,
+        status: filterStatus !== "all" ? (filterStatus === "active" ? 1 : 0) : undefined,
+      };
+
+      const response = await VendorCustomersAPI.getCustomers(filters);
+
+      if (response.error) {
+        setError(response.message || "Failed to load customers");
+        return;
+      }
+
+      setCustomers(response.customers);
+      if (response.pagination) {
+        setPagination(response.pagination);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load customers");
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
   // Calculate summary stats
   const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(c => c.status === "active").length;
-  const totalRevenue = customers.reduce((sum, customer) => sum + customer.totalSpent, 0);
-  const avgSpendPerCustomer = totalRevenue / totalCustomers;
+  const activeCustomers = customers.filter(c => c.status === 1).length;
+  const totalRevenue = customers.reduce((sum, customer) => sum + customer.total_spent, 0);
+  const avgSpendPerCustomer = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
 
   const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || customer.status === filterStatus;
+    const matchesSearch = customer.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.customer_email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "all" ||
+                         (filterStatus === "active" && customer.status === 1) ||
+                         (filterStatus === "inactive" && customer.status === 0);
 
     return matchesSearch && matchesStatus;
-  });
-
-  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-    switch (sortBy) {
-      case "totalSpent":
-        return b.totalSpent - a.totalSpent;
-      case "ordersCount":
-        return b.ordersCount - a.ordersCount;
-      case "joinDate":
-        return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
-      case "name":
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
-    }
   });
 
   const handleInviteCustomers = () => {
     navigate('/vendor-portal/invite');
   };
 
-  const handleViewDetails = (customer: Customer) => {
+  const handleViewDetails = (customer: VendorCustomer) => {
     setSelectedCustomer(customer);
   };
 
-  const shareCustomer = (customer: Customer) => {
-    const shareText = `Check out ${customer.name} - one of my valued customers on ThinkPartnership!`;
+  const shareCustomer = (customer: VendorCustomer) => {
+    const shareText = `Check out ${customer.customer_name} - one of my valued customers on ThinkPartnership!`;
     if (navigator.share) {
       navigator.share({
         title: "Customer Referral",
@@ -193,6 +124,39 @@ const VendorCustomersPage = () => {
     }
   };
 
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-16 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -203,7 +167,7 @@ const VendorCustomersPage = () => {
             Track customers you've brought to the platform and their spending across all vendors.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
@@ -275,6 +239,16 @@ const VendorCustomersPage = () => {
         </Card>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
@@ -290,7 +264,7 @@ const VendorCustomersPage = () => {
                 />
               </div>
             </div>
-            
+
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
@@ -302,7 +276,7 @@ const VendorCustomersPage = () => {
                 <SelectItem value="name">Name</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full sm:w-32">
                 <SelectValue placeholder="Status" />
@@ -319,7 +293,7 @@ const VendorCustomersPage = () => {
 
       {/* Customers List */}
       <div className="space-y-4">
-        {sortedCustomers.length === 0 ? (
+        {filteredCustomers.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -332,61 +306,55 @@ const VendorCustomersPage = () => {
             </CardContent>
           </Card>
         ) : (
-          sortedCustomers.map((customer) => (
+          filteredCustomers.map((customer) => (
             <Card key={customer.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   {/* Avatar */}
                   <div className="w-16 h-16 flex-shrink-0">
-                    {customer.avatar ? (
-                      <img 
-                        src={customer.avatar} 
-                        alt={customer.name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                        <Users className="h-8 w-8 text-gray-400" />
-                      </div>
-                    )}
+                    <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                      <User className="h-8 w-8 text-gray-400" />
+                    </div>
                   </div>
 
                   {/* Customer Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{customer.name}</h3>
-                        <p className="text-sm text-gray-600">{customer.email}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">{customer.customer_name}</h3>
+                        <p className="text-sm text-gray-600">{customer.customer_email}</p>
                       </div>
-                      
+
                       <Badge
                         className={cn(
                           "text-xs",
-                          customer.status === "active"
+                          customer.status === 1
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
                         )}
                       >
-                        {customer.status}
+                        {customer.status === 1 ? "Active" : "Inactive"}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                       <div>
                         <p className="text-xs text-gray-500">Total Spent</p>
-                        <p className="font-semibold text-green-600">${customer.totalSpent.toFixed(2)}</p>
+                        <p className="font-semibold text-green-600">${customer.total_spent.toFixed(2)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Orders</p>
-                        <p className="font-semibold text-blue-600">{customer.ordersCount}</p>
+                        <p className="font-semibold text-blue-600">{customer.orders_count}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Joined</p>
-                        <p className="font-semibold text-gray-700">{new Date(customer.joinDate).toLocaleDateString()}</p>
+                        <p className="font-semibold text-gray-700">{new Date(customer.created_at).toLocaleDateString()}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Last Order</p>
-                        <p className="font-semibold text-gray-700">{new Date(customer.lastOrderDate).toLocaleDateString()}</p>
+                        <p className="font-semibold text-gray-700">
+                          {customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : "No orders"}
+                        </p>
                       </div>
                     </div>
 
@@ -410,63 +378,51 @@ const VendorCustomersPage = () => {
                             {selectedCustomer && (
                               <div className="space-y-4">
                                 <div className="flex items-center gap-4">
-                                  {selectedCustomer.avatar ? (
-                                    <img
-                                      src={selectedCustomer.avatar}
-                                      alt={selectedCustomer.name}
-                                      className="w-16 h-16 rounded-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                                      <Users className="h-8 w-8 text-gray-400" />
-                                    </div>
-                                  )}
+                                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <User className="h-8 w-8 text-gray-400" />
+                                  </div>
                                   <div>
-                                    <h3 className="text-lg font-semibold">{selectedCustomer.name}</h3>
-                                    <p className="text-sm text-gray-600">{selectedCustomer.status}</p>
+                                    <h3 className="text-lg font-semibold">{selectedCustomer.customer_name}</h3>
+                                    <p className="text-sm text-gray-600">{selectedCustomer.status === 1 ? "Active" : "Inactive"}</p>
                                   </div>
                                 </div>
 
                                 <div className="space-y-3">
                                   <div className="flex items-center gap-2">
                                     <Mail className="h-4 w-4 text-gray-500" />
-                                    <span className="text-sm">{selectedCustomer.email}</span>
+                                    <span className="text-sm">{selectedCustomer.customer_email}</span>
                                   </div>
-                                  {selectedCustomer.phone && (
+                                  {selectedCustomer.customer_phone && (
                                     <div className="flex items-center gap-2">
                                       <Phone className="h-4 w-4 text-gray-500" />
-                                      <span className="text-sm">{selectedCustomer.phone}</span>
-                                    </div>
-                                  )}
-                                  {selectedCustomer.address && (
-                                    <div className="flex items-center gap-2">
-                                      <MapPin className="h-4 w-4 text-gray-500" />
-                                      <span className="text-sm">{selectedCustomer.address}</span>
+                                      <span className="text-sm">{selectedCustomer.customer_phone}</span>
                                     </div>
                                   )}
                                   <div className="flex items-center gap-2">
                                     <Calendar className="h-4 w-4 text-gray-500" />
-                                    <span className="text-sm">Joined {new Date(selectedCustomer.joinDate).toLocaleDateString()}</span>
+                                    <span className="text-sm">Joined {new Date(selectedCustomer.created_at).toLocaleDateString()}</span>
                                   </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                                   <div className="text-center">
-                                    <p className="text-2xl font-bold text-green-600">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                                    <p className="text-2xl font-bold text-green-600">${selectedCustomer.total_spent.toFixed(2)}</p>
                                     <p className="text-sm text-gray-600">Total Spent</p>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-2xl font-bold text-blue-600">{selectedCustomer.ordersCount}</p>
+                                    <p className="text-2xl font-bold text-blue-600">{selectedCustomer.orders_count}</p>
                                     <p className="text-sm text-gray-600">Total Orders</p>
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 pt-2">
-                                  <Clock className="h-4 w-4 text-gray-500" />
-                                  <span className="text-sm text-gray-600">
-                                    Last order: {new Date(selectedCustomer.lastOrderDate).toLocaleDateString()}
-                                  </span>
-                                </div>
+                                {selectedCustomer.last_order_date && (
+                                  <div className="flex items-center gap-2 pt-2">
+                                    <Clock className="h-4 w-4 text-gray-500" />
+                                    <span className="text-sm text-gray-600">
+                                      Last order: {new Date(selectedCustomer.last_order_date).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </DialogContent>
@@ -488,6 +444,36 @@ const VendorCustomersPage = () => {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.pages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} customers
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={pagination.page === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={pagination.page === pagination.pages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

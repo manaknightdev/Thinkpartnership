@@ -3,11 +3,16 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Building, Phone, MapPin, Clock, Award, Users, Plus } from "lucide-react";
+import { Building, Phone, MapPin, Clock, Award, Users, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import VendorAuthAPI, { UpdateVendorProfileData } from "@/services/VendorAuthAPI";
+import { showSuccess, showError } from "@/utils/toast";
 
 // Cities organized by province/territory
 const citiesByProvince = {
@@ -126,25 +131,107 @@ const serviceCategories = [
 
 const VendorProfilePage = () => {
   const [profileData, setProfileData] = useState({
-    companyName: "Rapid Plumbers",
-    companyBio: "Rapid Plumbers provides 24/7 emergency plumbing services, leak detection, drain cleaning, and water heater installations. We are committed to fast, reliable, and high-quality service.",
-    contactEmail: "info@rapidplumbers.com",
-    contactPhone: "(555) 123-4567",
-    website: "https://www.rapidplumbers.com",
-    address: "123 Main Street, Anytown, ST 12345",
-    businessHours: "7 days in a week",
-    yearsInBusiness: "15",
-    teamSize: "12",
-    serviceAreas: ["Toronto", "Mississauga", "Brampton"],
-    primaryCategory: "Plumbing",
+    business_name: "",
+    contact_name: "",
+    phone: "",
+    business_address: "",
+    city: "",
+    province: "",
+    postal_code: "",
+    description: "",
+    website_url: "",
+    service_areas: [] as string[],
+    business_license: "",
+    insurance_info: "",
   });
 
-  const [selectedProvince, setSelectedProvince] = useState("Ontario");
+  const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [vendorProfile, setVendorProfile] = useState<any>(null);
 
+  // Load vendor profile on component mount
+  useEffect(() => {
+    loadVendorProfile();
+  }, []);
 
-  const handleSaveProfile = () => {
-    toast.success("Company profile saved successfully!");
+  const loadVendorProfile = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await VendorAuthAPI.getProfile();
+
+      if (response.error) {
+        setError(response.message || "Failed to load vendor profile");
+        return;
+      }
+
+      if (response.vendor) {
+        setVendorProfile(response.vendor);
+        setProfileData({
+          business_name: response.vendor.business_name || "",
+          contact_name: response.vendor.contact_name || "",
+          phone: response.vendor.phone || "",
+          business_address: response.vendor.business_address || "",
+          city: response.vendor.city || "",
+          province: response.vendor.province || "",
+          postal_code: response.vendor.postal_code || "",
+          description: response.vendor.description || "",
+          website_url: response.vendor.website_url || "",
+          service_areas: response.vendor.service_areas || [],
+          business_license: response.vendor.business_license || "",
+          insurance_info: response.vendor.insurance_info || "",
+        });
+        setSelectedProvince(response.vendor.province || "");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load vendor profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      setError("");
+
+      const updateData: UpdateVendorProfileData = {
+        business_name: profileData.business_name,
+        contact_name: profileData.contact_name,
+        phone: profileData.phone,
+        business_address: profileData.business_address,
+        city: profileData.city,
+        province: profileData.province,
+        postal_code: profileData.postal_code,
+        description: profileData.description,
+        website_url: profileData.website_url,
+        service_areas: profileData.service_areas,
+        business_license: profileData.business_license,
+        insurance_info: profileData.insurance_info,
+      };
+
+      const response = await VendorAuthAPI.updateProfile(updateData);
+
+      if (response.error) {
+        setError(response.message);
+        showError(response.message);
+        return;
+      }
+
+      showSuccess("Company profile saved successfully!");
+      // Reload profile to get updated data
+      await loadVendorProfile();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to save profile";
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -155,27 +242,57 @@ const VendorProfilePage = () => {
   };
 
   const addCity = () => {
-    if (selectedCity && !profileData.serviceAreas.includes(selectedCity)) {
+    if (selectedCity && !profileData.service_areas.includes(selectedCity)) {
       setProfileData(prev => ({
         ...prev,
-        serviceAreas: [...prev.serviceAreas, selectedCity]
+        service_areas: [...prev.service_areas, selectedCity]
       }));
       setSelectedCity("");
-      toast.success(`${selectedCity} added to your service cities!`);
-    } else if (profileData.serviceAreas.includes(selectedCity)) {
-      toast.error("This city is already in your service list!");
+      showSuccess(`${selectedCity} added to your service cities!`);
+    } else if (profileData.service_areas.includes(selectedCity)) {
+      showError("This city is already in your service list!");
     } else {
-      toast.error("Please select a city first!");
+      showError("Please select a city first!");
     }
   };
 
   const removeCity = (city: string) => {
     setProfileData(prev => ({
       ...prev,
-      serviceAreas: prev.serviceAreas.filter(a => a !== city)
+      service_areas: prev.service_areas.filter(a => a !== city)
     }));
-    toast.success(`${city} removed from your service cities!`);
+    showSuccess(`${city} removed from your service cities!`);
   };
+
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-64" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -187,10 +304,28 @@ const VendorProfilePage = () => {
             Manage your business information and how customers see your company.
           </p>
         </div>
-        <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-700">
-          Save Changes
+        <Button
+          onClick={handleSaveProfile}
+          disabled={isSaving}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
       </div>
+
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Profile Information */}
@@ -208,41 +343,33 @@ const VendorProfilePage = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="company-name">Company Name *</Label>
+                <Label htmlFor="business-name">Business Name *</Label>
                 <Input
-                  id="company-name"
+                  id="business-name"
                   type="text"
-                  placeholder="Your Company Name"
-                  value={profileData.companyName}
-                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                  placeholder="Your Business Name"
+                  value={profileData.business_name}
+                  onChange={(e) => handleInputChange('business_name', e.target.value)}
                 />
               </div>
               <div>
-                <Label htmlFor="primary-category">Primary Service Category *</Label>
-                <Select
-                  value={profileData.primaryCategory}
-                  onValueChange={(value) => handleInputChange('primaryCategory', value)}
-                >
-                  <SelectTrigger id="primary-category">
-                    <SelectValue placeholder="Select your main service category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {serviceCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="contact-name">Contact Name *</Label>
+                <Input
+                  id="contact-name"
+                  type="text"
+                  placeholder="Your Full Name"
+                  value={profileData.contact_name}
+                  onChange={(e) => handleInputChange('contact_name', e.target.value)}
+                />
               </div>
               <div>
-                <Label htmlFor="company-bio">Company Description *</Label>
+                <Label htmlFor="business-description">Business Description *</Label>
                 <Textarea
-                  id="company-bio"
-                  placeholder="Tell customers about your company and what makes you special..."
+                  id="business-description"
+                  placeholder="Tell customers about your business and what makes you special..."
                   rows={4}
-                  value={profileData.companyBio}
-                  onChange={(e) => handleInputChange('companyBio', e.target.value)}
+                  value={profileData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
                 />
               </div>
             </CardContent>
@@ -260,36 +387,24 @@ const VendorProfilePage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="contact-email">Business Email *</Label>
-                  <Input
-                    id="contact-email"
-                    type="email"
-                    placeholder="contact@yourcompany.com"
-                    value={profileData.contactEmail}
-                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contact-phone">Phone Number *</Label>
-                  <Input
-                    id="contact-phone"
-                    type="tel"
-                    placeholder="(123) 456-7890"
-                    value={profileData.contactPhone}
-                    onChange={(e) => handleInputChange('contactPhone', e.target.value)}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="contact-phone">Phone Number *</Label>
+                <Input
+                  id="contact-phone"
+                  type="tel"
+                  placeholder="(123) 456-7890"
+                  value={profileData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                />
               </div>
               <div>
-                <Label htmlFor="company-website">Website URL</Label>
+                <Label htmlFor="business-website">Website URL</Label>
                 <Input
-                  id="company-website"
+                  id="business-website"
                   type="url"
-                  placeholder="https://www.yourcompany.com"
-                  value={profileData.website}
-                  onChange={(e) => handleInputChange('website', e.target.value)}
+                  placeholder="https://www.yourbusiness.com"
+                  value={profileData.website_url}
+                  onChange={(e) => handleInputChange('website_url', e.target.value)}
                 />
               </div>
               <div>
@@ -297,10 +412,42 @@ const VendorProfilePage = () => {
                 <Input
                   id="business-address"
                   type="text"
-                  placeholder="123 Main Street, City, State, ZIP"
-                  value={profileData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="123 Main Street"
+                  value={profileData.business_address}
+                  onChange={(e) => handleInputChange('business_address', e.target.value)}
                 />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    placeholder="Toronto"
+                    value={profileData.city}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="province">Province</Label>
+                  <Input
+                    id="province"
+                    type="text"
+                    placeholder="Ontario"
+                    value={profileData.province}
+                    onChange={(e) => handleInputChange('province', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="postal-code">Postal Code</Label>
+                  <Input
+                    id="postal-code"
+                    type="text"
+                    placeholder="M5V 3A8"
+                    value={profileData.postal_code}
+                    onChange={(e) => handleInputChange('postal_code', e.target.value)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -317,27 +464,25 @@ const VendorProfilePage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="business-hours">Business Hours</Label>
-                  <Input
-                    id="business-hours"
-                    type="text"
-                    placeholder="Mon-Fri 9AM-5PM"
-                    value={profileData.businessHours}
-                    onChange={(e) => handleInputChange('businessHours', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="years-in-business">Years in Business</Label>
-                  <Input
-                    id="years-in-business"
-                    type="text"
-                    placeholder="5"
-                    value={profileData.yearsInBusiness}
-                    onChange={(e) => handleInputChange('yearsInBusiness', e.target.value)}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="business-license">Business License Number</Label>
+                <Input
+                  id="business-license"
+                  type="text"
+                  placeholder="Enter your business license number"
+                  value={profileData.business_license}
+                  onChange={(e) => handleInputChange('business_license', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="insurance-info">Insurance Information</Label>
+                <Textarea
+                  id="insurance-info"
+                  placeholder="Provide details about your business insurance coverage..."
+                  rows={3}
+                  value={profileData.insurance_info}
+                  onChange={(e) => handleInputChange('insurance_info', e.target.value)}
+                />
               </div>
               {/* <div>
                 <Label htmlFor="team-size">Team Size</Label>
@@ -368,26 +513,22 @@ const VendorProfilePage = () => {
                 <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Building className="h-10 w-10 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-lg">{profileData.companyName}</h3>
-                <p className="text-sm text-gray-600">{profileData.primaryCategory} Service Provider</p>
+                <h3 className="font-semibold text-lg">{profileData.business_name || "Your Business"}</h3>
+                <p className="text-sm text-gray-600">{profileData.contact_name || "Business Owner"}</p>
               </div>
 
               <div className="space-y-3 pt-4 border-t">
                 <div className="flex items-center gap-2 text-sm">
-                  <Building className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">{profileData.primaryCategory} Services</span>
+                  <Phone className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-600">{profileData.phone || "No phone number"}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">{profileData.yearsInBusiness} years in business</span>
-                </div>
-                {/* <div className="flex items-center gap-2 text-sm">
-                  <Users className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">{profileData.teamSize} team members</span>
-                </div> */}
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Multiple service cities</span>
+                  <span className="text-gray-600">{profileData.city && profileData.province ? `${profileData.city}, ${profileData.province}` : "No location set"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Building className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-600">{profileData.service_areas.length} service cities</span>
                 </div>
               </div>
             </CardContent>
@@ -406,7 +547,7 @@ const VendorProfilePage = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {profileData.serviceAreas.map((city, index) => (
+                {profileData.service_areas.map((city, index) => (
                   <Badge
                     key={index}
                     variant="secondary"
@@ -416,6 +557,9 @@ const VendorProfilePage = () => {
                     {city} ×
                   </Badge>
                 ))}
+                {profileData.service_areas.length === 0 && (
+                  <p className="text-sm text-gray-500">No service cities added yet</p>
+                )}
               </div>
 
               <div className="space-y-3">

@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
 import {
   Search,
   Home,
@@ -24,6 +27,42 @@ import {
 const CustomerBrowseServicesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        // Fetch categories and featured services
+        const [categoriesResponse, servicesResponse] = await Promise.all([
+          ServicesAPI.getCategories(),
+          ServicesAPI.getServices({ limit: 6, sort: 'popular' })
+        ]);
+
+        if (categoriesResponse.error) {
+          throw new Error('Failed to load categories');
+        }
+
+        if (servicesResponse.error) {
+          throw new Error('Failed to load services');
+        }
+
+        setCategories(categoriesResponse.categories);
+        setFeaturedServices(servicesResponse.services);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSearch = () => {
     // Navigate to all services with search parameters
@@ -32,150 +71,92 @@ const CustomerBrowseServicesPage = () => {
     navigate(`/marketplace/services?${params.toString()}`);
   };
 
-  const handleViewDetails = (serviceName: string) => {
+  const handleViewDetails = (serviceId: number) => {
     // Navigate to the marketplace service details page
-    navigate(`/marketplace/services/${encodeURIComponent(serviceName)}`);
+    navigate(`/marketplace/services/${serviceId}`);
   };
 
-  const mockCategories = [
-    {
-      name: "Plumbing",
-      icon: CheckCircle,
-      count: 28,
-      color: "bg-blue-500",
-      description: "Pipes, fixtures, repairs"
-    },
-    {
-      name: "Electrical",
-      icon: Lightbulb,
-      count: 24,
-      color: "bg-yellow-500",
-      description: "Wiring, outlets, lighting"
-    },
-    {
-      name: "HVAC",
-      icon: Home,
-      count: 18,
-      color: "bg-orange-500",
-      description: "Heating, cooling, ventilation"
-    },
-    {
-      name: "Roofing",
-      icon: Building2,
-      count: 16,
-      color: "bg-gray-600",
-      description: "Repair, replacement, gutters"
-    },
-    {
-      name: "Flooring",
-      icon: Leaf,
-      count: 22,
-      color: "bg-amber-600",
-      description: "Hardwood, tile, carpet"
-    },
-    {
-      name: "Painting",
-      icon: Truck,
-      count: 20,
-      color: "bg-purple-500",
-      description: "Interior, exterior, touch-ups"
-    },
-    {
-      name: "Landscaping",
-      icon: Leaf,
-      count: 19,
-      color: "bg-green-600",
-      description: "Lawn care, garden design"
-    },
-    {
-      name: "Handyman",
-      icon: Hammer,
-      count: 25,
-      color: "bg-gray-500",
-      description: "General repairs, maintenance"
-    },
-  ];
+  const handleCategoryClick = (categorySlug: string) => {
+    navigate(`/marketplace/services?category=${categorySlug}`);
+  };
 
-  const mockFeaturedServices = [
-    {
-      title: "Home Painting",
-      vendor: "Brush Strokes Pro",
-      description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
-      price: "$500",
-      responseTime: "2 hours",
-      verified: true,
-      deliveryTime: "3-5 days",
-      tags: ["Interior", "Exterior", "Eco-friendly"],
-      image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 150
-    },
-    {
-      title: "Emergency Plumbing Repair",
-      vendor: "Rapid Plumbers",
-      description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
-      price: "$150",
-      responseTime: "30 mins",
-      verified: true,
-      deliveryTime: "Same day",
-      tags: ["24/7", "Emergency", "Licensed"],
-      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 89
-    },
-    {
-      title: "Full Home Inspection",
-      vendor: "Certified Inspectors Inc.",
-      description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
-      price: "$300",
-      responseTime: "1 day",
-      verified: true,
-      deliveryTime: "2-3 days",
-      tags: ["Certified", "Detailed Reports", "Pre-purchase"],
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 200
-    },
-    {
-      title: "Professional Lawn Care",
-      vendor: "Green Thumb Landscaping",
-      description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
-      price: "$80",
-      responseTime: "4 hours",
-      verified: true,
-      deliveryTime: "Weekly",
-      tags: ["Weekly Service", "Organic", "Seasonal"],
-      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 300
-    },
-    {
-      title: "HVAC System Tune-up",
-      vendor: "Climate Control Experts",
-      description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
-      price: "$120",
-      responseTime: "6 hours",
-      verified: true,
-      deliveryTime: "1-2 days",
-      tags: ["Maintenance", "Energy Efficient", "Warranty"],
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 120
-    },
-    {
-      title: "Deep House Cleaning",
-      vendor: "Sparkling Spaces",
-      description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
-      price: "$200",
-      responseTime: "3 hours",
-      verified: true,
-      deliveryTime: "Same day",
-      tags: ["Deep Clean", "Eco-friendly", "Insured"],
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
-      vendorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      completedOrders: 250
-    },
-  ];
+  // Category icon mapping
+  const getCategoryIcon = (categoryName: string) => {
+    const iconMap: { [key: string]: any } = {
+      'plumbing': CheckCircle,
+      'electrical': Lightbulb,
+      'hvac': Home,
+      'roofing': Building2,
+      'flooring': Leaf,
+      'painting': Truck,
+      'landscaping': Leaf,
+      'handyman': Hammer,
+    };
+    return iconMap[categoryName.toLowerCase()] || Hammer;
+  };
+
+  const getCategoryColor = (index: number) => {
+    const colors = [
+      "bg-blue-500",
+      "bg-yellow-500",
+      "bg-orange-500",
+      "bg-gray-600",
+      "bg-amber-600",
+      "bg-purple-500",
+      "bg-green-600",
+      "bg-gray-500"
+    ];
+    return colors[index % colors.length];
+  };
+
+  // Loading and error states
+  if (isLoading) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-white">
+          <div className="max-w-7xl mx-auto px-4 py-20">
+            <div className="text-center mb-16">
+              <Skeleton className="h-16 w-3/4 mx-auto mb-4" />
+              <Skeleton className="h-6 w-1/2 mx-auto mb-8" />
+              <Skeleton className="h-12 w-full max-w-4xl mx-auto" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="h-56 w-full" />
+                  <CardContent className="p-6">
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full mb-4" />
+                    <Skeleton className="h-8 w-1/3" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <Button
+              onClick={() => window.location.reload()}
+              className="mt-4"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
 
   return (
     <MarketplaceLayout>
@@ -287,12 +268,12 @@ const CustomerBrowseServicesPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {mockFeaturedServices.map((service, index) => (
-              <Card key={index} className="group overflow-hidden border shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl relative">
+            {featuredServices.map((service) => (
+              <Card key={service.id} className="group overflow-hidden border shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl relative">
 
                 <div className="relative overflow-hidden rounded-t-2xl">
                   <img
-                    src={service.image}
+                    src={service.image || service.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center'}
                     alt={service.title}
                     className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -305,13 +286,13 @@ const CustomerBrowseServicesPage = () => {
                   {/* Vendor Info */}
                   <div className="absolute bottom-4 left-4 flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                     <img
-                      src={service.vendorImage}
+                      src={service.vendor_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face'}
                       alt={service.vendor}
                       className="w-10 h-10 rounded-full border-3 border-white shadow-lg"
                     />
                     <div className="text-white">
                       <div className="text-sm font-semibold">{service.vendor}</div>
-                      <div className="text-xs opacity-90">{service.completedOrders} orders completed</div>
+                      <div className="text-xs opacity-90">{service.completed_orders} orders completed</div>
                     </div>
                   </div>
                 </div>
@@ -326,16 +307,14 @@ const CustomerBrowseServicesPage = () => {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-end mb-4">
-                    <div className="flex items-center space-x-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
-                      <span>{service.responseTime} response</span>
-                    </div>
-                  </div>
-
-                  {/* Service Tags */}
+                  {/* Category and Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {service.tags.slice(0, 2).map((tag, tagIndex) => (
+                    {/* Category Badge */}
+                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                      {service.category}
+                    </Badge>
+                    {/* Category Tags */}
+                    {Array.isArray(service.category_tags) && service.category_tags.slice(0, 2).map((tag: string, tagIndex: number) => (
                       <Badge key={tagIndex} variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full">
                         {tag}
                       </Badge>
@@ -345,16 +324,16 @@ const CustomerBrowseServicesPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center space-x-2 mb-1">
-                        <span className="text-xl font-bold text-gray-900">{service.price}</span>
+                        <span className="text-xl font-bold text-gray-900">${service.base_price}</span>
                       </div>
                       <div className="flex items-center space-x-1 text-xs text-gray-500">
                         <Clock className="w-3 h-3" />
-                        <span>{service.deliveryTime}</span>
+                        <span>{service.delivery_time}</span>
                       </div>
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => handleViewDetails(service.title)}
+                      onClick={() => handleViewDetails(service.id)}
                       className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       View Details

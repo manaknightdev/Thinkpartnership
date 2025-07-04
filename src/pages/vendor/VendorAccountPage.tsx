@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   User,
   Bell,
@@ -21,44 +23,55 @@ import {
   Edit,
   Save,
   X,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+import VendorAuthAPI from "@/services/VendorAuthAPI";
+import { showSuccess, showError } from "@/utils/toast";
+
 const VendorAccountPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const [vendorProfile, setVendorProfile] = useState({
-    companyName: "Rapid Plumbers",
-    ownerName: "John Smith",
-    email: "john@rapidplumbers.com",
-    phone: "(555) 123-4567",
-    website: "https://www.rapidplumbers.com",
-    address: "123 Main Street, Anytown, ST 12345",
-    businessLicense: "BL-2023-001234",
-    insuranceNumber: "INS-789456123",
-    taxId: "TAX-987654321",
-    bio: "Professional plumbing services with 15+ years of experience. We provide 24/7 emergency services, leak detection, drain cleaning, and water heater installations.",
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    company_name: "",
+    business_address: "",
+    business_license: "",
+    insurance_number: "",
+    tax_id: "",
+    website: "",
+    bio: "",
   });
 
+  const [originalProfile, setOriginalProfile] = useState(vendorProfile);
+
   const [notifications, setNotifications] = useState({
-    emailRequests: true,
-    emailMessages: true,
-    emailPayments: true,
-    emailReviews: true,
-    pushNotifications: true,
-    smsUrgent: true,
-    weeklyReport: true,
-    monthlyReport: true,
+    email_requests: true,
+    email_messages: true,
+    email_payments: true,
+    email_reviews: true,
+    push_notifications: true,
+    sms_urgent: true,
+    weekly_report: true,
+    monthly_report: true,
   });
 
   const [privacy, setPrivacy] = useState({
-    profileVisible: true,
-    showReviews: true,
-    showCompletedJobs: true,
-    allowDirectContact: true,
-    showResponseTime: true,
+    profile_visible: true,
+    show_reviews: true,
+    show_completed_jobs: true,
+    allow_direct_contact: true,
+    show_response_time: true,
   });
 
   const tabs = [
@@ -68,46 +81,185 @@ const VendorAccountPage = () => {
     { id: "security", name: "Security", icon: Settings }
   ];
 
-  const handleSaveProfile = () => {
+  // Load profile data on component mount
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await VendorAuthAPI.getProfile();
+
+      if (response.error) {
+        setError(response.message || "Failed to load profile");
+        return;
+      }
+
+      const profileData = {
+        first_name: response.user.first_name || "",
+        last_name: response.user.last_name || "",
+        email: response.user.email || "",
+        phone: response.user.phone || "",
+        company_name: response.user.company_name || "",
+        business_address: response.user.business_address || "",
+        business_license: response.user.business_license || "",
+        insurance_number: response.user.insurance_number || "",
+        tax_id: response.user.tax_id || "",
+        website: response.user.website || "",
+        bio: response.user.bio || "",
+      };
+
+      setVendorProfile(profileData);
+      setOriginalProfile(profileData);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      setError("");
+
+      const response = await VendorAuthAPI.updateProfile(vendorProfile);
+
+      if (response.error) {
+        setError(response.message);
+        showError(response.message);
+        return;
+      }
+
+      setOriginalProfile(vendorProfile);
+      setIsEditing(false);
+      showSuccess("Profile updated successfully!");
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to update profile";
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setVendorProfile(originalProfile);
     setIsEditing(false);
-    toast.success("Profile updated successfully!");
   };
 
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: value }));
-    toast.success("Notification preferences updated!");
+    // TODO: Add API call to save notification preferences
+    showSuccess("Notification preferences updated!");
   };
 
   const handlePrivacyChange = (key: string, value: boolean) => {
     setPrivacy(prev => ({ ...prev, [key]: value }));
-    toast.success("Privacy settings updated!");
+    // TODO: Add API call to save privacy settings
+    showSuccess("Privacy settings updated!");
   };
+
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96 mt-2" />
+        </div>
+        <div className="flex space-x-1">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-10 w-32" />
+          ))}
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const renderProfileTab = () => (
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Personal Account Information</CardTitle>
-          <Button
-            variant={isEditing ? "outline" : "default"}
-            size="sm"
-            onClick={() => isEditing ? setIsEditing(false) : setIsEditing(true)}
-          >
-            {isEditing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
+          <div className="flex gap-2">
+            {isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCancelEdit}
+                disabled={isSaving}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            )}
+            <Button
+              variant={isEditing ? "default" : "outline"}
+              size="sm"
+              onClick={isEditing ? handleSaveProfile : () => setIsEditing(true)}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : isEditing ? (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              ) : (
+                <>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="ownerName">Full Name *</Label>
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
-                id="ownerName"
-                value={vendorProfile.ownerName}
-                onChange={(e) => setVendorProfile({...vendorProfile, ownerName: e.target.value})}
+                id="firstName"
+                value={vendorProfile.first_name}
+                onChange={(e) => setVendorProfile({...vendorProfile, first_name: e.target.value})}
                 disabled={!isEditing}
               />
             </div>
+            <div>
+              <Label htmlFor="lastName">Last Name *</Label>
+              <Input
+                id="lastName"
+                value={vendorProfile.last_name}
+                onChange={(e) => setVendorProfile({...vendorProfile, last_name: e.target.value})}
+                disabled={!isEditing}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="email">Email Address *</Label>
               <Input
@@ -118,9 +270,6 @@ const VendorAccountPage = () => {
                 disabled={!isEditing}
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="phone">Phone Number *</Label>
               <Input
@@ -130,28 +279,85 @@ const VendorAccountPage = () => {
                 disabled={!isEditing}
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="companyName">Company Name</Label>
               <Input
                 id="companyName"
-                value={vendorProfile.companyName}
-                disabled={true}
-                className="bg-gray-50"
+                value={vendorProfile.company_name}
+                onChange={(e) => setVendorProfile({...vendorProfile, company_name: e.target.value})}
+                disabled={!isEditing}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Update company details in <a href="/vendor-portal/profile" className="text-blue-600 hover:underline">Profile Setup</a>
-              </p>
+            </div>
+            <div>
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                value={vendorProfile.website}
+                onChange={(e) => setVendorProfile({...vendorProfile, website: e.target.value})}
+                disabled={!isEditing}
+                placeholder="https://www.yourcompany.com"
+              />
             </div>
           </div>
 
-          {isEditing && (
-            <div className="flex gap-2">
-              <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-700">
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-              </Button>
+          <div>
+            <Label htmlFor="businessAddress">Business Address</Label>
+            <Input
+              id="businessAddress"
+              value={vendorProfile.business_address}
+              onChange={(e) => setVendorProfile({...vendorProfile, business_address: e.target.value})}
+              disabled={!isEditing}
+              placeholder="123 Main Street, City, State, ZIP"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="businessLicense">Business License</Label>
+              <Input
+                id="businessLicense"
+                value={vendorProfile.business_license}
+                onChange={(e) => setVendorProfile({...vendorProfile, business_license: e.target.value})}
+                disabled={!isEditing}
+                placeholder="BL-2023-001234"
+              />
             </div>
-          )}
+            <div>
+              <Label htmlFor="insuranceNumber">Insurance Number</Label>
+              <Input
+                id="insuranceNumber"
+                value={vendorProfile.insurance_number}
+                onChange={(e) => setVendorProfile({...vendorProfile, insurance_number: e.target.value})}
+                disabled={!isEditing}
+                placeholder="INS-789456123"
+              />
+            </div>
+            <div>
+              <Label htmlFor="taxId">Tax ID</Label>
+              <Input
+                id="taxId"
+                value={vendorProfile.tax_id}
+                onChange={(e) => setVendorProfile({...vendorProfile, tax_id: e.target.value})}
+                disabled={!isEditing}
+                placeholder="TAX-987654321"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="bio">Business Bio</Label>
+            <Textarea
+              id="bio"
+              value={vendorProfile.bio}
+              onChange={(e) => setVendorProfile({...vendorProfile, bio: e.target.value})}
+              disabled={!isEditing}
+              placeholder="Describe your business, services, and experience..."
+              rows={4}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -224,8 +430,8 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="emailRequests"
-                checked={notifications.emailRequests}
-                onCheckedChange={(checked) => handleNotificationChange("emailRequests", checked)}
+                checked={notifications.email_requests}
+                onCheckedChange={(checked) => handleNotificationChange("email_requests", checked)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -235,8 +441,8 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="emailMessages"
-                checked={notifications.emailMessages}
-                onCheckedChange={(checked) => handleNotificationChange("emailMessages", checked)}
+                checked={notifications.email_messages}
+                onCheckedChange={(checked) => handleNotificationChange("email_messages", checked)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -246,11 +452,21 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="emailPayments"
-                checked={notifications.emailPayments}
-                onCheckedChange={(checked) => handleNotificationChange("emailPayments", checked)}
+                checked={notifications.email_payments}
+                onCheckedChange={(checked) => handleNotificationChange("email_payments", checked)}
               />
             </div>
-
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="emailReviews">Review Notifications</Label>
+                <p className="text-sm text-gray-600">New reviews and ratings from customers</p>
+              </div>
+              <Switch
+                id="emailReviews"
+                checked={notifications.email_reviews}
+                onCheckedChange={(checked) => handleNotificationChange("email_reviews", checked)}
+              />
+            </div>
           </div>
         </div>
 
@@ -264,8 +480,8 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="pushNotifications"
-                checked={notifications.pushNotifications}
-                onCheckedChange={(checked) => handleNotificationChange("pushNotifications", checked)}
+                checked={notifications.push_notifications}
+                onCheckedChange={(checked) => handleNotificationChange("push_notifications", checked)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -275,8 +491,8 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="smsUrgent"
-                checked={notifications.smsUrgent}
-                onCheckedChange={(checked) => handleNotificationChange("smsUrgent", checked)}
+                checked={notifications.sms_urgent}
+                onCheckedChange={(checked) => handleNotificationChange("sms_urgent", checked)}
               />
             </div>
           </div>
@@ -292,8 +508,8 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="weeklyReport"
-                checked={notifications.weeklyReport}
-                onCheckedChange={(checked) => handleNotificationChange("weeklyReport", checked)}
+                checked={notifications.weekly_report}
+                onCheckedChange={(checked) => handleNotificationChange("weekly_report", checked)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -303,8 +519,8 @@ const VendorAccountPage = () => {
               </div>
               <Switch
                 id="monthlyReport"
-                checked={notifications.monthlyReport}
-                onCheckedChange={(checked) => handleNotificationChange("monthlyReport", checked)}
+                checked={notifications.monthly_report}
+                onCheckedChange={(checked) => handleNotificationChange("monthly_report", checked)}
               />
             </div>
           </div>
@@ -322,6 +538,16 @@ const VendorAccountPage = () => {
           Manage your vendor account preferences and business information.
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Tabs */}
       <div className="flex flex-col lg:flex-row gap-6">
@@ -363,8 +589,8 @@ const VendorAccountPage = () => {
                   </div>
                   <Switch
                     id="profileVisible"
-                    checked={privacy.profileVisible}
-                    onCheckedChange={(checked) => handlePrivacyChange("profileVisible", checked)}
+                    checked={privacy.profile_visible}
+                    onCheckedChange={(checked) => handlePrivacyChange("profile_visible", checked)}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -374,8 +600,19 @@ const VendorAccountPage = () => {
                   </div>
                   <Switch
                     id="showReviews"
-                    checked={privacy.showReviews}
-                    onCheckedChange={(checked) => handlePrivacyChange("showReviews", checked)}
+                    checked={privacy.show_reviews}
+                    onCheckedChange={(checked) => handlePrivacyChange("show_reviews", checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="showCompletedJobs">Show Completed Jobs</Label>
+                    <p className="text-sm text-gray-600">Display your completed work portfolio</p>
+                  </div>
+                  <Switch
+                    id="showCompletedJobs"
+                    checked={privacy.show_completed_jobs}
+                    onCheckedChange={(checked) => handlePrivacyChange("show_completed_jobs", checked)}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -385,8 +622,19 @@ const VendorAccountPage = () => {
                   </div>
                   <Switch
                     id="allowDirectContact"
-                    checked={privacy.allowDirectContact}
-                    onCheckedChange={(checked) => handlePrivacyChange("allowDirectContact", checked)}
+                    checked={privacy.allow_direct_contact}
+                    onCheckedChange={(checked) => handlePrivacyChange("allow_direct_contact", checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="showResponseTime">Show Response Time</Label>
+                    <p className="text-sm text-gray-600">Display your average response time to customers</p>
+                  </div>
+                  <Switch
+                    id="showResponseTime"
+                    checked={privacy.show_response_time}
+                    onCheckedChange={(checked) => handlePrivacyChange("show_response_time", checked)}
                   />
                 </div>
               </CardContent>

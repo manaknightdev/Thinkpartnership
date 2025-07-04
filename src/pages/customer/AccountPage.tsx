@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,9 @@ import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import UserAPI, { UserProfile, UpdateProfileData, ChangePasswordData } from "@/services/UserAPI";
 import {
   User,
   CreditCard,
@@ -17,7 +20,9 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  Calendar
+  Calendar,
+  Loader2,
+  CheckCircle
 } from "lucide-react";
 
 const AccountPage = () => {
@@ -25,20 +30,138 @@ const AccountPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Mock user data
-  const [userProfile, setUserProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main St, Anytown, ST 12345",
-    bio: "Looking for reliable home services in my area. I value quality work and professional service.",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    memberSince: "2023-06-15",
-    totalOrders: 12,
-    totalSpent: 2450,
-    favoriteCategories: ["Cleaning", "Plumbing", "Landscaping"]
+  // API state
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  // Form data for editing
+  const [formData, setFormData] = useState<UpdateProfileData>({});
+  const [passwordData, setPasswordData] = useState<ChangePasswordData>({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
   });
+
+  // Fetch user profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await UserAPI.getProfile();
+        if (response.error) {
+          throw new Error(response.message || 'Failed to load profile');
+        }
+
+        setUserProfile(response.user);
+        setFormData({
+          first_name: response.user.first_name,
+          last_name: response.user.last_name,
+          phone: response.user.phone,
+          address: response.user.address || '',
+          city: response.user.city || '',
+          province: response.user.province || '',
+          postal_code: response.user.postal_code || '',
+          bio: response.user.bio || '',
+          email_notifications: response.user.email_notifications || true,
+          sms_notifications: response.user.sms_notifications || false,
+          marketing_emails: response.user.marketing_emails || false
+        });
+      } catch (err: any) {
+        setError(err.message || 'Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // Handle profile update
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      setError('');
+      setSuccess('');
+
+      const response = await UserAPI.updateProfile(formData);
+      if (response.error) {
+        throw new Error(response.message || 'Failed to update profile');
+      }
+
+      setUserProfile(response.user);
+      setIsEditing(false);
+      setSuccess('Profile updated successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle password change
+  const handleChangePassword = async () => {
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError('');
+      setSuccess('');
+
+      const response = await UserAPI.changePassword(passwordData);
+      if (response.error) {
+        throw new Error(response.message || 'Failed to change password');
+      }
+
+      setPasswordData({
+        current_password: '',
+        new_password: '',
+        confirm_password: ''
+      });
+      setSuccess('Password changed successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to change password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle avatar upload
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setSaving(true);
+      setError('');
+      setSuccess('');
+
+      const response = await UserAPI.uploadAvatar(file);
+      if (response.error) {
+        throw new Error(response.message || 'Failed to upload avatar');
+      }
+
+      // Update the user profile with new avatar
+      if (userProfile) {
+        setUserProfile({
+          ...userProfile,
+          avatar: response.avatar_url
+        });
+      }
+      setSuccess('Avatar updated successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload avatar');
+    } finally {
+      setSaving(false);
+    }
+  };
 
 
 
@@ -48,11 +171,88 @@ const AccountPage = () => {
     { id: "security", name: "Security", icon: Settings }
   ];
 
-  const handleSaveProfile = () => {
-    // In a real app, this would save to backend
-    setIsEditing(false);
-    console.log("Profile saved:", userProfile);
-  };
+  // Loading state
+  if (loading) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-gray-50">
+          <div className="bg-white border-b border-gray-200">
+            <div className="max-w-6xl mx-auto px-4 py-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Skeleton className="h-8 w-64 mb-2" />
+                  <Skeleton className="h-4 w-48" />
+                </div>
+                <Skeleton className="h-6 w-32" />
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-1">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <Skeleton className="w-24 h-24 rounded-full mx-auto mb-4" />
+                      <Skeleton className="h-6 w-32 mx-auto mb-2" />
+                      <Skeleton className="h-4 w-24 mx-auto" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="lg:col-span-3">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="space-y-6">
+                      {Array.from({ length: 4 }).map((_, index) => (
+                        <div key={index}>
+                          <Skeleton className="h-4 w-24 mb-2" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
+
+  // Error state
+  if (error && !userProfile) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <Alert>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
+
+  // No profile found
+  if (!userProfile) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile not found</h2>
+              <p className="text-gray-600 mb-6">Unable to load your profile information.</p>
+            </div>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
 
   const renderProfileTab = () => (
     <div className="space-y-6">
@@ -62,43 +262,56 @@ const AccountPage = () => {
           <div className="flex items-center space-x-6">
             <div className="relative">
               <img
-                src={userProfile.avatar}
+                src={userProfile.photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
                 alt="Profile"
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
               />
-              <Button
-                size="sm"
-                className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-green-600 hover:bg-green-700"
-              >
-                <Camera className="w-4 h-4" />
-              </Button>
+              <label htmlFor="avatar-upload">
+                <Button
+                  size="sm"
+                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-green-600 hover:bg-green-700"
+                  disabled={saving}
+                  asChild
+                >
+                  <span>
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
+                  </span>
+                </Button>
+              </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {userProfile.firstName} {userProfile.lastName}
+                {userProfile.first_name || 'User'} {userProfile.last_name || ''}
               </h2>
               <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Member since {new Date(userProfile.memberSince).toLocaleDateString()}
+                  Member since {new Date(userProfile.created_at).toLocaleDateString()}
                 </span>
-                {/* <Badge variant="secondary" className="bg-green-100 text-green-700">
-                  Verified Customer
-                </Badge> */}
+                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                  {userProfile.status === 1 ? 'Active' : 'Inactive'} Customer
+                </Badge>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-green-600">{userProfile.totalOrders}</div>
+                  <div className="text-2xl font-bold text-green-600">{userProfile.total_orders || 0}</div>
                   <div className="text-sm text-gray-600">Total Orders</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-600">${userProfile.totalSpent}</div>
+                  <div className="text-2xl font-bold text-green-600">${userProfile.total_spent || 0}</div>
                   <div className="text-sm text-gray-600">Total Spent</div>
                 </div>
-                {/* <div>
-                  <div className="text-2xl font-bold text-green-600">4.8</div>
-                  <div className="text-sm text-gray-600">Avg Rating</div>
-                </div> */}
               </div>
             </div>
           </div>
@@ -124,8 +337,8 @@ const AccountPage = () => {
               <Label htmlFor="firstName">First Name</Label>
               <Input
                 id="firstName"
-                value={userProfile.firstName}
-                onChange={(e) => setUserProfile(prev => ({ ...prev, firstName: e.target.value }))}
+                value={isEditing ? formData.first_name || '' : userProfile.first_name || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
                 disabled={!isEditing}
               />
             </div>
@@ -133,63 +346,107 @@ const AccountPage = () => {
               <Label htmlFor="lastName">Last Name</Label>
               <Input
                 id="lastName"
-                value={userProfile.lastName}
-                onChange={(e) => setUserProfile(prev => ({ ...prev, lastName: e.target.value }))}
+                value={isEditing ? formData.last_name || '' : userProfile.last_name || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
                 disabled={!isEditing}
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
               value={userProfile.email}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, email: e.target.value }))}
-              disabled={!isEditing}
+              disabled={true}
+              className="bg-gray-50"
             />
+            <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
           </div>
-          
+
           <div>
             <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
-              value={userProfile.phone}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, phone: e.target.value }))}
+              value={isEditing ? formData.phone || '' : userProfile.phone || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
               disabled={!isEditing}
             />
           </div>
-          
+
           <div>
             <Label htmlFor="address">Address</Label>
             <Input
               id="address"
-              value={userProfile.address}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, address: e.target.value }))}
+              value={isEditing ? formData.address || '' : userProfile.address || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
               disabled={!isEditing}
             />
           </div>
-          
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={isEditing ? formData.city || '' : userProfile.city || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
+              <Label htmlFor="province">Province</Label>
+              <Input
+                id="province"
+                value={isEditing ? formData.province || '' : userProfile.province || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, province: e.target.value }))}
+                disabled={!isEditing}
+              />
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="bio">Bio</Label>
             <Textarea
               id="bio"
-              value={userProfile.bio}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, bio: e.target.value }))}
+              value={isEditing ? formData.bio || '' : userProfile.bio || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
               disabled={!isEditing}
               rows={3}
+              placeholder="Tell us a bit about yourself..."
             />
           </div>
 
           {isEditing && (
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditing(false)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setError('');
+                  setSuccess('');
+                }}
+                disabled={saving}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSaveProfile} className="bg-green-600 hover:bg-green-700">
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
+              <Button
+                onClick={handleSaveProfile}
+                className="bg-green-600 hover:bg-green-700"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
               </Button>
             </div>
           )}
@@ -290,7 +547,7 @@ const AccountPage = () => {
         {/* Billing History */}
         <Card>
           <CardHeader>
-            <CardTitle>Billing History</CardTitle>
+            <CardTitle>Purchase History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -360,6 +617,8 @@ const AccountPage = () => {
                   id="currentPassword"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter current password"
+                  value={passwordData.current_password}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, current_password: e.target.value }))}
                 />
                 <Button
                   type="button"
@@ -378,6 +637,8 @@ const AccountPage = () => {
                 id="newPassword"
                 type="password"
                 placeholder="Enter new password"
+                value={passwordData.new_password}
+                onChange={(e) => setPasswordData(prev => ({ ...prev, new_password: e.target.value }))}
               />
             </div>
             <div>
@@ -386,10 +647,23 @@ const AccountPage = () => {
                 id="confirmPassword"
                 type="password"
                 placeholder="Confirm new password"
+                value={passwordData.confirm_password}
+                onChange={(e) => setPasswordData(prev => ({ ...prev, confirm_password: e.target.value }))}
               />
             </div>
-            <Button className="bg-green-600 hover:bg-green-700">
-              Update Password
+            <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleChangePassword}
+              disabled={saving || !passwordData.current_password || !passwordData.new_password || !passwordData.confirm_password}
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Password'
+              )}
             </Button>
           </div>
         </div>
@@ -421,6 +695,25 @@ const AccountPage = () => {
             </p>
           </div>
         </section>
+
+        {/* Success/Error Messages */}
+        {(error || success) && (
+          <section className="py-4">
+            <div className="max-w-7xl mx-auto px-4">
+              {error && (
+                <Alert className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {success && (
+                <Alert className="mb-4 border-green-200 bg-green-50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">{success}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Content */}
         <section className="py-12">
