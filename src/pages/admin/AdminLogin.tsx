@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import * as z from 'zod';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2, Shield } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, Building2, ArrowLeft } from 'lucide-react';
 
-import ClientAPI, { ClientLoginData } from '@/services/ClientAPI';
+import AdminAPI, { AdminLoginData } from '@/services/AdminAPI';
 import { showSuccess, showError } from '@/utils/toast';
 
 const loginSchema = z.object({
@@ -21,7 +23,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const ClientLogin = () => {
+const AdminLogin = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,20 +39,17 @@ const ClientLogin = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('🚀 Form submitted with data:', data);
     setIsLoading(true);
     setError('');
 
     try {
-      const loginData: ClientLoginData = {
+      const loginData: AdminLoginData = {
         email: data.email,
         password: data.password,
         is_refresh: data.remember,
       };
 
-      console.log('📤 Sending login request:', loginData);
-      const response = await ClientAPI.login(loginData);
-      console.log('📥 Login response:', response);
+      const response = await AdminAPI.login(loginData);
 
       if (response.error) {
         setError(response.message);
@@ -58,17 +57,13 @@ const ClientLogin = () => {
       }
 
       // Store auth data
-      ClientAPI.storeAuthData(response);
-      console.log('🔐 Auth data stored, checking if authenticated:', ClientAPI.isAuthenticated());
-      console.log('🔑 Stored token:', localStorage.getItem('client_token'));
+      AdminAPI.storeAuthData(response);
 
-      showSuccess('Welcome back! You have been successfully logged in to your client portal.');
+      showSuccess('Welcome back! You have been successfully logged in.');
 
-      // Redirect to client portal
-      console.log('🔄 Navigating to /client-portal');
-      navigate('/client-portal');
+      // Redirect to admin dashboard
+      navigate('/admin-portal');
     } catch (err: any) {
-      console.error('❌ Login error:', err);
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -76,73 +71,67 @@ const ClientLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home */}
-        <div className="mb-6">
-          <Link 
-            to="/" 
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Home
-          </Link>
+        {/* Logo/Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-4">
+            <Shield className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
+          <p className="text-gray-600">Secure access to platform administration</p>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-xl flex items-center justify-center mb-4">
-              <Building2 className="h-6 w-6 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              Client Portal
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              Sign in to manage your marketplace
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-2xl font-bold text-center">Administrator Sign In</CardTitle>
+            <CardDescription className="text-center text-gray-600">
+              Enter your admin credentials to access the control panel
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <form
-              onSubmit={(e) => {
-                console.log('📝 Form onSubmit triggered');
-                handleSubmit(onSubmit)(e);
-              }}
-              className="space-y-4"
-            >
+
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                  {error}
-                </div>
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
 
+              {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your business email"
-                  {...register('email')}
-                  className="h-11"
-                />
+                <Label htmlFor="email">Admin Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your admin email"
+                    className="pl-10"
+                    {...register('email')}
+                  />
+                </div>
                 {errors.email && (
                   <p className="text-sm text-red-600">{errors.email.message}</p>
                 )}
               </div>
 
+              {/* Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
+                    className="pl-10 pr-10"
                     {...register('password')}
-                    className="h-11 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -152,10 +141,12 @@ const ClientLogin = () => {
                 )}
               </div>
 
+              {/* Remember Me */}
               <div className="flex items-center space-x-2">
                 <Controller
                   name="remember"
                   control={control}
+                  defaultValue={false}
                   render={({ field }) => (
                     <Checkbox
                       id="remember"
@@ -169,23 +160,35 @@ const ClientLogin = () => {
                 </Label>
               </div>
 
+              {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-11 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-medium"
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
                 disabled={isLoading}
-                onClick={() => console.log('🔘 Button clicked!')}
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    Sign In to Admin Portal
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
             </form>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Don't have a client account?{' '}
-                <Link to="/client/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Sign up here
-                </Link>
-              </p>
+            {/* Security Notice */}
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <Shield className="h-4 w-4 text-amber-600 mt-0.5" />
+                <div className="text-xs text-amber-800">
+                  <p className="font-medium">Security Notice</p>
+                  <p>This is a restricted area. All access attempts are logged and monitored.</p>
+                </div>
+              </div>
             </div>
 
             {/* Other Portal Links */}
@@ -194,14 +197,14 @@ const ClientLogin = () => {
                 Looking for a different portal?
               </p>
               <div className="flex justify-center space-x-4 text-xs">
-                <Link to="/marketplace/login" className="text-blue-600 hover:underline">
+                <Link to="/marketplace/login" className="text-purple-600 hover:underline">
                   Customer Portal
                 </Link>
-                <Link to="/vendor/login" className="text-blue-600 hover:underline">
+                <Link to="/vendor/login" className="text-purple-600 hover:underline">
                   Vendor Portal
                 </Link>
-                <Link to="/admin/login" className="text-blue-600 hover:underline">
-                  Admin Portal
+                <Link to="/client/login" className="text-purple-600 hover:underline">
+                  Client Portal
                 </Link>
               </div>
             </div>
@@ -212,4 +215,4 @@ const ClientLogin = () => {
   );
 };
 
-export default ClientLogin;
+export default AdminLogin;

@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 
 export interface Notification {
   id: number;
@@ -81,7 +81,7 @@ class VendorNotificationsAPI {
     date_to?: string;
   }): Promise<APIResponse<{ notifications: Notification[] }>> {
     try {
-      const response = await apiClient.get('/vendor/notifications', { params: filters });
+      const response = await vendorApiClient.get('/vendor/notifications', { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -94,7 +94,7 @@ class VendorNotificationsAPI {
   // Get notification statistics
   static async getNotificationStats(): Promise<APIResponse<NotificationStats>> {
     try {
-      const response = await apiClient.get('/vendor/notifications/stats');
+      const response = await vendorApiClient.get('/vendor/notifications/stats');
       return response.data;
     } catch (error: any) {
       return {
@@ -107,7 +107,7 @@ class VendorNotificationsAPI {
   // Mark notification as read
   static async markAsRead(notificationId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`/vendor/notifications/${notificationId}/read`);
+      const response = await vendorApiClient.put(`/vendor/notifications/${notificationId}/read`);
       return response.data;
     } catch (error: any) {
       return {
@@ -120,7 +120,7 @@ class VendorNotificationsAPI {
   // Mark all notifications as read
   static async markAllAsRead(): Promise<APIResponse> {
     try {
-      const response = await apiClient.put('/vendor/notifications/mark-all-read');
+      const response = await vendorApiClient.put('/vendor/notifications/mark-all-read');
       return response.data;
     } catch (error: any) {
       return {
@@ -133,7 +133,7 @@ class VendorNotificationsAPI {
   // Delete notification
   static async deleteNotification(notificationId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`/vendor/notifications/${notificationId}`);
+      const response = await vendorApiClient.delete(`/vendor/notifications/${notificationId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -146,7 +146,7 @@ class VendorNotificationsAPI {
   // Delete all notifications
   static async deleteAllNotifications(): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete('/vendor/notifications/delete-all');
+      const response = await vendorApiClient.delete('/vendor/notifications/delete-all');
       return response.data;
     } catch (error: any) {
       return {
@@ -159,7 +159,7 @@ class VendorNotificationsAPI {
   // Get notification settings
   static async getNotificationSettings(): Promise<APIResponse<NotificationSettings>> {
     try {
-      const response = await apiClient.get('/vendor/notifications/settings');
+      const response = await vendorApiClient.get('/vendor/notifications/settings');
       return response.data;
     } catch (error: any) {
       return {
@@ -172,7 +172,7 @@ class VendorNotificationsAPI {
   // Update notification settings
   static async updateNotificationSettings(settings: Partial<NotificationSettings>): Promise<APIResponse> {
     try {
-      const response = await apiClient.put('/vendor/notifications/settings', settings);
+      const response = await vendorApiClient.put('/vendor/notifications/settings', settings);
       return response.data;
     } catch (error: any) {
       return {
@@ -185,7 +185,7 @@ class VendorNotificationsAPI {
   // Test notification
   static async testNotification(type: string, channel: 'email' | 'push' | 'sms'): Promise<APIResponse> {
     try {
-      const response = await apiClient.post('/vendor/notifications/test', { type, channel });
+      const response = await vendorApiClient.post('/vendor/notifications/test', { type, channel });
       return response.data;
     } catch (error: any) {
       return {
@@ -198,7 +198,7 @@ class VendorNotificationsAPI {
   // Get notification templates
   static async getNotificationTemplates(): Promise<APIResponse<{ templates: NotificationTemplate[] }>> {
     try {
-      const response = await apiClient.get('/vendor/notifications/templates');
+      const response = await vendorApiClient.get('/vendor/notifications/templates');
       return response.data;
     } catch (error: any) {
       return {
@@ -211,7 +211,7 @@ class VendorNotificationsAPI {
   // Update notification template
   static async updateNotificationTemplate(templateId: number, data: Partial<NotificationTemplate>): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`/vendor/notifications/templates/${templateId}`, data);
+      const response = await vendorApiClient.put(`/vendor/notifications/templates/${templateId}`, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -224,7 +224,7 @@ class VendorNotificationsAPI {
   // Subscribe to push notifications
   static async subscribeToPush(subscription: any): Promise<APIResponse> {
     try {
-      const response = await apiClient.post('/vendor/notifications/push-subscribe', { subscription });
+      const response = await vendorApiClient.post('/vendor/notifications/push-subscribe', { subscription });
       return response.data;
     } catch (error: any) {
       return {
@@ -237,7 +237,7 @@ class VendorNotificationsAPI {
   // Unsubscribe from push notifications
   static async unsubscribeFromPush(): Promise<APIResponse> {
     try {
-      const response = await apiClient.post('/vendor/notifications/push-unsubscribe');
+      const response = await vendorApiClient.post('/vendor/notifications/push-unsubscribe');
       return response.data;
     } catch (error: any) {
       return {
@@ -266,7 +266,7 @@ class VendorNotificationsAPI {
     };
   }>> {
     try {
-      const response = await apiClient.get('/vendor/notifications/analytics', { params: filters });
+      const response = await vendorApiClient.get('/vendor/notifications/analytics', { params: filters });
       return response.data;
     } catch (error: any) {
       return {

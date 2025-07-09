@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface VendorCustomer {
@@ -93,7 +93,7 @@ class VendorCustomersAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}?${params.toString()}`
     );
     return response.data;
@@ -101,7 +101,7 @@ class VendorCustomersAPI {
 
   // Get customer details
   async getCustomerDetails(customerId: number): Promise<CustomerDetailsResponse> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/${customerId}`
     );
     return response.data;
@@ -118,7 +118,7 @@ class VendorCustomersAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/search?${params.toString()}`
     );
     return response.data;
@@ -126,7 +126,7 @@ class VendorCustomersAPI {
 
   // Get customer statistics
   async getCustomerStats(): Promise<CustomerStats> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/stats`
     );
     return response.data;
@@ -152,7 +152,7 @@ class VendorCustomersAPI {
       pages: number;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/${customerId}/orders?page=${page}&limit=${limit}`
     );
     return response.data;
@@ -177,7 +177,7 @@ class VendorCustomersAPI {
       pages: number;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/${customerId}/requests?page=${page}&limit=${limit}`
     );
     return response.data;
@@ -193,7 +193,7 @@ class VendorCustomersAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/export?${params.toString()}`,
       { responseType: 'blob' }
     );
@@ -206,7 +206,7 @@ class VendorCustomersAPI {
     message: string;
     note_id?: number;
   }> {
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/${customerId}/notes`,
       { note }
     );
@@ -223,7 +223,7 @@ class VendorCustomersAPI {
       created_by: string;
     }>;
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/${customerId}/notes`
     );
     return response.data;
@@ -234,7 +234,7 @@ class VendorCustomersAPI {
     error: boolean;
     message: string;
   }> {
-    const response = await apiClient.put(
+    const response = await vendorApiClient.put(
       `${API_CONFIG.ENDPOINTS.VENDOR_CUSTOMERS.LIST}/${customerId}/status`,
       { status }
     );

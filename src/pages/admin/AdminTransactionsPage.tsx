@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Search, Download, Filter, DollarSign, TrendingUp, Users, Calendar, X, SlidersHorizontal } from "lucide-react";
+import { Search, Download, Filter, DollarSign, TrendingUp, Users, Calendar, X, SlidersHorizontal, Loader2 } from "lucide-react";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 
 const mockTransactions = [
   { id: "TXN001", vendor: "Rapid Plumbers", customer: "Alice Smith", service: "Emergency Plumbing", amount: "$250.00", date: "2024-01-15", status: "Completed", paymentMethod: "Credit Card" },
@@ -37,16 +39,82 @@ const getStatusVariant = (status: string) => {
 const AdminTransactionsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-
   const [vendorFilter, setVendorFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [dateRangeFilter, setDateRangeFilter] = useState("all");
   const [amountRangeFilter, setAmountRangeFilter] = useState("all");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    per_page: 20
+  });
 
-  const handleExport = () => {
-    toast.info("Exporting transactions data...");
-    // Logic to export data
+  useEffect(() => {
+    fetchTransactions();
+  }, [searchTerm, statusFilter, vendorFilter, dateRangeFilter, amountRangeFilter, paymentMethodFilter, pagination.current_page]);
+
+  const fetchTransactions = async () => {
+    try {
+      setIsLoading(true);
+
+      const params = {
+        page: pagination.current_page,
+        limit: pagination.per_page,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(vendorFilter !== 'all' && { vendor: vendorFilter }),
+        ...(dateRangeFilter !== 'all' && { date_range: dateRangeFilter }),
+        ...(amountRangeFilter !== 'all' && { amount_range: amountRangeFilter }),
+        ...(paymentMethodFilter !== 'all' && { payment_method: paymentMethodFilter })
+      };
+
+      const response = await AdminAPI.getAllTransactions(params);
+
+      if (response.error) {
+        showError(response.message || 'Failed to fetch transactions');
+      } else {
+        setTransactions(response.transactions || []);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      showError('Failed to load transactions. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      toast.info("Exporting transactions data...");
+      const response = await AdminAPI.exportTransactions({
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(vendorFilter !== 'all' && { vendor: vendorFilter }),
+        ...(dateRangeFilter !== 'all' && { date_range: dateRangeFilter }),
+        ...(amountRangeFilter !== 'all' && { amount_range: amountRangeFilter }),
+        ...(paymentMethodFilter !== 'all' && { payment_method: paymentMethodFilter })
+      });
+
+      if (response.error) {
+        showError(response.message || 'Failed to export transactions');
+      } else {
+        showSuccess('Transactions exported successfully');
+        // Handle file download if needed
+        if (response.download_url) {
+          window.open(response.download_url, '_blank');
+        }
+      }
+    } catch (error) {
+      console.error('Error exporting transactions:', error);
+      showError('Failed to export transactions. Please try again.');
+    }
   };
 
   const handleAdvancedFilters = () => {
@@ -63,8 +131,8 @@ const AdminTransactionsPage = () => {
     toast.info("All filters cleared");
   };
 
-  // Filter transactions based on current filters
-  const filteredTransactions = mockTransactions.filter(transaction => {
+  // Use transactions directly since filtering is done server-side via API
+  const filteredTransactions = transactions.length > 0 ? transactions : mockTransactions.filter(transaction => {
     const matchesSearch = searchTerm === "" ||
       transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -359,7 +427,26 @@ const AdminTransactionsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.map((txn, index) => (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="flex items-center justify-center space-x-2">
+                        <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
+                        <span className="text-gray-600">Loading transactions...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredTransactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="text-gray-500">
+                        <p className="text-lg font-medium">No transactions found</p>
+                        <p className="text-sm">Try adjusting your filters or search terms</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredTransactions.map((txn, index) => (
                   <TableRow
                     key={txn.id}
                     className={`hover:bg-gray-50 transition-colors ${
@@ -386,7 +473,8 @@ const AdminTransactionsPage = () => {
                       </Badge>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
@@ -394,7 +482,7 @@ const AdminTransactionsPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredTransactions.length} of {mockTransactions.length} transactions
+              Showing {filteredTransactions.length} of {pagination.total_count || mockTransactions.length} transactions
               {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" ||
                 dateRangeFilter !== "all" || amountRangeFilter !== "all" || paymentMethodFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>

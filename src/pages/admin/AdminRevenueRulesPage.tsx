@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Settings, PlusCircle, Edit, Trash2 } from "lucide-react";
+import { Settings, PlusCircle, Edit, Trash2, Loader2 } from "lucide-react";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 
 const mockGlobalServiceRules = [
   { id: "r001", service: "Plumbing", platformShare: "10%", clientShare: "10%", vendorShare: "80%" },
@@ -14,20 +17,104 @@ const mockGlobalServiceRules = [
 ];
 
 const AdminRevenueRulesPage = () => {
-  const handleSaveDefaultRules = () => {
-    toast.success("Default platform rules saved!");
+  const [isLoading, setIsLoading] = useState(true);
+  const [revenueRules, setRevenueRules] = useState([]);
+  const [defaultPlatformCommission, setDefaultPlatformCommission] = useState(5);
+  const [defaultClientCommission, setDefaultClientCommission] = useState(10);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetchRevenueRules();
+  }, []);
+
+  const fetchRevenueRules = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await AdminAPI.getRevenueRules();
+
+      if (response.error) {
+        showError(response.message || 'Failed to fetch revenue rules');
+      } else {
+        setRevenueRules(response.rules || []);
+        // Set default values if available
+        const defaultRule = response.rules?.find(rule => rule.is_default);
+        if (defaultRule) {
+          setDefaultPlatformCommission(defaultRule.platform_commission || 5);
+          setDefaultClientCommission(defaultRule.client_commission || 10);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching revenue rules:', error);
+      showError('Failed to load revenue rules. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEditRule = (service: string) => {
-    toast.info(`Editing global rule for ${service}...`);
+  const handleSaveDefaultRules = async () => {
+    try {
+      setIsSaving(true);
+
+      const response = await AdminAPI.updateDefaultRevenueRules({
+        platform_commission: defaultPlatformCommission,
+        client_commission: defaultClientCommission
+      });
+
+      if (response.error) {
+        showError(response.message || 'Failed to save default rules');
+      } else {
+        showSuccess('Default platform rules saved successfully!');
+        fetchRevenueRules(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error saving default rules:', error);
+      showError('Failed to save default rules. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteRule = (service: string) => {
-    toast.error(`Deleted global rule for ${service}.`);
+  const handleEditRule = async (ruleId: string) => {
+    try {
+      // This would typically open a modal for editing
+      toast.info('Edit functionality would open a modal here');
+    } catch (error) {
+      console.error('Error editing rule:', error);
+      showError('Failed to edit rule. Please try again.');
+    }
   };
 
-  const handleAddCustomRule = () => {
-    toast.success("New global service rule added!");
+  const handleDeleteRule = async (ruleId: string) => {
+    try {
+      const response = await AdminAPI.deleteRevenueRule(ruleId);
+
+      if (response.error) {
+        showError(response.message || 'Failed to delete rule');
+      } else {
+        showSuccess('Revenue rule deleted successfully');
+        fetchRevenueRules(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error deleting rule:', error);
+      showError('Failed to delete rule. Please try again.');
+    }
+  };
+
+  const handleAddCustomRule = async (ruleData: any) => {
+    try {
+      const response = await AdminAPI.createRevenueRule(ruleData);
+
+      if (response.error) {
+        showError(response.message || 'Failed to create rule');
+      } else {
+        showSuccess('New revenue rule created successfully!');
+        fetchRevenueRules(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error creating rule:', error);
+      showError('Failed to create rule. Please try again.');
+    }
   };
 
   return (
@@ -47,12 +134,25 @@ const AdminRevenueRulesPage = () => {
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="platform-commission">Platform Share (%)</Label>
-            <Input id="platform-commission" type="number" placeholder="e.g., 5" defaultValue={5} />
+            <Input
+              id="platform-commission"
+              type="number"
+              placeholder="e.g., 5"
+              value={defaultPlatformCommission}
+              onChange={(e) => setDefaultPlatformCommission(Number(e.target.value))}
+            />
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             This percentage is taken before the remaining amount is split between the client and vendor.
           </p>
-          <Button onClick={handleSaveDefaultRules}>Save Default Rules</Button>
+          <Button
+            onClick={handleSaveDefaultRules}
+            disabled={isSaving}
+            className="flex items-center"
+          >
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Save Default Rules
+          </Button>
         </CardContent>
       </Card>
 
@@ -64,7 +164,14 @@ const AdminRevenueRulesPage = () => {
           <CardDescription>Define custom commission splits for specific service categories that apply globally.</CardDescription>
         </CardHeader>
         <CardContent>
-          {mockGlobalServiceRules.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                Loading revenue rules...
+              </div>
+            </div>
+          ) : (revenueRules.length > 0 || mockGlobalServiceRules.length > 0) ? (
             <div className="overflow-x-auto">
               <Table className="mb-4">
                 <TableHeader>
@@ -77,17 +184,34 @@ const AdminRevenueRulesPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockGlobalServiceRules.map((rule) => (
+                  {(revenueRules.length > 0 ? revenueRules : mockGlobalServiceRules).map((rule) => (
                     <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.service}</TableCell>
-                      <TableCell>{rule.platformShare}</TableCell>
-                      <TableCell>{rule.clientShare}</TableCell>
-                      <TableCell>{rule.vendorShare}</TableCell>
+                      <TableCell className="font-medium">
+                        {rule.service_category || rule.service}
+                      </TableCell>
+                      <TableCell>
+                        {rule.platform_commission || rule.platformShare}%
+                      </TableCell>
+                      <TableCell>
+                        {rule.client_commission || rule.clientShare}%
+                      </TableCell>
+                      <TableCell>
+                        {rule.vendor_commission || rule.vendorShare}%
+                      </TableCell>
                       <TableCell className="text-right">
-                        <Button onClick={() => handleEditRule(rule.service)} variant="ghost" size="sm">
+                        <Button
+                          onClick={() => handleEditRule(rule.id)}
+                          variant="ghost"
+                          size="sm"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button onClick={() => handleDeleteRule(rule.service)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                        <Button
+                          onClick={() => handleDeleteRule(rule.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>

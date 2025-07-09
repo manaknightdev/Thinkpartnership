@@ -340,8 +340,6 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
         )}>
           {children}
 
-          {/* Quick Navigation Footer */}
-          <PortalQuickNavFooter />
         </main>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 import {
   User,
   Shield,
@@ -24,25 +26,61 @@ import {
   Award,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  Loader2
 } from 'lucide-react';
 
 const AdminProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Administrator",
-    email: "admin@thinkpartnerships.com",
-    phone: "(555) 123-4567",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
     title: "Platform Administrator",
     department: "System Operations",
-    location: "San Francisco, CA",
-    joinDate: "2023-01-15",
-    bio: "Experienced platform administrator with expertise in multi-tenant SaaS systems, user management, and system security.",
+    location: "",
+    joinDate: "",
+    bio: "",
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await AdminAPI.getProfile();
+
+        if (response.error) {
+          showError(response.message || 'Failed to fetch profile data');
+        } else {
+          const userData = response.user;
+          setProfileData({
+            firstName: userData.first_name || '',
+            lastName: userData.last_name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            title: userData.title || 'Platform Administrator',
+            department: userData.department || 'System Operations',
+            location: userData.location || '',
+            joinDate: userData.created_at ? new Date(userData.created_at).toISOString().split('T')[0] : '',
+            bio: userData.bio || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        showError('Failed to load profile data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const [systemSettings, setSystemSettings] = useState({
     twoFactorEnabled: true,
@@ -78,9 +116,34 @@ const AdminProfilePage = () => {
     toast.info(`${setting} ${value ? 'enabled' : 'disabled'}`);
   };
 
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-    toast.success("Admin profile updated successfully!");
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+
+      const updateData = {
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+        phone: profileData.phone,
+        title: profileData.title,
+        department: profileData.department,
+        location: profileData.location,
+        bio: profileData.bio,
+      };
+
+      const response = await AdminAPI.updateProfile(updateData);
+
+      if (response.error) {
+        showError(response.message || 'Failed to update profile');
+      } else {
+        setIsEditing(false);
+        showSuccess("Admin profile updated successfully!");
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      showError('Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleChangePassword = () => {
@@ -100,31 +163,43 @@ const AdminProfilePage = () => {
               <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {profileData.firstName} {profileData.lastName}
-              </h2>
-              <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                <span className="flex items-center gap-1">
-                  <Crown className="w-4 h-4" />
-                  {profileData.title}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Building className="w-4 h-4" />
-                  {profileData.department}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Since {new Date(profileData.joinDate).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex space-x-2">
-                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                  Super Admin
-                </Badge>
-                <Badge variant="secondary" className="bg-green-100 text-green-700">
-                  Active
-                </Badge>
-              </div>
+              {isLoading ? (
+                <div className="space-y-2">
+                  <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {profileData.firstName} {profileData.lastName}
+                  </h2>
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
+                    <span className="flex items-center gap-1">
+                      <Crown className="w-4 h-4" />
+                      {profileData.title}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Building className="w-4 h-4" />
+                      {profileData.department}
+                    </span>
+                    {profileData.joinDate && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        Since {new Date(profileData.joinDate).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                      Super Admin
+                    </Badge>
+                    <Badge variant="secondary" className="bg-green-100 text-green-700">
+                      Active
+                    </Badge>
+                  </div>
+                </>
+              )}
             </div>
             <Button
               onClick={() => setIsEditing(!isEditing)}
@@ -210,8 +285,19 @@ const AdminProfilePage = () => {
             />
           </div>
           {isEditing && (
-            <Button onClick={handleSaveProfile} className="bg-purple-600 hover:bg-purple-700">
-              Save Changes
+            <Button
+              onClick={handleSaveProfile}
+              disabled={isSaving}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           )}
         </CardContent>

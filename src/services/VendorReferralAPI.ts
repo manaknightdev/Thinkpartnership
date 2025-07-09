@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface Referral {
@@ -76,7 +76,7 @@ class VendorReferralAPI {
   // Get referral statistics
   static async getReferralStats(): Promise<APIResponse<ReferralStats>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.STATS);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.STATS);
       return response.data;
     } catch (error: any) {
       return {
@@ -96,7 +96,7 @@ class VendorReferralAPI {
     date_to?: string;
   }): Promise<APIResponse<{ referrals: Referral[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.LIST, { params: filters });
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.LIST, { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -109,7 +109,7 @@ class VendorReferralAPI {
   // Get referral codes
   static async getReferralCodes(): Promise<APIResponse<{ codes: ReferralCode[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES);
       return response.data;
     } catch (error: any) {
       return {
@@ -122,7 +122,7 @@ class VendorReferralAPI {
   // Create referral code
   static async createReferralCode(data: CreateReferralCodeData): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -135,7 +135,7 @@ class VendorReferralAPI {
   // Update referral code
   static async updateReferralCode(codeId: number, data: Partial<CreateReferralCodeData>): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES}/${codeId}`, data);
+      const response = await vendorApiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES}/${codeId}`, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -148,7 +148,7 @@ class VendorReferralAPI {
   // Delete referral code
   static async deleteReferralCode(codeId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES}/${codeId}`);
+      const response = await vendorApiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES}/${codeId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -161,7 +161,7 @@ class VendorReferralAPI {
   // Toggle referral code status
   static async toggleReferralCode(codeId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES}/${codeId}/toggle`);
+      const response = await vendorApiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.CODES}/${codeId}/toggle`);
       return response.data;
     } catch (error: any) {
       return {
@@ -174,7 +174,7 @@ class VendorReferralAPI {
   // Get referral links
   static async getReferralLinks(): Promise<APIResponse<{ links: ReferralLink[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.LINKS);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.LINKS);
       return response.data;
     } catch (error: any) {
       return {
@@ -191,7 +191,7 @@ class VendorReferralAPI {
     target_url?: string;
   }): Promise<APIResponse<{ link: ReferralLink }>> {
     try {
-      const response = await apiClient.post('/vendor/referrals/links', data);
+      const response = await vendorApiClient.post('/vendor/referrals/links', data);
       return response.data;
     } catch (error: any) {
       return {
@@ -219,7 +219,7 @@ class VendorReferralAPI {
     }>;
   }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.ANALYTICS, { params: filters });
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_REFERRALS.ANALYTICS, { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -232,7 +232,7 @@ class VendorReferralAPI {
   // Request commission payout
   static async requestCommissionPayout(amount: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.post('/vendor/referrals/payout', { amount });
+      const response = await vendorApiClient.post('/vendor/referrals/payout', { amount });
       return response.data;
     } catch (error: any) {
       return {

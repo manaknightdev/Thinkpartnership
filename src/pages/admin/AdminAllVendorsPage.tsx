@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AddVendorModal } from "@/components/modals/AddVendorModal";
 import { ViewEditVendorModal } from "@/components/modals/ViewEditVendorModal";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 import {
   Search,
   Filter,
@@ -27,7 +29,8 @@ import {
 
   Plus,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Loader2
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -138,13 +141,55 @@ const AdminAllVendorsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [vendors, setVendors] = useState([]);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    per_page: 20
+  });
 
   const [serviceFilter, setServiceFilter] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-  const [vendors, setVendors] = useState(mockVendors);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [searchTerm, statusFilter, locationFilter, serviceFilter, pagination.current_page]);
+
+  const fetchVendors = async () => {
+    try {
+      setIsLoading(true);
+
+      const params = {
+        page: pagination.current_page,
+        limit: pagination.per_page,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(locationFilter !== 'all' && { location: locationFilter }),
+        ...(serviceFilter !== 'all' && { service: serviceFilter })
+      };
+
+      const response = await AdminAPI.getAllVendors(params);
+
+      if (response.error) {
+        showError(response.message || 'Failed to fetch vendors');
+      } else {
+        setVendors(response.vendors || []);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+      showError('Failed to load vendors. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleViewVendor = (vendor: any) => {
     setSelectedVendor(vendor);
@@ -195,15 +240,15 @@ const AdminAllVendorsPage = () => {
     toast.info("All filters cleared");
   };
 
-  // Filter vendors based on current filters
-  const filteredVendors = vendors.filter(vendor => {
+  // Use vendors directly since filtering is done server-side via API
+  const filteredVendors = vendors.length > 0 ? vendors : mockVendors.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vendor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.services.toLowerCase().includes(searchTerm.toLowerCase());
+                         (vendor.services && vendor.services.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === "all" || vendor.status.toLowerCase() === statusFilter;
-    const matchesLocation = locationFilter === "all" || vendor.location.toLowerCase().includes(locationFilter.toLowerCase());
+    const matchesLocation = locationFilter === "all" || (vendor.location && vendor.location.toLowerCase().includes(locationFilter.toLowerCase()));
 
-    const matchesService = serviceFilter === "all" || vendor.services.toLowerCase().includes(serviceFilter.toLowerCase());
+    const matchesService = serviceFilter === "all" || (vendor.services && vendor.services.toLowerCase().includes(serviceFilter.toLowerCase()));
 
     return matchesSearch && matchesStatus && matchesLocation && matchesService;
   });
@@ -423,7 +468,27 @@ const AdminAllVendorsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredVendors.map((vendor, index) => (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                          <span className="text-gray-500">Loading vendors...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredVendors.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="text-gray-500">
+                          {searchTerm || statusFilter !== 'all' || locationFilter !== 'all' || serviceFilter !== 'all'
+                            ? 'No vendors found matching your filters.'
+                            : 'No vendors found.'}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredVendors.map((vendor, index) => (
                     <TableRow
                       key={vendor.id}
                       className={`hover:bg-gray-50 transition-colors ${
@@ -505,7 +570,8 @@ const AdminAllVendorsPage = () => {
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -514,7 +580,7 @@ const AdminAllVendorsPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredVendors.length} of {vendors.length} vendors
+              Showing {filteredVendors.length} of {pagination.total_count} vendors
               {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }

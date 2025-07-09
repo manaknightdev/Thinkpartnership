@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface VendorRegisterData {
@@ -87,68 +87,68 @@ export interface UpdateVendorProfileData {
 class VendorAuthAPI {
   // Register new vendor
   async register(data: VendorRegisterData): Promise<VendorAuthResponse> {
-    const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_AUTH.REGISTER, data);
+    const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_AUTH.REGISTER, data);
     return response.data;
   }
 
   // Login vendor
   async login(data: VendorLoginData): Promise<VendorAuthResponse> {
-    const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_AUTH.LOGIN, data);
+    const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_AUTH.LOGIN, data);
     return response.data;
   }
 
   // Get vendor profile
   async getProfile(): Promise<VendorProfile> {
-    const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_AUTH.PROFILE);
+    const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_AUTH.PROFILE);
     return response.data;
   }
 
   // Update vendor profile
   async updateProfile(data: UpdateVendorProfileData): Promise<{ error: boolean; message: string }> {
-    const response = await apiClient.put(API_CONFIG.ENDPOINTS.VENDOR_AUTH.PROFILE, data);
+    const response = await vendorApiClient.put(API_CONFIG.ENDPOINTS.VENDOR_AUTH.PROFILE, data);
     return response.data;
   }
 
-  // Store authentication data in localStorage
+  // Store authentication data in localStorage with vendor-specific keys
   storeAuthData(authResponse: VendorAuthResponse): void {
     if (authResponse.token) {
-      localStorage.setItem('auth_token', authResponse.token);
+      localStorage.setItem('vendor_auth_token', authResponse.token);
     }
     if (authResponse.refresh_token) {
-      localStorage.setItem('refresh_token', authResponse.refresh_token);
+      localStorage.setItem('vendor_refresh_token', authResponse.refresh_token);
     }
     if (authResponse.user_id) {
-      localStorage.setItem('user_id', authResponse.user_id.toString());
+      localStorage.setItem('vendor_user_id', authResponse.user_id.toString());
     }
     if (authResponse.vendor_id) {
       localStorage.setItem('vendor_id', authResponse.vendor_id.toString());
     }
     if (authResponse.role) {
-      localStorage.setItem('user_role', authResponse.role);
+      localStorage.setItem('vendor_role', authResponse.role);
     }
     if (authResponse.business_name) {
-      localStorage.setItem('business_name', authResponse.business_name);
+      localStorage.setItem('vendor_business_name', authResponse.business_name);
     }
     if (authResponse.email) {
-      localStorage.setItem('user_email', authResponse.email);
+      localStorage.setItem('vendor_email', authResponse.email);
     }
   }
 
   // Clear authentication data
   clearAuthData(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_id');
+    localStorage.removeItem('vendor_auth_token');
+    localStorage.removeItem('vendor_refresh_token');
+    localStorage.removeItem('vendor_user_id');
     localStorage.removeItem('vendor_id');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('business_name');
-    localStorage.removeItem('user_email');
+    localStorage.removeItem('vendor_role');
+    localStorage.removeItem('vendor_business_name');
+    localStorage.removeItem('vendor_email');
   }
 
   // Check if vendor is authenticated
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('auth_token');
-    const role = localStorage.getItem('user_role');
+    const token = localStorage.getItem('vendor_auth_token');
+    const role = localStorage.getItem('vendor_role');
     return !!(token && role === 'vendor');
   }
 
@@ -161,11 +161,11 @@ class VendorAuthAPI {
     email: string | null;
   } {
     return {
-      token: localStorage.getItem('auth_token'),
-      user_id: localStorage.getItem('user_id'),
+      token: localStorage.getItem('vendor_auth_token'),
+      user_id: localStorage.getItem('vendor_user_id'),
       vendor_id: localStorage.getItem('vendor_id'),
-      business_name: localStorage.getItem('business_name'),
-      email: localStorage.getItem('user_email'),
+      business_name: localStorage.getItem('vendor_business_name'),
+      email: localStorage.getItem('vendor_email'),
     };
   }
 

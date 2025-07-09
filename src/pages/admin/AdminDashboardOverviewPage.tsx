@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Users, TrendingUp, CheckCircle, Clock, ArrowUpRight, AlertTriangle, Activity, CheckSquare, Plus } from "lucide-react";
+import { DollarSign, Users, TrendingUp, CheckCircle, Clock, ArrowUpRight, AlertTriangle, Activity, CheckSquare, Plus, Loader2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { toast } from "sonner";
 import { ActivityLogModal } from "@/components/modals/ActivityLogModal";
 import { SystemStatusModal } from "@/components/modals/SystemStatusModal";
+import AdminAPI from '@/services/AdminAPI';
+import { showError } from '@/utils/toast';
 
 const mockOverallData = [
   { name: 'Jan', revenue: 12000, vendors: 10, transactions: 50 },
@@ -21,15 +23,73 @@ const AdminDashboardOverviewPage = () => {
   const navigate = useNavigate();
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
   const [isSystemStatusOpen, setIsSystemStatusOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [revenueAnalytics, setRevenueAnalytics] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch dashboard stats and revenue analytics in parallel
+        const [statsResponse, revenueResponse] = await Promise.all([
+          AdminAPI.getDashboardStats(),
+          AdminAPI.getRevenueAnalytics()
+        ]);
+
+        if (statsResponse.error) {
+          showError(statsResponse.message || 'Failed to fetch dashboard statistics');
+        } else {
+          setDashboardStats(statsResponse.stats);
+        }
+
+        if (revenueResponse.error) {
+          showError(revenueResponse.message || 'Failed to fetch revenue analytics');
+        } else {
+          setRevenueAnalytics(revenueResponse.revenue_data);
+        }
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        showError('Failed to load dashboard data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const handleViewReports = () => {
     navigate('/admin-portal/reports');
     toast.info("Navigating to detailed reports...");
   };
 
-  const handleExportData = () => {
-    toast.info("Exporting platform data...");
-    // In a real app, this would trigger a data export
+  const handleExportData = async () => {
+    try {
+      toast.info("Preparing data export...");
+
+      const response = await AdminAPI.exportData({
+        type: 'transactions',
+        start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Last 30 days
+        end_date: new Date().toISOString().split('T')[0]
+      });
+
+      if (response.error) {
+        showError(response.message || 'Failed to export data');
+      } else {
+        if (response.download_url) {
+          window.open(response.download_url, '_blank');
+          toast.success("Data export ready for download!");
+        } else {
+          toast.success(response.message || "Data export initiated successfully!");
+        }
+      }
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      showError('Failed to export data. Please try again.');
+    }
   };
 
   const handleReviewAll = () => {
@@ -94,11 +154,24 @@ const AdminDashboardOverviewPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">$1.2M</div>
-            <div className="flex items-center mt-1">
-              <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-              <p className="text-xs text-green-600 font-medium">+15% from last quarter</p>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="text-2xl font-bold text-gray-400">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900">
+                  ${dashboardStats?.total_revenue ? (dashboardStats.total_revenue / 1000).toFixed(1) + 'K' : '0'}
+                </div>
+                <div className="flex items-center mt-1">
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                  <p className="text-xs text-green-600 font-medium">
+                    ${dashboardStats?.monthly_revenue ? (dashboardStats.monthly_revenue / 1000).toFixed(1) + 'K' : '0'} this month
+                  </p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -110,11 +183,20 @@ const AdminDashboardOverviewPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">250</div>
-            <div className="flex items-center mt-1">
-              <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-              <p className="text-xs text-green-600 font-medium">+20 new this month</p>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="text-2xl font-bold text-gray-400">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_vendors || 0}</div>
+                <div className="flex items-center mt-1">
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                  <p className="text-xs text-green-600 font-medium">Active vendors</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -126,43 +208,70 @@ const AdminDashboardOverviewPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">5,800</div>
-            <div className="flex items-center mt-1">
-              <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-              <p className="text-xs text-green-600 font-medium">+10% from last month</p>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="text-2xl font-bold text-gray-400">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_transactions || 0}</div>
+                <div className="flex items-center mt-1">
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                  <p className="text-xs text-green-600 font-medium">Platform transactions</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Pending Vendors</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Pending Approvals</CardTitle>
             <div className="p-2 bg-orange-100 rounded-lg">
               <Clock className="h-4 w-4 text-orange-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">12</div>
-            <div className="flex items-center mt-1">
-              <AlertTriangle className="h-3 w-3 text-orange-500 mr-1" />
-              <p className="text-xs text-orange-600 font-medium">Requires review</p>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="text-2xl font-bold text-gray-400">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.pending_approvals || 0}</div>
+                <div className="flex items-center mt-1">
+                  <AlertTriangle className="h-3 w-3 text-orange-500 mr-1" />
+                  <p className="text-xs text-orange-600 font-medium">Requires review</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Active Clients</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Total Clients</CardTitle>
             <div className="p-2 bg-emerald-100 rounded-lg">
               <CheckCircle className="h-4 w-4 text-emerald-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">1</div>
-            <div className="flex items-center mt-1">
-              <CheckCircle className="h-3 w-3 text-emerald-500 mr-1" />
-              <p className="text-xs text-emerald-600 font-medium">Marketplaces live</p>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="text-2xl font-bold text-gray-400">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_clients || 0}</div>
+                <div className="flex items-center mt-1">
+                  <CheckCircle className="h-3 w-3 text-emerald-500 mr-1" />
+                  <p className="text-xs text-emerald-600 font-medium">Active clients</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -183,16 +292,24 @@ const AdminDashboardOverviewPage = () => {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart
-              data={mockOverallData}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[350px]">
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="text-gray-500">Loading analytics...</span>
+              </div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart
+                data={revenueAnalytics || mockOverallData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis
                 dataKey="name"
@@ -238,6 +355,7 @@ const AdminDashboardOverviewPage = () => {
               />
             </LineChart>
           </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
 

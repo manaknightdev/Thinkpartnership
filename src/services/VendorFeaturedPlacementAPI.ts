@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface FeaturedPackage {
@@ -54,7 +54,7 @@ class VendorFeaturedPlacementAPI {
   // Get available featured placement packages
   static async getPackages(): Promise<APIResponse<FeaturedPackage[]>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.PACKAGES);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.PACKAGES);
       return response.data;
     } catch (error: any) {
       return {
@@ -67,7 +67,7 @@ class VendorFeaturedPlacementAPI {
   // Get active featured placements
   static async getActivePlacements(): Promise<APIResponse<ActivePlacement[]>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.ACTIVE);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.ACTIVE);
       return response.data;
     } catch (error: any) {
       return {
@@ -80,7 +80,7 @@ class VendorFeaturedPlacementAPI {
   // Purchase featured placement
   static async purchasePlacement(data: PurchaseData): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.PURCHASE, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.PURCHASE, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -93,7 +93,7 @@ class VendorFeaturedPlacementAPI {
   // Get featured placement analytics
   static async getAnalytics(): Promise<APIResponse<FeaturedAnalytics>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.ANALYTICS);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_FEATURED.ANALYTICS);
       return response.data;
     } catch (error: any) {
       return {

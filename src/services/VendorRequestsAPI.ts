@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface VendorRequest {
@@ -85,7 +85,7 @@ class VendorRequestsAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.LIST}?${params.toString()}`
     );
     return response.data;
@@ -93,7 +93,7 @@ class VendorRequestsAPI {
 
   // Get request details
   async getRequestDetails(requestId: number): Promise<RequestDetailsResponse> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.DETAILS}/${requestId}`
     );
     return response.data;
@@ -101,7 +101,7 @@ class VendorRequestsAPI {
 
   // Send quote for request
   async sendQuote(requestId: number, data: SendQuoteData): Promise<QuoteResponse> {
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.QUOTE}/${requestId}/quote`,
       data
     );
@@ -110,7 +110,7 @@ class VendorRequestsAPI {
 
   // Update quote
   async updateQuote(requestId: number, data: SendQuoteData): Promise<QuoteResponse> {
-    const response = await apiClient.put(
+    const response = await vendorApiClient.put(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.QUOTE}/${requestId}/quote`,
       data
     );
@@ -119,7 +119,7 @@ class VendorRequestsAPI {
 
   // Accept request (start work)
   async acceptRequest(requestId: number): Promise<{ error: boolean; message: string }> {
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.DETAILS}/${requestId}/accept`
     );
     return response.data;
@@ -127,7 +127,7 @@ class VendorRequestsAPI {
 
   // Decline request
   async declineRequest(requestId: number, reason?: string): Promise<{ error: boolean; message: string }> {
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.DETAILS}/${requestId}/decline`,
       { reason }
     );
@@ -136,7 +136,7 @@ class VendorRequestsAPI {
 
   // Complete request
   async completeRequest(requestId: number, notes?: string): Promise<{ error: boolean; message: string }> {
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.DETAILS}/${requestId}/complete`,
       { notes }
     );
@@ -145,7 +145,7 @@ class VendorRequestsAPI {
 
   // Update request status
   async updateRequestStatus(requestId: number, data: UpdateRequestStatusData): Promise<{ error: boolean; message: string }> {
-    const response = await apiClient.put(
+    const response = await vendorApiClient.put(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.DETAILS}/${requestId}/status`,
       data
     );
@@ -166,7 +166,7 @@ class VendorRequestsAPI {
       response_rate: number;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.LIST}/stats`
     );
     return response.data;
@@ -183,7 +183,7 @@ class VendorRequestsAPI {
       created_by: string;
     }>;
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.DETAILS}/${requestId}/timeline`
     );
     return response.data;
@@ -200,7 +200,7 @@ class VendorRequestsAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.LIST}/search?${params.toString()}`
     );
     return response.data;
@@ -216,7 +216,7 @@ class VendorRequestsAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_REQUESTS.LIST}/export?${params.toString()}`,
       { responseType: 'blob' }
     );

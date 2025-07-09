@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface Invitation {
@@ -77,7 +77,7 @@ class VendorInviteAPI {
   // Get invitation statistics
   static async getInviteStats(): Promise<APIResponse<InviteStats>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.STATS);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.STATS);
       return response.data;
     } catch (error: any) {
       return {
@@ -97,7 +97,7 @@ class VendorInviteAPI {
     date_to?: string;
   }): Promise<APIResponse<{ invitations: Invitation[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.LIST, { params: filters });
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.LIST, { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -110,7 +110,7 @@ class VendorInviteAPI {
   // Send single invitation
   static async sendInvitation(data: SendInviteData): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_INVITES.SEND, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_INVITES.SEND, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -127,7 +127,7 @@ class VendorInviteAPI {
     errors: string[];
   }>> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_INVITES.BULK_SEND, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_INVITES.BULK_SEND, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -140,7 +140,7 @@ class VendorInviteAPI {
   // Resend invitation
   static async resendInvitation(invitationId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.LIST}/${invitationId}/resend`);
+      const response = await vendorApiClient.post(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.LIST}/${invitationId}/resend`);
       return response.data;
     } catch (error: any) {
       return {
@@ -153,7 +153,7 @@ class VendorInviteAPI {
   // Cancel invitation
   static async cancelInvitation(invitationId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.LIST}/${invitationId}`);
+      const response = await vendorApiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.LIST}/${invitationId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -166,7 +166,7 @@ class VendorInviteAPI {
   // Get invitation templates
   static async getInviteTemplates(): Promise<APIResponse<{ templates: InviteTemplate[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES);
       return response.data;
     } catch (error: any) {
       return {
@@ -179,7 +179,7 @@ class VendorInviteAPI {
   // Create invitation template
   static async createInviteTemplate(data: CreateTemplateData): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -192,7 +192,7 @@ class VendorInviteAPI {
   // Update invitation template
   static async updateInviteTemplate(templateId: number, data: Partial<CreateTemplateData>): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES}/${templateId}`, data);
+      const response = await vendorApiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES}/${templateId}`, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -205,7 +205,7 @@ class VendorInviteAPI {
   // Delete invitation template
   static async deleteInviteTemplate(templateId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES}/${templateId}`);
+      const response = await vendorApiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_INVITES.TEMPLATES}/${templateId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -234,7 +234,7 @@ class VendorInviteAPI {
     }>;
   }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.ANALYTICS, { params: filters });
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_INVITES.ANALYTICS, { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -254,7 +254,7 @@ class VendorInviteAPI {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await apiClient.post('/vendor/invites/import-contacts', formData, {
+      const response = await vendorApiClient.post('/vendor/invites/import-contacts', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

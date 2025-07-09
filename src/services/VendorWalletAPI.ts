@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface WalletBalance {
@@ -66,7 +66,7 @@ class VendorWalletAPI {
   // Get wallet balance and overview
   static async getWalletBalance(): Promise<APIResponse<WalletBalance>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.BALANCE);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.BALANCE);
       return response.data;
     } catch (error: any) {
       return {
@@ -86,7 +86,7 @@ class VendorWalletAPI {
     date_to?: string;
   }): Promise<APIResponse<{ transactions: Transaction[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.TRANSACTIONS, { params: filters });
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.TRANSACTIONS, { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -99,7 +99,7 @@ class VendorWalletAPI {
   // Get earnings statistics
   static async getEarningsStats(): Promise<APIResponse<EarningsStats>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.EARNINGS_STATS);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.EARNINGS_STATS);
       return response.data;
     } catch (error: any) {
       return {
@@ -112,7 +112,7 @@ class VendorWalletAPI {
   // Get payment methods
   static async getPaymentMethods(): Promise<APIResponse<{ payment_methods: PaymentMethod[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS);
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS);
       return response.data;
     } catch (error: any) {
       return {
@@ -132,7 +132,7 @@ class VendorWalletAPI {
     card_token?: string;
   }): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -145,7 +145,7 @@ class VendorWalletAPI {
   // Remove payment method
   static async removePaymentMethod(paymentMethodId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS}/${paymentMethodId}`);
+      const response = await vendorApiClient.delete(`${API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS}/${paymentMethodId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -158,7 +158,7 @@ class VendorWalletAPI {
   // Set default payment method
   static async setDefaultPaymentMethod(paymentMethodId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS}/${paymentMethodId}/default`);
+      const response = await vendorApiClient.put(`${API_CONFIG.ENDPOINTS.VENDOR_WALLET.PAYMENT_METHODS}/${paymentMethodId}/default`);
       return response.data;
     } catch (error: any) {
       return {
@@ -171,7 +171,7 @@ class VendorWalletAPI {
   // Request withdrawal
   static async requestWithdrawal(data: WithdrawalRequest): Promise<APIResponse> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_WALLET.WITHDRAW, data);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_WALLET.WITHDRAW, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -188,7 +188,7 @@ class VendorWalletAPI {
     status?: string;
   }): Promise<APIResponse<{ withdrawals: Transaction[] }>> {
     try {
-      const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.WITHDRAWALS, { params: filters });
+      const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.WITHDRAWALS, { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -205,7 +205,7 @@ class VendorWalletAPI {
     format?: 'csv' | 'pdf';
   }): Promise<APIResponse<{ download_url: string }>> {
     try {
-      const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_WALLET.EXPORT, filters);
+      const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_WALLET.EXPORT, filters);
       return response.data;
     } catch (error: any) {
       return {

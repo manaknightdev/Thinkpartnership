@@ -69,7 +69,8 @@ import VendorLogin from "./pages/vendor/VendorLogin";
 import VendorSignup from "./pages/vendor/VendorSignup";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientSignup from "./pages/client/ClientSignup";
-import ProtectedRoute from "./components/ProtectedRoute";
+import AdminLogin from "./pages/admin/AdminLogin";
+import ProtectedRoute, { VendorProtectedRoute, ClientProtectedRoute, AdminProtectedRoute } from "./components/ProtectedRoute";
 
 // Import new admin sub-pages
 import AdminDashboardOverviewPage from "./pages/admin/AdminDashboardOverviewPage";
@@ -119,6 +120,9 @@ const App = () => (
           <Route path="/client/login" element={<ClientLogin />} />
           <Route path="/client/signup" element={<ClientSignup />} />
 
+          {/* Admin Authentication Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+
           {/* Protected Marketplace Routes */}
           <Route path="/marketplace" element={<ProtectedRoute><CustomerBrowseServicesPage /></ProtectedRoute>} />
           <Route path="/marketplace/categories" element={<ProtectedRoute><CategoriesPage /></ProtectedRoute>} />
@@ -143,7 +147,7 @@ const App = () => (
           </Route>
 
           {/* Nested routes for Client Dashboard */}
-          <Route path="/client-portal" element={<ClientDashboard />}>
+          <Route path="/client-portal" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<ClientOverviewPage />} />
             <Route path="tasks" element={<ClientTasksPage />} />
@@ -162,7 +166,7 @@ const App = () => (
           </Route>
 
           {/* Nested routes for Vendor Dashboard */}
-          <Route path="/vendor-portal" element={<VendorDashboard />}>
+          <Route path="/vendor-portal" element={<VendorProtectedRoute><VendorDashboard /></VendorProtectedRoute>}>
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<VendorProfilePage />} />
             <Route path="services" element={<VendorServicesPage />} />
@@ -183,7 +187,7 @@ const App = () => (
           </Route>
 
           {/* Nested routes for Admin Portal */}
-          <Route path="/admin-portal" element={<AdminDashboard />}>
+          <Route path="/admin-portal" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<AdminDashboardOverviewPage />} />
             <Route path="tasks" element={<AdminTasksPage />} />

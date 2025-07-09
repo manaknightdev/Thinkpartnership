@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/utils/dateFormat";
 import { ORDER_STATUSES, getOrderStatusVariant, type OrderStatus } from "@/utils/orderStatus";
+import ClientAPI from "@/services/ClientAPI";
 
 interface MarketplaceOrder {
   id: string;
@@ -43,11 +44,16 @@ const initialMockMarketplaceOrders: MarketplaceOrder[] = [
 
 
 const ClientMarketplaceOrdersPage = () => {
-  const [orders, setOrders] = useState<MarketplaceOrder[]>(initialMockMarketplaceOrders);
+  const [orders, setOrders] = useState<MarketplaceOrder[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<MarketplaceOrder | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<MarketplaceOrder["status"] | "">("");
   const [editedNotes, setEditedNotes] = useState<string>(""); // State for edited notes
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
   useEffect(() => {
     if (selectedOrder) {
@@ -55,6 +61,21 @@ const ClientMarketplaceOrdersPage = () => {
       setEditedNotes(selectedOrder.notes || "");
     }
   }, [selectedOrder]);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const ordersData = await ClientAPI.getOrders();
+      setOrders(Array.isArray(ordersData) ? ordersData : []);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      toast.error('Failed to load orders');
+      // Fallback to mock data if API fails
+      setOrders(initialMockMarketplaceOrders);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleExportOrders = () => {
     toast.info("Exporting marketplace orders data...");
@@ -65,26 +86,36 @@ const ClientMarketplaceOrdersPage = () => {
     setIsDetailModalOpen(true);
   };
   
-  const handleSaveChangesAndCloseModal = () => {
+  const handleSaveChangesAndCloseModal = async () => {
     if (selectedOrder) {
       const statusChanged = newStatus && newStatus !== selectedOrder.status;
       const notesChanged = editedNotes !== (selectedOrder.notes || "");
 
       if (statusChanged || notesChanged) {
-        setOrders(prevOrders =>
-          prevOrders.map(order =>
-            order.id === selectedOrder.id ? { 
-              ...order, 
-              status: statusChanged ? (newStatus as MarketplaceOrder["status"]) : order.status,
-              notes: notesChanged ? editedNotes : order.notes 
-            } : order
-          )
-        );
-        
-        let toastMessage = "Order details updated: ";
-        if (statusChanged) toastMessage += `Status set to ${newStatus}. `;
-        if (notesChanged) toastMessage += `Notes updated.`;
-        toast.success(toastMessage.trim());
+        try {
+          if (statusChanged) {
+            await ClientAPI.updateOrderStatus(selectedOrder.id, newStatus, editedNotes);
+          }
+
+          setOrders(prevOrders =>
+            (prevOrders || []).map(order =>
+              order.id === selectedOrder.id ? {
+                ...order,
+                status: statusChanged ? (newStatus as MarketplaceOrder["status"]) : order.status,
+                notes: notesChanged ? editedNotes : order.notes
+              } : order
+            )
+          );
+
+          let toastMessage = "Order details updated: ";
+          if (statusChanged) toastMessage += `Status set to ${newStatus}. `;
+          if (notesChanged) toastMessage += `Notes updated.`;
+          toast.success(toastMessage.trim());
+        } catch (error) {
+          console.error('Error updating order:', error);
+          toast.error('Failed to update order');
+          return; // Don't close modal if update failed
+        }
       } else {
         toast.info("No changes were made.");
       }
@@ -135,7 +166,19 @@ const ClientMarketplaceOrdersPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      Loading orders...
+                    </TableCell>
+                  </TableRow>
+                ) : !orders || orders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      No orders found
+                    </TableCell>
+                  </TableRow>
+                ) : orders?.map((order) => (
                   <TableRow
                     key={order.id}
                     onClick={() => handleViewOrderDetails(order)}

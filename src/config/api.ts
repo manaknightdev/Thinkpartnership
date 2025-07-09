@@ -20,6 +20,11 @@ export const API_CONFIG = {
       LOGIN: '/api/marketplace/client/auth/login',
       PROFILE: '/api/marketplace/client/auth/profile',
     },
+    // Admin Authentication
+    ADMIN_AUTH: {
+      LOGIN: '/api/marketplace/admin/auth/login',
+      PROFILE: '/api/marketplace/admin/auth/profile',
+    },
     // Services
     SERVICES: {
       LIST: '/api/marketplace/services',
@@ -97,6 +102,53 @@ export const API_CONFIG = {
       ACTIVE: '/api/marketplace/vendor/featured-placement/active',
       PURCHASE: '/api/marketplace/vendor/featured-placement/purchase',
       ANALYTICS: '/api/marketplace/vendor/featured-placement/analytics',
+    },
+    // Admin Dashboard
+    ADMIN_DASHBOARD: {
+      STATS: '/api/marketplace/admin/dashboard/stats',
+      REVENUE_ANALYTICS: '/api/marketplace/admin/analytics/revenue',
+    },
+    // Admin Management
+    ADMIN_CLIENTS: {
+      LIST: '/api/marketplace/admin/clients',
+      UPDATE_STATUS: '/api/marketplace/admin/clients',
+    },
+    ADMIN_VENDORS: {
+      LIST: '/api/marketplace/admin/vendors',
+    },
+    ADMIN_CUSTOMERS: {
+      LIST: '/api/marketplace/admin/customers',
+    },
+    ADMIN_TRANSACTIONS: {
+      LIST: '/api/marketplace/admin/transactions',
+      DETAILS: '/api/marketplace/admin/transactions/:id',
+      UPDATE_STATUS: '/api/marketplace/admin/transactions/:id/status',
+      EXPORT: '/api/marketplace/admin/transactions/export',
+    },
+    ADMIN_VENDOR_APPROVALS: {
+      LIST: '/api/marketplace/admin/vendor-approvals',
+      DETAILS: '/api/marketplace/admin/vendor-approvals/:id',
+      APPROVE: '/api/marketplace/admin/vendor-approvals/:id/approve',
+      REJECT: '/api/marketplace/admin/vendor-approvals/:id/reject',
+    },
+    ADMIN_REVENUE_RULES: {
+      LIST: '/api/marketplace/admin/revenue/rules',
+      CREATE: '/api/marketplace/admin/revenue/rules',
+      UPDATE: '/api/marketplace/admin/revenue/rules/:id',
+      DELETE: '/api/marketplace/admin/revenue/rules/:id',
+      UPDATE_DEFAULT: '/api/marketplace/admin/revenue/rules/default',
+    },
+    ADMIN_VENDOR_APPROVALS: {
+      LIST: '/api/marketplace/admin/vendor-approvals',
+      UPDATE_STATUS: '/api/marketplace/admin/vendor-approvals',
+    },
+    ADMIN_REVENUE: {
+      RULES: '/api/marketplace/admin/revenue/rules',
+      MANUAL_COMMISSION: '/api/marketplace/admin/commissions/manual',
+    },
+    ADMIN_REPORTS: {
+      PERFORMANCE: '/api/marketplace/admin/reports/performance',
+      EXPORT: '/api/marketplace/admin/reports/export',
     },
   },
   TIMEOUT: 10000,

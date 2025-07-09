@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import clientApiClient from '@/config/clientAxios';
 import { API_CONFIG } from '@/config/api';
 
 // Types for Client API
@@ -115,6 +115,14 @@ export interface WalletTransaction {
   created_at: string;
 }
 
+export interface RevenueRule {
+  id: string;
+  service: string;
+  clientShare: string;
+  vendorShare: string;
+  platformShare: string;
+}
+
 export interface BrandingSettings {
   logo_url?: string;
   primary_color: string;
@@ -128,80 +136,106 @@ export interface BrandingSettings {
 class ClientAPI {
   // Authentication Methods
   async register(data: ClientRegisterData): Promise<ClientAuthResponse> {
-    const response = await apiClient.post('/api/marketplace/client/auth/register', data);
+    const response = await clientApiClient.post('/api/marketplace/client/auth/register', data);
     return response.data;
   }
 
   async login(data: ClientLoginData): Promise<ClientAuthResponse> {
-    const response = await apiClient.post('/api/marketplace/client/auth/login', data);
+    const response = await clientApiClient.post('/api/marketplace/client/auth/login', data);
     return response.data;
   }
 
   // Profile Methods
   async getProfile(): Promise<ClientProfile> {
-    const response = await apiClient.get('/api/marketplace/client/auth/profile');
+    const response = await clientApiClient.get('/api/marketplace/client/auth/profile');
     return response.data;
   }
 
   // Dashboard Methods
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get('/api/marketplace/client/dashboard/stats');
+    const response = await clientApiClient.get('/api/marketplace/client/dashboard/stats');
     return response.data;
   }
 
   // Vendor Management Methods
   async getVendors(): Promise<ClientVendor[]> {
-    const response = await apiClient.get('/api/marketplace/client/vendors');
+    const response = await clientApiClient.get('/api/marketplace/client/vendors');
     return response.data;
   }
 
   async updateVendorStatus(vendorId: string, status: string): Promise<any> {
-    const response = await apiClient.put(`/api/marketplace/client/vendors/${vendorId}/status`, { status });
+    const response = await clientApiClient.put(`/api/marketplace/client/vendors/${vendorId}/status`, { status });
     return response.data;
   }
 
   // Customer Management Methods
   async getCustomers(): Promise<ClientCustomer[]> {
-    const response = await apiClient.get('/api/marketplace/client/customers');
+    const response = await clientApiClient.get('/api/marketplace/client/customers');
     return response.data;
   }
 
   // Order Management Methods
   async getOrders(): Promise<ClientOrder[]> {
-    const response = await apiClient.get('/api/marketplace/client/orders');
+    const response = await clientApiClient.get('/api/marketplace/client/orders');
+    return response.data.orders || [];
+  }
+
+  async updateOrderStatus(orderId: string, status: string, notes?: string): Promise<any> {
+    const response = await clientApiClient.put(`/api/marketplace/client/orders/${orderId}/status`, { status, notes });
+    return response.data;
+  }
+
+  // Revenue Rules Methods
+  async getRevenueRules(): Promise<RevenueRule[]> {
+    const response = await clientApiClient.get('/api/marketplace/client/revenue-rules');
+    return response.data;
+  }
+
+  async updateRevenueRules(rules: RevenueRule[]): Promise<any> {
+    const response = await clientApiClient.put('/api/marketplace/client/revenue-rules', { rules });
+    return response.data;
+  }
+
+  async createRevenueRule(rule: Omit<RevenueRule, 'id'>): Promise<RevenueRule> {
+    const response = await clientApiClient.post('/api/marketplace/client/revenue-rules', rule);
+    return response.data;
+  }
+
+  async deleteRevenueRule(ruleId: string): Promise<any> {
+    const response = await clientApiClient.delete(`/api/marketplace/client/revenue-rules/${ruleId}`);
     return response.data;
   }
 
   // Invite System Methods
   async sendInvites(invites: { email: string; type: 'customer' | 'vendor' }[]): Promise<any> {
-    const response = await apiClient.post('/api/marketplace/client/invites', { invites });
+    const response = await clientApiClient.post('/api/marketplace/client/invites', { invites });
     return response.data;
   }
 
   async getInvites(): Promise<ClientInvite[]> {
-    const response = await apiClient.get('/api/marketplace/client/invites');
+    const response = await clientApiClient.get('/api/marketplace/client/invites');
     return response.data;
   }
 
   // Wallet Methods
   async getWalletBalance(): Promise<WalletBalance> {
-    const response = await apiClient.get('/api/marketplace/client/wallet');
+    const response = await clientApiClient.get('/api/marketplace/client/wallet');
     return response.data;
   }
 
   async getWalletTransactions(): Promise<WalletTransaction[]> {
-    const response = await apiClient.get('/api/marketplace/client/wallet/transactions');
+    const response = await clientApiClient.get('/api/marketplace/client/wallet/transactions');
     return response.data;
   }
 
   // Branding Methods
   async getBrandingSettings(): Promise<BrandingSettings> {
-    const response = await apiClient.get('/api/marketplace/client/branding');
-    return response.data;
+    const response = await clientApiClient.get('/api/marketplace/client/branding');
+    return response.data.branding || {};
   }
 
   async updateBrandingSettings(settings: Partial<BrandingSettings>): Promise<any> {
-    const response = await apiClient.put('/api/marketplace/client/branding', settings);
+    const response = await clientApiClient.put('/api/marketplace/client/branding', settings);
     return response.data;
   }
 

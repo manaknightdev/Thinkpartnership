@@ -289,8 +289,6 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
         )}>
           {children}
 
-          {/* Quick Navigation Footer */}
-          <PortalQuickNavFooter />
         </main>
       </div>
     </div>

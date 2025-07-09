@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Users, Clock, Search, Filter, Eye, UserCheck, AlertTriangle, SlidersHorizontal, X, CreditCard, Edit } from "lucide-react";
+import { CheckCircle, XCircle, Users, Clock, Search, Filter, Eye, UserCheck, AlertTriangle, SlidersHorizontal, X, CreditCard, Edit, Loader2 } from "lucide-react";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 import { VendorDetailsModal } from "@/components/modals/VendorDetailsModal";
 import { BulkActionsModal } from "@/components/modals/BulkActionsModal";
 import { VendorSubscriptionModal } from "@/components/modals/VendorSubscriptionModal";
@@ -44,23 +46,94 @@ const AdminVendorApprovalsPage = () => {
   // Data states
   const [vendors, setVendors] = useState(mockAllVendors);
   const [pendingApplications, setPendingApplications] = useState(mockPendingVendorApplications);
+  const [isLoading, setIsLoading] = useState(true);
+  const [vendorApprovals, setVendorApprovals] = useState([]);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    per_page: 20
+  });
 
-  const handleApproveVendor = (vendorId: string) => {
-    const vendor = pendingApplications.find(v => v.id === vendorId);
-    if (vendor) {
-      // Move from pending to active vendors
-      const newVendor = { ...vendor, status: "Active" };
-      setVendors(prev => [...prev, newVendor]);
-      setPendingApplications(prev => prev.filter(v => v.id !== vendorId));
-      toast.success(`Approved ${vendor.name}.`);
+  useEffect(() => {
+    fetchVendorApprovals();
+  }, [searchTerm, statusFilter, locationFilter, pagination.current_page]);
+
+  const fetchVendorApprovals = async () => {
+    try {
+      setIsLoading(true);
+
+      const params = {
+        page: pagination.current_page,
+        limit: pagination.per_page,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(locationFilter !== 'all' && { location: locationFilter })
+      };
+
+      const response = await AdminAPI.getVendorApprovals(params);
+
+      if (response.error) {
+        showError(response.message || 'Failed to fetch vendor approvals');
+      } else {
+        setVendorApprovals(response.vendor_approvals || []);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching vendor approvals:', error);
+      showError('Failed to load vendor approvals. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRejectVendor = (vendorId: string) => {
-    const vendor = pendingApplications.find(v => v.id === vendorId);
-    if (vendor) {
-      setPendingApplications(prev => prev.filter(v => v.id !== vendorId));
-      toast.error(`Rejected ${vendor.name}.`);
+  const handleApproveVendor = async (vendorId: string) => {
+    try {
+      const response = await AdminAPI.approveVendor(vendorId);
+
+      if (response.error) {
+        showError(response.message || 'Failed to approve vendor');
+      } else {
+        showSuccess('Vendor approved successfully');
+        fetchVendorApprovals(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error approving vendor:', error);
+      showError('Failed to approve vendor. Please try again.');
+
+      // Fallback to mock behavior if API fails
+      const vendor = pendingApplications.find(v => v.id === vendorId);
+      if (vendor) {
+        const newVendor = { ...vendor, status: "Active" };
+        setVendors(prev => [...prev, newVendor]);
+        setPendingApplications(prev => prev.filter(v => v.id !== vendorId));
+        toast.success(`Approved ${vendor.name}.`);
+      }
+    }
+  };
+
+  const handleRejectVendor = async (vendorId: string) => {
+    try {
+      const response = await AdminAPI.rejectVendor(vendorId);
+
+      if (response.error) {
+        showError(response.message || 'Failed to reject vendor');
+      } else {
+        showSuccess('Vendor rejected successfully');
+        fetchVendorApprovals(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error rejecting vendor:', error);
+      showError('Failed to reject vendor. Please try again.');
+
+      // Fallback to mock behavior if API fails
+      const vendor = pendingApplications.find(v => v.id === vendorId);
+      if (vendor) {
+        setPendingApplications(prev => prev.filter(v => v.id !== vendorId));
+        toast.error(`Rejected ${vendor.name}.`);
+      }
     }
   };
 
@@ -341,61 +414,81 @@ const AdminVendorApprovalsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredVendors.map((vendor, index) => (
-                  <TableRow
-                    key={vendor.id}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
-                    }`}
-                  >
-                    <TableCell className="font-medium text-gray-900">{vendor.name}</TableCell>
-                    <TableCell className="text-gray-600">{vendor.email}</TableCell>
-                    <TableCell className="text-gray-700">{vendor.services}</TableCell>
-                    <TableCell className="text-gray-600">{vendor.location}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={vendor.status === "Active" ? "default" : "destructive"}
-                        className={`${
-                          vendor.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                          'bg-red-100 text-red-800 hover:bg-red-100'
-                        }`}
-                      >
-                        {vendor.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button
-                          onClick={() => handleViewVendorDetails(vendor)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          onClick={() => handleEditVendor(vendor)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          onClick={() => handleSubscriptionPlans(vendor)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          Plan
-                        </Button>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        Loading vendor approvals...
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : vendorApprovals.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                      No vendor approvals found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  (vendorApprovals.length > 0 ? vendorApprovals : filteredVendors).map((vendor, index) => (
+                    <TableRow
+                      key={vendor.id}
+                      className={`hover:bg-gray-50 transition-colors ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
+                      }`}
+                    >
+                      <TableCell className="font-medium text-gray-900">
+                        {vendor.name || vendor.business_name}
+                      </TableCell>
+                      <TableCell className="text-gray-600">{vendor.email}</TableCell>
+                      <TableCell className="text-gray-700">{vendor.services}</TableCell>
+                      <TableCell className="text-gray-600">{vendor.location}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={vendor.status === "Active" || vendor.status === "approved" ? "default" : "destructive"}
+                          className={`${
+                            vendor.status === 'Active' || vendor.status === 'approved' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                            vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' :
+                            'bg-red-100 text-red-800 hover:bg-red-100'
+                          }`}
+                        >
+                          {vendor.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Button
+                            onClick={() => handleViewVendorDetails(vendor)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          <Button
+                            onClick={() => handleEditVendor(vendor)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={() => handleSubscriptionPlans(vendor)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          >
+                            <CreditCard className="h-4 w-4 mr-1" />
+                            Plan
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
@@ -422,16 +515,28 @@ const AdminVendorApprovalsPage = () => {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          {pendingApplications.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin mr-2" />
+                Loading pending applications...
+              </div>
+            </div>
+          ) : (vendorApprovals.filter(v => v.status === 'pending').length > 0 || pendingApplications.length > 0) ? (
             <div className="space-y-4">
-              {pendingApplications.map((vendor) => (
+              {(vendorApprovals.filter(v => v.status === 'pending').length > 0 ?
+                vendorApprovals.filter(v => v.status === 'pending') :
+                pendingApplications
+              ).map((vendor) => (
                 <div
                   key={vendor.id}
                   className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-6 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-semibold text-gray-900 text-lg">{vendor.name}</h3>
+                      <h3 className="font-semibold text-gray-900 text-lg">
+                        {vendor.name || vendor.business_name}
+                      </h3>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-600 flex items-center">

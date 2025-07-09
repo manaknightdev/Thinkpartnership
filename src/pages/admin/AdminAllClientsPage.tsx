@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AddClientModal } from "@/components/modals/AddClientModal";
 import { ViewEditClientModal } from "@/components/modals/ViewEditClientModal";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 import {
   Search,
   Filter,
@@ -27,7 +29,8 @@ import {
   Plus,
   X,
   SlidersHorizontal,
-  LogIn
+  LogIn,
+  Loader2
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -148,8 +151,50 @@ const AdminAllClientsPage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    per_page: 20
+  });
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-  const [clients, setClients] = useState(mockClients);
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    fetchClients();
+  }, [searchTerm, statusFilter, planFilter, pagination.current_page]);
+
+  const fetchClients = async () => {
+    try {
+      setIsLoading(true);
+
+      const params = {
+        page: pagination.current_page,
+        limit: pagination.per_page,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(planFilter !== 'all' && { plan: planFilter })
+      };
+
+      const response = await AdminAPI.getAllClients(params);
+
+      if (response.error) {
+        showError(response.message || 'Failed to fetch clients');
+      } else {
+        setClients(response.clients || []);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      showError('Failed to load clients. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleViewClient = (client: any) => {
     setSelectedClient(client);
@@ -199,15 +244,15 @@ const AdminAllClientsPage = () => {
     toast.info("All filters cleared");
   };
 
-  // Filter clients based on current filters
-  const filteredClients = clients.filter(client => {
+  // Use clients directly since filtering is done server-side via API
+  const filteredClients = clients.length > 0 ? clients : mockClients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.website.toLowerCase().includes(searchTerm.toLowerCase());
+                         (client.website && client.website.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === "all" || client.status.toLowerCase() === statusFilter;
     const matchesPlan = planFilter === "all" || client.plan.toLowerCase() === planFilter;
 
-    const revenueAmount = parseFloat(client.totalRevenue.replace('$', '').replace(',', ''));
+    const revenueAmount = client.totalRevenue ? parseFloat(client.totalRevenue.replace('$', '').replace(',', '')) : 0;
     const matchesRevenue = revenueFilter === "all" ||
                           (revenueFilter === "high" && revenueAmount >= 400000) ||
                           (revenueFilter === "medium" && revenueAmount >= 200000 && revenueAmount < 400000) ||
@@ -410,7 +455,27 @@ const AdminAllClientsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredClients.map((client, index) => (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                          <span className="text-gray-500">Loading clients...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredClients.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="text-gray-500">
+                          {searchTerm || statusFilter !== 'all' || planFilter !== 'all' || revenueFilter !== 'all'
+                            ? 'No clients found matching your filters.'
+                            : 'No clients found.'}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredClients.map((client, index) => (
                   <TableRow 
                     key={client.id}
                     className={`hover:bg-gray-50 transition-colors ${
@@ -490,7 +555,8 @@ const AdminAllClientsPage = () => {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                    ))
+                  )}
               </TableBody>
             </Table>
             </div>
@@ -499,7 +565,7 @@ const AdminAllClientsPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredClients.length} of {clients.length} clients
+              Showing {filteredClients.length} of {pagination.total_count} clients
               {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }

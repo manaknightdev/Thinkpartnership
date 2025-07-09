@@ -233,8 +233,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             {children}
           </div>
 
-          {/* Quick Navigation Footer */}
-          <PortalQuickNavFooter />
+         
         </main>
       </div>
     </div>

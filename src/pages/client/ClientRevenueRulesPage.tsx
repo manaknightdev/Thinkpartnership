@@ -8,14 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { Settings, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-
-interface RevenueRule {
-  id: string;
-  service: string;
-  clientShare: string;
-  vendorShare: string;
-  platformShare: string;
-}
+import ClientAPI, { RevenueRule } from "@/services/ClientAPI";
 
 const ClientRevenueRulesPage = () => {
   const [loading, setLoading] = useState(true);
@@ -30,21 +23,19 @@ const ClientRevenueRulesPage = () => {
   const loadRevenueRules = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call when client revenue rule endpoints are created
-      // const rulesData = await ClientAPI.getRevenueRules();
+      const rulesData = await ClientAPI.getRevenueRules();
+      setRevenueRules(Array.isArray(rulesData) ? rulesData : []);
+    } catch (error) {
+      console.error('Error loading revenue rules:', error);
+      toast.error('Failed to load revenue rules');
 
-      // For now, using mock data since no client-specific revenue rule APIs exist
+      // Fallback to mock data if API fails
       const mockServiceRules = [
         { id: "r001", service: "Plumbing", clientShare: "15%", vendorShare: "80%", platformShare: "5%" },
         { id: "r002", service: "Painting", clientShare: "10%", vendorShare: "85%", platformShare: "5%" },
         { id: "r003", service: "Inspections", clientShare: "20%", vendorShare: "75%", platformShare: "5%" },
       ];
-
       setRevenueRules(mockServiceRules);
-    } catch (error) {
-      console.error('Error loading revenue rules:', error);
-      toast.error('Failed to load revenue rules');
-      setRevenueRules([]);
     } finally {
       setLoading(false);
     }
@@ -52,8 +43,7 @@ const ClientRevenueRulesPage = () => {
 
   const handleSaveGlobalRules = async () => {
     try {
-      // TODO: Replace with actual API call when client revenue rule endpoints are created
-      // await ClientAPI.updateRevenueRules(revenueRules);
+      await ClientAPI.updateRevenueRules(revenueRules);
       toast.success("Global rules saved!");
     } catch (error) {
       console.error('Error saving rules:', error);
@@ -73,8 +63,12 @@ const ClientRevenueRulesPage = () => {
 
   const handleDeleteRule = async (service: string) => {
     try {
-      // TODO: Replace with actual API call when client revenue rule endpoints are created
-      toast.error(`Deleted rule for ${service}.`);
+      const ruleToDelete = revenueRules?.find(rule => rule.service === service);
+      if (ruleToDelete) {
+        await ClientAPI.deleteRevenueRule(ruleToDelete.id);
+        setRevenueRules((revenueRules || []).filter(rule => rule.service !== service));
+        toast.success(`Revenue rule for ${service} deleted successfully`);
+      }
     } catch (error) {
       console.error('Error deleting rule:', error);
       toast.error('Failed to delete rule');
@@ -234,7 +228,7 @@ const ClientRevenueRulesPage = () => {
           <CardDescription>Override global rules for specific service categories or vendors.</CardDescription>
         </CardHeader>
         <CardContent>
-          {mockServiceRules.length > 0 ? (
+          {(revenueRules?.length || 0) > 0 ? (
             <div className="overflow-x-auto">
               <Table className="mb-4">
                 <TableHeader>
@@ -254,14 +248,14 @@ const ClientRevenueRulesPage = () => {
                         <p>Loading revenue rules...</p>
                       </TableCell>
                     </TableRow>
-                  ) : revenueRules.length === 0 ? (
+                  ) : !revenueRules || revenueRules.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                         No revenue rules found
                       </TableCell>
                     </TableRow>
                   ) : (
-                    revenueRules.map((rule) => (
+                    revenueRules?.map((rule) => (
                       <TableRow key={rule.id}>
                         <TableCell className="font-medium">{rule.service}</TableCell>
                         <TableCell>{rule.clientShare}</TableCell>

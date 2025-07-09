@@ -4,14 +4,40 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Palette, Image, Type, Globe } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import ClientAPI from "@/services/ClientAPI";
 
 const ClientBrandingPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [primaryColor, setPrimaryColor] = useState("#22C55E");
   const [secondaryColor, setSecondaryColor] = useState("#3B82F6");
   const [fontFamily, setFontFamily] = useState("Inter, sans-serif");
   const [subdomain, setSubdomain] = useState("yourbrand");
+
+  useEffect(() => {
+    loadBrandingSettings();
+  }, []);
+
+  const loadBrandingSettings = async () => {
+    try {
+      setLoading(true);
+      const brandingData = await ClientAPI.getBrandingSettings();
+
+      if (brandingData) {
+        setPrimaryColor(brandingData.primary_color || "#22C55E");
+        setSecondaryColor(brandingData.secondary_color || "#3B82F6");
+        setFontFamily(brandingData.font_family || "Inter, sans-serif");
+        setSubdomain(brandingData.marketplace_subdomain || "yourbrand");
+      }
+    } catch (error) {
+      console.error('Error loading branding settings:', error);
+      toast.error('Failed to load branding settings');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -20,11 +46,40 @@ const ClientBrandingPage = () => {
     }
   };
 
-  const handleSaveBranding = () => {
-    toast.success("Branding settings saved successfully!");
-    console.log({ logoFile, primaryColor, secondaryColor, fontFamily, subdomain });
-    // In a real app, this would upload the logo and save settings to the backend
+  const handleSaveBranding = async () => {
+    try {
+      setSaving(true);
+
+      const brandingData = {
+        primary_color: primaryColor,
+        secondary_color: secondaryColor,
+        font_family: fontFamily,
+        marketplace_subdomain: subdomain,
+        logo_url: logoFile ? URL.createObjectURL(logoFile) : null // In real implementation, upload file first
+      };
+
+      await ClientAPI.updateBrandingSettings(brandingData);
+      toast.success("Branding settings saved successfully!");
+    } catch (error) {
+      console.error('Error saving branding settings:', error);
+      toast.error('Failed to save branding settings');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading branding settings...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -119,8 +174,15 @@ const ClientBrandingPage = () => {
       </Card> */}
 
       <div className="text-center mt-10">
-        <Button size="lg" onClick={handleSaveBranding}>
-          Save All Branding Settings
+        <Button size="lg" onClick={handleSaveBranding} disabled={saving}>
+          {saving ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Saving...
+            </>
+          ) : (
+            'Save All Branding Settings'
+          )}
         </Button>
       </div>
     </div>

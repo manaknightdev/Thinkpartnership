@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface VendorService {
@@ -99,7 +99,7 @@ class VendorServicesAPI {
       }
     });
 
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.LIST}?${params.toString()}`
     );
     return response.data;
@@ -107,13 +107,13 @@ class VendorServicesAPI {
 
   // Create new service
   async createService(data: CreateServiceData): Promise<ServiceResponse> {
-    const response = await apiClient.post(API_CONFIG.ENDPOINTS.VENDOR_SERVICES.CREATE, data);
+    const response = await vendorApiClient.post(API_CONFIG.ENDPOINTS.VENDOR_SERVICES.CREATE, data);
     return response.data;
   }
 
   // Update service
   async updateService(serviceId: number, data: UpdateServiceData): Promise<ServiceResponse> {
-    const response = await apiClient.put(
+    const response = await vendorApiClient.put(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.UPDATE}/${serviceId}`,
       data
     );
@@ -122,7 +122,7 @@ class VendorServicesAPI {
 
   // Delete service
   async deleteService(serviceId: number): Promise<{ error: boolean; message: string }> {
-    const response = await apiClient.delete(
+    const response = await vendorApiClient.delete(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.DELETE}/${serviceId}`
     );
     return response.data;
@@ -130,7 +130,7 @@ class VendorServicesAPI {
 
   // Get service details
   async getServiceDetails(serviceId: number): Promise<ServiceResponse> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.LIST}/${serviceId}`
     );
     return response.data;
@@ -138,7 +138,7 @@ class VendorServicesAPI {
 
   // Toggle service status (activate/deactivate)
   async toggleServiceStatus(serviceId: number, status: number): Promise<ServiceResponse> {
-    const response = await apiClient.put(
+    const response = await vendorApiClient.put(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.UPDATE}/${serviceId}/status`,
       { status }
     );
@@ -156,7 +156,7 @@ class VendorServicesAPI {
       formData.append(`images[${index}]`, file);
     });
 
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.UPDATE}/${serviceId}/images`,
       formData,
       {
@@ -179,13 +179,13 @@ class VendorServicesAPI {
       status: number;
     }>;
   }> {
-    const response = await apiClient.get(API_CONFIG.ENDPOINTS.SERVICES.CATEGORIES);
+    const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.SERVICES.CATEGORIES);
     return response.data;
   }
 
   // Duplicate service
   async duplicateService(serviceId: number): Promise<ServiceResponse> {
-    const response = await apiClient.post(
+    const response = await vendorApiClient.post(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.CREATE}/${serviceId}/duplicate`
     );
     return response.data;
@@ -203,7 +203,7 @@ class VendorServicesAPI {
       reviews: number;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.LIST}/${serviceId}/analytics?period=${period}`
     );
     return response.data;

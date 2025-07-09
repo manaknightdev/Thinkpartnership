@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
 
 export interface DashboardStats {
@@ -134,13 +134,13 @@ export interface PerformanceMetrics {
 class VendorAnalyticsAPI {
   // Get dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get(API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD);
+    const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD);
     return response.data;
   }
 
   // Get revenue analytics
   async getRevenueAnalytics(period: string = '12m'): Promise<RevenueAnalytics> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/revenue?period=${period}`
     );
     return response.data;
@@ -148,7 +148,7 @@ class VendorAnalyticsAPI {
 
   // Get request analytics
   async getRequestAnalytics(period: string = '12m'): Promise<RequestAnalytics> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/requests?period=${period}`
     );
     return response.data;
@@ -156,7 +156,7 @@ class VendorAnalyticsAPI {
 
   // Get service analytics
   async getServiceAnalytics(period: string = '12m'): Promise<ServiceAnalytics> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/services?period=${period}`
     );
     return response.data;
@@ -164,7 +164,7 @@ class VendorAnalyticsAPI {
 
   // Get customer analytics
   async getCustomerAnalytics(period: string = '12m'): Promise<CustomerAnalytics> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/customers?period=${period}`
     );
     return response.data;
@@ -172,7 +172,7 @@ class VendorAnalyticsAPI {
 
   // Get performance metrics
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/performance`
     );
     return response.data;
@@ -202,7 +202,7 @@ class VendorAnalyticsAPI {
       }>;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/earnings?start_date=${startDate}&end_date=${endDate}`
     );
     return response.data;
@@ -210,7 +210,7 @@ class VendorAnalyticsAPI {
 
   // Export analytics data
   async exportAnalytics(type: string, period: string = '12m'): Promise<Blob> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/export?type=${type}&period=${period}`,
       { responseType: 'blob' }
     );
@@ -234,7 +234,7 @@ class VendorAnalyticsAPI {
       }>;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/competitor-analysis`
     );
     return response.data;
@@ -259,7 +259,7 @@ class VendorAnalyticsAPI {
       }>;
     };
   }> {
-    const response = await apiClient.get(
+    const response = await vendorApiClient.get(
       `${API_CONFIG.ENDPOINTS.VENDOR_ANALYTICS.DASHBOARD}/growth-insights`
     );
     return response.data;

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AddCustomerModal } from "@/components/modals/AddCustomerModal";
 import { ViewEditCustomerModal } from "@/components/modals/ViewEditCustomerModal";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 import {
   Search,
   Filter,
@@ -27,7 +29,8 @@ import {
 
   Plus,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Loader2
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -175,16 +178,58 @@ const getStatusVariant = (status: string) => {
 const AdminAllCustomersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-
   const [vendorFilter, setVendorFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [customers, setCustomers] = useState([]);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    per_page: 20
+  });
   const [locationFilter, setLocationFilter] = useState("all");
   const [spendingFilter, setSpendingFilter] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-  const [customers, setCustomers] = useState(mockCustomers);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [searchTerm, statusFilter, vendorFilter, locationFilter, spendingFilter, pagination.current_page]);
+
+  const fetchCustomers = async () => {
+    try {
+      setIsLoading(true);
+
+      const params = {
+        page: pagination.current_page,
+        limit: pagination.per_page,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(vendorFilter !== 'all' && { vendor: vendorFilter }),
+        ...(locationFilter !== 'all' && { location: locationFilter }),
+        ...(spendingFilter !== 'all' && { spending: spendingFilter })
+      };
+
+      const response = await AdminAPI.getAllCustomers(params);
+
+      if (response.error) {
+        showError(response.message || 'Failed to fetch customers');
+      } else {
+        setCustomers(response.customers || []);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      showError('Failed to load customers. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Get available vendors
   const availableVendors = mockAvailableVendors;
@@ -236,16 +281,16 @@ const AdminAllCustomersPage = () => {
     toast.info("All filters cleared");
   };
 
-  // Filter customers based on current filters
-  const filteredCustomers = customers.filter(customer => {
+  // Use customers directly since filtering is done server-side via API
+  const filteredCustomers = customers.length > 0 ? customers : mockCustomers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.preferredServices.toLowerCase().includes(searchTerm.toLowerCase());
+                         (customer.preferredServices && customer.preferredServices.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === "all" || customer.status.toLowerCase() === statusFilter;
     const matchesVendor = vendorFilter === "all" || customer.vendor === vendorFilter;
-    const matchesLocation = locationFilter === "all" || customer.location.toLowerCase().includes(locationFilter.toLowerCase());
+    const matchesLocation = locationFilter === "all" || (customer.location && customer.location.toLowerCase().includes(locationFilter.toLowerCase()));
 
-    const spentAmount = parseFloat(customer.totalSpent.replace('$', '').replace(',', ''));
+    const spentAmount = customer.totalSpent ? parseFloat(customer.totalSpent.replace('$', '').replace(',', '')) : 0;
     const matchesSpending = spendingFilter === "all" ||
                            (spendingFilter === "high" && spentAmount >= 3000) ||
                            (spendingFilter === "medium" && spentAmount >= 1500 && spentAmount < 3000) ||
@@ -499,7 +544,27 @@ const AdminAllCustomersPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCustomers.map((customer, index) => (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                          <span className="text-gray-500">Loading customers...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredCustomers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="text-gray-500">
+                          {searchTerm || statusFilter !== 'all' || vendorFilter !== 'all' || locationFilter !== 'all' || spendingFilter !== 'all'
+                            ? 'No customers found matching your filters.'
+                            : 'No customers found.'}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredCustomers.map((customer, index) => (
                   <TableRow 
                     key={customer.id}
                     className={`hover:bg-gray-50 transition-colors ${
@@ -589,7 +654,8 @@ const AdminAllCustomersPage = () => {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                    ))
+                  )}
               </TableBody>
             </Table>
             </div>
@@ -598,7 +664,7 @@ const AdminAllCustomersPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredCustomers.length} of {customers.length} customers
+              Showing {filteredCustomers.length} of {pagination.total_count} customers
               {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" || locationFilter !== "all" || spendingFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }

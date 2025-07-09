@@ -1,4 +1,4 @@
-import apiClient from '@/config/axios';
+import vendorApiClient from '@/config/vendorAxios';
 
 export interface ServiceTier {
   id: number;
@@ -77,7 +77,7 @@ class VendorServiceTiersAPI {
     is_featured?: boolean;
   }): Promise<APIResponse<{ tiers: ServiceTier[] }>> {
     try {
-      const response = await apiClient.get('/vendor/service-tiers', { params: filters });
+      const response = await vendorApiClient.get('/vendor/service-tiers', { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -90,7 +90,7 @@ class VendorServiceTiersAPI {
   // Create new service tier
   static async createServiceTier(data: CreateTierData): Promise<APIResponse> {
     try {
-      const response = await apiClient.post('/vendor/service-tiers', data);
+      const response = await vendorApiClient.post('/vendor/service-tiers', data);
       return response.data;
     } catch (error: any) {
       return {
@@ -103,7 +103,7 @@ class VendorServiceTiersAPI {
   // Update service tier
   static async updateServiceTier(tierId: number, data: Partial<CreateTierData>): Promise<APIResponse> {
     try {
-      const response = await apiClient.put(`/vendor/service-tiers/${tierId}`, data);
+      const response = await vendorApiClient.put(`/vendor/service-tiers/${tierId}`, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -116,7 +116,7 @@ class VendorServiceTiersAPI {
   // Delete service tier
   static async deleteServiceTier(tierId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`/vendor/service-tiers/${tierId}`);
+      const response = await vendorApiClient.delete(`/vendor/service-tiers/${tierId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -133,7 +133,7 @@ class VendorServiceTiersAPI {
     status?: string;
   }): Promise<APIResponse<{ placements: FeaturedPlacement[] }>> {
     try {
-      const response = await apiClient.get('/vendor/featured-placements', { params: filters });
+      const response = await vendorApiClient.get('/vendor/featured-placements', { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -146,7 +146,7 @@ class VendorServiceTiersAPI {
   // Get available placement packages
   static async getPlacementPackages(): Promise<APIResponse<{ packages: PlacementPackage[] }>> {
     try {
-      const response = await apiClient.get('/vendor/placement-packages');
+      const response = await vendorApiClient.get('/vendor/placement-packages');
       return response.data;
     } catch (error: any) {
       return {
@@ -159,7 +159,7 @@ class VendorServiceTiersAPI {
   // Purchase featured placement
   static async purchasePlacement(data: PurchasePlacementData): Promise<APIResponse> {
     try {
-      const response = await apiClient.post('/vendor/featured-placements/purchase', data);
+      const response = await vendorApiClient.post('/vendor/featured-placements/purchase', data);
       return response.data;
     } catch (error: any) {
       return {
@@ -172,7 +172,7 @@ class VendorServiceTiersAPI {
   // Cancel featured placement
   static async cancelPlacement(placementId: number): Promise<APIResponse> {
     try {
-      const response = await apiClient.delete(`/vendor/featured-placements/${placementId}`);
+      const response = await vendorApiClient.delete(`/vendor/featured-placements/${placementId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -191,7 +191,7 @@ class VendorServiceTiersAPI {
     conversion_rate: number;
   }>> {
     try {
-      const response = await apiClient.get(`/vendor/featured-placements/${placementId}/analytics`);
+      const response = await vendorApiClient.get(`/vendor/featured-placements/${placementId}/analytics`);
       return response.data;
     } catch (error: any) {
       return {
@@ -209,7 +209,7 @@ class VendorServiceTiersAPI {
     base_price: number;
   }> }>> {
     try {
-      const response = await apiClient.get('/vendor/services/simple');
+      const response = await vendorApiClient.get('/vendor/services/simple');
       return response.data;
     } catch (error: any) {
       return {

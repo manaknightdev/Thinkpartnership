@@ -249,8 +249,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
         )}>
           {children}
 
-          {/* Quick Navigation Footer */}
-          <PortalQuickNavFooter />
+     
         </main>
       </div>
     </div>
