@@ -31,6 +31,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import VendorMessagesAPI, { VendorChat, VendorMessage } from "@/services/VendorMessagesAPI";
 
 interface Message {
   id: number;
@@ -56,7 +57,6 @@ interface Customer {
   unreadCount: number;
   status: "online" | "offline";
   location: string;
-
   totalSpent?: string;
 }
 
@@ -74,6 +74,14 @@ const VendorMessagesPage = () => {
   const [isChooseOrderOpen, setIsChooseOrderOpen] = useState(false);
   const [selectedServiceTier, setSelectedServiceTier] = useState("");
   const [selectedExistingOrder, setSelectedExistingOrder] = useState("");
+
+  // API state
+  const [chats, setChats] = useState<VendorChat[]>([]);
+  const [messages, setMessages] = useState<VendorMessage[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sending, setSending] = useState(false);
 
   // Vendor's custom service tiers (created by vendor in Service Tiers page)
   const vendorServiceTiers = [
@@ -139,85 +147,105 @@ const VendorMessagesPage = () => {
     setSelectedExistingOrder("");
   };
 
-  // Mock customers data
-  const [customers] = useState<Customer[]>([
-    {
-      id: "c1",
-      name: "John Doe",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Hello! I need interior painting for my living room and bedroom. Can you provide a quote?",
-      timestamp: "10:32 AM",
-      unreadCount: 2,
-      status: "online",
-      location: "Downtown Area",
-
-      totalSpent: "$2,450"
-    },
-    {
-      id: "c2",
-      name: "Sarah Wilson",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Thank you for the quick response! When can you start?",
-      timestamp: "Yesterday",
-      unreadCount: 0,
-      status: "offline",
-      location: "Suburbs",
-
-      totalSpent: "$1,200"
-    },
-    {
-      id: "c3",
-      name: "Mike Johnson",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "I accept your quote! Let's schedule the work.",
-      timestamp: "2 days ago",
-      unreadCount: 1,
-      status: "online",
-      location: "Industrial District",
-
-      totalSpent: "$3,800"
-    },
-    {
-      id: "c4",
-      name: "Emily Chen",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Could you send me some references from previous work?",
-      timestamp: "3 days ago",
-      unreadCount: 0,
-      status: "offline",
-      location: "Downtown Area",
-
-      totalSpent: "$950"
+  // Load chats from API
+  const loadChats = async () => {
+    try {
+      setLoading(true);
+      const response = await VendorMessagesAPI.getChats();
+      if (!response.error) {
+        setChats(response.chats);
+        // Auto-select first chat if customerId param matches or select first chat
+        if (customerId) {
+          const chat = response.chats.find(c => c.id.toString() === customerId);
+          if (chat) {
+            setSelectedChatId(chat.id);
+            loadMessages(chat.id);
+          }
+        } else if (response.chats.length > 0) {
+          setSelectedChatId(response.chats[0].id);
+          loadMessages(response.chats[0].id);
+        }
+      } else {
+        toast.error("Failed to load chats");
+      }
+    } catch (error) {
+      console.error("Error loading chats:", error);
+      toast.error("Failed to load chats");
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  // Mock messages for selected customer
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      sender: "customer",
-      content: "Hello! I need interior painting for my living room and bedroom. Can you provide a quote?",
-      timestamp: "10:32 AM",
-      status: "read",
-      type: "text"
-    },
-    {
-      id: 2,
-      sender: "vendor",
-      content: "Hi John! Thanks for reaching out. I'd be happy to help with your painting project. Could you tell me the approximate square footage of both rooms?",
-      timestamp: "10:35 AM",
-      status: "read",
-      type: "text"
-    },
-    {
-      id: 3,
-      sender: "customer",
-      content: "The living room is about 300 sq ft and the bedroom is 250 sq ft. I'm looking for neutral colors, maybe light gray or beige.",
-      timestamp: "10:38 AM",
-      status: "read",
-      type: "text"
+  // Load messages for a specific chat
+  const loadMessages = async (chatId: number) => {
+    try {
+      setLoadingMessages(true);
+      const response = await VendorMessagesAPI.getMessages(chatId);
+      if (!response.error) {
+        setMessages(response.messages);
+        setTimeout(scrollToBottom, 100);
+      } else {
+        toast.error("Failed to load messages");
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+      toast.error("Failed to load messages");
+    } finally {
+      setLoadingMessages(false);
     }
-  ]);
+  };
+
+  // Convert VendorChat to Customer format for UI compatibility
+  const convertChatToCustomer = (chat: VendorChat): Customer => {
+    const formatTime = (dateString: string) => {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+      if (diffInHours < 24) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else if (diffInHours < 48) {
+        return 'Yesterday';
+      } else {
+        return `${Math.floor(diffInHours / 24)} days ago`;
+      }
+    };
+
+    return {
+      id: chat.id.toString(),
+      name: chat.customer_name || chat.customer_email,
+      avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face`,
+      lastMessage: chat.last_message || "No messages yet",
+      timestamp: chat.last_message_time ? formatTime(chat.last_message_time) : "",
+      unreadCount: chat.unread_count,
+      status: "offline" as const,
+      location: "Unknown",
+      totalSpent: "$0"
+    };
+  };
+
+  // Convert chats to customers for UI
+  const customers = chats.map(convertChatToCustomer);
+
+  // Convert VendorMessage to Message format for UI compatibility
+  const convertApiMessageToUI = (apiMessage: VendorMessage): Message => {
+    const formatTime = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    return {
+      id: apiMessage.id,
+      sender: apiMessage.sender_type === 0 ? "customer" : "vendor",
+      content: apiMessage.message,
+      timestamp: formatTime(apiMessage.created_at),
+      status: apiMessage.read_by_customer ? "read" : "sent",
+      type: "text"
+    };
+  };
+
+  // Convert API messages to UI format
+  const uiMessages = messages.map(convertApiMessageToUI);
 
   const [quoteData, setQuoteData] = useState({
     service: "Interior Painting - Living Room & Bedroom",
@@ -226,15 +254,18 @@ const VendorMessagesPage = () => {
     validUntil: ""
   });
 
-  // Set selected customer based on URL param or default to first customer
+  // Load chats on component mount
   useEffect(() => {
-    if (customerId) {
-      const customer = customers.find(c => c.id === customerId);
-      setSelectedCustomer(customer || customers[0]);
-    } else {
-      setSelectedCustomer(customers[0]);
+    loadChats();
+  }, []);
+
+  // Set selected customer based on selected chat
+  useEffect(() => {
+    if (selectedChatId && customers.length > 0) {
+      const customer = customers.find(c => c.id === selectedChatId.toString());
+      setSelectedCustomer(customer || null);
     }
-  }, [customerId, customers]);
+  }, [selectedChatId, customers]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -244,37 +275,30 @@ const VendorMessagesPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        sender: "vendor",
-        content: message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: "sent",
-        type: "text"
-      };
-      
-      setMessages([...messages, newMessage]);
-      setMessage("");
-      toast.success("Message sent!");
-      
-      // Simulate customer typing response
-      setTimeout(() => {
-        setIsTyping(true);
-        setTimeout(() => {
-          setIsTyping(false);
-          const customerResponse: Message = {
-            id: messages.length + 2,
-            sender: "customer",
-            content: "Thanks for the quick response!",
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: "read",
-            type: "text"
-          };
-          setMessages(prev => [...prev, customerResponse]);
-        }, 2000);
-      }, 500);
+  const handleSendMessage = async () => {
+    if (!message.trim() || !selectedChatId || sending) return;
+
+    try {
+      setSending(true);
+      const response = await VendorMessagesAPI.sendMessage(selectedChatId, {
+        message: message.trim()
+      });
+
+      if (!response.error) {
+        setMessage("");
+        toast.success("Message sent!");
+        // Reload messages to get the updated list
+        await loadMessages(selectedChatId);
+        // Reload chats to update last message
+        await loadChats();
+      } else {
+        toast.error("Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -300,9 +324,12 @@ const VendorMessagesPage = () => {
   };
 
   const handleCustomerSelect = (customer: Customer) => {
+    const chatId = parseInt(customer.id);
+    setSelectedChatId(chatId);
     setSelectedCustomer(customer);
     navigate(`/vendor-portal/messages/${customer.id}`);
     setShowCustomerList(false);
+    loadMessages(chatId);
   };
 
   const filteredCustomers = customers.filter(customer =>
@@ -342,7 +369,16 @@ const VendorMessagesPage = () => {
 
         {/* Customer List */}
         <div className="flex-1 overflow-y-auto">
-          {filteredCustomers.map((customer) => (
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="text-gray-500">Loading chats...</div>
+            </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="text-gray-500">No chats available</div>
+            </div>
+          ) : (
+            filteredCustomers.map((customer) => (
             <div
               key={customer.id}
               onClick={() => handleCustomerSelect(customer)}
@@ -384,7 +420,8 @@ const VendorMessagesPage = () => {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -618,7 +655,16 @@ const VendorMessagesPage = () => {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-              {messages.map((msg) => (
+              {loadingMessages ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="text-gray-500">Loading messages...</div>
+                </div>
+              ) : uiMessages.length === 0 ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="text-gray-500">No messages yet</div>
+                </div>
+              ) : (
+                uiMessages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.sender === "vendor" ? "justify-end" : "justify-start"}`}
@@ -689,7 +735,8 @@ const VendorMessagesPage = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
 
               {/* Typing Indicator */}
               {isTyping && (
@@ -738,7 +785,7 @@ const VendorMessagesPage = () => {
 
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!message.trim()}
+                  disabled={!message.trim() || !selectedChatId || sending}
                   className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
                 >
                   <Send className="w-5 h-5" />

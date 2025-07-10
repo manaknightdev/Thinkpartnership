@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import ChatAPI, { Chat, ChatMessage } from "@/services/ChatAPI";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +45,7 @@ import {
 } from "lucide-react";
 
 const ChatPage = () => {
-  const { vendorName } = useParams();
+  const { chatId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -56,83 +57,63 @@ const ChatPage = () => {
   const [requestCount] = useState(2);
   const [notificationCount] = useState(3);
   const [userName] = useState("John Doe");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  // Mock vendor data
-  const vendor = {
-    name: decodeURIComponent(vendorName || ""),
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-    status: "online",
-    lastSeen: "Active now",
-    completedJobs: 127,
-    location: "Downtown Area"
-  };
+  // Load chat data and messages
+  useEffect(() => {
+    const loadChatData = async () => {
+      if (!chatId) {
+        setError("Chat ID is required");
+        setLoading(false);
+        return;
+      }
 
-  // Mock messages
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "vendor",
-      content: "Hi! Thanks for your interest in my painting services. I'd be happy to help with your project.",
-      timestamp: "10:30 AM",
-      status: "read"
-    },
-    {
-      id: 2,
-      sender: "user",
-      content: "Hello! I need interior painting for my living room and bedroom. Can you provide a quote?",
-      timestamp: "10:32 AM",
-      status: "read"
-    },
-    {
-      id: 3,
-      sender: "vendor",
-      content: "Absolutely! Could you tell me the approximate square footage of both rooms? Also, do you have any color preferences?",
-      timestamp: "10:35 AM",
-      status: "read"
-    },
-    {
-      id: 4,
-      sender: "user",
-      content: "The living room is about 300 sq ft and bedroom is 200 sq ft. I'm thinking neutral colors - maybe light gray for living room and soft beige for bedroom.",
-      timestamp: "10:38 AM",
-      status: "read"
-    },
-    {
-      id: 5,
-      sender: "vendor",
-      content: "Perfect! For 500 sq ft with quality paint and professional application, I can offer this for $450. This includes all materials, prep work, and cleanup. When would you like to schedule?",
-      timestamp: "10:42 AM",
-      status: "delivered"
-    },
-    {
-      id: 6,
-      sender: "vendor",
-      type: "quote",
-      content: {
-        title: "Interior Painting Quote",
-        description: "Living room (300 sq ft) + Bedroom (200 sq ft)",
-        price: "$450",
-        includes: [
-          "Premium quality paint",
-          "Surface preparation",
-          "Professional application",
-          "Complete cleanup",
-          "1-year warranty"
-        ],
-        timeline: "2-3 days",
-        validUntil: "Valid for 30 days"
-      },
-      timestamp: "10:45 AM",
-      status: "delivered"
-    }
-  ]);
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get all chats to find the current one
+        const chatsResponse = await ChatAPI.getChats();
+        if (chatsResponse.error) {
+          throw new Error('Failed to load chats');
+        }
+
+        const chat = chatsResponse.chats.find(c => c.id.toString() === chatId);
+        if (!chat) {
+          throw new Error('Chat not found');
+        }
+
+        setCurrentChat(chat);
+
+        // Load messages for this chat
+        const messagesResponse = await ChatAPI.getChatMessages(parseInt(chatId));
+        if (messagesResponse.error) {
+          throw new Error('Failed to load messages');
+        }
+
+        setMessages(messagesResponse.messages || []);
+      } catch (err: any) {
+        console.error('Error loading chat:', err);
+        setError(err.message || 'Failed to load chat');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadChatData();
+  }, [chatId]);
+
+
 
   // Marketplace sidebar items
   const sidebarItems = [
     { name: "Browse", path: "/marketplace", icon: Home, exact: true },
     { name: "Categories", path: "/marketplace/categories", icon: Grid3X3 },
     { name: "All Services", path: "/marketplace/services", icon: List },
-    { name: "Messages", path: "/marketplace/chat/Certified%20Inspectors%20Inc.", icon: MessageCircle },
+    { name: "Messages", path: "/marketplace/messages", icon: MessageCircle },
     { name: "Account", path: "/marketplace/account", icon: Settings },
     { name: "Help", path: "/marketplace/help", icon: HelpCircle },
   ];
@@ -165,33 +146,49 @@ const ChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      const newMessage = {
-        id: messages.length + 1,
-        sender: "user" as const,
-        content: message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: "sent" as const
+  const handleSendMessage = async () => {
+    if (!message.trim() || !chatId || !currentChat) return;
+
+    const messageText = message.trim();
+    setMessage("");
+
+    try {
+      // Optimistically add message to UI
+      const optimisticMessage: ChatMessage = {
+        id: Date.now(), // Temporary ID
+        message: messageText,
+        sender_type: 'customer',
+        message_type: 0,
+        created_at: new Date().toISOString(),
+        read_by_customer: true,
+        read_by_vendor: false
       };
-      
-      setMessages([...messages, newMessage]);
-      setMessage("");
-      
-      // Simulate vendor typing
-      setIsTyping(true);
-      setTimeout(() => {
-        setIsTyping(false);
-        // Simulate vendor response
-        const vendorResponse = {
-          id: messages.length + 2,
-          sender: "vendor" as const,
-          content: "Thanks for your message! Let me get back to you with more details.",
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: "read" as const
-        };
-        setMessages(prev => [...prev, vendorResponse]);
-      }, 2000);
+
+      setMessages(prev => [...(prev || []), optimisticMessage]);
+
+      // Send message to API
+      const response = await ChatAPI.sendMessage(parseInt(chatId), {
+        message: messageText,
+        message_type: 0
+      });
+
+      if (response.error) {
+        throw new Error(response.message || 'Failed to send message');
+      }
+
+      // Update the optimistic message with real data
+      setMessages(prev => (prev || []).map(msg =>
+        msg.id === optimisticMessage.id
+          ? { ...optimisticMessage, id: response.data.id }
+          : msg
+      ));
+
+    } catch (err: any) {
+      console.error('Error sending message:', err);
+      // Remove optimistic message on error
+      setMessages(prev => (prev || []).filter(msg => msg.id !== Date.now()));
+      setError(err.message || 'Failed to send message');
+      setMessage(messageText); // Restore message text
     }
   };
 
@@ -201,15 +198,12 @@ const ChatPage = () => {
 
 
 
-  const handleAcceptQuote = () => {
-    const acceptMessage = {
-      id: messages.length + 1,
-      sender: "user" as const,
-      content: "I accept your quote! When can we schedule the work?",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: "sent" as const
-    };
-    setMessages([...messages, acceptMessage]);
+  const handleAcceptQuote = async () => {
+    if (!chatId) return;
+
+    const acceptMessage = "I accept your quote! When can we schedule the work?";
+    setMessage(acceptMessage);
+    await handleSendMessage();
   };
 
   const handleSearch = (searchTerm: string) => {
@@ -231,17 +225,20 @@ const ChatPage = () => {
     navigate('/');
   };
 
-  const getMessageStatusIcon = (status: string) => {
-    switch (status) {
-      case "sent":
-        return <Check className="w-3 h-3 text-gray-400" />;
-      case "delivered":
-        return <CheckCheck className="w-3 h-3 text-gray-400" />;
-      case "read":
+  const getMessageStatusIcon = (msg: ChatMessage) => {
+    if (msg.sender_type === 'customer') {
+      if (msg.read_by_vendor) {
         return <CheckCheck className="w-3 h-3 text-blue-500" />;
-      default:
-        return <Clock className="w-3 h-3 text-gray-400" />;
+      } else {
+        return <Check className="w-3 h-3 text-gray-400" />;
+      }
     }
+    return null;
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -496,7 +493,7 @@ const ChatPage = () => {
               time: "10:45 AM",
               unread: 2,
               avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-              active: vendor.name === "Certified Inspectors Inc."
+              active: currentChat?.vendor.name === "Certified Inspectors Inc."
             },
             {
               name: "Rapid Plumbers",
@@ -504,7 +501,7 @@ const ChatPage = () => {
               time: "Yesterday",
               unread: 0,
               avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-              active: vendor.name === "Rapid Plumbers"
+              active: currentChat?.vendor.name === "Rapid Plumbers"
             },
             {
               name: "Sparkling Spaces",
@@ -512,7 +509,7 @@ const ChatPage = () => {
               time: "2 days ago",
               unread: 0,
               avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-              active: vendor.name === "Sparkling Spaces"
+              active: currentChat?.vendor.name === "Sparkling Spaces"
             },
             {
               name: "Green Thumb Landscaping",
@@ -520,7 +517,7 @@ const ChatPage = () => {
               time: "3 days ago",
               unread: 1,
               avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-              active: vendor.name === "Green Thumb Landscaping"
+              active: currentChat?.vendor.name === "Green Thumb Landscaping"
             }
           ].map((chat, index) => (
             <div
@@ -582,23 +579,27 @@ const ChatPage = () => {
             </Button>
             
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <img
-                  src={vendor.avatar}
-                  alt={vendor.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-              </div>
-              
-              <div className="min-w-0 flex-1">
-                <h2 className="font-semibold text-gray-900 truncate">{vendor.name}</h2>
-                <div className="flex items-center space-x-2 text-sm text-gray-500">
-                  <span className="hidden sm:inline">{vendor.lastSeen}</span>
-                  
+              {currentChat && (
+                <>
+                  <div className="relative">
+                    <img
+                      src={currentChat.vendor.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"}
+                      alt={currentChat.vendor.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  </div>
 
-                </div>
-              </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-semibold text-gray-900 truncate">{currentChat.vendor.name}</h2>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <span className="hidden sm:inline">Active now</span>
+                      <span className="text-xs">•</span>
+                      <span className="text-xs">{currentChat.service.title}</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           
@@ -618,12 +619,12 @@ const ChatPage = () => {
                   <div className="text-sm">
                     <div className="flex items-center space-x-2 mb-1">
                       <MapPin className="w-3 h-3 text-gray-500" />
-                      <span className="text-gray-600">{vendor.location}</span>
+                      <span className="text-gray-600">{currentChat?.vendor.location || "Location not available"}</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right text-sm">
-                  <div className="font-semibold text-gray-900">{vendor.completedJobs} jobs completed</div>
+                  <div className="font-semibold text-gray-900">{currentChat?.vendor.completedJobs || 0} jobs completed</div>
                   {/* <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                     Verified Pro
                   </Badge> */}
@@ -635,57 +636,61 @@ const ChatPage = () => {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-2 sm:px-3 lg:px-4 py-4 space-y-4 w-full max-w-full">
-          {messages.map((msg) => (
+          {(messages || []).map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${msg.sender_type === "customer" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`max-w-[280px] sm:max-w-sm lg:max-w-md ${msg.sender === "user" ? "order-2" : "order-1"}`}>
-                {msg.sender === "vendor" && (
+              <div className={`max-w-[280px] sm:max-w-sm lg:max-w-md ${msg.sender_type === "customer" ? "order-2" : "order-1"}`}>
+                {msg.sender_type === "vendor" && currentChat && (
                   <div className="flex items-center space-x-2 mb-1">
                     <img
-                      src={vendor.avatar}
-                      alt={vendor.name}
+                      src={currentChat.vendor.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"}
+                      alt={currentChat.vendor.name}
                       className="w-6 h-6 rounded-full"
                     />
-                    <span className="text-xs text-gray-500">{vendor.name}</span>
+                    <span className="text-xs text-gray-500">{currentChat.vendor.name}</span>
                   </div>
                 )}
-                
-                {msg.type === "quote" && typeof msg.content === "object" ? (
+
+                {msg.message_type === 2 && msg.quote_details ? (
                   /* Quote Card */
                   <Card className="border border-gray-200 bg-white max-w-[280px] sm:max-w-sm">
                     <CardHeader className="pb-3">
                       <div className="flex items-center space-x-2">
                         <FileText className="w-4 h-4 text-blue-500" />
-                        <h4 className="font-semibold text-gray-900">{msg.content.title}</h4>
+                        <h4 className="font-semibold text-gray-900">{msg.quote_details.title || 'Quote'}</h4>
                       </div>
-                      <p className="text-sm text-gray-600">{msg.content.description}</p>
+                      <p className="text-sm text-gray-600">{msg.quote_details.description || msg.message}</p>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-green-600">{msg.content.price}</span>
+                          <span className="text-2xl font-bold text-green-600">${msg.quote_amount}</span>
                           <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                            {msg.content.timeline}
+                            {msg.quote_details.timeline || '2-3 days'}
                           </Badge>
                         </div>
 
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-gray-900">Includes:</p>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {msg.content.includes.map((item, index) => (
-                              <li key={index} className="flex items-center space-x-2">
-                                <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        {msg.quote_details.includes && (
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-900">Includes:</p>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              {(msg.quote_details?.includes || []).map((item: string, index: number) => (
+                                <li key={index} className="flex items-center space-x-2">
+                                  <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
 
-                        <div className="text-xs text-gray-500 border-t pt-2">
-                          {msg.content.validUntil}
-                        </div>
+                        {msg.quote_details.validUntil && (
+                          <div className="text-xs text-gray-500 border-t pt-2">
+                            {msg.quote_details.validUntil}
+                          </div>
+                        )}
 
                         <div className="flex space-x-2 pt-2">
                           <Button
@@ -713,30 +718,44 @@ const ChatPage = () => {
                   /* Regular Message */
                   <div
                     className={`px-4 py-2 rounded-2xl ${
-                      msg.sender === "user"
+                      msg.sender_type === "customer"
                         ? "bg-blue-500 text-white rounded-br-md"
                         : "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
                     }`}
                   >
-                    <p className="text-sm">{typeof msg.content === "string" ? msg.content : ""}</p>
+                    <p className="text-sm">{msg.message}</p>
                   </div>
                 )}
-                
-                <div className={`flex items-center space-x-1 mt-1 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                  <span className="text-xs text-gray-500">{msg.timestamp}</span>
-                  {msg.sender === "user" && getMessageStatusIcon(msg.status)}
+
+                <div className={`flex items-center space-x-1 mt-1 ${msg.sender_type === "customer" ? "justify-end" : "justify-start"}`}>
+                  <span className="text-xs text-gray-500">{formatTimestamp(msg.created_at)}</span>
+                  {msg.sender_type === "customer" && getMessageStatusIcon(msg)}
                 </div>
               </div>
             </div>
           ))}
           
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center py-8">
+              <div className="text-gray-500">Loading chat...</div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="flex justify-center py-8">
+              <div className="text-red-500">{error}</div>
+            </div>
+          )}
+
           {/* Typing Indicator */}
-          {isTyping && (
+          {isTyping && currentChat && (
             <div className="flex justify-start">
               <div className="flex items-center space-x-2">
                 <img
-                  src={vendor.avatar}
-                  alt={vendor.name}
+                  src={currentChat.vendor.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face"}
+                  alt={currentChat.vendor.name}
                   className="w-6 h-6 rounded-full"
                 />
                 <div className="bg-gray-200 px-4 py-2 rounded-2xl rounded-bl-md">

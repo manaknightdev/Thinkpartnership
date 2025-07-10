@@ -61,6 +61,7 @@ import ServiceRequestsPage from "./pages/customer/ServiceRequestsPage";
 import ServiceRequestDetailsPage from "./pages/customer/ServiceRequestDetailsPage";
 import RequestServicePage from "./pages/customer/RequestServicePage";
 import ChatPage from "./pages/customer/ChatPage";
+import MessagesPage from "./pages/customer/MessagesPage";
 import NotificationsPage from "./pages/customer/NotificationsPage";
 import PlaceholderPage from "./pages/customer/PlaceholderPage";
 import CustomerLogin from "./pages/customer/CustomerLogin";
@@ -136,7 +137,8 @@ const App = () => (
           <Route path="/marketplace/request-service/:serviceName" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
           <Route path="/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
-          <Route path="/marketplace/chat/:vendorName" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+          <Route path="/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
 
           {/* Nested routes for Customer Dashboard */}

@@ -37,6 +37,13 @@ export const API_CONFIG = {
       LIST: '/api/marketplace/service-requests',
       DETAILS: '/api/marketplace/service-requests',
     },
+    // Customer Chat
+    CHAT: {
+      LIST: '/api/marketplace/chats',
+      MESSAGES: '/api/marketplace/chats/:chatId/messages',
+      SEND_MESSAGE: '/api/marketplace/chats/:chatId/messages',
+      START_CHAT: '/api/marketplace/chats/start',
+    },
     // Vendor Services
     VENDOR_SERVICES: {
       LIST: '/api/marketplace/vendor/services',

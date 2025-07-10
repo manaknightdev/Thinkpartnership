@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
+import ChatAPI from "@/services/ChatAPI";
 import {
   ArrowLeft,
   Phone,
@@ -23,6 +24,7 @@ const ServiceDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [hasChattedWithSeller, setHasChattedWithSeller] = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
 
   // Fetch service details on component mount
   useEffect(() => {
@@ -53,6 +55,39 @@ const ServiceDetailsPage = () => {
 
     fetchServiceDetails();
   }, [id]);
+
+  // Handle starting a chat with the vendor
+  const handleStartChat = async () => {
+    if (!service || !service.vendor) {
+      setError("Service or vendor information not available");
+      return;
+    }
+
+    try {
+      setStartingChat(true);
+      setError("");
+
+      const response = await ChatAPI.startChat({
+        service_id: service.id,
+        vendor_id: service.vendor.id,
+        initial_message: `Hi! I'm interested in your service "${service.title}". Could you provide more information?`
+      });
+
+      if (response.error) {
+        throw new Error(response.message || 'Failed to start chat');
+      }
+
+      setHasChattedWithSeller(true);
+      // Navigate to the chat page with the chat ID
+      navigate(`/marketplace/chat/${response.data.chat_id}`);
+
+    } catch (err: any) {
+      console.error('Error starting chat:', err);
+      setError(err.message || 'Failed to start chat');
+    } finally {
+      setStartingChat(false);
+    }
+  };
 
   // Loading state
   if (loading) {
@@ -245,13 +280,15 @@ const ServiceDetailsPage = () => {
                   size="lg"
                   variant="outline"
                   className="w-full text-lg py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
-                  onClick={() => {
-                    setHasChattedWithSeller(true);
-                    navigate(`/marketplace/chat/${encodeURIComponent(service.vendor?.name || '')}`);
-                  }}
+                  onClick={handleStartChat}
+                  disabled={startingChat}
                 >
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Chat with Provider
+                  {startingChat ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                  )}
+                  {startingChat ? 'Starting Chat...' : 'Chat with Provider'}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
