@@ -19,6 +19,7 @@ import VendorProfilePage from "./pages/vendor/VendorProfilePage";
 import VendorServicesPage from "./pages/vendor/VendorServicesPage";
 import VendorServiceTiersPage from "./pages/vendor/VendorServiceTiersPage";
 import VendorRequestsPage from "./pages/vendor/VendorRequestsPage";
+import VendorOrdersPage from "./pages/vendor/VendorOrdersPage";
 import VendorMessagesPage from "./pages/vendor/VendorMessagesPage";
 import VendorCustomersPage from "./pages/vendor/VendorCustomersPage";
 import VendorFeaturedPlacementPage from "./pages/vendor/VendorFeaturedPlacementPage";
@@ -53,6 +54,7 @@ import CustomerOrdersPage from "./pages/customer/CustomerOrdersPage";
 import CustomerAccountPage from "./pages/customer/CustomerAccountPage";
 import ServiceDetailsPage from "./pages/customer/ServiceDetailsPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
+import PaymentSuccessPage from "./pages/customer/PaymentSuccessPage";
 import CategoriesPage from "./pages/customer/CategoriesPage";
 import AllServicesPage from "./pages/customer/AllServicesPage";
 import AccountPage from "./pages/customer/AccountPage";
@@ -130,11 +132,13 @@ const App = () => (
           <Route path="/marketplace/services" element={<ProtectedRoute><AllServicesPage /></ProtectedRoute>} />
           <Route path="/marketplace/services/:id" element={<ProtectedRoute><ServiceDetailsPage /></ProtectedRoute>} />
           <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+          <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
           <Route path="/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
           <Route path="/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
           <Route path="/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
-          <Route path="/marketplace/request-service/:serviceName" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
+          <Route path="/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
           <Route path="/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
           <Route path="/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
@@ -174,6 +178,7 @@ const App = () => (
             <Route path="services" element={<VendorServicesPage />} />
             <Route path="service-tiers" element={<VendorServiceTiersPage />} />
             <Route path="requests" element={<VendorRequestsPage />} />
+            <Route path="orders" element={<VendorOrdersPage />} />
             <Route path="messages" element={<VendorMessagesPage />} />
             <Route path="messages/:customerId" element={<VendorMessagesPage />} />
             <Route path="customers" element={<VendorCustomersPage />} />

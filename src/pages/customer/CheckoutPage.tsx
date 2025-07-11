@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,94 +6,103 @@ import { Badge } from "@/components/ui/badge";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, Clock, Shield } from "lucide-react";
-
-const mockServiceDetails = {
-  "Home Painting": {
-    vendor: "Brush Strokes Pro",
-    description: "Transform your home with high-quality interior and exterior painting services. Experienced and reliable.",
-    price: 500,
-    responseTime: "2 hours",
-    deliveryTime: "3-5 days",
-    image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center",
-    vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-    completedOrders: 150,
-    tags: ["Interior", "Exterior", "Eco-friendly"]
-  },
-  "Emergency Plumbing Repair": {
-    vendor: "Rapid Plumbers",
-    description: "24/7 emergency plumbing services for leaks, clogs, and burst pipes. Fast response guaranteed.",
-    price: 150,
-    responseTime: "30 mins",
-    deliveryTime: "Same day",
-    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop&crop=center",
-    vendorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-    completedOrders: 89,
-    tags: ["24/7", "Emergency", "Licensed"]
-  },
-  "Full Home Inspection": {
-    vendor: "Certified Inspectors Inc.",
-    description: "Comprehensive home inspections for buyers and sellers. Detailed reports and expert advice.",
-    price: 300,
-    responseTime: "1 day",
-    deliveryTime: "2-3 days",
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center",
-    vendorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-    completedOrders: 200,
-    tags: ["Certified", "Detailed Reports", "Pre-purchase"]
-  },
-  "Professional Lawn Care": {
-    vendor: "Green Thumb Landscaping",
-    description: "Regular lawn mowing, fertilization, and garden maintenance to keep your yard pristine.",
-    price: 80,
-    responseTime: "4 hours",
-    deliveryTime: "Weekly",
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center",
-    vendorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-    completedOrders: 300,
-    tags: ["Weekly Service", "Organic", "Seasonal"]
-  },
-  "HVAC System Tune-up": {
-    vendor: "Climate Control Experts",
-    description: "Seasonal maintenance to ensure your heating and cooling systems run efficiently.",
-    price: 120,
-    responseTime: "6 hours",
-    deliveryTime: "1-2 days",
-    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop&crop=center",
-    vendorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-    completedOrders: 120,
-    tags: ["Maintenance", "Energy Efficient", "Warranty"]
-  },
-  "Deep House Cleaning": {
-    vendor: "Sparkling Spaces",
-    description: "Thorough cleaning services for homes, including kitchens, bathrooms, and living areas.",
-    price: 200,
-    responseTime: "3 hours",
-    deliveryTime: "Same day",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center",
-    vendorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-    completedOrders: 250,
-    tags: ["Deep Clean", "Eco-friendly", "Insured"]
-  },
-};
+import { ArrowLeft, CheckCircle, Clock, Shield, Loader2 } from "lucide-react";
+import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
 
 const CheckoutPage = () => {
   const { serviceName } = useParams<{ serviceName: string }>();
   const navigate = useNavigate();
+  const [service, setService] = useState<ServiceDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const service = serviceName ? mockServiceDetails[serviceName as keyof typeof mockServiceDetails] : undefined;
+  // Fetch service details by name
+  useEffect(() => {
+    const fetchServiceByName = async () => {
+      if (!serviceName) {
+        setError('Service name is required');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError('');
+
+        // First get all services and find by title
+        const response = await ServicesAPI.getServices({ search: decodeURIComponent(serviceName) });
+
+        if (response.error || !response.services || response.services.length === 0) {
+          setError('Service not found');
+          setLoading(false);
+          return;
+        }
+
+        // Find exact match by title
+        const matchedService = response.services.find(s =>
+          s.title.toLowerCase() === decodeURIComponent(serviceName).toLowerCase()
+        );
+
+        if (!matchedService) {
+          setError('Service not found');
+          setLoading(false);
+          return;
+        }
+
+        // Get detailed service information
+        const detailsResponse = await ServicesAPI.getServiceDetails(matchedService.id);
+
+        if (detailsResponse.error) {
+          setError('Failed to load service details');
+        } else {
+          const serviceData = detailsResponse.service;
+          // Ensure base_price is a number
+          if (serviceData.base_price && typeof serviceData.base_price === 'string') {
+            serviceData.base_price = parseFloat(serviceData.base_price);
+          }
+          setService(serviceData);
+        }
+      } catch (err: any) {
+        console.error('Error fetching service:', err);
+        setError(err.message || 'Failed to load service');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServiceByName();
+  }, [serviceName]);
 
   const handlePaymentComplete = (paymentData: any) => {
     toast.success("Payment successful! Your order has been placed.");
     console.log("Payment completed:", paymentData);
 
-    // In a real app, this would send data to backend
+    // Store payment data for the success page
+    localStorage.setItem('lastPaymentData', JSON.stringify(paymentData));
+
+    // Redirect to payment success page
     setTimeout(() => {
-      navigate("/marketplace/orders");
+      navigate("/marketplace/payment-success");
     }, 2000);
   };
 
-  if (!service) {
+  // Loading state
+  if (loading) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-green-600" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Service Details</h2>
+            <p className="text-gray-600">Please wait while we prepare your checkout...</p>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
+
+  // Error or no service found
+  if (error || !service) {
     return (
       <MarketplaceLayout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -100,9 +110,11 @@ const CheckoutPage = () => {
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <ArrowLeft className="w-10 h-10 text-red-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              {error || 'Service Not Found'}
+            </h1>
             <p className="text-lg text-gray-600 mb-8">
-              The service you are trying to purchase does not exist.
+              {error || 'The service you are trying to purchase does not exist.'}
             </p>
             <Button
               onClick={() => navigate("/marketplace")}
@@ -125,7 +137,7 @@ const CheckoutPage = () => {
             <Button
               variant="outline"
               className="mb-6 flex items-center gap-2"
-              onClick={() => navigate(`/marketplace/services/${encodeURIComponent(serviceName || '')}`)}
+              onClick={() => navigate(`/marketplace/services/${service.id}`)}
             >
               <ArrowLeft className="w-4 h-4" /> Back to Service Details
             </Button>
@@ -184,38 +196,37 @@ const CheckoutPage = () => {
                   <CardContent className="space-y-6">
                     <div className="relative">
                       <img
-                        src={service.image}
-                        alt={serviceName}
+                        src={service.images && service.images.length > 0 ? service.images[0] : service.image}
+                        alt={service.title}
                         className="w-full h-48 object-cover rounded-xl"
                       />
-
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{serviceName}</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
                       <p className="text-gray-600 mb-4">{service.description}</p>
 
                       <div className="flex items-center space-x-4 mb-4">
                         <div className="flex items-center space-x-1 text-sm text-gray-500">
                           <Clock className="w-4 h-4" />
-                          <span>{service.responseTime} response</span>
+                          <span>{service.response_time} response</span>
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-3 mb-6">
                         <img
-                          src={service.vendorImage}
-                          alt={service.vendor}
+                          src={service.vendor.image}
+                          alt={service.vendor.name}
                           className="w-10 h-10 rounded-full"
                         />
                         <div>
-                          <div className="font-semibold text-gray-900">{service.vendor}</div>
-                          <div className="text-sm text-gray-600">{service.completedOrders} orders completed</div>
+                          <div className="font-semibold text-gray-900">{service.vendor.name}</div>
+                          <div className="text-sm text-gray-600">{service.vendor.completed_orders} orders completed</div>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 mb-6">
-                        {Array.isArray(service.tags) && service.tags.map((tag, index) => (
+                        {service.category_tags && service.category_tags.map((tag, index) => (
                           <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full">
                             {tag}
                           </Badge>
@@ -226,12 +237,14 @@ const CheckoutPage = () => {
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-gray-600">Service Price</span>
                           <div className="flex items-center space-x-2">
-                            <span className="text-lg font-bold text-gray-900">${service.price}</span>
+                            <span className="text-lg font-bold text-gray-900">
+                              ${typeof service.base_price === 'number' ? service.base_price.toFixed(2) : parseFloat(service.base_price || '0').toFixed(2)}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-sm text-gray-600">
                           <span>Delivery Time</span>
-                          <span>{service.deliveryTime}</span>
+                          <span>{service.delivery_time}</span>
                         </div>
                       </div>
                     </div>
@@ -242,8 +255,11 @@ const CheckoutPage = () => {
               {/* Payment Form */}
               <div className="lg:col-span-3">
                 <PaymentForm
-                  amount={service.price}
-                  serviceName={serviceName || ''}
+                  amount={typeof service.base_price === 'number' ? service.base_price : parseFloat(service.base_price || '0')}
+                  serviceName={service.title}
+                  serviceId={service.id}
+                  vendorId={service.vendor?.id}
+                  serviceType="fixed"
                   onPaymentComplete={handlePaymentComplete}
                 />
               </div>

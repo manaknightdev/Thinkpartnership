@@ -31,6 +31,8 @@ import {
   Shield,
   Zap,
   Loader2,
+  ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -42,6 +44,7 @@ import VendorWalletAPI, {
   EarningsStats,
   WithdrawalRequest
 } from "@/services/VendorWalletAPI";
+import VendorStripeAPI, { StripeAccountStatus } from "@/services/VendorStripeAPI";
 import { showSuccess, showError } from "@/utils/toast";
 
 const VendorWalletPage = () => {
@@ -74,9 +77,28 @@ const VendorWalletPage = () => {
     withdrawal_threshold: 1000,
   });
 
+  // Stripe account state
+  const [stripeAccount, setStripeAccount] = useState<StripeAccountStatus | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
+
   // Load data on component mount
   useEffect(() => {
     loadWalletData();
+  }, []);
+
+  // Check for Stripe connection status from URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('connected') === 'true') {
+      showSuccess('Stripe account connected successfully!');
+      loadStripeAccountStatus();
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('refresh') === 'true') {
+      loadStripeAccountStatus();
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const loadWalletData = async () => {
@@ -84,26 +106,57 @@ const VendorWalletPage = () => {
       setIsLoading(true);
       setError("");
 
-      // Load all wallet data in parallel
-      const [balanceRes, transactionsRes, paymentMethodsRes, statsRes] = await Promise.all([
-        VendorWalletAPI.getWalletBalance(),
-        VendorWalletAPI.getTransactions({ page: pagination.page, limit: pagination.limit }),
+      // Load wallet data from orders
+      const walletResponse = await fetch('/api/marketplace/vendor/auth/wallet/transactions', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
+        }
+      });
+
+      if (walletResponse.ok) {
+        const walletData = await walletResponse.json();
+        if (!walletData.error) {
+          setWalletBalance({
+            available_balance: walletData.data.balance,
+            pending_balance: 0,
+            total_earnings: walletData.data.balance,
+            currency: 'USD'
+          });
+          setTransactions(walletData.data.transactions);
+          setPagination(walletData.data.pagination);
+        }
+      }
+
+      // Load other data in parallel
+      const [paymentMethodsRes, statsRes] = await Promise.all([
         VendorWalletAPI.getPaymentMethods(),
         VendorWalletAPI.getEarningsStats(),
       ]);
 
-      if (balanceRes.error) {
-        setError(balanceRes.message);
-        return;
+      // Load Stripe account status separately (non-critical)
+      try {
+        const stripeStatus = await VendorStripeAPI.getAccountStatus();
+        setStripeAccount(stripeStatus);
+      } catch (err) {
+        console.error('Failed to load Stripe account status:', err);
+        // Don't show error for Stripe status as it's not critical
       }
 
-      if (balanceRes.data) setWalletBalance(balanceRes.data);
-      if (transactionsRes.data) {
-        setTransactions(transactionsRes.data.transactions);
-        if (transactionsRes.pagination) setPagination(transactionsRes.pagination);
+      // Handle other API responses
+      if (paymentMethodsRes.error) {
+        console.warn('Failed to load payment methods:', paymentMethodsRes.message);
+      } else {
+        setPaymentMethods(paymentMethodsRes.data || []);
       }
-      if (paymentMethodsRes.data) setPaymentMethods(paymentMethodsRes.data.payment_methods);
-      if (statsRes.data) setEarningsStats(statsRes.data);
+
+      if (statsRes.error) {
+        console.warn('Failed to load earnings stats:', statsRes.message);
+      } else {
+        setEarningsStats(statsRes.data);
+      }
+
+      // Data is already set above from wallet API
 
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load wallet data");
@@ -277,9 +330,48 @@ const VendorWalletPage = () => {
     );
   }
 
-  const handleConnectStripe = () => {
-    // TODO: Implement Stripe Connect onboarding
-    showSuccess("Stripe Connect functionality coming soon!");
+  // Handle Stripe account connection
+  const handleConnectStripe = async () => {
+    try {
+      setStripeLoading(true);
+      setError('');
+
+      await VendorStripeAPI.redirectToStripeConnect();
+    } catch (err: any) {
+      setError(err.message || 'Failed to connect Stripe account');
+      setStripeLoading(false);
+    }
+  };
+
+  // Handle Stripe account disconnection
+  const handleStripeDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect your Stripe account? This will disable your ability to receive payments.')) {
+      return;
+    }
+
+    try {
+      setStripeLoading(true);
+      setError('');
+
+      await VendorStripeAPI.disconnectAccount();
+      await loadStripeAccountStatus();
+      showSuccess('Stripe account disconnected successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to disconnect Stripe account');
+    } finally {
+      setStripeLoading(false);
+    }
+  };
+
+  // Load Stripe account status
+  const loadStripeAccountStatus = async () => {
+    try {
+      const accountStatus = await VendorStripeAPI.getAccountStatus();
+      setStripeAccount(accountStatus);
+    } catch (err: any) {
+      console.error('Failed to load Stripe account status:', err);
+      // Don't show error for Stripe account status as it's not critical
+    }
   };
 
   const handleAddPaymentMethod = () => {
@@ -468,38 +560,163 @@ const VendorWalletPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" />
-                Stripe Connection
+                <DollarSign className="h-5 w-5" />
+                Stripe Account Connection
               </CardTitle>
+              <p className="text-sm text-gray-600">
+                Connect your Stripe account to receive payments and manage withdrawals securely.
+              </p>
             </CardHeader>
-            <CardContent>
-              <div className="text-center space-y-4">
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                  <Shield className="h-10 w-10 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Stripe</h3>
-                  <p className="text-gray-600 mb-4">
-                    Connect your Stripe account to receive payouts securely and efficiently.
-                  </p>
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
-                    onClick={handleConnectStripe}
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Connect with Stripe
-                  </Button>
-                </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <h4 className="font-semibold text-green-900">Secure & Trusted</h4>
+            <CardContent className="space-y-4">
+              {stripeAccount ? (
+                <div className="space-y-4">
+                  {/* Account Status */}
+                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                        stripeAccount.connected && stripeAccount.details_submitted
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-yellow-100 text-yellow-600'
+                      }`}>
+                        {stripeAccount.connected && stripeAccount.details_submitted ? (
+                          <CheckCircle className="w-6 h-6" />
+                        ) : (
+                          <AlertCircle className="w-6 h-6" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {stripeAccount.connected ? 'Stripe Account Connected' : 'Stripe Account Not Connected'}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {stripeAccount.connected && stripeAccount.details_submitted
+                            ? 'Your account is fully set up and ready to receive payments'
+                            : stripeAccount.connected
+                              ? 'Complete your account setup to start receiving payments'
+                              : 'Connect your Stripe account to receive payments'
+                          }
+                        </div>
+                        {stripeAccount.company && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {stripeAccount.company.name}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {stripeAccount.connected ? (
+                        <>
+                          {!stripeAccount.details_submitted && (
+                            <Button
+                              onClick={handleConnectStripe}
+                              disabled={stripeLoading}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              {stripeLoading ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                              )}
+                              Complete Setup
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            onClick={handleStripeDisconnect}
+                            disabled={stripeLoading}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            {stripeLoading ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4 mr-2" />
+                            )}
+                            Disconnect
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          onClick={handleConnectStripe}
+                          disabled={stripeLoading}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {stripeLoading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                          )}
+                          Connect Stripe Account
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-green-700">
-                    Stripe provides bank-level security for all your payment transactions and payouts.
-                  </p>
+
+                  {/* Account Capabilities */}
+                  {stripeAccount.connected && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full ${
+                            stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
+                          }`}></div>
+                          <span className="font-medium text-gray-900">Accept Payments</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {stripeAccount.charges_enabled ? 'Enabled' : 'Disabled'}
+                        </p>
+                      </div>
+                      <div className="p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full ${
+                            stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
+                          }`}></div>
+                          <span className="font-medium text-gray-900">Receive Payouts</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {stripeAccount.payouts_enabled ? 'Enabled' : 'Disabled'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Requirements */}
+                  {stripeAccount.connected && stripeAccount.requirements && stripeAccount.requirements.currently_due.length > 0 && (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <AlertCircle className="w-4 h-4 text-yellow-600" />
+                        <span className="font-medium text-yellow-800">Action Required</span>
+                      </div>
+                      <p className="text-sm text-yellow-700 mb-2">
+                        Complete the following requirements to fully activate your account:
+                      </p>
+                      <ul className="text-sm text-yellow-700 list-disc list-inside">
+                        {stripeAccount.requirements.currently_due.slice(0, 5).map((requirement, index) => (
+                          <li key={index}>{requirement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>
+                        ))}
+                        {stripeAccount.requirements.currently_due.length > 5 && (
+                          <li>... and {stripeAccount.requirements.currently_due.length - 5} more</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Security Notice */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <h4 className="font-semibold text-green-900">Secure & Trusted</h4>
+                    </div>
+                    <p className="text-sm text-green-700">
+                      Stripe provides bank-level security for all your payment transactions and payouts.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600">Loading Stripe account status...</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

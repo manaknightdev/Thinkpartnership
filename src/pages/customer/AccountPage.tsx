@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import UserAPI, { UserProfile, UpdateProfileData, ChangePasswordData } from "@/services/UserAPI";
+import StripeAPI, { StripeAccountStatus } from "@/services/StripeAPI";
 import {
   User,
   CreditCard,
@@ -22,7 +23,10 @@ import {
   EyeOff,
   Calendar,
   Loader2,
-  CheckCircle
+  CheckCircle,
+  ExternalLink,
+  AlertCircle,
+  DollarSign
 } from "lucide-react";
 
 const AccountPage = () => {
@@ -44,6 +48,10 @@ const AccountPage = () => {
     new_password: '',
     confirm_password: ''
   });
+
+  // Stripe account state
+  const [stripeAccount, setStripeAccount] = useState<StripeAccountStatus | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   // Fetch user profile
   useEffect(() => {
@@ -71,6 +79,9 @@ const AccountPage = () => {
           sms_notifications: response.user.sms_notifications || false,
           marketing_emails: response.user.marketing_emails || false
         });
+
+        // Load Stripe account status
+        await loadStripeAccountStatus();
       } catch (err: any) {
         setError(err.message || 'Failed to load profile');
       } finally {
@@ -163,7 +174,65 @@ const AccountPage = () => {
     }
   };
 
+  // Load Stripe account status
+  const loadStripeAccountStatus = async () => {
+    try {
+      const accountStatus = await StripeAPI.getAccountStatus();
+      setStripeAccount(accountStatus);
+    } catch (err: any) {
+      console.error('Failed to load Stripe account status:', err);
+      // Don't show error for Stripe account status as it's not critical
+    }
+  };
 
+  // Handle Stripe account connection
+  const handleStripeConnect = async () => {
+    try {
+      setStripeLoading(true);
+      setError('');
+
+      await StripeAPI.redirectToStripeConnect();
+    } catch (err: any) {
+      setError(err.message || 'Failed to connect Stripe account');
+      setStripeLoading(false);
+    }
+  };
+
+  // Handle Stripe account disconnection
+  const handleStripeDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect your Stripe account? This will disable your ability to receive payments.')) {
+      return;
+    }
+
+    try {
+      setStripeLoading(true);
+      setError('');
+      setSuccess('');
+
+      await StripeAPI.disconnectAccount();
+      await loadStripeAccountStatus();
+      setSuccess('Stripe account disconnected successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to disconnect Stripe account');
+    } finally {
+      setStripeLoading(false);
+    }
+  };
+
+  // Check for Stripe connection status from URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('connected') === 'true') {
+      setSuccess('Stripe account connected successfully!');
+      loadStripeAccountStatus();
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('refresh') === 'true') {
+      loadStripeAccountStatus();
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const tabs = [
     { id: "profile", name: "Profile", icon: User },
@@ -458,109 +527,176 @@ const AccountPage = () => {
 
 
   const renderPaymentTab = () => {
-    const paymentMethods = [
-      {
-        id: 1,
-        type: "card",
-        brand: "visa",
-        last4: "4242",
-        expiryMonth: 12,
-        expiryYear: 2025,
-        isDefault: true,
-        name: "John Doe"
-      },
-      {
-        id: 2,
-        type: "card",
-        brand: "mastercard",
-        last4: "8888",
-        expiryMonth: 8,
-        expiryYear: 2026,
-        isDefault: false,
-        name: "John Doe"
-      }
-    ];
-
-    const getBrandIcon = (brand: string) => {
-      switch (brand) {
-        case "visa":
-          return "💳";
-        case "mastercard":
-          return "💳";
-        case "amex":
-          return "💳";
-        default:
-          return "💳";
-      }
-    };
 
     return (
       <div className="space-y-6">
-        {/* Payment Methods */}
+        {/* Stripe Account Connection */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Payment Methods</CardTitle>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Add Payment Method
-            </Button>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5" />
+              Stripe Account Connection
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              Connect your Stripe account to receive payments and manage withdrawals securely.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {paymentMethods.map((method) => (
-              <div key={method.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center text-white text-lg">
-                    {getBrandIcon(method.brand)}
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900">
-                        •••• •••• •••• {method.last4}
-                      </span>
-                      {method.isDefault && (
-                        <Badge className="bg-green-100 text-green-700 text-xs">Default</Badge>
+            {stripeAccount ? (
+              <div className="space-y-4">
+                {/* Account Status */}
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      stripeAccount.connected && stripeAccount.details_submitted
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-yellow-100 text-yellow-600'
+                    }`}>
+                      {stripeAccount.connected && stripeAccount.details_submitted ? (
+                        <CheckCircle className="w-6 h-6" />
+                      ) : (
+                        <AlertCircle className="w-6 h-6" />
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">
-                      Expires {method.expiryMonth.toString().padStart(2, '0')}/{method.expiryYear}
-                    </p>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {stripeAccount.connected ? 'Stripe Account Connected' : 'Stripe Account Not Connected'}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {stripeAccount.connected && stripeAccount.details_submitted
+                          ? 'Your account is fully set up and ready to receive payments'
+                          : stripeAccount.connected
+                            ? 'Complete your account setup to start receiving payments'
+                            : 'Connect your Stripe account to receive payments'
+                        }
+                      </div>
+                      {stripeAccount.individual && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {stripeAccount.individual.first_name} {stripeAccount.individual.last_name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {stripeAccount.connected ? (
+                      <>
+                        {!stripeAccount.details_submitted && (
+                          <Button
+                            onClick={handleStripeConnect}
+                            disabled={stripeLoading}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            {stripeLoading ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <ExternalLink className="w-4 h-4 mr-2" />
+                            )}
+                            Complete Setup
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          onClick={handleStripeDisconnect}
+                          disabled={stripeLoading}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          {stripeLoading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4 mr-2" />
+                          )}
+                          Disconnect
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        onClick={handleStripeConnect}
+                        disabled={stripeLoading}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {stripeLoading ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                        )}
+                        Connect Stripe Account
+                      </Button>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {!method.isDefault && (
-                    <Button variant="outline" size="sm">
-                      Set as Default
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm">
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+
+                {/* Account Capabilities */}
+                {stripeAccount.connected && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${
+                          stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
+                        }`}></div>
+                        <span className="font-medium text-gray-900">Accept Payments</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {stripeAccount.charges_enabled ? 'Enabled' : 'Disabled'}
+                      </p>
+                    </div>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${
+                          stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
+                        }`}></div>
+                        <span className="font-medium text-gray-900">Receive Payouts</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {stripeAccount.payouts_enabled ? 'Enabled' : 'Disabled'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Requirements */}
+                {stripeAccount.connected && stripeAccount.requirements && stripeAccount.requirements.currently_due.length > 0 && (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <AlertCircle className="w-4 h-4 text-yellow-600" />
+                      <span className="font-medium text-yellow-800">Action Required</span>
+                    </div>
+                    <p className="text-sm text-yellow-700 mb-2">
+                      Complete the following requirements to fully activate your account:
+                    </p>
+                    <ul className="text-sm text-yellow-700 list-disc list-inside">
+                      {stripeAccount.requirements.currently_due.map((requirement, index) => (
+                        <li key={index}>{requirement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600">Loading Stripe account status...</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Billing History */}
+        {/* Transaction History */}
         <Card>
           <CardHeader>
-            <CardTitle>Purchase History</CardTitle>
+            <CardTitle>Transaction History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
-                { date: "2024-01-15", amount: "$150.00", service: "Emergency Plumbing Repair", status: "Paid" },
-                { date: "2024-01-10", amount: "$200.00", service: "Deep House Cleaning", status: "Paid" },
-                { date: "2024-01-05", amount: "$80.00", service: "Professional Lawn Care", status: "Paid" },
-                { date: "2024-01-01", amount: "$500.00", service: "Premium Home Painting", status: "Paid" }
+                { date: "2024-01-15", amount: "$150.00", service: "Emergency Plumbing Repair", status: "Completed", type: "Payment" },
+                { date: "2024-01-10", amount: "$200.00", service: "Deep House Cleaning", status: "Completed", type: "Payment" },
+                { date: "2024-01-05", amount: "$80.00", service: "Professional Lawn Care", status: "Completed", type: "Payment" },
+                { date: "2024-01-01", amount: "$500.00", service: "Premium Home Painting", status: "Completed", type: "Payment" }
               ].map((transaction, index) => (
                 <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <div className="font-medium text-gray-900">{transaction.service}</div>
-                    <div className="text-sm text-gray-600">{transaction.date}</div>
+                    <div className="text-sm text-gray-600">{transaction.date} • {transaction.type}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-medium text-gray-900">{transaction.amount}</div>
@@ -590,8 +726,8 @@ const AccountPage = () => {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <Label>Save payment methods</Label>
-                <p className="text-sm text-gray-600">Securely store cards for faster checkout</p>
+                <Label>Transaction notifications</Label>
+                <p className="text-sm text-gray-600">Get notified about withdrawals and deposits</p>
               </div>
               <Switch defaultChecked />
             </div>

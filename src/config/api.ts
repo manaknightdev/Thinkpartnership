@@ -8,17 +8,36 @@ export const API_CONFIG = {
       LOGIN: '/api/marketplace/auth/login',
       PROFILE: '/api/marketplace/auth/profile',
     },
+    // Customer Stripe Integration
+    STRIPE: {
+      CONNECT: '/api/marketplace/auth/stripe/connect',
+      ACCOUNT_STATUS: '/api/marketplace/auth/stripe/account-status',
+      DISCONNECT: '/api/marketplace/auth/stripe/disconnect',
+      CREATE_PAYMENT: '/api/marketplace/auth/stripe/create-payment',
+    },
     // Vendor Authentication
     VENDOR_AUTH: {
       REGISTER: '/api/marketplace/vendor/auth/register',
       LOGIN: '/api/marketplace/vendor/auth/login',
       PROFILE: '/api/marketplace/vendor/auth/profile',
     },
+    // Vendor Stripe Integration
+    VENDOR_STRIPE: {
+      CONNECT: '/api/marketplace/vendor/auth/stripe/connect',
+      ACCOUNT_STATUS: '/api/marketplace/vendor/auth/stripe/account-status',
+      DISCONNECT: '/api/marketplace/vendor/auth/stripe/disconnect',
+    },
     // Client Authentication
     CLIENT_AUTH: {
       REGISTER: '/api/marketplace/client/auth/register',
       LOGIN: '/api/marketplace/client/auth/login',
       PROFILE: '/api/marketplace/client/auth/profile',
+    },
+    // Client Stripe Integration
+    CLIENT_STRIPE: {
+      CONNECT: '/api/marketplace/client/auth/stripe/connect',
+      ACCOUNT_STATUS: '/api/marketplace/client/auth/stripe/account-status',
+      DISCONNECT: '/api/marketplace/client/auth/stripe/disconnect',
     },
     // Admin Authentication
     ADMIN_AUTH: {

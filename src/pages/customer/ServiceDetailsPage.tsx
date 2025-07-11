@@ -271,7 +271,7 @@ const ServiceDetailsPage = () => {
                 <Button
                   size="lg"
                   className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  onClick={() => navigate(`/marketplace/request-service/${service.id}`)}
+                  onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
                 >
                   Request Service Now
                 </Button>

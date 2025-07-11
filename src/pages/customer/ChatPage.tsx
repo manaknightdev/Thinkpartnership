@@ -61,6 +61,7 @@ const ChatPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [allChats, setAllChats] = useState<Chat[]>([]);
 
   // Load chat data and messages
   useEffect(() => {
@@ -80,6 +81,9 @@ const ChatPage = () => {
         if (chatsResponse.error) {
           throw new Error('Failed to load chats');
         }
+
+        // Store all chats for the sidebar
+        setAllChats(chatsResponse.chats);
 
         const chat = chatsResponse.chats.find(c => c.id.toString() === chatId);
         if (!chat) {
@@ -105,8 +109,6 @@ const ChatPage = () => {
 
     loadChatData();
   }, [chatId]);
-
-
 
   // Marketplace sidebar items
   const sidebarItems = [
@@ -238,7 +240,19 @@ const ChatPage = () => {
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffInHours < 48) {
+      return 'Yesterday';
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} days ago`;
+    }
   };
 
   return (
@@ -486,73 +500,50 @@ const ChatPage = () => {
 
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto">
-          {[
-            {
-              name: "Certified Inspectors Inc.",
-              lastMessage: "Perfect! For 500 sq ft with quality paint...",
-              time: "10:45 AM",
-              unread: 2,
-              avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-              active: currentChat?.vendor.name === "Certified Inspectors Inc."
-            },
-            {
-              name: "Rapid Plumbers",
-              lastMessage: "I can be there tomorrow morning",
-              time: "Yesterday",
-              unread: 0,
-              avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-              active: currentChat?.vendor.name === "Rapid Plumbers"
-            },
-            {
-              name: "Sparkling Spaces",
-              lastMessage: "Thank you for choosing our service!",
-              time: "2 days ago",
-              unread: 0,
-              avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-              active: currentChat?.vendor.name === "Sparkling Spaces"
-            },
-            {
-              name: "Green Thumb Landscaping",
-              lastMessage: "The quote is ready for review",
-              time: "3 days ago",
-              unread: 1,
-              avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
-              active: currentChat?.vendor.name === "Green Thumb Landscaping"
-            }
-          ].map((chat, index) => (
-            <div
-              key={index}
-              className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                chat.active ? 'bg-blue-50 border-blue-200' : ''
-              }`}
-              onClick={() => navigate(`/marketplace/chat/${encodeURIComponent(chat.name)}`)}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <img
-                    src={chat.avatar}
-                    alt={chat.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-gray-900 truncate">{chat.name}</h3>
-                    <span className="text-xs text-gray-500">{chat.time}</span>
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="text-gray-500">Loading chats...</div>
+            </div>
+          ) : allChats.length === 0 ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="text-gray-500">No chats available</div>
+            </div>
+          ) : (
+            allChats.map((chat) => (
+              <div
+                key={chat.id}
+                className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                  currentChat?.id === chat.id ? 'bg-blue-50 border-blue-200' : ''
+                }`}
+                onClick={() => navigate(`/marketplace/chat/${chat.id}`)}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <img
+                      src={chat.vendor.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"}
+                      alt={chat.vendor.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                   </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
-                    {chat.unread > 0 && (
-                      <Badge className="bg-blue-500 text-white text-xs ml-2">
-                        {chat.unread}
-                      </Badge>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium text-gray-900 truncate">{chat.vendor.name}</h3>
+                      <span className="text-xs text-gray-500">{formatTimestamp(chat.last_message_time)}</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-sm text-gray-600 truncate">{chat.last_message}</p>
+                      {chat.unread_count > 0 && (
+                        <Badge className="bg-blue-500 text-white text-xs ml-2">
+                          {chat.unread_count}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -619,12 +610,12 @@ const ChatPage = () => {
                   <div className="text-sm">
                     <div className="flex items-center space-x-2 mb-1">
                       <MapPin className="w-3 h-3 text-gray-500" />
-                      <span className="text-gray-600">{currentChat?.vendor.location || "Location not available"}</span>
+                      <span className="text-gray-600">Location not available</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right text-sm">
-                  <div className="font-semibold text-gray-900">{currentChat?.vendor.completedJobs || 0} jobs completed</div>
+                  <div className="font-semibold text-gray-900">Professional Service Provider</div>
                   {/* <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                     Verified Pro
                   </Badge> */}

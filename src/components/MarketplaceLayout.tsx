@@ -32,7 +32,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const [requestCount, setRequestCount] = useState(2);
+  const [orderCount, setOrderCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
 
   // User profile state
@@ -84,8 +84,8 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     { name: "Browse", path: "/marketplace", icon: Home, exact: true },
     // { name: "Categories", path: "/marketplace/categories", icon: Grid3X3 },
     { name: "All Services", path: "/marketplace/services", icon: List },
-    { name: "Service Requests", path: "/marketplace/requests", icon: FileText },
-    { name: "Messages", path: "/marketplace/chat/Certified%20Inspectors%20Inc.", icon: MessageCircle },
+    { name: "My Orders", path: "/marketplace/orders", icon: FileText },
+    { name: "Messages", path: "/marketplace/messages", icon: MessageCircle },
     { name: "Account", path: "/marketplace/account", icon: Settings },
     { name: "Help", path: "/marketplace/help", icon: HelpCircle },
   ];
@@ -277,13 +277,13 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                 <item.icon className={cn("flex-shrink-0", sidebarCollapsed ? "h-5 w-5" : "h-5 w-5")} />
                 {!sidebarCollapsed && <span>{item.name}</span>}
 
-                {/* Badge for Service Requests */}
-                {item.name === "Service Requests" && requestCount > 0 && (
+                {/* Badge for My Orders */}
+                {item.name === "My Orders" && orderCount > 0 && (
                   <Badge className={cn(
                     "h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0",
                     sidebarCollapsed ? "absolute -top-1 -right-1" : "ml-auto"
                   )}>
-                    {requestCount}
+                    {orderCount}
                   </Badge>
                 )}
 
@@ -320,10 +320,10 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
 
-                    {/* Badge for Service Requests */}
-                    {item.name === "Service Requests" && requestCount > 0 && (
+                    {/* Badge for My Orders */}
+                    {item.name === "My Orders" && orderCount > 0 && (
                       <Badge className="ml-auto h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
-                        {requestCount}
+                        {orderCount}
                       </Badge>
                     )}
                   </Link>

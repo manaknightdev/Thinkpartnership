@@ -74,6 +74,10 @@ const VendorAccountPage = () => {
     show_response_time: true,
   });
 
+  // Stripe account state
+  const [stripeAccount, setStripeAccount] = useState<StripeAccountStatus | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
+
   const tabs = [
     { id: "profile", name: "Account Info", icon: User },
     { id: "notifications", name: "Notifications", icon: Bell },
