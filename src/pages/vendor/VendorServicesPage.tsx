@@ -1,12 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Percent, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import React, { useState, useEffect } from "react";
+import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Loader2, Upload, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +14,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import VendorServicesAPI, { VendorService, CreateServiceData, UpdateServiceData } from "@/services/VendorServicesAPI";
 import { showSuccess, showError } from "@/utils/toast";
+import API_CONFIG from "@/config/api";
 
 const VendorServicesPage = () => {
   const [services, setServices] = useState<VendorService[]>([]);
@@ -33,6 +32,17 @@ const VendorServicesPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Utility function to get full image URL
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath; // Already a full URL
+    return `${API_CONFIG.BASE_URL}${imagePath}`; // Convert relative path to full URL
+  };
   const [newService, setNewService] = useState<CreateServiceData>({
     title: "",
     description: "",
@@ -99,6 +109,26 @@ const VendorServicesPage = () => {
         return;
       }
 
+      // Upload image if one is selected
+      if (selectedImage && response.service) {
+        setIsUploadingImage(true);
+        try {
+          const imageResponse = await VendorServicesAPI.uploadServiceImage(selectedImage);
+
+          if (imageResponse.error) {
+            showError("Service created but failed to upload image: " + imageResponse.message);
+          } else if (imageResponse.url) {
+            // Update the service with the uploaded image URL
+            const updateData = { images: [imageResponse.url] };
+            await VendorServicesAPI.updateService(response.service.id, updateData);
+          }
+        } catch (imageErr: any) {
+          showError("Service created but failed to upload image");
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
       showSuccess("Service created successfully!");
       setShowCreateDialog(false);
       resetNewService();
@@ -143,6 +173,27 @@ const VendorServicesPage = () => {
         return;
       }
 
+      // Upload new image if one is selected
+      if (selectedImage) {
+        setIsUploadingImage(true);
+        try {
+          const imageResponse = await VendorServicesAPI.uploadServiceImage(selectedImage);
+
+          if (imageResponse.error) {
+            showError("Service updated but failed to upload new image: " + imageResponse.message);
+          } else if (imageResponse.url) {
+            // Update the service with the new image URL
+            const newImages = [...(newService.images || []), imageResponse.url];
+            const finalUpdateData = { ...updateData, images: newImages };
+            await VendorServicesAPI.updateService(editingService.id, finalUpdateData);
+          }
+        } catch (imageErr: any) {
+          showError("Service updated but failed to upload new image");
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
       showSuccess("Service updated successfully!");
       setShowEditDialog(false);
       setEditingService(null);
@@ -175,21 +226,30 @@ const VendorServicesPage = () => {
     }
   };
 
-  const handleToggleServiceStatus = async (serviceId: number, currentStatus: number) => {
-    try {
-      const newStatus = currentStatus === 1 ? 0 : 1;
-      const response = await VendorServicesAPI.toggleServiceStatus(serviceId, newStatus);
+  // Image handling functions
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
-      if (response.error) {
-        showError(response.message);
-        return;
-      }
+    const file = files[0]; // Take only the first file
+    setSelectedImage(file);
 
-      showSuccess(`Service ${newStatus === 1 ? 'activated' : 'deactivated'} successfully!`);
-      await loadServices();
-    } catch (err: any) {
-      showError(err.response?.data?.message || "Failed to update service status");
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreviewUrl(previewUrl);
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreviewUrl('');
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
+  };
+
+  const removeExistingImage = () => {
+    setNewService({ ...newService, images: [] });
   };
 
   const resetNewService = () => {
@@ -208,6 +268,13 @@ const VendorServicesPage = () => {
       service_areas: [],
       requirements: "",
     });
+
+    // Clean up image states
+    setSelectedImage(null);
+    setImagePreviewUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const openEditDialog = (service: VendorService) => {
@@ -227,6 +294,14 @@ const VendorServicesPage = () => {
       service_areas: service.service_areas || [],
       requirements: service.requirements || "",
     });
+
+    // Reset image upload states for editing
+    setSelectedImage(null);
+    setImagePreviewUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
     setShowEditDialog(true);
   };
 
@@ -302,14 +377,14 @@ const VendorServicesPage = () => {
                 Add Service
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
               <DialogHeader>
                 <DialogTitle>Add New Service</DialogTitle>
                 <DialogDescription>
                   Create a new service offering for your customers.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-4 py-4 overflow-y-auto flex-1 pr-2">
                 <div className="space-y-2">
                   <Label htmlFor="new-service-title">Service Title *</Label>
                   <Input
@@ -368,6 +443,55 @@ const VendorServicesPage = () => {
                     onChange={(e) => setNewService({ ...newService, short_description: e.target.value })}
                   />
                 </div>
+
+                {/* Image Upload Section */}
+                <div className="space-y-2">
+                  <Label>Service Image</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                    <div className="text-center">
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mb-2"
+                      >
+                        Choose Image
+                      </Button>
+                      <p className="text-sm text-gray-500">
+                        Upload one image (JPG, PNG, GIF)
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Image Preview */}
+                  {imagePreviewUrl && (
+                    <div className="relative w-32 h-32 mx-auto">
+                      <img
+                        src={imagePreviewUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                        onClick={removeImage}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="response-time">Response Time</Label>
@@ -389,20 +513,29 @@ const VendorServicesPage = () => {
                   </div>
                 </div>
               </div>
-              <Button
-                onClick={handleCreateService}
-                disabled={isCreating}
-                className="w-full"
-              >
-                {isCreating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Service"
-                )}
-              </Button>
+
+              {/* Fixed button at bottom */}
+              <div className="border-t pt-4 mt-4">
+                <Button
+                  onClick={handleCreateService}
+                  disabled={isCreating || isUploadingImage}
+                  className="w-full"
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : isUploadingImage ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Uploading Image...
+                    </>
+                  ) : (
+                    "Create Service"
+                  )}
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -424,7 +557,7 @@ const VendorServicesPage = () => {
                 <div className="aspect-video relative overflow-hidden">
                   {service.images && service.images.length > 0 ? (
                     <img
-                      src={service.images[0]}
+                      src={getImageUrl(service.images[0])}
                       alt={service.title}
                       className="w-full h-full object-cover"
                     />
@@ -433,15 +566,6 @@ const VendorServicesPage = () => {
                       <ImageIcon className="h-12 w-12 text-gray-400" />
                     </div>
                   )}
-                  <Badge
-                    className={`absolute top-2 right-2 ${
-                      service.status === 1
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-gray-500 hover:bg-gray-600"
-                    }`}
-                  >
-                    {service.status === 1 ? "Active" : "Inactive"}
-                  </Badge>
                 </div>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -467,14 +591,6 @@ const VendorServicesPage = () => {
                       Edit
                     </Button>
                     <Button
-                      onClick={() => handleToggleServiceStatus(service.id, service.status)}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                    >
-                      {service.status === 1 ? "Deactivate" : "Activate"}
-                    </Button>
-                    <Button
                       onClick={() => handleDeleteService(service.id)}
                       variant="outline"
                       size="sm"
@@ -498,7 +614,7 @@ const VendorServicesPage = () => {
                     <div className="w-20 h-20 flex-shrink-0 relative overflow-hidden rounded-lg">
                       {service.images && service.images.length > 0 ? (
                         <img
-                          src={service.images[0]}
+                          src={getImageUrl(service.images[0])}
                           alt={service.title}
                           className="w-full h-full object-cover"
                         />
@@ -516,17 +632,6 @@ const VendorServicesPage = () => {
                           <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{service.title}</h3>
                           <p className="text-sm text-gray-600">{service.short_description}</p>
                         </div>
-
-                        {/* Status Badge */}
-                        <Badge
-                          className={`ml-2 ${
-                            service.status === 1
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {service.status === 1 ? "Active" : "Inactive"}
-                        </Badge>
                       </div>
 
                       <p className="text-sm text-gray-600 line-clamp-2 mb-3">{service.description}</p>
@@ -547,13 +652,6 @@ const VendorServicesPage = () => {
                           >
                             <Edit className="h-4 w-4 mr-1" />
                             Edit
-                          </Button>
-                          <Button
-                            onClick={() => handleToggleServiceStatus(service.id, service.status)}
-                            variant="outline"
-                            size="sm"
-                          >
-                            {service.status === 1 ? "Deactivate" : "Activate"}
                           </Button>
                           <Button
                             onClick={() => handleDeleteService(service.id)}
@@ -588,14 +686,14 @@ const VendorServicesPage = () => {
 
       {/* Edit Service Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Edit Service</DialogTitle>
             <DialogDescription>
               Update your service details and pricing.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 overflow-y-auto flex-1 pr-2">
             <div className="space-y-2">
               <Label htmlFor="edit-service-title">Service Title *</Label>
               <Input
@@ -642,21 +740,101 @@ const VendorServicesPage = () => {
                 onChange={(e) => setNewService({ ...newService, description: e.target.value })}
               />
             </div>
-          </div>
-          <Button
-            onClick={handleUpdateService}
-            disabled={isUpdating}
-            className="w-full"
-          >
-            {isUpdating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              "Update Service"
+
+            {/* Current Image */}
+            {newService.images && newService.images.length > 0 && (
+              <div className="space-y-2">
+                <Label>Current Image</Label>
+                <div className="relative w-32 h-32 mx-auto">
+                  <img
+                    src={getImageUrl(newService.images[0])}
+                    alt="Current service image"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                    onClick={removeExistingImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
             )}
-          </Button>
+
+            {/* Replace Image */}
+            <div className="space-y-2">
+              <Label>Replace Image</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <div className="text-center">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mb-2"
+                  >
+                    Choose New Image
+                  </Button>
+                  <p className="text-sm text-gray-500">
+                    Upload one image (JPG, PNG, GIF)
+                  </p>
+                </div>
+              </div>
+
+              {/* New Image Preview */}
+              {imagePreviewUrl && (
+                <div className="relative w-32 h-32 mx-auto">
+                  <img
+                    src={imagePreviewUrl}
+                    alt="New image preview"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                    onClick={removeImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Fixed button at bottom */}
+          <div className="border-t pt-4 mt-4">
+            <Button
+              onClick={handleUpdateService}
+              disabled={isUpdating || isUploadingImage}
+              className="w-full"
+            >
+              {isUpdating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : isUploadingImage ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Uploading Image...
+                </>
+              ) : (
+                "Update Service"
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

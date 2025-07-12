@@ -45,6 +45,7 @@ import VendorWalletAPI, {
   WithdrawalRequest
 } from "@/services/VendorWalletAPI";
 import VendorStripeAPI, { StripeAccountStatus } from "@/services/VendorStripeAPI";
+import VendorOrdersAPI from "@/services/VendorOrdersAPI";
 import { showSuccess, showError } from "@/utils/toast";
 
 const VendorWalletPage = () => {
@@ -101,64 +102,112 @@ const VendorWalletPage = () => {
     }
   }, []);
 
+  // Load Stripe account status
+  const loadStripeAccountStatus = async () => {
+    try {
+      setStripeLoading(true);
+      const accountStatus = await VendorStripeAPI.getAccountStatus();
+      setStripeAccount(accountStatus);
+    } catch (err: any) {
+      console.error('Failed to load Stripe account status:', err);
+      // Set a default state to prevent infinite loading
+      setStripeAccount({
+        connected: false,
+        account_id: null,
+        details_submitted: false,
+        charges_enabled: false,
+        payouts_enabled: false
+      });
+    } finally {
+      setStripeLoading(false);
+    }
+  };
+
   const loadWalletData = async () => {
     try {
       setIsLoading(true);
       setError("");
 
-      // Load wallet data from orders
-      const walletResponse = await fetch('/api/marketplace/vendor/auth/wallet/transactions', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('vendor_token')}`
-        }
-      });
+      // Load wallet balance using the proper wallet API
+      const walletBalanceResponse = await VendorWalletAPI.getWalletBalance();
 
-      if (walletResponse.ok) {
-        const walletData = await walletResponse.json();
-        if (!walletData.error) {
-          setWalletBalance({
-            available_balance: walletData.data.balance,
-            pending_balance: 0,
-            total_earnings: walletData.data.balance,
-            currency: 'USD'
-          });
-          setTransactions(walletData.data.transactions);
-          setPagination(walletData.data.pagination);
-        }
+      if (!walletBalanceResponse.error && walletBalanceResponse.data) {
+        setWalletBalance(walletBalanceResponse.data);
+      } else {
+        console.warn('Wallet balance API returned error:', walletBalanceResponse.message);
+        // Set default empty state
+        setWalletBalance({
+          available_balance: 0,
+          pending_balance: 0,
+          total_earnings: 0,
+          total_withdrawals: 0,
+          currency: 'USD'
+        });
       }
 
-      // Load other data in parallel
-      const [paymentMethodsRes, statsRes] = await Promise.all([
-        VendorWalletAPI.getPaymentMethods(),
-        VendorWalletAPI.getEarningsStats(),
-      ]);
+      // Load wallet transactions
+      const transactionsResponse = await VendorWalletAPI.getTransactions();
+
+      if (!transactionsResponse.error && transactionsResponse.data) {
+        setTransactions(transactionsResponse.data.transactions);
+        // The pagination is at the root level of the response, not inside data
+        if ('pagination' in transactionsResponse && transactionsResponse.pagination) {
+          setPagination(transactionsResponse.pagination);
+        } else {
+          // Fallback pagination if not provided
+          setPagination({
+            page: 1,
+            limit: 10,
+            total: transactionsResponse.data.transactions.length,
+            pages: Math.ceil(transactionsResponse.data.transactions.length / 10)
+          });
+        }
+      } else {
+        console.warn('Wallet transactions API returned error:', transactionsResponse.message);
+        setTransactions([]);
+        setPagination({
+          page: 1,
+          limit: 10,
+          total: 0,
+          pages: 0
+        });
+      }
+
+      // Load other data in parallel - handle errors gracefully
+      try {
+        const [paymentMethodsRes, statsRes] = await Promise.all([
+          VendorWalletAPI.getPaymentMethods().catch(err => ({ error: true, message: err.message })),
+          VendorWalletAPI.getEarningsStats().catch(err => ({ error: true, message: err.message })),
+        ]);
+
+        // Handle payment methods response
+        if (paymentMethodsRes.error) {
+          console.warn('Failed to load payment methods:', paymentMethodsRes.message);
+          setPaymentMethods([]);
+        } else {
+          const paymentData = 'data' in paymentMethodsRes ? paymentMethodsRes.data : null;
+          setPaymentMethods(paymentData?.payment_methods || []);
+        }
+
+        // Handle earnings stats response
+        if (statsRes.error) {
+          console.warn('Failed to load earnings stats:', statsRes.message);
+          setEarningsStats(null);
+        } else {
+          const statsData = 'data' in statsRes ? statsRes.data : null;
+          setEarningsStats(statsData);
+        }
+      } catch (err) {
+        console.warn('Error loading additional wallet data:', err);
+        setPaymentMethods([]);
+        setEarningsStats(null);
+      }
 
       // Load Stripe account status separately (non-critical)
-      try {
-        const stripeStatus = await VendorStripeAPI.getAccountStatus();
-        setStripeAccount(stripeStatus);
-      } catch (err) {
-        console.error('Failed to load Stripe account status:', err);
-        // Don't show error for Stripe status as it's not critical
-      }
-
-      // Handle other API responses
-      if (paymentMethodsRes.error) {
-        console.warn('Failed to load payment methods:', paymentMethodsRes.message);
-      } else {
-        setPaymentMethods(paymentMethodsRes.data || []);
-      }
-
-      if (statsRes.error) {
-        console.warn('Failed to load earnings stats:', statsRes.message);
-      } else {
-        setEarningsStats(statsRes.data);
-      }
-
-      // Data is already set above from wallet API
+      loadStripeAccountStatus();
 
     } catch (err: any) {
+      console.error('Error in loadWalletData:', err);
       setError(err.response?.data?.message || "Failed to load wallet data");
     } finally {
       setIsLoading(false);
@@ -336,7 +385,7 @@ const VendorWalletPage = () => {
       setStripeLoading(true);
       setError('');
 
-      await VendorStripeAPI.redirectToStripeConnect();
+      VendorStripeAPI.redirectToStripeConnect();
     } catch (err: any) {
       setError(err.message || 'Failed to connect Stripe account');
       setStripeLoading(false);
@@ -360,17 +409,6 @@ const VendorWalletPage = () => {
       setError(err.message || 'Failed to disconnect Stripe account');
     } finally {
       setStripeLoading(false);
-    }
-  };
-
-  // Load Stripe account status
-  const loadStripeAccountStatus = async () => {
-    try {
-      const accountStatus = await VendorStripeAPI.getAccountStatus();
-      setStripeAccount(accountStatus);
-    } catch (err: any) {
-      console.error('Failed to load Stripe account status:', err);
-      // Don't show error for Stripe account status as it's not critical
     }
   };
 
@@ -568,7 +606,12 @@ const VendorWalletPage = () => {
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {stripeAccount ? (
+              {stripeLoading ? (
+                <div className="text-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600">Loading Stripe account status...</p>
+                </div>
+              ) : stripeAccount ? (
                 <div className="space-y-4">
                   {/* Account Status */}
                   <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
@@ -713,8 +756,16 @@ const VendorWalletPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
-                  <p className="text-gray-600">Loading Stripe account status...</p>
+                  <AlertCircle className="w-8 h-8 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600">Unable to load Stripe account status</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadStripeAccountStatus}
+                    className="mt-2"
+                  >
+                    Retry
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -815,7 +866,7 @@ const VendorWalletPage = () => {
               </div>
 
               {/* Pagination */}
-              {pagination.pages > 1 && (
+              {pagination && pagination.pages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                   <div className="text-sm text-gray-700">
                     Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} transactions

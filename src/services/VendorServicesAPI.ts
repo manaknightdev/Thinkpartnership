@@ -145,19 +145,18 @@ class VendorServicesAPI {
     return response.data;
   }
 
-  // Upload service images
-  async uploadServiceImages(serviceId: number, files: File[]): Promise<{
+  // Upload single service image
+  async uploadServiceImage(file: File): Promise<{
     error: boolean;
-    images: string[];
+    id?: number;
+    url?: string;
     message: string;
   }> {
     const formData = new FormData();
-    files.forEach((file, index) => {
-      formData.append(`images[${index}]`, file);
-    });
+    formData.append('file', file);
 
     const response = await vendorApiClient.post(
-      `${API_CONFIG.ENDPOINTS.VENDOR_SERVICES.UPDATE}/${serviceId}/images`,
+      API_CONFIG.ENDPOINTS.VENDOR_SERVICES.UPLOAD_IMAGE,
       formData,
       {
         headers: {

@@ -69,6 +69,7 @@ export const API_CONFIG = {
       CREATE: '/api/marketplace/vendor/services',
       UPDATE: '/api/marketplace/vendor/services',
       DELETE: '/api/marketplace/vendor/services',
+      UPLOAD_IMAGE: '/v1/api/thinkpartnership/vendor/lambda/upload',
     },
     // Vendor Requests
     VENDOR_REQUESTS: {

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,10 +33,16 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 const CustomerSignup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [referralInfo, setReferralInfo] = useState<{
+    referralCode?: string;
+    vendorId?: string;
+    isReferral: boolean;
+  }>({ isReferral: false });
 
   const {
     register,
@@ -46,6 +52,20 @@ const CustomerSignup = () => {
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
   });
+
+  // Handle referral codes from URL parameters
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    const vendor = searchParams.get('vendor');
+
+    if (ref || vendor) {
+      setReferralInfo({
+        referralCode: ref || undefined,
+        vendorId: vendor || undefined,
+        isReferral: true
+      });
+    }
+  }, [searchParams]);
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
@@ -59,6 +79,9 @@ const CustomerSignup = () => {
         last_name: data.last_name,
         phone: data.phone,
         is_refresh: true, // Enable refresh token
+        // Include referral data if available
+        ...(referralInfo.referralCode && { referral_code: referralInfo.referralCode }),
+        ...(referralInfo.vendorId && { vendor_id: referralInfo.vendorId }),
       };
 
       const response = await AuthAPI.register(registerData);
@@ -97,6 +120,19 @@ const CustomerSignup = () => {
             <CardDescription className="text-center text-gray-600">
               Get started with your free account
             </CardDescription>
+            {referralInfo.isReferral && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                <div className="flex items-center justify-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-800 font-medium">
+                    🎉 You're joining via a special invitation!
+                  </span>
+                </div>
+                <p className="text-xs text-green-600 text-center mt-1">
+                  Complete your registration to get connected with your inviting partner
+                </p>
+              </div>
+            )}
           </CardHeader>
 
           <CardContent>

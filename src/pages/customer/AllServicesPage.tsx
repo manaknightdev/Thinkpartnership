@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
+import API_CONFIG from "@/config/api";
 import {
   Search,
   Filter,
@@ -28,6 +29,13 @@ const AllServicesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+
+  // Utility function to get full image URL
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath; // Already a full URL
+    return `${API_CONFIG.BASE_URL}${imagePath}`; // Convert relative path to full URL
+  };
   const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'all');
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState(searchParams.get('delivery') || 'all');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'best-match');
@@ -367,7 +375,7 @@ const AllServicesPage = () => {
                 <Card key={service.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl">
                   <div className="relative overflow-hidden rounded-t-2xl">
                     <img
-                      src={service.image || "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center"}
+                      src={service.images?.[0] ? getImageUrl(service.images[0]) : "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center"}
                       alt={service.title}
                       className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
                     />

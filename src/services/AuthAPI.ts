@@ -8,6 +8,8 @@ export interface RegisterData {
   last_name: string;
   phone?: string;
   is_refresh?: boolean;
+  referral_code?: string;
+  vendor_id?: string;
 }
 
 export interface LoginData {

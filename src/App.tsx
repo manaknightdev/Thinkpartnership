@@ -115,6 +115,9 @@ const App = () => (
           <Route path="/marketplace/login" element={<CustomerLogin />} />
           <Route path="/marketplace/signup" element={<CustomerSignup />} />
 
+          {/* Register route for referral links */}
+          <Route path="/register" element={<CustomerSignup />} />
+
           {/* Vendor Authentication Routes */}
           <Route path="/vendor/login" element={<VendorLogin />} />
           <Route path="/vendor/signup" element={<VendorSignup />} />

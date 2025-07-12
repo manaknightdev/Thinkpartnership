@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
+import API_CONFIG from "@/config/api";
 import {
   Search,
   Home,
@@ -28,6 +29,13 @@ const CustomerBrowseServicesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
+
+  // Utility function to get full image URL
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath; // Already a full URL
+    return `${API_CONFIG.BASE_URL}${imagePath}`; // Convert relative path to full URL
+  };
   const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -273,7 +281,7 @@ const CustomerBrowseServicesPage = () => {
 
                 <div className="relative overflow-hidden rounded-t-2xl">
                   <img
-                    src={service.image || service.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center'}
+                    src={service.images?.[0] ? getImageUrl(service.images[0]) : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center'}
                     alt={service.title}
                     className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
                   />

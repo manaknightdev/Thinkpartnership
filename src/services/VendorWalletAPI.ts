@@ -84,7 +84,7 @@ class VendorWalletAPI {
     status?: string;
     date_from?: string;
     date_to?: string;
-  }): Promise<APIResponse<{ transactions: Transaction[] }>> {
+  }): Promise<APIResponse<{ transactions: Transaction[] }> & { pagination?: { page: number; limit: number; total: number; pages: number; } }> {
     try {
       const response = await vendorApiClient.get(API_CONFIG.ENDPOINTS.VENDOR_WALLET.TRANSACTIONS, { params: filters });
       return response.data;

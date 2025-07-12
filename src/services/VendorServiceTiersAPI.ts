@@ -75,9 +75,9 @@ class VendorServiceTiersAPI {
     limit?: number;
     service_id?: number;
     is_featured?: boolean;
-  }): Promise<APIResponse<{ tiers: ServiceTier[] }>> {
+  }): Promise<APIResponse<{ service_tiers: ServiceTier[] }>> {
     try {
-      const response = await vendorApiClient.get('/vendor/service-tiers', { params: filters });
+      const response = await vendorApiClient.get('/api/marketplace/vendor/service-tiers', { params: filters });
       return response.data;
     } catch (error: any) {
       return {
@@ -90,7 +90,7 @@ class VendorServiceTiersAPI {
   // Create new service tier
   static async createServiceTier(data: CreateTierData): Promise<APIResponse> {
     try {
-      const response = await vendorApiClient.post('/vendor/service-tiers', data);
+      const response = await vendorApiClient.post('/api/marketplace/vendor/service-tiers', data);
       return response.data;
     } catch (error: any) {
       return {
@@ -103,7 +103,7 @@ class VendorServiceTiersAPI {
   // Update service tier
   static async updateServiceTier(tierId: number, data: Partial<CreateTierData>): Promise<APIResponse> {
     try {
-      const response = await vendorApiClient.put(`/vendor/service-tiers/${tierId}`, data);
+      const response = await vendorApiClient.put(`/api/marketplace/vendor/service-tiers/${tierId}`, data);
       return response.data;
     } catch (error: any) {
       return {
@@ -116,7 +116,7 @@ class VendorServiceTiersAPI {
   // Delete service tier
   static async deleteServiceTier(tierId: number): Promise<APIResponse> {
     try {
-      const response = await vendorApiClient.delete(`/vendor/service-tiers/${tierId}`);
+      const response = await vendorApiClient.delete(`/api/marketplace/vendor/service-tiers/${tierId}`);
       return response.data;
     } catch (error: any) {
       return {
