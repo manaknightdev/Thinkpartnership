@@ -30,6 +30,8 @@ export interface SendVendorMessageRequest {
   message: string;
   message_type?: number;
   attachments?: any;
+  quote_amount?: number;
+  quote_details?: any;
 }
 
 class VendorMessagesAPI {
@@ -68,6 +70,38 @@ class VendorMessagesAPI {
     } catch (error: any) {
       console.error('Error sending message:', error);
       throw error.response?.data || { error: true, message: 'Failed to send message' };
+    }
+  }
+
+  // Send a quote message in a chat
+  async sendQuote(chatId: number, quoteData: {
+    service: string;
+    price: number;
+    description: string;
+    validUntil?: string;
+    estimatedDuration?: string;
+  }): Promise<{ error: boolean; message: string; data: any }> {
+    try {
+      const messageData: SendVendorMessageRequest = {
+        message: `I've prepared a quote for your project: ${quoteData.service}`,
+        message_type: 3, // Quote message type
+        quote_amount: quoteData.price,
+        quote_details: {
+          service: quoteData.service,
+          description: quoteData.description,
+          validUntil: quoteData.validUntil,
+          estimatedDuration: quoteData.estimatedDuration
+        }
+      };
+
+      const response = await vendorApiClient.post(
+        `${API_CONFIG.ENDPOINTS.VENDOR_MESSAGES.SEND}/${chatId}`,
+        messageData
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('Error sending quote:', error);
+      throw error.response?.data || { error: true, message: 'Failed to send quote' };
     }
   }
 }

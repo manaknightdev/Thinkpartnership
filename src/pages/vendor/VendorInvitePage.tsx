@@ -39,6 +39,9 @@ const VendorInvitePage = () => {
       // Update sent invites
       if (!invitesRes.error && invitesRes.data?.invitations) {
         setSentInvites(invitesRes.data.invitations);
+      } else if (!invitesRes.error && invitesRes.invitations) {
+        // Handle direct response format
+        setSentInvites(invitesRes.invitations);
       }
 
     } catch (error) {

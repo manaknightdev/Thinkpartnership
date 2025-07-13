@@ -39,7 +39,7 @@ interface Message {
   content: string;
   timestamp: string;
   status: "sent" | "delivered" | "read";
-  type?: "text" | "quote" | "image";
+  type?: "text" | "quote" | "image" | "quote_acceptance";
   quoteData?: {
     service: string;
     price: string;
@@ -234,14 +234,42 @@ const VendorMessagesPage = () => {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    return {
+    // Check if this is a quote acceptance message first
+    let messageType: "text" | "quote" | "image" | "quote_acceptance" = "text";
+    if (apiMessage.sender_type === 0 && apiMessage.message.includes("accepted your quote")) {
+      messageType = "quote_acceptance";
+    } else if (apiMessage.message_type === 3) {
+      messageType = "quote";
+    }
+
+    const message: Message = {
       id: apiMessage.id,
       sender: apiMessage.sender_type === 0 ? "customer" : "vendor",
       content: apiMessage.message,
       timestamp: formatTime(apiMessage.created_at),
       status: apiMessage.read_by_customer ? "read" : "sent",
-      type: "text"
+      type: messageType
     };
+
+    // Add quote data if this is a quote message
+    if (apiMessage.message_type === 3 && apiMessage.quote_amount && apiMessage.quote_details) {
+      try {
+        const quoteDetails = typeof apiMessage.quote_details === 'string'
+          ? JSON.parse(apiMessage.quote_details)
+          : apiMessage.quote_details;
+
+        message.quoteData = {
+          service: quoteDetails.service || "Custom Service",
+          price: `$${apiMessage.quote_amount}`,
+          description: quoteDetails.description || "",
+          validUntil: quoteDetails.validUntil || ""
+        };
+      } catch (error) {
+        console.error("Error parsing quote details:", error);
+      }
+    }
+
+    return message;
   };
 
   // Convert API messages to UI format
@@ -302,24 +330,42 @@ const VendorMessagesPage = () => {
     }
   };
 
-  const handleSendQuote = () => {
-    if (quoteData.service && quoteData.price && quoteData.description) {
-      const quoteMessage: Message = {
-        id: messages.length + 1,
-        sender: "vendor",
-        content: "I've prepared a quote for your project:",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: "sent",
-        type: "quote",
-        quoteData: quoteData
-      };
-      
-      setMessages([...messages, quoteMessage]);
-      setShowQuoteModal(false);
-      setQuoteData({ service: "", price: "", description: "", validUntil: "" });
-      toast.success("Quote sent successfully!");
-    } else {
+  const handleSendQuote = async () => {
+    if (!quoteData.service || !quoteData.price || !quoteData.description) {
       toast.error("Please fill in all quote details.");
+      return;
+    }
+
+    if (!selectedChatId) {
+      toast.error("No chat selected.");
+      return;
+    }
+
+    try {
+      setSending(true);
+      const response = await VendorMessagesAPI.sendQuote(selectedChatId, {
+        service: quoteData.service,
+        price: parseFloat(quoteData.price),
+        description: quoteData.description,
+        validUntil: quoteData.validUntil,
+      });
+
+      if (!response.error) {
+        setShowQuoteModal(false);
+        setQuoteData({ service: "", price: "", description: "", validUntil: "" });
+        toast.success("Quote sent successfully!");
+        // Reload messages to show the new quote
+        await loadMessages(selectedChatId);
+        // Reload chats to update last message
+        await loadChats();
+      } else {
+        toast.error("Failed to send quote");
+      }
+    } catch (error) {
+      console.error("Error sending quote:", error);
+      toast.error("Failed to send quote");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -535,8 +581,12 @@ const VendorMessagesPage = () => {
                           />
                         </div>
                       </div>
-                      <Button onClick={handleSendQuote} className="w-full">
-                        Send Quote
+                      <Button
+                        onClick={handleSendQuote}
+                        className="w-full"
+                        disabled={sending}
+                      >
+                        {sending ? "Sending..." : "Send Quote"}
                       </Button>
                     </DialogContent>
                   </Dialog>
@@ -682,29 +732,40 @@ const VendorMessagesPage = () => {
                     )}
 
                     {msg.type === "quote" && msg.quoteData ? (
-                      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                      <Card className="bg-white border border-gray-200 shadow-sm max-w-sm">
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center">
-                            <FileText className="h-4 w-4 mr-2 text-blue-600" />
-                            Quote Proposal
-                          </CardTitle>
+                          <div className="flex items-center space-x-2">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                            <CardTitle className="text-sm font-semibold text-gray-900">Quote Proposal</CardTitle>
+                          </div>
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div>
-                            <p className="font-semibold text-gray-900">{msg.quoteData.service}</p>
-                            <p className="text-2xl font-bold text-blue-600">{msg.quoteData.price}</p>
+                            <p className="font-semibold text-gray-900 text-base">{msg.quoteData.service}</p>
+                            <p className="text-3xl font-bold text-blue-600 mt-1">
+                              {msg.quoteData.price.replace('$', '')}
+                              <span className="text-sm font-normal text-gray-500 ml-1">USD</span>
+                            </p>
                           </div>
-                          <p className="text-sm text-gray-700">{msg.quoteData.description}</p>
+                          {msg.quoteData.description && (
+                            <p className="text-sm text-gray-600">{msg.quoteData.description}</p>
+                          )}
                           {msg.quoteData.validUntil && (
-                            <div className="flex items-center text-xs text-gray-600">
+                            <div className="flex items-center text-xs text-gray-500 border-t pt-2">
                               <Clock className="h-3 w-3 mr-1" />
                               Valid until {new Date(msg.quoteData.validUntil).toLocaleDateString()}
                             </div>
                           )}
                           {msg.sender === "vendor" && (
-                            <div className="flex items-center text-xs text-green-600">
+                            <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Quote sent successfully
+                            </div>
+                          )}
+                          {msg.type === "quote_acceptance" && (
+                            <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Quote accepted & paid
                             </div>
                           )}
                         </CardContent>

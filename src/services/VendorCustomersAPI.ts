@@ -3,15 +3,17 @@ import API_CONFIG from '@/config/api';
 
 export interface VendorCustomer {
   id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  join_date: string;
-  total_requests: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
   total_spent: number;
-  last_request_date: string;
-  status: string;
+  orders_count: number;
+  status: number;
+  created_at: string;
+  last_order_date: string | null;
+  relationship_type: string;
+  invite_code: string;
+  referral_date: string;
 }
 
 export interface CustomerFilters {

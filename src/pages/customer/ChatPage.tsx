@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import ChatAPI, { Chat, ChatMessage } from "@/services/ChatAPI";
+import OrdersAPI from "@/services/OrdersAPI";
+import StripeAPI from "@/services/StripeAPI";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,13 +25,11 @@ import {
   Check,
   CheckCheck,
   Clock,
-  Star,
-  MapPin,
-  Calendar,
-  DollarSign,
   FileText,
-  ThumbsUp,
   ThumbsDown,
+  ShoppingCart,
+  MapPin,
+  CheckCircle,
   Menu,
   Home,
   Grid3X3,
@@ -54,6 +55,10 @@ const ChatPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
+  const [checkingStripe, setCheckingStripe] = useState(false);
+  const [acceptingQuote, setAcceptingQuote] = useState(false);
+  const [acceptedQuotes, setAcceptedQuotes] = useState<Set<number>>(new Set());
   const [requestCount] = useState(2);
   const [notificationCount] = useState(3);
   const [userName] = useState("John Doe");
@@ -109,6 +114,11 @@ const ChatPage = () => {
 
     loadChatData();
   }, [chatId]);
+
+  // Check Stripe connection status on component mount
+  useEffect(() => {
+    checkStripeConnection();
+  }, []);
 
   // Marketplace sidebar items
   const sidebarItems = [
@@ -200,12 +210,90 @@ const ChatPage = () => {
 
 
 
-  const handleAcceptQuote = async () => {
-    if (!chatId) return;
+  // Check Stripe connection status
+  const checkStripeConnection = async () => {
+    try {
+      setCheckingStripe(true);
+      const status = await StripeAPI.getAccountStatus();
+      setStripeConnected(status.connected);
+    } catch (error) {
+      console.error('Error checking Stripe connection:', error);
+      setStripeConnected(false);
+    } finally {
+      setCheckingStripe(false);
+    }
+  };
 
-    const acceptMessage = "I accept your quote! When can we schedule the work?";
-    setMessage(acceptMessage);
-    await handleSendMessage();
+  const handleAcceptQuote = async (quoteMessage: ChatMessage) => {
+    if (!chatId || !quoteMessage.quote_amount || !quoteMessage.quote_details || !currentChat) {
+      toast.error("Invalid quote data or chat not loaded");
+      return;
+    }
+
+    try {
+      setAcceptingQuote(true);
+
+      // First, check if Stripe account is connected
+      if (stripeConnected === null) {
+        toast.info("Checking Stripe connection...");
+        await checkStripeConnection();
+      }
+
+      if (stripeConnected === false) {
+        toast.error("Please connect your Stripe account first to accept quotes");
+        // Redirect to Stripe Connect
+        StripeAPI.redirectToStripeConnect();
+        return;
+      }
+
+      toast.info("Processing payment...");
+
+      // Create a payment intent for the quote amount
+      const paymentResponse = await StripeAPI.createPayment({
+        amount: quoteMessage.quote_amount,
+        currency: 'usd',
+        service_id: currentChat.service.id,
+        service_name: quoteMessage.quote_details.service || 'Custom Quote Service'
+      });
+
+      if (!paymentResponse.client_secret) {
+        toast.error("Failed to initiate payment");
+        return;
+      }
+
+      toast.info("Creating order...");
+
+      // Create order using the existing order creation API
+      const orderData = await OrdersAPI.createOrder({
+        service_id: currentChat.service.id,
+        service_name: quoteMessage.quote_details.service || 'Custom Quote Service',
+        vendor_id: currentChat.vendor.id,
+        amount: quoteMessage.quote_amount,
+        payment_intent_id: paymentResponse.payment_intent_id,
+        service_type: 'custom' // Mark as custom since it's from a quote
+      });
+
+      if (orderData.error) {
+        toast.error("Failed to create order");
+        return;
+      }
+
+      // Mark this quote as accepted
+      setAcceptedQuotes(prev => new Set(prev).add(quoteMessage.id));
+
+      // Send acceptance message
+      const acceptMessage = `I've accepted your quote for $${quoteMessage.quote_amount}! Order has been created (Order ID: ${orderData.data?.order_id}). When can we schedule the work?`;
+      setMessage(acceptMessage);
+      await handleSendMessage();
+
+      toast.success("Quote accepted and order created successfully!");
+
+    } catch (error) {
+      console.error("Error accepting quote:", error);
+      toast.error("Failed to accept quote");
+    } finally {
+      setAcceptingQuote(false);
+    }
   };
 
   const handleSearch = (searchTerm: string) => {
@@ -644,62 +732,82 @@ const ChatPage = () => {
                   </div>
                 )}
 
-                {msg.message_type === 2 && msg.quote_details ? (
+                {msg.message_type === 3 && msg.quote_details ? (
                   /* Quote Card */
-                  <Card className="border border-gray-200 bg-white max-w-[280px] sm:max-w-sm">
+                  <Card className="border border-gray-200 bg-white max-w-[320px] sm:max-w-sm shadow-sm">
                     <CardHeader className="pb-3">
                       <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-blue-500" />
-                        <h4 className="font-semibold text-gray-900">{msg.quote_details.title || 'Quote'}</h4>
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <h4 className="font-semibold text-gray-900">Quote Proposal</h4>
                       </div>
-                      <p className="text-sm text-gray-600">{msg.quote_details.description || msg.message}</p>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-green-600">${msg.quote_amount}</span>
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                            {msg.quote_details.timeline || '2-3 days'}
-                          </Badge>
+                        <div>
+                          <p className="font-semibold text-gray-900 text-base">
+                            {msg.quote_details.service || 'Custom Service'}
+                          </p>
+                          <div className="flex items-baseline space-x-1 mt-1">
+                            <span className="text-3xl font-bold text-blue-600">{msg.quote_amount}</span>
+                            <span className="text-sm font-normal text-gray-500">USD</span>
+                          </div>
                         </div>
 
-                        {msg.quote_details.includes && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-gray-900">Includes:</p>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              {(msg.quote_details?.includes || []).map((item: string, index: number) => (
-                                <li key={index} className="flex items-center space-x-2">
-                                  <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                        {msg.quote_details.description && (
+                          <p className="text-sm text-gray-600">{msg.quote_details.description}</p>
                         )}
 
                         {msg.quote_details.validUntil && (
-                          <div className="text-xs text-gray-500 border-t pt-2">
-                            {msg.quote_details.validUntil}
+                          <div className="flex items-center text-xs text-gray-500 border-t pt-2">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Valid until {new Date(msg.quote_details.validUntil).toLocaleDateString()}
                           </div>
                         )}
 
-                        <div className="flex space-x-2 pt-2">
-                          <Button
-                            size="sm"
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                            onClick={handleAcceptQuote}
-                          >
-                            <ThumbsUp className="w-3 h-3 mr-1" />
-                            Accept Quote
-                          </Button>
+                        <div className="flex space-x-2 pt-3">
+                          {acceptedQuotes.has(msg.id) ? (
+                            <Button
+                              size="sm"
+                              className="flex-1 bg-green-600 text-white"
+                              disabled
+                            >
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Accepted & Paid
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-400"
+                              onClick={() => handleAcceptQuote(msg)}
+                              disabled={checkingStripe || acceptingQuote}
+                            >
+                              {acceptingQuote ? (
+                                <>
+                                  <div className="w-3 h-3 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  Processing...
+                                </>
+                              ) : checkingStripe ? (
+                                <>
+                                  <div className="w-3 h-3 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  Checking...
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingCart className="w-3 h-3 mr-1" />
+                                  Accept & Pay
+                                </>
+                              )}
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
-                            className="flex-1"
+                            className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-50"
                             onClick={() => setMessage("I'd like to negotiate the price. Can we discuss?")}
+                            disabled={acceptedQuotes.has(msg.id) || acceptingQuote}
                           >
                             <ThumbsDown className="w-3 h-3 mr-1" />
-                            Negotiate
+                            Decline
                           </Button>
                         </div>
                       </div>

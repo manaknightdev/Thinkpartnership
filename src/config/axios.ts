@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
       // Clear token and redirect to login
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
-      window.location.href = '/customer/login';
+      window.location.href = '/marketplace/login';
     }
     return Promise.reject(error);
   }
