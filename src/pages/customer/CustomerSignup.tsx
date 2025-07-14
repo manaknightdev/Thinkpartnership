@@ -41,7 +41,9 @@ const CustomerSignup = () => {
   const [referralInfo, setReferralInfo] = useState<{
     referralCode?: string;
     vendorId?: string;
+    clientId?: string;
     isReferral: boolean;
+    referralType?: string;
   }>({ isReferral: false });
 
   const {
@@ -57,11 +59,15 @@ const CustomerSignup = () => {
   useEffect(() => {
     const ref = searchParams.get('ref');
     const vendor = searchParams.get('vendor');
+    const client = searchParams.get('client');
+    const type = searchParams.get('type');
 
-    if (ref || vendor) {
+    if (ref || vendor || client) {
       setReferralInfo({
         referralCode: ref || undefined,
         vendorId: vendor || undefined,
+        clientId: client || undefined,
+        referralType: type || undefined,
         isReferral: true
       });
     }
@@ -82,6 +88,7 @@ const CustomerSignup = () => {
         // Include referral data if available
         ...(referralInfo.referralCode && { referral_code: referralInfo.referralCode }),
         ...(referralInfo.vendorId && { vendor_id: referralInfo.vendorId }),
+        ...(referralInfo.clientId && { client_id: referralInfo.clientId }),
       };
 
       const response = await AuthAPI.register(registerData);
@@ -140,6 +147,22 @@ const CustomerSignup = () => {
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Referral Info Display */}
+              {referralInfo.isReferral && (
+                <Alert className="border-green-200 bg-green-50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    {referralInfo.clientId ? (
+                      <>🎉 You're signing up through a client referral! You'll get special benefits and support.</>
+                    ) : referralInfo.vendorId ? (
+                      <>🎉 You're signing up through a vendor referral! You'll get special benefits and support.</>
+                    ) : (
+                      <>🎉 You're signing up through a referral link! You'll get special benefits and support.</>
+                    )}
+                  </AlertDescription>
                 </Alert>
               )}
 

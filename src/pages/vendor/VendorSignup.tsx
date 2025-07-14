@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -39,10 +39,17 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 const VendorSignup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [referralInfo, setReferralInfo] = useState<{
+    referralCode?: string;
+    clientId?: string;
+    isReferral: boolean;
+    referralType?: string;
+  }>({ isReferral: false });
 
   const {
     register,
@@ -52,6 +59,22 @@ const VendorSignup = () => {
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
   });
+
+  // Check for referral parameters on component mount
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    const client = searchParams.get('client');
+    const type = searchParams.get('type');
+
+    if (ref || client) {
+      setReferralInfo({
+        referralCode: ref || undefined,
+        clientId: client || undefined,
+        referralType: type || undefined,
+        isReferral: true,
+      });
+    }
+  }, [searchParams]);
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
@@ -70,6 +93,9 @@ const VendorSignup = () => {
         postal_code: data.postal_code,
         description: data.description,
         is_refresh: true, // Enable refresh token
+        // Include referral information
+        ...(referralInfo.referralCode && { referral_code: referralInfo.referralCode }),
+        ...(referralInfo.clientId && { client_id: referralInfo.clientId }),
       };
 
       const response = await VendorAuthAPI.register(registerData);
@@ -113,6 +139,20 @@ const VendorSignup = () => {
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Referral Info Display */}
+            {referralInfo.isReferral && (
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  {referralInfo.clientId ? (
+                    <>🎉 You're signing up through a client referral! You'll get special benefits and support.</>
+                  ) : (
+                    <>🎉 You're signing up through a referral link! You'll get special benefits and support.</>
+                  )}
+                </AlertDescription>
               </Alert>
             )}
 

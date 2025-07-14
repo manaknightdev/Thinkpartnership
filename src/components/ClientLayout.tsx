@@ -49,7 +49,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     // { name: "Platform Subscription", path: "/client-portal/subscription", icon: Crown, exact: false },
     // { name: "Pricing & Billing", path: "/client-portal/pricing", icon: DollarSign, exact: false },
     { name: "Wallet & Payments", path: "/client-portal/wallet", icon: Wallet, exact: false },
-    { name: "Set Rules", path: "/client-portal/rules", icon: Settings, exact: false },
+    // { name: "Set Rules", path: "/client-portal/rules", icon: Settings, exact: false },
     { name: "Branding", path: "/client-portal/branding", icon: Palette, exact: false },
     { name: "Marketplace Orders", path: "/client-portal/orders", icon: ListOrdered, exact: false },
     { name: "Help & Support", path: "/client-portal/help", icon: HelpCircle, exact: false },

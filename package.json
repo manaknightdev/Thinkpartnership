@@ -4,12 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --mode development",
+    "dev:local": "vite --mode development",
+    "dev:prod": "vite --mode production",
+    "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
+    "build:prod": "vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:netlify": "vite build && echo 'Build completed! Deploy the dist/ folder to Netlify.'"
+    "preview:dev": "vite preview --mode development",
+    "preview:prod": "vite preview --mode production",
+    "build:netlify": "vite build --mode production && echo 'Build completed! Deploy the dist/ folder to Netlify.'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

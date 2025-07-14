@@ -51,7 +51,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: "All Vendors", path: "/admin-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/admin-portal/customers", icon: UserCheck, exact: false },
     { name: "All Transactions", path: "/admin-portal/transactions", icon: DollarSign, exact: false },
-    { name: "Vendor Approvals", path: "/admin-portal/vendor-approvals", icon: Shield, exact: false },
+    // { name: "Vendor Approvals", path: "/admin-portal/vendor-approvals", icon: Shield, exact: false },
     { name: "Global Revenue Rules", path: "/admin-portal/revenue-rules", icon: Settings, exact: false },
     // { name: "Usage Reports", path: "/admin-portal/reports", icon: BarChart, exact: false },
     // { name: "Manual Commissions", path: "/admin-portal/manual-commissions", icon: PlusCircle, exact: false },

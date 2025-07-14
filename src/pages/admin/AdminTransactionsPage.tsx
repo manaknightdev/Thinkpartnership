@@ -132,60 +132,7 @@ const AdminTransactionsPage = () => {
   };
 
   // Use transactions directly since filtering is done server-side via API
-  const filteredTransactions = transactions.length > 0 ? transactions : mockTransactions.filter(transaction => {
-    const matchesSearch = searchTerm === "" ||
-      transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.service.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = statusFilter === "all" || transaction.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesVendor = vendorFilter === "all" || transaction.vendor === vendorFilter;
-    const matchesPaymentMethod = paymentMethodFilter === "all" || transaction.paymentMethod === paymentMethodFilter;
-
-    // Date range filtering
-    let matchesDateRange = true;
-    if (dateRangeFilter !== "all") {
-      const transactionDate = new Date(transaction.date);
-      const today = new Date();
-      const daysDiff = Math.floor((today.getTime() - transactionDate.getTime()) / (1000 * 60 * 60 * 24));
-
-      switch (dateRangeFilter) {
-        case "today":
-          matchesDateRange = daysDiff === 0;
-          break;
-        case "week":
-          matchesDateRange = daysDiff <= 7;
-          break;
-        case "month":
-          matchesDateRange = daysDiff <= 30;
-          break;
-        case "quarter":
-          matchesDateRange = daysDiff <= 90;
-          break;
-      }
-    }
-
-    // Amount range filtering
-    let matchesAmountRange = true;
-    if (amountRangeFilter !== "all") {
-      const amount = parseFloat(transaction.amount.replace('$', '').replace(',', ''));
-      switch (amountRangeFilter) {
-        case "low":
-          matchesAmountRange = amount < 200;
-          break;
-        case "medium":
-          matchesAmountRange = amount >= 200 && amount < 1000;
-          break;
-        case "high":
-          matchesAmountRange = amount >= 1000;
-          break;
-      }
-    }
-
-    return matchesSearch && matchesStatus && matchesVendor &&
-           matchesPaymentMethod && matchesDateRange && matchesAmountRange;
-  });
+  const filteredTransactions = transactions.length > 0 ? transactions : [];
 
   // Calculate summary stats based on filtered data
   const totalTransactions = filteredTransactions.length;
@@ -354,13 +301,7 @@ const AdminTransactionsPage = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Vendors</SelectItem>
-                        <SelectItem value="Rapid Plumbers">Rapid Plumbers</SelectItem>
-                        <SelectItem value="Brush Strokes Pro">Brush Strokes Pro</SelectItem>
-                        <SelectItem value="Certified Inspectors Inc.">Certified Inspectors Inc.</SelectItem>
-                        <SelectItem value="Green Thumb Landscaping">Green Thumb Landscaping</SelectItem>
-                        <SelectItem value="Sparky Electric">Sparky Electric</SelectItem>
-                        <SelectItem value="Climate Control Experts">Climate Control Experts</SelectItem>
-                        <SelectItem value="Move It Right">Move It Right</SelectItem>
+                        {/* Dynamic vendor options would be populated from API */}
                       </SelectContent>
                     </Select>
                   </div>
@@ -482,20 +423,30 @@ const AdminTransactionsPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredTransactions.length} of {pagination.total_count || mockTransactions.length} transactions
+              Showing {filteredTransactions.length} of {pagination.total_count} transactions
               {(searchTerm || statusFilter !== "all" || vendorFilter !== "all" ||
                 dateRangeFilter !== "all" || amountRangeFilter !== "all" || paymentMethodFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }
             </p>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm" disabled>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page <= 1}
+                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page - 1 }))}
+              >
                 Previous
               </Button>
               <Button variant="outline" size="sm" className="bg-purple-600 text-white hover:bg-purple-700">
-                1
+                {pagination.current_page}
               </Button>
-              <Button variant="outline" size="sm" disabled>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page >= pagination.total_pages}
+                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page + 1 }))}
+              >
                 Next
               </Button>
             </div>

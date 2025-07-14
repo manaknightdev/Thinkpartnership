@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ClientAPI, { ClientInvite } from "@/services/ClientAPI";
+import ClientReferralAPI from "@/services/ClientReferralAPI";
 
 const ClientInviteSystemPage = () => {
   const [activeTab, setActiveTab] = useState("customers");
@@ -38,32 +39,55 @@ const ClientInviteSystemPage = () => {
   const [invites, setInvites] = useState<ClientInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [referralLinks, setReferralLinks] = useState<any[]>([]);
+  const [loadingLinks, setLoadingLinks] = useState(true);
 
-  // Referral links
-  const customerReferralLink = "https://realpartneros.com/join/customer/your-client-id";
-  const vendorReferralLink = "https://realpartneros.com/join/vendor/your-client-id";
+  // Single email invite states
+  const [singleEmail, setSingleEmail] = useState("");
+  const [singleInviteType, setSingleInviteType] = useState<"customer" | "vendor">("customer");
+  const [sendingSingle, setSendingSingle] = useState(false);
 
-  // Load invites on component mount
+  // Load invites and referral links on component mount
   useEffect(() => {
-    loadInvites();
+    loadInviteData();
   }, []);
 
-  const loadInvites = async () => {
+  const loadInviteData = async () => {
+    setLoading(true);
+    setLoadingLinks(true);
     try {
-      setLoading(true);
-      const inviteData = await ClientAPI.getInvites();
+      // Load invites and referral links in parallel
+      const [inviteData, linksRes] = await Promise.all([
+        ClientAPI.getInvites(),
+        ClientReferralAPI.getReferralLinks()
+      ]);
+
+      // Update invites
       setInvites(inviteData || []);
+
+      // Update referral links
+      if (!linksRes.error && linksRes.data?.links) {
+        setReferralLinks(linksRes.data.links);
+      }
+
     } catch (error) {
-      console.error('Error loading invites:', error);
-      toast.error('Failed to load invites');
+      console.error('Error loading invite data:', error);
+      toast.error('Failed to load invite data');
       setInvites([]);
     } finally {
       setLoading(false);
+      setLoadingLinks(false);
     }
   };
 
   const customerInvites = (invites || []).filter(invite => invite?.type === "customer");
   const vendorInvites = (invites || []).filter(invite => invite?.type === "vendor");
+
+  // Get referral links
+  const customerReferralLink = referralLinks.find(link => link.referral_type === 'customer')?.url ||
+    "https://think-partnership.netlify.app/marketplace/register?ref=client-customer";
+  const vendorReferralLink = referralLinks.find(link => link.referral_type === 'vendor')?.url ||
+    "https://think-partnership.netlify.app/vendor/register?ref=client-vendor";
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -91,12 +115,47 @@ const ClientInviteSystemPage = () => {
       setIsInviteDialogOpen(false);
 
       // Reload invites to show the new ones
-      await loadInvites();
+      await loadInviteData();
     } catch (error) {
       console.error('Error sending invites:', error);
       toast.error('Failed to send invites. Please try again.');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleSendSingleInvite = async () => {
+    if (!singleEmail.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(singleEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setSendingSingle(true);
+    try {
+      await ClientAPI.sendSingleInvite({
+        email: singleEmail,
+        type: singleInviteType,
+        message: `Join our marketplace to ${singleInviteType === 'customer' ? 'discover amazing services' : 'offer your services to customers'}!`
+      });
+
+      toast.success(`${singleInviteType} invite sent successfully!`);
+      setSingleEmail("");
+
+      // Reload invites to show the new one
+      await loadInviteData();
+
+    } catch (error) {
+      console.error('Error sending single invite:', error);
+      toast.error("Failed to send invitation");
+    } finally {
+      setSendingSingle(false);
     }
   };
 
@@ -124,7 +183,7 @@ const ClientInviteSystemPage = () => {
     try {
       await ClientAPI.sendInvites([{ email: invite.email, type: invite.type }]);
       toast.success(`Invite resent to ${invite.email}`);
-      await loadInvites();
+      await loadInviteData();
     } catch (error) {
       console.error('Error resending invite:', error);
       toast.error('Failed to resend invite. Please try again.');
@@ -154,7 +213,7 @@ const ClientInviteSystemPage = () => {
         <p className="text-lg text-gray-700 mb-4">
           Invite customers and vendors to join your marketplace ecosystem.
         </p>
-        <div className="flex flex-wrap gap-3">
+        {/* <div className="flex flex-wrap gap-3">
           <Button 
             className="bg-green-600 hover:bg-green-700" 
             onClick={() => {
@@ -175,8 +234,68 @@ const ClientInviteSystemPage = () => {
             <Building className="mr-2 h-4 w-4" />
             Invite Vendors
           </Button>
-        </div>
+        </div> */}
       </div>
+
+      {/* Quick Invite Section */}
+      <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-purple-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Send className="h-5 w-5 text-purple-600" />
+            </div>
+            Quick Invite
+          </CardTitle>
+          <CardDescription>Send a single invitation quickly via email.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="single-email">Email Address</Label>
+              <Input
+                id="single-email"
+                type="email"
+                placeholder="user@example.com"
+                value={singleEmail}
+                onChange={(e) => setSingleEmail(e.target.value)}
+                disabled={sendingSingle}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="single-invite-type">Invite Type</Label>
+              <Select value={singleInviteType} onValueChange={(value: "customer" | "vendor") => setSingleInviteType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="vendor">Vendor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>&nbsp;</Label>
+              <Button
+                onClick={handleSendSingleInvite}
+                disabled={sendingSingle || !singleEmail.trim()}
+                className="w-full bg-purple-600 hover:bg-purple-700"
+              >
+                {sendingSingle ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Invite
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Referral Links Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -193,22 +312,28 @@ const ClientInviteSystemPage = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
               <LinkIcon className="h-4 w-4 text-gray-400" />
-              <code className="flex-1 text-sm text-gray-700 break-all">{customerReferralLink}</code>
+              <code className="flex-1 text-sm text-gray-700 break-all">
+                {loadingLinks ? "Loading your referral link..." : customerReferralLink}
+              </code>
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => copyToClipboard(customerReferralLink, "Customer")}
                 className="flex-1"
+                disabled={loadingLinks}
               >
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Link
               </Button>
-              <Button variant="outline">
+              {/* <Button variant="outline" disabled={loadingLinks}>
                 <Share className="mr-2 h-4 w-4" />
                 Share
-              </Button>
+              </Button> */}
             </div>
+            <p className="text-sm text-gray-500">
+              When customers sign up through this link, they'll be attributed to your client account.
+            </p>
           </CardContent>
         </Card>
 
@@ -225,22 +350,28 @@ const ClientInviteSystemPage = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
               <LinkIcon className="h-4 w-4 text-gray-400" />
-              <code className="flex-1 text-sm text-gray-700 break-all">{vendorReferralLink}</code>
+              <code className="flex-1 text-sm text-gray-700 break-all">
+                {loadingLinks ? "Loading your referral link..." : vendorReferralLink}
+              </code>
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => copyToClipboard(vendorReferralLink, "Vendor")}
                 className="flex-1"
+                disabled={loadingLinks}
               >
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Link
               </Button>
-              <Button variant="outline">
+              {/* <Button variant="outline" disabled={loadingLinks}>
                 <Share className="mr-2 h-4 w-4" />
                 Share
-              </Button>
+              </Button> */}
             </div>
+            <p className="text-sm text-gray-500">
+              When vendors sign up through this link, they'll be attributed to your client account.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -568,7 +699,13 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
           )}
           <DialogFooter>
             {selectedInvite && selectedInvite.status !== "accepted" && (
-              <Button onClick={() => handleResendInvite(selectedInvite)} className="bg-green-600 hover:bg-green-700">
+              <Button
+                onClick={() => {
+                  handleResendInvite(selectedInvite);
+                  setIsViewInviteOpen(false);
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
                 <Send className="mr-2 h-4 w-4" />
                 Resend Invite
               </Button>

@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/utils/dateFormat";
 import { ORDER_STATUSES, getOrderStatusVariant, type OrderStatus } from "@/utils/orderStatus";
-import ClientAPI from "@/services/ClientAPI";
+import ClientAPI, { type ClientOrder } from "@/services/ClientAPI";
 
 interface MarketplaceOrder {
   id: string;
@@ -31,15 +31,6 @@ interface MarketplaceOrder {
   status: OrderStatus;
   notes?: string;
 }
-
-const initialMockMarketplaceOrders: MarketplaceOrder[] = [
-  { id: "ORDC001", customer: "Alice Wonderland", vendor: "Rapid Plumbers", service: "Emergency Drain Cleaning", date: "2024-01-01", amount: "$250.00", status: "completed", notes: "Customer reported issue resolved within 2 hours." },
-  { id: "ORDC002", customer: "Bob The Builder", vendor: "Brush Strokes Pro", service: "Interior Painting - 2 Rooms", date: "2024-01-03", amount: "$1200.00", status: "completed", notes: "Color: Sky Blue. Project completed ahead of schedule." },
-  { id: "ORDC003", customer: "Charlie Chaplin", vendor: "Climate Control Experts", service: "HVAC Check-up", date: "2024-01-05", amount: "$120.00", status: "processing", notes: "Scheduled for next week. Awaiting customer confirmation." },
-  { id: "ORDC004", customer: "Diana Prince", vendor: "Certified Inspectors Inc.", service: "Full Home Inspection", date: "2024-01-06", amount: "$350.00", status: "paid" },
-  { id: "ORDC005", customer: "Edward Scissorhands", vendor: "Green Thumb Landscaping", service: "Lawn Mowing & Edging", date: "2024-01-08", amount: "$80.00", status: "cancelled", notes: "Customer requested cancellation due to weather." },
-  { id: "ORDC006", customer: "Fiona Gallagher", vendor: "Sparky Electric", service: "Outlet Installation", date: "2024-01-10", amount: "$180.00", status: "not paid" },
-];
 
 
 
@@ -66,12 +57,27 @@ const ClientMarketplaceOrdersPage = () => {
     try {
       setLoading(true);
       const ordersData = await ClientAPI.getOrders();
-      setOrders(Array.isArray(ordersData) ? ordersData : []);
+
+      // Convert ClientOrder to MarketplaceOrder format
+      const formattedOrders: MarketplaceOrder[] = Array.isArray(ordersData)
+        ? ordersData.map((order: ClientOrder) => ({
+            id: order.id,
+            customer: order.customer,
+            vendor: order.vendor,
+            service: order.service,
+            date: order.date,
+            amount: order.amount,
+            status: order.status as OrderStatus,
+            notes: order.notes || ''
+          }))
+        : [];
+
+      setOrders(formattedOrders);
     } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
-      // Fallback to mock data if API fails
-      setOrders(initialMockMarketplaceOrders);
+      // Set empty array instead of mock data to show real data only
+      setOrders([]);
     } finally {
       setLoading(false);
     }

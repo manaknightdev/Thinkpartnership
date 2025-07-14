@@ -227,31 +227,6 @@ const AdminDashboardOverviewPage = () => {
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Pending Approvals</CardTitle>
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Clock className="h-4 w-4 text-orange-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <div className="text-2xl font-bold text-gray-400">Loading...</div>
-              </div>
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.pending_approvals || 0}</div>
-                <div className="flex items-center mt-1">
-                  <AlertTriangle className="h-3 w-3 text-orange-500 mr-1" />
-                  <p className="text-xs text-orange-600 font-medium">Requires review</p>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">Total Clients</CardTitle>
             <div className="p-2 bg-emerald-100 rounded-lg">
               <CheckCircle className="h-4 w-4 text-emerald-600" />
@@ -358,107 +333,6 @@ const AdminDashboardOverviewPage = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Quick Actions Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-              <Clock className="h-5 w-5 text-orange-600 mr-2" />
-              Pending Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-              <span className="text-sm text-gray-700">Vendor Applications</span>
-              <span className="text-sm font-semibold text-orange-600">12 pending</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm text-gray-700">License Renewals</span>
-              <span className="text-sm font-semibold text-blue-600">3 expiring</span>
-            </div>
-            <Button onClick={handleReviewAll} className="w-full bg-purple-600 hover:bg-purple-700 mt-4">
-              Review All
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-              <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span className="text-sm text-gray-700">New Vendor Approved</span>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm text-gray-700">Commission Rule Updated</span>
-              <span className="text-xs text-gray-500">1 day ago</span>
-            </div>
-            <Button onClick={handleViewActivityLog} variant="outline" className="w-full mt-4">
-              View Activity Log
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-              <CheckSquare className="h-5 w-5 text-blue-600 mr-2" />
-              Tasks & Follow-ups
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-              <span className="text-sm text-gray-700">Overdue Tasks</span>
-              <span className="text-sm font-semibold text-red-600">1 overdue</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-              <span className="text-sm text-gray-700">Due Today</span>
-              <span className="text-sm font-semibold text-orange-600">2 pending</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <span className="text-sm text-gray-700">In Progress</span>
-              <span className="text-sm font-semibold text-blue-600">1 active</span>
-            </div>
-            <div className="flex gap-2 mt-4">
-              <Button onClick={handleViewTasks} variant="outline" className="flex-1">
-                View All
-              </Button>
-              <Button onClick={handleCreateTask} className="flex-1 bg-purple-600 hover:bg-purple-700">
-                <Plus className="h-4 w-4 mr-1" />
-                New Task
-              </Button>
-            </div>
-          </CardContent>
-        </Card> */}
-
-        {/* <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-              <Activity className="h-5 w-5 text-purple-600 mr-2" />
-              System Health
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span className="text-sm text-gray-700">API Status</span>
-              <span className="text-sm font-semibold text-green-600">Operational</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span className="text-sm text-gray-700">Database</span>
-              <span className="text-sm font-semibold text-green-600">Healthy</span>
-            </div>
-            <Button onClick={handleSystemStatus} variant="outline" className="w-full mt-4">
-              System Status
-            </Button>
-          </CardContent>
-        </Card> */}
-      </div>
 
       {/* Modals */}
       <ActivityLogModal

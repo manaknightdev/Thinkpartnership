@@ -1,6 +1,20 @@
 // API Configuration
+const getBaseUrl = () => {
+  // Check for environment variable first
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // Fallback based on environment
+  if (import.meta.env.DEV) {
+    return 'http://localhost:5172';
+  }
+
+  return 'https://baas.mytechpassport.com';
+};
+
 export const API_CONFIG = {
-  BASE_URL: 'https://baas.mytechpassport.com',
+  BASE_URL: getBaseUrl(),
   ENDPOINTS: {
     // Customer Authentication
     AUTH: {
@@ -38,6 +52,23 @@ export const API_CONFIG = {
       CONNECT: '/api/marketplace/client/auth/stripe/connect',
       ACCOUNT_STATUS: '/api/marketplace/client/auth/stripe/account-status',
       DISCONNECT: '/api/marketplace/client/auth/stripe/disconnect',
+    },
+    // Client Referrals
+    CLIENT_REFERRALS: {
+      STATS: '/api/marketplace/client/referrals/stats',
+      LIST: '/api/marketplace/client/referrals',
+      CODES: '/api/marketplace/client/referrals/codes',
+      LINKS: '/api/marketplace/client/referrals/links',
+      ANALYTICS: '/api/marketplace/client/referrals/analytics',
+    },
+    // Client Invites
+    CLIENT_INVITES: {
+      STATS: '/api/marketplace/client/invites/stats',
+      LIST: '/api/marketplace/client/invites',
+      SEND: '/api/marketplace/client/invites/send',
+      BULK_SEND: '/api/marketplace/client/invites/bulk-send',
+      TEMPLATES: '/api/marketplace/client/invites/templates',
+      ANALYTICS: '/api/marketplace/client/invites/analytics',
     },
     // Admin Authentication
     ADMIN_AUTH: {

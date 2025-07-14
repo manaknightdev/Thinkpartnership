@@ -85,12 +85,17 @@ export interface ClientCustomer {
 
 export interface ClientOrder {
   id: string;
-  customer_name: string;
-  vendor_name: string;
-  service_title: string;
-  amount: number;
+  customer: string;
+  vendor: string;
+  service: string;
+  date: string;
+  amount: string;
   status: string;
-  created_at: string;
+  notes?: string;
+  customer_name?: string;
+  vendor_name?: string;
+  service_title?: string;
+  created_at?: string;
 }
 
 export interface ClientInvite {
@@ -210,13 +215,23 @@ class ClientAPI {
   }
 
   // Invite System Methods
-  async sendInvites(invites: { email: string; type: 'customer' | 'vendor' }[]): Promise<any> {
+  async sendInvites(invites: { email: string; type: 'customer' | 'vendor'; message?: string }[]): Promise<any> {
     const response = await clientApiClient.post('/api/marketplace/client/invites', { invites });
     return response.data;
   }
 
   async getInvites(): Promise<ClientInvite[]> {
     const response = await clientApiClient.get('/api/marketplace/client/invites');
+    return response.data;
+  }
+
+  async sendSingleInvite(data: {
+    email: string;
+    type: 'customer' | 'vendor';
+    name?: string;
+    message?: string;
+  }): Promise<any> {
+    const response = await clientApiClient.post('/api/marketplace/client/invites/send', data);
     return response.data;
   }
 

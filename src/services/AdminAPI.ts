@@ -100,14 +100,19 @@ export interface AdminCustomer {
 }
 
 export interface AdminTransaction {
-  id: number;
-  type: string;
-  amount: number;
+  id: string;
+  vendor: string;
+  customer: string;
+  service: string;
+  amount: string;
+  date: string;
   status: string;
-  vendor_name: string;
-  customer_name: string;
-  service_title: string;
-  created_at: string;
+  paymentMethod: string;
+  vendor_id?: number;
+  customer_id?: number;
+  service_id?: number;
+  payment_status?: number;
+  created_at?: string;
 }
 
 interface Transaction {
@@ -122,7 +127,7 @@ interface Transaction {
   vendor_id?: number;
   customer_id?: number;
   service_id?: number;
-  payment_status?: string;
+  payment_status?: number;
   commission_amount?: string;
   created_at?: string;
   updated_at?: string;
@@ -285,10 +290,11 @@ class AdminAPI {
     page?: number;
     limit?: number;
     search?: string;
-    type?: string;
     status?: string;
-    start_date?: string;
-    end_date?: string;
+    vendor?: string;
+    date_range?: string;
+    amount_range?: string;
+    payment_method?: string;
   }): Promise<{
     error: boolean;
     transactions: AdminTransaction[];
