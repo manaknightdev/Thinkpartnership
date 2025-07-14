@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:5172',
+  BASE_URL: 'https://baas.mytechpassport.com',
   ENDPOINTS: {
     // Customer Authentication
     AUTH: {
