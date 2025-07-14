@@ -160,7 +160,7 @@ class ClientAPI {
   // Vendor Management Methods
   async getVendors(): Promise<ClientVendor[]> {
     const response = await clientApiClient.get('/api/marketplace/client/vendors');
-    return response.data;
+    return response.data.vendors || response.data;
   }
 
   async updateVendorStatus(vendorId: string, status: string): Promise<any> {
