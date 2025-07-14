@@ -44,14 +44,15 @@ const ClientCustomersPage = () => {
     }
   };
 
-  const formatCurrency = (amount: number | undefined) => {
+  const formatCurrency = (amount: number | string | undefined) => {
     if (amount === undefined || amount === null) {
       return '$0.00';
     }
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) || 0 : amount;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    }).format(numericAmount);
   };
 
   const formatDate = (dateString: string | undefined) => {
@@ -70,9 +71,14 @@ const ClientCustomersPage = () => {
   // Calculate summary stats
   const totalCustomers = (customers || []).length;
   const activeCustomers = (customers || []).filter(c => c?.status === "active").length;
-  const totalRevenue = (customers || []).reduce((sum, customer) => sum + (customer?.total_spent || 0), 0);
+  const totalRevenue = (customers || []).reduce((sum, customer) => {
+    const spent = typeof customer?.total_spent === 'string'
+      ? parseFloat(customer.total_spent || '0')
+      : (customer?.total_spent || 0);
+    return sum + spent;
+  }, 0);
   const avgSpendPerCustomer = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
-  const totalOrders = (customers || []).reduce((sum, customer) => sum + (customer?.orders_count || 0), 0);
+  const totalOrders = (customers || []).reduce((sum, customer) => sum + (customer?.completed_orders || 0), 0);
 
   const filteredCustomers = (customers || []).filter(customer => {
     const fullName = `${customer?.first_name || ''} ${customer?.last_name || ''}`.toLowerCase();
@@ -89,9 +95,11 @@ const ClientCustomersPage = () => {
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
     switch (sortBy) {
       case "total_spent":
-        return (b?.total_spent || 0) - (a?.total_spent || 0);
+        const spentA = typeof a?.total_spent === 'string' ? parseFloat(a.total_spent || '0') : (a?.total_spent || 0);
+        const spentB = typeof b?.total_spent === 'string' ? parseFloat(b.total_spent || '0') : (b?.total_spent || 0);
+        return spentB - spentA;
       case "orders_count":
-        return (b?.orders_count || 0) - (a?.orders_count || 0);
+        return (b?.completed_orders || 0) - (a?.completed_orders || 0);
       case "created_at":
         return new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime();
       case "name":
@@ -103,7 +111,7 @@ const ClientCustomersPage = () => {
     }
   });
 
-  const handleViewCustomer = (customer: Customer) => {
+  const handleViewCustomer = (customer: ClientCustomer) => {
     setSelectedCustomer(customer);
     setIsViewCustomerOpen(true);
   };
@@ -307,23 +315,17 @@ const ClientCustomersPage = () => {
                     <div className="flex items-center gap-4">
                       {/* Avatar */}
                       <div className="w-16 h-16 flex-shrink-0">
-                        {customer.avatar ? (
-                          <img
-                            src={customer.avatar}
-                            alt={customer.name}
-                            className="w-16 h-16 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                            <Users className="h-8 w-8 text-purple-600" />
-                          </div>
-                        )}
+                        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Users className="h-8 w-8 text-purple-600" />
+                        </div>
                       </div>
 
                       {/* Customer Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">{customer.name}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown User'}
+                          </h3>
                           <Badge variant={customer.status === "active" ? "default" : "secondary"}
                                  className={customer.status === "active" ? "bg-green-100 text-green-800" : ""}>
                             {customer.status}
@@ -340,15 +342,15 @@ const ClientCustomersPage = () => {
                           </div>
                           <div>
                             <p className="text-gray-500">Total Spent</p>
-                            <p className="font-semibold text-green-600">${customer.totalSpent.toLocaleString()}</p>
+                            <p className="font-semibold text-green-600">{formatCurrency(customer.total_spent)}</p>
                           </div>
                           <div>
                             <p className="text-gray-500">Orders</p>
-                            <p className="font-semibold text-blue-600">{customer.ordersCount}</p>
+                            <p className="font-semibold text-blue-600">{customer.completed_orders || 0}</p>
                           </div>
                           <div>
-                            <p className="text-gray-500">Referred By</p>
-                            <p className="font-semibold text-purple-600">{customer.referredBy || "Direct"}</p>
+                            <p className="text-gray-500">Phone</p>
+                            <p className="font-semibold text-purple-600">{customer.phone || "N/A"}</p>
                           </div>
                         </div>
 
@@ -358,11 +360,11 @@ const ClientCustomersPage = () => {
                               <Calendar className="h-3 w-3" />
                               Join Date
                             </p>
-                            <p className="font-medium">{new Date(customer.joinDate).toLocaleDateString()}</p>
+                            <p className="font-medium">{formatDate(customer.join_date)}</p>
                           </div>
                           <div>
                             <p className="text-gray-500">Last Order</p>
-                            <p className="font-medium">{new Date(customer.lastOrderDate).toLocaleDateString()}</p>
+                            <p className="font-medium">{formatDate(customer.last_order_date)}</p>
                           </div>
                         </div>
                       </div>
@@ -397,19 +399,13 @@ const ClientCustomersPage = () => {
           {selectedCustomer && (
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                {selectedCustomer.avatar ? (
-                  <img
-                    src={selectedCustomer.avatar}
-                    alt={selectedCustomer.name}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Users className="h-10 w-10 text-purple-600" />
-                  </div>
-                )}
+                <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Users className="h-10 w-10 text-purple-600" />
+                </div>
                 <div>
-                  <h3 className="text-2xl font-semibold">{selectedCustomer.name}</h3>
+                  <h3 className="text-2xl font-semibold">
+                    {`${selectedCustomer.first_name || ''} ${selectedCustomer.last_name || ''}`.trim() || 'Unknown User'}
+                  </h3>
                   <p className="text-gray-600">{selectedCustomer.email}</p>
                   <Badge variant={selectedCustomer.status === "active" ? "default" : "secondary"} className="mt-1">
                     {selectedCustomer.status}
@@ -424,11 +420,11 @@ const ClientCustomersPage = () => {
                     <div className="space-y-2 mt-2">
                       <p className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-gray-400" />
-                        {selectedCustomer.phone}
+                        {selectedCustomer.phone || 'N/A'}
                       </p>
                       <p className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-gray-400" />
-                        {selectedCustomer.address}
+                        Address not available
                       </p>
                     </div>
                   </div>
@@ -438,11 +434,11 @@ const ClientCustomersPage = () => {
                     <div className="space-y-2 mt-2">
                       <p className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
-                        Joined: {new Date(selectedCustomer.joinDate).toLocaleDateString()}
+                        Joined: {formatDate(selectedCustomer.join_date)}
                       </p>
                       <p className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
-                        Last Order: {new Date(selectedCustomer.lastOrderDate).toLocaleDateString()}
+                        Last Order: {formatDate(selectedCustomer.last_order_date)}
                       </p>
                     </div>
                   </div>
@@ -453,7 +449,7 @@ const ClientCustomersPage = () => {
                     <Label className="text-sm font-medium text-gray-500">Referral Information</Label>
                     <div className="mt-2">
                       <Badge className="bg-purple-100 text-purple-800">
-                        {selectedCustomer.referredBy || "Direct Customer"}
+                        Direct Customer
                       </Badge>
                     </div>
                   </div>
@@ -465,14 +461,14 @@ const ClientCustomersPage = () => {
                   <CardContent className="p-4 text-center">
                     <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Total Spent</p>
-                    <p className="text-2xl font-bold text-green-600">${selectedCustomer.totalSpent.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.total_spent)}</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-blue-50 border-blue-200">
                   <CardContent className="p-4 text-center">
                     <TrendingUp className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Total Orders</p>
-                    <p className="text-2xl font-bold text-blue-600">{selectedCustomer.ordersCount}</p>
+                    <p className="text-2xl font-bold text-blue-600">{selectedCustomer.completed_orders || 0}</p>
                   </CardContent>
                 </Card>
               </div>

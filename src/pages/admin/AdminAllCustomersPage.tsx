@@ -283,14 +283,17 @@ const AdminAllCustomersPage = () => {
 
   // Use customers directly since filtering is done server-side via API
   const filteredCustomers = customers.length > 0 ? customers : mockCustomers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (customer.preferredServices && customer.preferredServices.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || customer.status.toLowerCase() === statusFilter;
-    const matchesVendor = vendorFilter === "all" || customer.vendor === vendorFilter;
-    const matchesLocation = locationFilter === "all" || (customer.location && customer.location.toLowerCase().includes(locationFilter.toLowerCase()));
+    const customerName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim();
+    const matchesSearch = customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" ||
+                         (statusFilter === "active" && customer.status === 0) ||
+                         (statusFilter === "inactive" && customer.status === 1) ||
+                         (statusFilter === "suspended" && customer.status === 2);
+    const matchesVendor = vendorFilter === "all"; // Simplified for now
+    const matchesLocation = locationFilter === "all"; // Simplified for now
 
-    const spentAmount = customer.totalSpent ? parseFloat(customer.totalSpent.replace('$', '').replace(',', '')) : 0;
+    const spentAmount = customer.total_spent || 0;
     const matchesSpending = spendingFilter === "all" ||
                            (spendingFilter === "high" && spentAmount >= 3000) ||
                            (spendingFilter === "medium" && spentAmount >= 1500 && spentAmount < 3000) ||
@@ -301,12 +304,15 @@ const AdminAllCustomersPage = () => {
 
   // Calculate summary stats based on filtered data
   const totalCustomers = filteredCustomers.length;
-  const activeCustomers = filteredCustomers.filter(c => c.status === "Active").length;
-  const inactiveCustomers = filteredCustomers.filter(c => c.status === "Inactive").length;
-  const suspendedCustomers = filteredCustomers.filter(c => c.status === "Suspended").length;
-  const totalRevenue = filteredCustomers.reduce((sum, customer) =>
-    sum + parseFloat(customer.totalSpent.replace('$', '').replace(',', '')), 0
-  );
+  const activeCustomers = filteredCustomers.filter(c => c.status === 0).length;
+  const inactiveCustomers = filteredCustomers.filter(c => c.status === 1).length;
+  const suspendedCustomers = filteredCustomers.filter(c => c.status === 2).length;
+  const totalRevenue = filteredCustomers.reduce((sum, customer) => {
+    const spent = typeof customer.total_spent === 'string'
+      ? parseFloat(customer.total_spent) || 0
+      : customer.total_spent || 0;
+    return sum + spent;
+  }, 0);
 
   return (
     <div className="space-y-6">
@@ -573,10 +579,12 @@ const AdminAllCustomersPage = () => {
                   >
                     <TableCell>
                       <div>
-                        <p className="font-medium text-gray-900">{customer.name}</p>
+                        <p className="font-medium text-gray-900">
+                          {`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown User'}
+                        </p>
                         <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin className="h-3 w-3 mr-1" />
-                          {customer.location}
+                          {customer.email}
                         </div>
                       </div>
                     </TableCell>
@@ -584,7 +592,7 @@ const AdminAllCustomersPage = () => {
                     <TableCell>
                       <div className="flex items-center">
                         <Users className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className="text-gray-700">{customer.vendor}</span>
+                        <span className="text-gray-700">Platform Customer</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -602,22 +610,27 @@ const AdminAllCustomersPage = () => {
                     <TableCell>
                       <div className="flex items-center">
                         <ShoppingBag className="h-4 w-4 mr-1 text-gray-400" />
-                        <span className="font-medium text-gray-900">{customer.totalOrders}</span>
+                        <span className="font-medium text-gray-900">{customer.completed_orders || 0}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-900 font-semibold">{customer.totalSpent}</TableCell>
+                    <TableCell className="text-gray-900 font-semibold">
+                      ${typeof customer.total_spent === 'string'
+                        ? parseFloat(customer.total_spent || '0').toLocaleString()
+                        : (customer.total_spent || 0).toLocaleString()}
+                    </TableCell>
 
-                    <TableCell className="text-gray-600">{customer.lastOrder}</TableCell>
+                    <TableCell className="text-gray-600">
+                      {customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : 'N/A'}
+                    </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={getStatusVariant(customer.status)}
+                      <Badge
+                        variant={customer.status === 0 ? "default" : "secondary"}
                         className={`${
-                          customer.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                          customer.status === 'Inactive' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
-                          'bg-red-100 text-red-800 hover:bg-red-100'
+                          customer.status === 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                          'bg-orange-100 text-orange-800 hover:bg-orange-100'
                         }`}
                       >
-                        {customer.status}
+                        {customer.status === 0 ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

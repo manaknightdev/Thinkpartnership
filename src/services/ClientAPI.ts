@@ -75,9 +75,12 @@ export interface ClientCustomer {
   email: string;
   phone?: string;
   status: string;
-  orders_count: number;
-  total_spent: number;
-  created_at: string;
+  completed_orders: number;
+  total_spent: string | number;
+  join_date: string;
+  total_requests: number;
+  last_order_date: string | null;
+  vendors_used: number;
 }
 
 export interface ClientOrder {
@@ -171,7 +174,7 @@ class ClientAPI {
   // Customer Management Methods
   async getCustomers(): Promise<ClientCustomer[]> {
     const response = await clientApiClient.get('/api/marketplace/client/customers');
-    return response.data;
+    return response.data.customers || response.data;
   }
 
   // Order Management Methods
