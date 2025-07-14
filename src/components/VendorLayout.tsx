@@ -150,7 +150,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
           {/* Right Section */}
           <div className="flex items-center space-x-3">
             {/* Notifications */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               className="relative"
@@ -163,7 +163,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
                   {notificationCount}
                 </Badge>
               )}
-            </Button>
+            </Button> */}
 
             {/* Profile Dropdown */}
             <DropdownMenu>
@@ -199,10 +199,10 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
                   <Crown className="mr-2 h-4 w-4" />
                   Subscription
                 </DropdownMenuItem> */}
-                <DropdownMenuItem onClick={() => navigate('/vendor-portal/notifications')}>
+                {/* <DropdownMenuItem onClick={() => navigate('/vendor-portal/notifications')}>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/vendor-portal/help')}>
                   <HelpCircle className="mr-2 h-4 w-4" />

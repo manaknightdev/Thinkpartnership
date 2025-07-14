@@ -117,7 +117,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
           {/* Right Section */}
           <div className="flex items-center space-x-3">
             {/* Notifications */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               className="relative"
@@ -130,7 +130,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                   {notificationCount}
                 </Badge>
               )}
-            </Button>
+            </Button> */}
 
             {/* Profile Dropdown */}
             <DropdownMenu>
