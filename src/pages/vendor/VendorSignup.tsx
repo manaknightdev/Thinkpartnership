@@ -448,7 +448,7 @@ const VendorSignup = () => {
                 Looking for a different portal?
               </p>
               <div className="flex justify-center space-x-4 text-xs">
-                <Link to="/login" className="text-blue-600 hover:underline">
+                <Link to="/marketplace/login" className="text-blue-600 hover:underline">
                   Customer Portal
                 </Link>
                 <Link to="/client/login" className="text-blue-600 hover:underline">

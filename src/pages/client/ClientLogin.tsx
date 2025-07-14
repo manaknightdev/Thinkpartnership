@@ -179,14 +179,14 @@ const ClientLogin = () => {
               </Button>
             </form>
 
-            <div className="text-center">
+            {/* <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have a client account?{' '}
                 <Link to="/client/signup" className="text-blue-600 hover:text-blue-700 font-medium">
                   Sign up here
                 </Link>
               </p>
-            </div>
+            </div> */}
 
             {/* Other Portal Links */}
             <div className="mt-6 pt-6 border-t border-gray-200">

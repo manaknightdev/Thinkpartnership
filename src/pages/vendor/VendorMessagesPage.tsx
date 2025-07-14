@@ -592,7 +592,7 @@ const VendorMessagesPage = () => {
                   </Dialog>
 
                   {/* Create Order Button */}
-                  <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
+                  {/* <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
                     <DialogTrigger asChild>
                       <Button
                         size="sm"
@@ -643,10 +643,10 @@ const VendorMessagesPage = () => {
                         </div>
                       </div>
                     </DialogContent>
-                  </Dialog>
+                  </Dialog> */}
 
                   {/* Choose Order Button */}
-                  <Dialog open={isChooseOrderOpen} onOpenChange={setIsChooseOrderOpen}>
+                  {/* <Dialog open={isChooseOrderOpen} onOpenChange={setIsChooseOrderOpen}>
                     <DialogTrigger asChild>
                       <Button
                         size="sm"
@@ -698,7 +698,7 @@ const VendorMessagesPage = () => {
                         </div>
                       </div>
                     </DialogContent>
-                  </Dialog>
+                  </Dialog> */}
                 </div>
               </div>
             </div>
