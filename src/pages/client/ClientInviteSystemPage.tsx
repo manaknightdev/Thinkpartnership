@@ -586,7 +586,7 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
             <Button
               onClick={handleSendInvites}
               disabled={sending}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-primary hover:bg-primary/90"
             >
               {sending ? (
                 <>
@@ -704,7 +704,7 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
                   handleResendInvite(selectedInvite);
                   setIsViewInviteOpen(false);
                 }}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Send className="mr-2 h-4 w-4" />
                 Resend Invite

@@ -133,9 +133,12 @@ export interface RevenueRule {
 
 export interface BrandingSettings {
   logo_url?: string;
+  favicon_url?: string;
   primary_color: string;
   secondary_color: string;
   company_name: string;
+  marketplace_subdomain?: string;
+  font_family?: string;
   tagline?: string;
   custom_domain?: string;
   theme_settings: Record<string, any>;
@@ -254,6 +257,23 @@ class ClientAPI {
 
   async updateBrandingSettings(settings: Partial<BrandingSettings>): Promise<any> {
     const response = await clientApiClient.put('/api/marketplace/client/branding', settings);
+    return response.data;
+  }
+
+  // File Upload Methods
+  async uploadFile(file: File, caption?: string): Promise<{ url: string; id: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (caption) {
+      formData.append('caption', caption);
+    }
+
+    const response = await clientApiClient.post('/v1/api/thinkpartnership/client/lambda/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     return response.data;
   }
 

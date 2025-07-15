@@ -428,11 +428,11 @@ const ClientWalletPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <Card className="bg-green-50 border-green-200">
+              <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="p-4 text-center">
-                  <TrendingUp className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Income</p>
-                  <p className="text-xl font-bold text-green-600">${totalIncome.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-primary">${totalIncome.toLocaleString()}</p>
                 </CardContent>
               </Card>
               <Card className="bg-blue-50 border-blue-200">

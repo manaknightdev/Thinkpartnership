@@ -81,7 +81,7 @@ const ClientNotificationsPage = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case "payment": return <DollarSign className="h-5 w-5 text-green-600" />;
+      case "payment": return <DollarSign className="h-5 w-5 text-primary" />;
       case "message": return <Mail className="h-5 w-5 text-blue-600" />;
       default: return <Bell className="h-5 w-5 text-gray-600" />;
     }

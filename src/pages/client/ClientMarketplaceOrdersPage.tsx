@@ -197,7 +197,12 @@ const ClientMarketplaceOrdersPage = () => {
                     <TableCell>{formatDate(order.date)}</TableCell>
                     <TableCell>{order.amount}</TableCell>
                     <TableCell>
-                      <Badge variant={getOrderStatusVariant(order.status)} className="capitalize">{order.status}</Badge>
+                      <Badge
+                        variant={order.status === "completed" ? "secondary" : getOrderStatusVariant(order.status)}
+                        className={`capitalize ${order.status === "completed" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}`}
+                      >
+                        {order.status}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleViewOrderDetails(order); }}>
@@ -237,7 +242,14 @@ const ClientMarketplaceOrdersPage = () => {
                 <p className="font-semibold">Date:</p><p>{formatDate(selectedOrder.date)}</p>
                 <p className="font-semibold">Amount:</p><p>{selectedOrder.amount}</p>
                 <p className="font-semibold">Current Status:</p>
-                <p><Badge variant={getOrderStatusVariant(selectedOrder.status)} className="capitalize">{selectedOrder.status}</Badge></p>
+                <p>
+                  <Badge
+                    variant={selectedOrder.status === "completed" ? "secondary" : getOrderStatusVariant(selectedOrder.status)}
+                    className={`capitalize ${selectedOrder.status === "completed" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}`}
+                  >
+                    {selectedOrder.status}
+                  </Badge>
+                </p>
               </div>
               
               <div className="space-y-2 mt-2">

@@ -627,12 +627,12 @@ const VendorProfilePage = () => {
                   View Referrals
                 </a>
               </Button>
-              <Button variant="outline" className="w-full justify-start" asChild>
+              {/* <Button variant="outline" className="w-full justify-start" asChild>
                 <a href="/vendor-portal/subscription">
                   <Users className="mr-2 h-4 w-4" />
                   Subscription
                 </a>
-              </Button>
+              </Button> */}
             </CardContent>
           </Card>
         </div>

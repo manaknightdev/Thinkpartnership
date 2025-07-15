@@ -1,11 +1,14 @@
 import { Outlet } from "react-router-dom";
 import { ClientLayout } from "@/components/ClientLayout";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 
 const ClientDashboard = () => {
   return (
-    <ClientLayout>
-      <Outlet />
-    </ClientLayout>
+    <BrandingProvider>
+      <ClientLayout>
+        <Outlet />
+      </ClientLayout>
+    </BrandingProvider>
   );
 };
 

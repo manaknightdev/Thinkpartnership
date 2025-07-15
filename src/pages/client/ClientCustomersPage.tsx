@@ -140,13 +140,13 @@ const ClientCustomersPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">All Customers</h1>
         <p className="text-lg text-gray-700 mb-4">
           Manage and track all customers in your marketplace ecosystem.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button className="bg-green-600 hover:bg-green-700" onClick={handleInviteCustomer}>
+          <Button className="bg-primary hover:bg-primary/90" onClick={handleInviteCustomer}>
             <UserPlus className="mr-2 h-4 w-4" />
             Invite Customer
           </Button>
@@ -177,13 +177,13 @@ const ClientCustomersPage = () => {
         <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-green-500">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-green-600" />
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <DollarSign className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-green-600">${totalRevenue.toLocaleString()}</p>
-                <p className="text-xs text-green-600">${avgSpendPerCustomer.toFixed(0)} avg per customer</p>
+                <p className="text-2xl font-bold text-primary">${totalRevenue.toLocaleString()}</p>
+                <p className="text-xs text-primary">${avgSpendPerCustomer.toFixed(0)} avg per customer</p>
               </div>
             </div>
           </CardContent>
@@ -327,7 +327,7 @@ const ClientCustomersPage = () => {
                             {`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown User'}
                           </h3>
                           <Badge variant={customer.status === "active" ? "default" : "secondary"}
-                                 className={customer.status === "active" ? "bg-green-100 text-green-800" : ""}>
+                                 className={customer.status === "active" ? "bg-primary/10 text-primary" : ""}>
                             {customer.status}
                           </Badge>
                         </div>
@@ -342,7 +342,7 @@ const ClientCustomersPage = () => {
                           </div>
                           <div>
                             <p className="text-gray-500">Total Spent</p>
-                            <p className="font-semibold text-green-600">{formatCurrency(customer.total_spent)}</p>
+                            <p className="font-semibold text-primary">{formatCurrency(customer.total_spent)}</p>
                           </div>
                           <div>
                             <p className="text-gray-500">Orders</p>
@@ -457,11 +457,11 @@ const ClientCustomersPage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="bg-green-50 border-green-200">
+                <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-4 text-center">
-                    <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Total Spent</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.total_spent)}</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(selectedCustomer.total_spent)}</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-blue-50 border-blue-200">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
+import { useBranding } from "@/contexts/BrandingContext";
 import {
   Menu,
   Bell,
@@ -27,6 +28,22 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Helper function to convert relative URLs to full URLs
+const getFullImageUrl = (url: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url; // Already a full URL
+  }
+  if (url.startsWith('/uploads/')) {
+    // Use local development server for development, production server for production
+    const baseUrl = import.meta.env.DEV
+      ? 'http://localhost:5172'
+      : 'https://baas.mytechpassport.com';
+    return `${baseUrl}${url}`;
+  }
+  return url;
+};
+
 interface ClientLayoutProps {
   children: React.ReactNode;
 }
@@ -37,7 +54,10 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(3);
-  const [userName] = useState("RealPartnersOS Corp"); // In real app, this would come from auth context
+  const { branding } = useBranding();
+
+  const companyName = branding?.company_name || "Client Portal";
+  const logoUrl = branding?.logo_url ? getFullImageUrl(branding.logo_url) : '';
 
   const sidebarItems = [
     { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard, exact: false },
@@ -87,14 +107,14 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className={cn(
                 "hidden md:flex items-center gap-2 hover:bg-gray-100 transition-all duration-200 rounded-lg px-3 py-2",
-                sidebarCollapsed ? "bg-green-50 text-green-700 border border-green-200" : ""
+                sidebarCollapsed ? "bg-primary/10 text-primary border border-primary/20" : ""
               )}
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Menu className="h-4 w-4" />
               {!sidebarCollapsed && <span className="text-sm font-medium">Menu</span>}
               {sidebarCollapsed && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
               )}
             </Button>
 
@@ -109,8 +129,8 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
             </Button>
 
             {/* Logo */}
-            <Link to="/client-portal" className="text-xl font-bold text-green-600">
-              Client Portal
+            <Link to="/client-portal" className="text-xl font-bold text-primary">
+              {companyName}
             </Link>
           </div>
 
@@ -136,16 +156,20 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2 hover:bg-gray-100">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span className="hidden sm:inline text-sm font-medium">{userName}</span>
+                  {logoUrl ? (
+                    <img src={logoUrl} alt={companyName} className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Building className="h-4 w-4 text-primary" />
+                    </div>
+                  )}
+                  <span className="hidden sm:inline text-sm font-medium">{companyName}</span>
                   <ChevronDown className="h-3 w-3 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-3 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{userName}</p>
+                  <p className="text-sm font-medium text-gray-900">{companyName}</p>
                   <p className="text-xs text-gray-500">Client Portal Admin</p>
                 </div>
                 {/* <DropdownMenuItem onClick={() => navigate('/client-portal/tasks')}>
@@ -196,7 +220,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                   "flex items-center rounded-lg text-sm font-medium transition-all duration-200 relative group",
                   sidebarCollapsed ? "px-2 py-3 justify-center mx-1" : "px-3 py-2 space-x-3",
                   isActive(item.path, item.exact)
-                    ? "bg-green-100 text-green-700 shadow-sm border border-green-200"
+                    ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 )}
                 title={sidebarCollapsed ? item.name : undefined}
@@ -229,7 +253,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                     className={cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       isActive(item.path, item.exact)
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-primary/10 text-primary"
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     )}
                   >

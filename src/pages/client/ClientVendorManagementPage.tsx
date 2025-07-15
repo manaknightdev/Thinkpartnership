@@ -227,7 +227,7 @@ const ClientVendorManagementPage = () => {
 
                     <TableCell>
                       <Badge variant={vendor.status === "active" ? "default" : "destructive"}
-                             className={vendor.status === "active" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
+                             className={vendor.status === "active" ? "bg-primary/10 text-primary hover:bg-primary/10" : ""}>
                         {vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
                       </Badge>
                     </TableCell>
@@ -368,11 +368,11 @@ const ClientVendorManagementPage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-green-50 border-green-200">
+                <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-4 text-center">
-                    <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Total Revenue</p>
-                    <p className="text-xl font-bold text-green-600">${selectedVendor.totalRevenue.toLocaleString()}</p>
+                    <p className="text-xl font-bold text-primary">${selectedVendor.totalRevenue.toLocaleString()}</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-blue-50 border-blue-200">

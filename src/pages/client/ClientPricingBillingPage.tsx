@@ -257,7 +257,7 @@ const ClientPricingBillingPage = () => {
 
   const getFeeTypeColor = (type: string) => {
     switch (type) {
-      case "commission": return "bg-green-100 text-green-800";
+      case "commission": return "bg-primary/10 text-primary";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -265,13 +265,13 @@ const ClientPricingBillingPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Vendor Pricing & Billing</h1>
         <p className="text-lg text-gray-700 mb-4">
           Set pricing plans and fees that your vendors will pay to use your marketplace.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button className="bg-green-600 hover:bg-green-700" onClick={() => setIsCreatePlanOpen(true)}>
+          <Button className="bg-primary hover:bg-primary/90" onClick={() => setIsCreatePlanOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Create Vendor Plan
           </Button>
@@ -539,7 +539,7 @@ const ClientPricingBillingPage = () => {
                             <p className="text-xs text-gray-500">{fee.description}</p>
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-600">Status:</span>
-                              <Badge className={fee.isActive && chargeVendors ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                              <Badge className={fee.isActive && chargeVendors ? "bg-primary/10 text-primary" : "bg-gray-100 text-gray-800"}>
                                 {fee.isActive && chargeVendors ? "Active" : "Inactive"}
                               </Badge>
                             </div>
@@ -744,7 +744,7 @@ const ClientPricingBillingPage = () => {
                       <Card className="border border-gray-200">
                         <CardHeader className="text-center">
                           <CardTitle className="text-lg">30-Day Featured</CardTitle>
-                          <div className="text-2xl font-bold text-green-600">$199</div>
+                          <div className="text-2xl font-bold text-primary">$199</div>
                           <CardDescription>Maximum exposure</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -845,10 +845,10 @@ const ClientPricingBillingPage = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-green-50 border-green-200">
+                <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-6">
-                    <h4 className="font-semibold text-green-900 mb-3">Featured Placement Benefits</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-green-800">
+                    <h4 className="font-semibold text-primary mb-3">Featured Placement Benefits</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-primary/80">
                       <ul className="space-y-2">
                         <li className="flex items-center gap-2">
                           <TrendingUp className="h-4 w-4" />

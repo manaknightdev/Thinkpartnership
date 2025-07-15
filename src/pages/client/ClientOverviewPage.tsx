@@ -61,13 +61,13 @@ const ClientOverviewPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Marketplace Overview</h1>
         <p className="text-lg text-gray-700 mb-4">
           Welcome to your client portal! Here you can manage your branded sub-marketplace, onboard vendors, and monitor transactions.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button className="bg-green-600 hover:bg-green-700" asChild>
+          <Button className="bg-primary hover:bg-primary/90" asChild>
             <Link to="/client-portal/invites">Invite Users</Link>
           </Button>
           <Button variant="outline" asChild>
@@ -84,15 +84,15 @@ const ClientOverviewPage = () => {
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <div className="p-2 bg-green-100 rounded-full">
-              <DollarSign className="h-4 w-4 text-green-600" />
+            <div className="p-2 bg-primary/10 rounded-full">
+              <DollarSign className="h-4 w-4 text-primary" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(stats?.total_revenue)}
             </div>
-            <p className={`text-xs font-medium ${stats && stats.monthly_growth && stats.monthly_growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-xs font-medium ${stats && stats.monthly_growth && stats.monthly_growth >= 0 ? 'text-primary' : 'text-red-600'}`}>
               {formatGrowth(stats?.monthly_growth)} from last month
             </p>
           </CardContent>
@@ -149,11 +149,11 @@ const ClientOverviewPage = () => {
 
       {/* Main Navigation Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <BarChart className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <BarChart className="h-5 w-5 text-primary" />
               </div>
               Marketplace Metrics
             </CardTitle>
@@ -163,7 +163,7 @@ const ClientOverviewPage = () => {
             <p className="text-gray-600 mb-4">
               Dive into detailed reports on transactions, revenue, and overall marketplace health.
             </p>
-            <Button className="w-full bg-green-600 hover:bg-green-700" asChild>
+            <Button className="w-full bg-primary hover:bg-primary/90" asChild>
               <Link to="/client-portal/reports">View Reports</Link>
             </Button>
           </CardContent>
@@ -255,7 +255,7 @@ const ClientOverviewPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3 mb-4">
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
                 <span className="text-sm text-gray-700">Payment Setup Completed</span>
                 <span className="text-xs text-gray-500">2 hours ago</span>
               </div>

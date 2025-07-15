@@ -135,7 +135,7 @@ const ClientHelpSupportPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Help & Support</h1>
         <p className="text-lg text-gray-700 mb-4">
           Get help with your marketplace management and find answers to common questions.
@@ -158,12 +158,12 @@ const ClientHelpSupportPage = () => {
 
       {/* Quick Access Cards */}
       {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-green-500">
+        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-primary">
           <CardContent className="p-6 text-center">
-            <MessageCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+            <MessageCircle className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Live Chat</h3>
             <p className="text-gray-600 mb-4">Get instant help from our support team</p>
-            <Badge className="bg-green-100 text-green-800">Available 24/7</Badge>
+            <Badge className="bg-primary/10 text-primary">Available 24/7</Badge>
           </CardContent>
         </Card>
 
@@ -304,7 +304,7 @@ const ClientHelpSupportPage = () => {
                   />
                 </div>
 
-                <Button onClick={handleSubmitTicket} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={handleSubmitTicket} className="bg-primary hover:bg-primary/90">
                   Submit Ticket
                 </Button>
               </div>
@@ -317,8 +317,8 @@ const ClientHelpSupportPage = () => {
                     <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <link.icon className="h-5 w-5 text-green-600" />
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <link.icon className="h-5 w-5 text-primary" />
                           </div>
                           <div className="flex-1">
                             <h4 className="font-medium text-gray-900">{link.title}</h4>
@@ -364,15 +364,15 @@ const ClientHelpSupportPage = () => {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-primary" />
                         <span className="text-sm">All systems operational</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-primary" />
                         <span className="text-sm">Payment processing: Normal</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-primary" />
                         <span className="text-sm">Email notifications: Normal</span>
                       </div>
                       <Button variant="outline" size="sm" className="w-full mt-3">

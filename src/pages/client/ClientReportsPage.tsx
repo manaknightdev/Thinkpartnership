@@ -92,7 +92,7 @@ const ClientReportsPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
         <p className="text-lg text-gray-700 mb-4">
           Access detailed reports and analytics for your marketplace performance.
@@ -110,17 +110,17 @@ const ClientReportsPage = () => {
               <SelectItem value="yearly">Yearly</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="bg-green-600 hover:bg-green-700" onClick={handleGenerateReport}>
+          <Button className="bg-primary hover:bg-primary/90" onClick={handleGenerateReport}>
             Generate Custom Report
           </Button>
         </div>
       </div>
 
-      <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-green-500">
+      <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-primary">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <LineChartIcon className="h-5 w-5 text-green-600" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <LineChartIcon className="h-5 w-5 text-primary" />
             </div>
             Marketplace Performance Overview
           </CardTitle>
@@ -201,9 +201,9 @@ const ClientReportsPage = () => {
               </Card>
               <Card className="bg-green-50 border-green-200">
                 <CardContent className="p-4 text-center">
-                  <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-primary">
                     ${mockAllVendors.reduce((sum, v) => sum + v.totalRevenue, 0).toLocaleString()}
                   </p>
                 </CardContent>
