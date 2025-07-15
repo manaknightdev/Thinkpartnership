@@ -26,6 +26,7 @@ const AdminDashboardOverviewPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [revenueAnalytics, setRevenueAnalytics] = useState(null);
+  const [chartData, setChartData] = useState(mockOverallData);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -39,15 +40,27 @@ const AdminDashboardOverviewPage = () => {
         ]);
 
         if (statsResponse.error) {
-          showError(statsResponse.message || 'Failed to fetch dashboard statistics');
+          showError('Failed to fetch dashboard statistics');
         } else {
           setDashboardStats(statsResponse.stats);
         }
 
         if (revenueResponse.error) {
-          showError(revenueResponse.message || 'Failed to fetch revenue analytics');
+          showError('Failed to fetch revenue analytics');
         } else {
           setRevenueAnalytics(revenueResponse.revenue_data);
+        }
+
+        // Transform revenue analytics data for chart after both API calls complete
+        if (!statsResponse.error && !revenueResponse.error &&
+            revenueResponse.revenue_data && Array.isArray(revenueResponse.revenue_data)) {
+          const transformedData = revenueResponse.revenue_data.map((item, index) => ({
+            name: new Date(item.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+            revenue: parseFloat(item.total_revenue || '0'),
+            vendors: statsResponse.stats?.total_vendors || (10 + index), // Use actual vendor count or fallback
+            transactions: parseInt(item.transactions?.toString() || '0')
+          }));
+          setChartData(transformedData);
         }
 
       } catch (error) {
@@ -162,12 +175,12 @@ const AdminDashboardOverviewPage = () => {
             ) : (
               <>
                 <div className="text-2xl font-bold text-gray-900">
-                  ${dashboardStats?.total_revenue ? (dashboardStats.total_revenue / 1000).toFixed(1) + 'K' : '0'}
+                  ${dashboardStats?.total_platform_revenue ? (parseFloat(dashboardStats.total_platform_revenue) / 1000).toFixed(1) + 'K' : '0'}
                 </div>
                 <div className="flex items-center mt-1">
                   <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
                   <p className="text-xs text-green-600 font-medium">
-                    ${dashboardStats?.monthly_revenue ? (dashboardStats.monthly_revenue / 1000).toFixed(1) + 'K' : '0'} this month
+                    ${dashboardStats?.month_revenue ? (parseFloat(dashboardStats.month_revenue) / 1000).toFixed(1) + 'K' : '0'} this month
                   </p>
                 </div>
               </>
@@ -261,9 +274,9 @@ const AdminDashboardOverviewPage = () => {
                 Revenue, vendor growth, and transaction volume over the last 6 months
               </CardDescription>
             </div>
-            <Button onClick={handleViewDetails} variant="outline" size="sm">
+            {/* <Button onClick={handleViewDetails} variant="outline" size="sm">
               View Details
-            </Button>
+            </Button> */}
           </div>
         </CardHeader>
         <CardContent className="pt-0">
@@ -277,7 +290,7 @@ const AdminDashboardOverviewPage = () => {
           ) : (
             <ResponsiveContainer width="100%" height={350}>
               <LineChart
-                data={revenueAnalytics || mockOverallData}
+                data={chartData}
                 margin={{
                   top: 5,
                   right: 30,

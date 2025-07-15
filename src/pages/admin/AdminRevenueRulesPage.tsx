@@ -3,24 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Settings, PlusCircle, Edit, Trash2, Loader2 } from "lucide-react";
+import { Settings, Loader2 } from "lucide-react";
 import AdminAPI from '@/services/AdminAPI';
 import { showError, showSuccess } from '@/utils/toast';
 
-const mockGlobalServiceRules = [
-  { id: "r001", service: "Plumbing", platformShare: "10%", clientShare: "10%", vendorShare: "80%" },
-  { id: "r002", service: "Painting", platformShare: "8%", clientShare: "12%", vendorShare: "80%" },
-  { id: "r003", service: "Inspections", platformShare: "15%", clientShare: "5%", vendorShare: "80%" },
-];
-
 const AdminRevenueRulesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [revenueRules, setRevenueRules] = useState([]);
-  const [defaultPlatformCommission, setDefaultPlatformCommission] = useState(5);
-  const [defaultClientCommission, setDefaultClientCommission] = useState(10);
+  const [platformShare, setPlatformShare] = useState(10);
+  const [clientShare, setClientShare] = useState(10);
+  const [vendorAShare, setVendorAShare] = useState(5);
+  const [vendorBShare, setVendorBShare] = useState(75);
+  const [vendorBShareNoReferrer, setVendorBShareNoReferrer] = useState(80);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -34,14 +28,16 @@ const AdminRevenueRulesPage = () => {
       const response = await AdminAPI.getRevenueRules();
 
       if (response.error) {
-        showError(response.message || 'Failed to fetch revenue rules');
+        showError('Failed to fetch revenue rules');
       } else {
-        setRevenueRules(response.rules || []);
         // Set default values if available
-        const defaultRule = response.rules?.find(rule => rule.is_default);
+        const defaultRule = response.rules?.find((rule: any) => rule.rule_type === 'default');
         if (defaultRule) {
-          setDefaultPlatformCommission(defaultRule.platform_commission || 5);
-          setDefaultClientCommission(defaultRule.client_commission || 10);
+          setPlatformShare(defaultRule.platform_share || 10);
+          setClientShare(defaultRule.client_share || 10);
+          setVendorAShare(defaultRule.vendor_a_share || 5);
+          setVendorBShare(defaultRule.vendor_b_share || 75);
+          setVendorBShareNoReferrer(defaultRule.vendor_b_share_no_referrer || 80);
         }
       }
     } catch (error) {
@@ -56,13 +52,42 @@ const AdminRevenueRulesPage = () => {
     try {
       setIsSaving(true);
 
-      const response = await AdminAPI.updateDefaultRevenueRules({
-        platform_commission: defaultPlatformCommission,
-        client_commission: defaultClientCommission
+      // Validate percentages
+      const totalWithReferrer = Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare);
+      const totalWithoutReferrer = Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer);
+
+      // Check if any total exceeds 100%
+      if (totalWithReferrer > 100) {
+        showError(`Commission percentages with referrer cannot exceed 100%. Current total: ${totalWithReferrer.toFixed(2)}%`);
+        return;
+      }
+
+      if (totalWithoutReferrer > 100) {
+        showError(`Commission percentages without referrer cannot exceed 100%. Current total: ${totalWithoutReferrer.toFixed(2)}%`);
+        return;
+      }
+
+      // Check if totals are exactly 100%
+      if (Math.abs(totalWithReferrer - 100) > 0.01) {
+        showError(`Commission percentages with referrer must add up to exactly 100%. Current total: ${totalWithReferrer.toFixed(2)}%`);
+        return;
+      }
+
+      if (Math.abs(totalWithoutReferrer - 100) > 0.01) {
+        showError(`Commission percentages without referrer must add up to exactly 100%. Current total: ${totalWithoutReferrer.toFixed(2)}%`);
+        return;
+      }
+
+      const response = await AdminAPI.createPlatformRevenueRule({
+        platform_share: Number(platformShare),
+        client_share: Number(clientShare),
+        vendor_a_share: Number(vendorAShare),
+        vendor_b_share: Number(vendorBShare),
+        vendor_b_share_no_referrer: Number(vendorBShareNoReferrer)
       });
 
       if (response.error) {
-        showError(response.message || 'Failed to save default rules');
+        showError('Failed to save default rules');
       } else {
         showSuccess('Default platform rules saved successfully!');
         fetchRevenueRules(); // Refresh the list
@@ -75,194 +100,162 @@ const AdminRevenueRulesPage = () => {
     }
   };
 
-  const handleEditRule = async (ruleId: string) => {
-    try {
-      // This would typically open a modal for editing
-      toast.info('Edit functionality would open a modal here');
-    } catch (error) {
-      console.error('Error editing rule:', error);
-      showError('Failed to edit rule. Please try again.');
-    }
-  };
 
-  const handleDeleteRule = async (ruleId: string) => {
-    try {
-      const response = await AdminAPI.deleteRevenueRule(ruleId);
-
-      if (response.error) {
-        showError(response.message || 'Failed to delete rule');
-      } else {
-        showSuccess('Revenue rule deleted successfully');
-        fetchRevenueRules(); // Refresh the list
-      }
-    } catch (error) {
-      console.error('Error deleting rule:', error);
-      showError('Failed to delete rule. Please try again.');
-    }
-  };
-
-  const handleAddCustomRule = async (ruleData: any) => {
-    try {
-      const response = await AdminAPI.createRevenueRule(ruleData);
-
-      if (response.error) {
-        showError(response.message || 'Failed to create rule');
-      } else {
-        showSuccess('New revenue rule created successfully!');
-        fetchRevenueRules(); // Refresh the list
-      }
-    } catch (error) {
-      console.error('Error creating rule:', error);
-      showError('Failed to create rule. Please try again.');
-    }
-  };
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Global Revenue & Commission Rules</h2>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Platform Revenue & Commission Rules</h2>
       <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-        Configure the default commission splits and revenue sharing across the entire marketplace.
+        Configure the default commission splits for all marketplace transactions. The system supports a 4-way split structure.
       </p>
 
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" /> Default Platform Commission
+            <Settings className="h-5 w-5" /> Default Platform Commission Structure
           </CardTitle>
-          <CardDescription>Set the default percentage the platform takes from each transaction.</CardDescription>
+          <CardDescription>
+            Set the default commission percentages for all marketplace transactions.
+            The system automatically adjusts when there's no referrer (Vendor A).
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="platform-commission">Platform Share (%)</Label>
-            <Input
-              id="platform-commission"
-              type="number"
-              placeholder="e.g., 5"
-              value={defaultPlatformCommission}
-              onChange={(e) => setDefaultPlatformCommission(Number(e.target.value))}
-            />
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="platform-share">Platform Share (%)</Label>
+              <Input
+                id="platform-share"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="e.g., 10"
+                value={platformShare}
+                onChange={(e) => setPlatformShare(Number(e.target.value))}
+              />
+              <p className="text-xs text-gray-500 mt-1">Platform commission from each transaction</p>
+            </div>
+
+            <div>
+              <Label htmlFor="client-share">Client Share (%)</Label>
+              <Input
+                id="client-share"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="e.g., 10"
+                value={clientShare}
+                onChange={(e) => setClientShare(Number(e.target.value))}
+              />
+              <p className="text-xs text-gray-500 mt-1">Client commission from each transaction</p>
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-a-share">Vendor A Share (Referrer) (%)</Label>
+              <Input
+                id="vendor-a-share"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="e.g., 5"
+                value={vendorAShare}
+                onChange={(e) => setVendorAShare(Number(e.target.value))}
+              />
+              <p className="text-xs text-gray-500 mt-1">Commission for vendor who referred the customer</p>
+            </div>
+
+            <div>
+              <Label htmlFor="vendor-b-share">Vendor B Share (Service Owner) (%)</Label>
+              <Input
+                id="vendor-b-share"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="e.g., 75"
+                value={vendorBShare}
+                onChange={(e) => setVendorBShare(Number(e.target.value))}
+              />
+              <p className="text-xs text-gray-500 mt-1">Commission for vendor providing the service (with referrer)</p>
+            </div>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This percentage is taken before the remaining amount is split between the client and vendor.
-          </p>
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+            <div>
+              <Label htmlFor="vendor-b-share-no-referrer">Vendor B Share (No Referrer) (%)</Label>
+              <Input
+                id="vendor-b-share-no-referrer"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="e.g., 80"
+                value={vendorBShareNoReferrer}
+                onChange={(e) => setVendorBShareNoReferrer(Number(e.target.value))}
+                className="mt-2"
+              />
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                Commission for vendor when there's no referrer (Vendor A gets 0%)
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Commission Summary:</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium text-green-600">With Referrer:</p>
+                <p>Platform: {platformShare}%</p>
+                <p>Client: {clientShare}%</p>
+                <p>Vendor A (Referrer): {vendorAShare}%</p>
+                <p>Vendor B (Service): {vendorBShare}%</p>
+                <p className={`font-medium ${
+                  Math.abs((Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare)) - 100) < 0.01
+                    ? 'text-green-600'
+                    : (Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare)) > 100
+                      ? 'text-red-600'
+                      : 'text-yellow-600'
+                }`}>
+                  Total: {(Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare)).toFixed(2)}%
+                  {(Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare)) > 100 && ' ⚠️ Exceeds 100%'}
+                  {(Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare)) < 100 && Math.abs((Number(platformShare) + Number(clientShare) + Number(vendorAShare) + Number(vendorBShare)) - 100) > 0.01 && ' ⚠️ Under 100%'}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-blue-600">Without Referrer:</p>
+                <p>Platform: {platformShare}%</p>
+                <p>Client: {clientShare}%</p>
+                <p>Vendor A (Referrer): 0%</p>
+                <p>Vendor B (Service): {vendorBShareNoReferrer}%</p>
+                <p className={`font-medium ${
+                  Math.abs((Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer)) - 100) < 0.01
+                    ? 'text-green-600'
+                    : (Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer)) > 100
+                      ? 'text-red-600'
+                      : 'text-yellow-600'
+                }`}>
+                  Total: {(Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer)).toFixed(2)}%
+                  {(Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer)) > 100 && ' ⚠️ Exceeds 100%'}
+                  {(Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer)) < 100 && Math.abs((Number(platformShare) + Number(clientShare) + Number(vendorBShareNoReferrer)) - 100) > 0.01 && ' ⚠️ Under 100%'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <Button
             onClick={handleSaveDefaultRules}
             disabled={isSaving}
             className="flex items-center"
           >
             {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Save Default Rules
+            Save Commission Rules
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" /> Global Service-Specific Rules
-          </CardTitle>
-          <CardDescription>Define custom commission splits for specific service categories that apply globally.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                Loading revenue rules...
-              </div>
-            </div>
-          ) : (revenueRules.length > 0 || mockGlobalServiceRules.length > 0) ? (
-            <div className="overflow-x-auto">
-              <Table className="mb-4">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Service Category</TableHead>
-                    <TableHead>Platform Share</TableHead>
-                    <TableHead>Client Share</TableHead>
-                    <TableHead>Vendor Share</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(revenueRules.length > 0 ? revenueRules : mockGlobalServiceRules).map((rule) => (
-                    <TableRow key={rule.id}>
-                      <TableCell className="font-medium">
-                        {rule.service_category || rule.service}
-                      </TableCell>
-                      <TableCell>
-                        {rule.platform_commission || rule.platformShare}%
-                      </TableCell>
-                      <TableCell>
-                        {rule.client_commission || rule.clientShare}%
-                      </TableCell>
-                      <TableCell>
-                        {rule.vendor_commission || rule.vendorShare}%
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          onClick={() => handleEditRule(rule.id)}
-                          variant="ghost"
-                          size="sm"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteRule(rule.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-gray-600 dark:text-gray-400 mb-4">No global service-specific rules configured yet.</p>
-          )}
-          
-          <h3 className="text-xl font-semibold mb-4">Add New Global Rule</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="new-service-category">Service Category</Label>
-              <Select>
-                <SelectTrigger id="new-service-category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="plumbing">Plumbing</SelectItem>
-                  <SelectItem value="electrical">Electrical</SelectItem>
-                  <SelectItem value="cleaning">Cleaning</SelectItem>
-                  <SelectItem value="landscaping">Landscaping</SelectItem>
-                  <SelectItem value="hvac">HVAC</SelectItem>
-                  <SelectItem value="painting">Painting</SelectItem>
-                  <SelectItem value="moving">Moving</SelectItem>
-                  <SelectItem value="inspections">Inspections</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="new-platform-share">Platform Share (%)</Label>
-              <Input id="new-platform-share" type="number" placeholder="e.g., 5" />
-            </div>
-            <div>
-              <Label htmlFor="new-client-share">Client Share (%)</Label>
-              <Input id="new-client-share" type="number" placeholder="e.g., 10" />
-            </div>
-            <div>
-              <Label htmlFor="new-vendor-share">Vendor Share (%)</Label>
-              <Input id="new-vendor-share" type="number" placeholder="e.g., 85" />
-            </div>
-          </div>
-          <Button onClick={handleAddCustomRule} className="mt-4">
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Global Rule
-          </Button>
-        </CardContent>
-      </Card>
+
     </div>
   );
 };

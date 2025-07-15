@@ -81,6 +81,7 @@ import AdminAllClientsPage from "./pages/admin/AdminAllClientsPage";
 import AdminAllVendorsPage from "./pages/admin/AdminAllVendorsPage";
 import AdminAllCustomersPage from "./pages/admin/AdminAllCustomersPage";
 import AdminTransactionsPage from "./pages/admin/AdminTransactionsPage";
+import AdminWalletPage from "./pages/admin/AdminWalletPage";
 import AdminVendorApprovalsPage from "./pages/admin/AdminVendorApprovalsPage";
 import AdminRevenueRulesPage from "./pages/admin/AdminRevenueRulesPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
@@ -207,6 +208,7 @@ const App = () => (
             <Route path="vendors" element={<AdminAllVendorsPage />} />
             <Route path="customers" element={<AdminAllCustomersPage />} />
             <Route path="transactions" element={<AdminTransactionsPage />} />
+            <Route path="wallet" element={<AdminWalletPage />} />
             <Route path="vendor-approvals" element={<AdminVendorApprovalsPage />} />
             <Route path="revenue-rules" element={<AdminRevenueRulesPage />} />
             <Route path="reports" element={<AdminReportsPage />} />

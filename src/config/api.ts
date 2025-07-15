@@ -75,6 +75,12 @@ export const API_CONFIG = {
       LOGIN: '/api/marketplace/admin/auth/login',
       PROFILE: '/api/marketplace/admin/auth/profile',
     },
+    // Admin Stripe Integration
+    ADMIN_STRIPE: {
+      CONNECT: '/api/marketplace/admin/auth/stripe/connect',
+      ACCOUNT_STATUS: '/api/marketplace/admin/auth/stripe/account-status',
+      DISCONNECT: '/api/marketplace/admin/auth/stripe/disconnect',
+    },
     // Services
     SERVICES: {
       LIST: '/api/marketplace/services',
@@ -207,6 +213,14 @@ export const API_CONFIG = {
     ADMIN_REPORTS: {
       PERFORMANCE: '/api/marketplace/admin/reports/performance',
       EXPORT: '/api/marketplace/admin/reports/export',
+    },
+    // Admin Wallet
+    ADMIN_WALLET: {
+      BALANCE: '/api/marketplace/admin/wallet/balance',
+      TRANSACTIONS: '/api/marketplace/admin/wallet/transactions',
+      WITHDRAW: '/api/marketplace/admin/wallet/withdraw',
+      WITHDRAWALS: '/api/marketplace/admin/wallet/withdrawals',
+      EXPORT: '/api/marketplace/admin/wallet/export',
     },
   },
   TIMEOUT: 10000,

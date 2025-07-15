@@ -42,28 +42,23 @@ export interface AdminDashboardStats {
     total_vendors: number;
     total_customers: number;
     total_transactions: number;
-    total_revenue: number;
-    monthly_revenue: number;
-    pending_approvals: number;
-    active_services: number;
+    total_platform_revenue: string;
+    month_revenue: string;
+    active_clients: number;
+    active_vendors: number;
+    pending_vendors: number;
+    pending_clients: number;
   };
 }
 
 export interface AdminRevenueAnalytics {
   error: boolean;
-  revenue_data: {
-    total_revenue: number;
-    monthly_breakdown: Array<{
-      month: string;
-      revenue: number;
-      transactions: number;
-    }>;
-    revenue_by_category: Array<{
-      category: string;
-      revenue: number;
-      percentage: number;
-    }>;
-  };
+  revenue_data: Array<{
+    month: string;
+    total_revenue: string;
+    platform_revenue: string;
+    transactions: number;
+  }>;
 }
 
 export interface AdminClient {
@@ -578,6 +573,18 @@ class AdminAPI {
     client_commission?: number;
   }): Promise<ApiResponse> {
     const response = await adminApiClient.put(API_CONFIG.ENDPOINTS.ADMIN_REVENUE_RULES.UPDATE_DEFAULT, defaultRules);
+    return response.data;
+  }
+
+  // New method for 4-way commission structure
+  async createPlatformRevenueRule(ruleData: {
+    platform_share: number;
+    client_share: number;
+    vendor_a_share: number;
+    vendor_b_share: number;
+    vendor_b_share_no_referrer: number;
+  }): Promise<ApiResponse> {
+    const response = await adminApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_REVENUE.RULES, ruleData);
     return response.data;
   }
 }
