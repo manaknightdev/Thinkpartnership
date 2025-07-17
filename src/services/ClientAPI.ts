@@ -65,7 +65,28 @@ export interface ClientVendor {
   status: string;
   services_count: number;
   total_revenue: number;
+  total_referrals?: number;
+  total_invites_accepted?: number;
+  total_referral_commission?: number;
+  completed_jobs?: number;
+  rating?: number;
+  total_reviews?: number;
+  verified?: boolean;
+  join_date?: string;
   created_at: string;
+}
+
+export interface ReportsVendorData extends ClientVendor {
+  total_referrals: number;
+  total_invites_accepted: number;
+  total_referral_commission: number;
+}
+
+export interface ReportsSummary {
+  total_vendors: number;
+  total_revenue: number;
+  total_referrals: number;
+  total_completed_jobs: number;
 }
 
 export interface ClientCustomer {
@@ -165,7 +186,19 @@ class ClientAPI {
   // Dashboard Methods
   async getDashboardStats(): Promise<DashboardStats> {
     const response = await clientApiClient.get('/api/marketplace/client/dashboard/stats');
-    return response.data;
+    const apiStats = response.data.stats;
+
+    // Map API response to frontend interface
+    return {
+      total_revenue: apiStats.total_revenue || 0,
+      active_vendors: apiStats.active_vendors || 0,
+      total_customers: apiStats.total_customers || 0,
+      pending_orders: apiStats.pending_vendors || 0, // Map pending_vendors to pending_orders
+      monthly_growth: 0, // TODO: Calculate from month_revenue vs previous month
+      vendor_growth: 0, // TODO: Calculate vendor growth
+      customer_growth: 0, // TODO: Calculate customer growth
+      order_growth: 0 // TODO: Calculate order growth
+    };
   }
 
   // Vendor Management Methods
@@ -274,6 +307,12 @@ class ClientAPI {
       },
     });
 
+    return response.data;
+  }
+
+  // Reports Methods
+  async getReportsVendors(): Promise<{ vendors: ReportsVendorData[], summary: ReportsSummary }> {
+    const response = await clientApiClient.get('/api/marketplace/client/reports/vendors');
     return response.data;
   }
 

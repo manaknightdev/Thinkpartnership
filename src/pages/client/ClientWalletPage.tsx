@@ -86,14 +86,29 @@ const ClientWalletPage = () => {
     }
   };
 
-  // Calculate totals
+  // Calculate totals with proper number handling
   const totalIncome = (transactions || [])
     .filter(t => t.amount > 0)
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + (parseFloat(t.amount?.toString()) || 0), 0);
 
   const totalWithdrawals = Math.abs((transactions || [])
     .filter(t => t.amount < 0 && t.type === "withdrawal")
-    .reduce((sum, t) => sum + t.amount, 0));
+    .reduce((sum, t) => sum + (parseFloat(t.amount?.toString()) || 0), 0));
+
+  // Calculate this month's earnings from transactions
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const thisMonthEarnings = (transactions || [])
+    .filter(t => {
+      const transactionDate = new Date(t.created_at);
+      return transactionDate.getMonth() === currentMonth &&
+             transactionDate.getFullYear() === currentYear &&
+             t.amount > 0;
+    })
+    .reduce((sum, t) => sum + (parseFloat(t.amount?.toString()) || 0), 0);
+
+  // Calculate net earnings safely
+  const netEarnings = totalIncome - totalWithdrawals;
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -347,7 +362,7 @@ const ClientWalletPage = () => {
                     </div>
                   ) : isBalanceVisible ? (
                     <p className="text-3xl font-bold text-green-600">
-                      ${walletBalance?.balance?.toLocaleString() || '0.00'}
+                      ${(parseFloat(walletBalance?.balance?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   ) : (
                     <p className="text-3xl font-bold text-gray-400">••••••</p>
@@ -380,7 +395,7 @@ const ClientWalletPage = () => {
                   </div>
                 ) : (
                   <p className="text-3xl font-bold text-orange-600">
-                    ${walletBalance?.pending_balance?.toLocaleString() || '0.00'}
+                    ${(parseFloat(walletBalance?.pending_balance?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 )}
                 <p className="text-xs text-gray-500">Processing in 2-3 days</p>
@@ -397,7 +412,16 @@ const ClientWalletPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">This Month</p>
-                <p className="text-3xl font-bold text-blue-600">$3,340.25</p>
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                    <p className="text-3xl font-bold text-gray-400">Loading...</p>
+                  </div>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-600">
+                    ${thisMonthEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                )}
                 <p className="text-xs text-green-600 font-medium">+12.5% from last month</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -432,21 +456,27 @@ const ClientWalletPage = () => {
                 <CardContent className="p-4 text-center">
                   <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Income</p>
-                  <p className="text-xl font-bold text-primary">${totalIncome.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-primary">
+                    ${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
                 </CardContent>
               </Card>
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="p-4 text-center">
                   <TrendingDown className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Withdrawals</p>
-                  <p className="text-xl font-bold text-blue-600">${totalWithdrawals.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-blue-600">
+                    ${totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
                 </CardContent>
               </Card>
               <Card className="bg-purple-50 border-purple-200">
                 <CardContent className="p-4 text-center">
                   <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Net Earnings</p>
-                  <p className="text-xl font-bold text-purple-600">${(totalIncome - totalWithdrawals).toLocaleString()}</p>
+                  <p className="text-xl font-bold text-purple-600">
+                    ${isNaN(netEarnings) ? '0.00' : netEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -490,7 +520,7 @@ const ClientWalletPage = () => {
                         <span className={`font-semibold ${
                           transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toLocaleString()}
+                          {transaction.amount > 0 ? '+' : ''}${Math.abs(parseFloat(transaction.amount?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </TableCell>
                       <TableCell>{formatDate(transaction.created_at)}</TableCell>

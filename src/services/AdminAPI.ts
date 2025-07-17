@@ -48,6 +48,7 @@ export interface AdminDashboardStats {
     active_vendors: number;
     pending_vendors: number;
     pending_clients: number;
+    pending_orders: number;
   };
 }
 

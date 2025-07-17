@@ -175,12 +175,16 @@ const AdminDashboardOverviewPage = () => {
             ) : (
               <>
                 <div className="text-2xl font-bold text-gray-900">
-                  ${dashboardStats?.total_platform_revenue ? (parseFloat(dashboardStats.total_platform_revenue) / 1000).toFixed(1) + 'K' : '0'}
+                  ${dashboardStats?.total_platform_revenue ?
+                    parseFloat(dashboardStats.total_platform_revenue.toString()).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }) : '0.00'}
                 </div>
                 <div className="flex items-center mt-1">
                   <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
                   <p className="text-xs text-green-600 font-medium">
-                    ${dashboardStats?.month_revenue ? (parseFloat(dashboardStats.month_revenue) / 1000).toFixed(1) + 'K' : '0'} this month
+                    +0.0% from last month
                   </p>
                 </div>
               </>
@@ -190,7 +194,7 @@ const AdminDashboardOverviewPage = () => {
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Vendors</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Active Vendors</CardTitle>
             <div className="p-2 bg-blue-100 rounded-lg">
               <Users className="h-4 w-4 text-blue-600" />
             </div>
@@ -203,10 +207,10 @@ const AdminDashboardOverviewPage = () => {
               </div>
             ) : (
               <>
-                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_vendors || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.active_vendors || 0}</div>
                 <div className="flex items-center mt-1">
                   <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">Active vendors</p>
+                  <p className="text-xs text-green-600 font-medium">+0.0% growth this quarter</p>
                 </div>
               </>
             )}
@@ -215,9 +219,9 @@ const AdminDashboardOverviewPage = () => {
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Transactions</CardTitle>
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <TrendingUp className="h-4 w-4 text-purple-600" />
+            <CardTitle className="text-sm font-medium text-gray-600">Total Customers</CardTitle>
+            <div className="p-2 bg-pink-100 rounded-lg">
+              <TrendingUp className="h-4 w-4 text-pink-600" />
             </div>
           </CardHeader>
           <CardContent>
@@ -228,10 +232,10 @@ const AdminDashboardOverviewPage = () => {
               </div>
             ) : (
               <>
-                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_transactions || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_customers || 0}</div>
                 <div className="flex items-center mt-1">
                   <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">Platform transactions</p>
+                  <p className="text-xs text-green-600 font-medium">+0.0% from last month</p>
                 </div>
               </>
             )}
@@ -240,9 +244,9 @@ const AdminDashboardOverviewPage = () => {
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Clients</CardTitle>
-            <div className="p-2 bg-emerald-100 rounded-lg">
-              <CheckCircle className="h-4 w-4 text-emerald-600" />
+            <CardTitle className="text-sm font-medium text-gray-600">Pending Orders</CardTitle>
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Clock className="h-4 w-4 text-orange-600" />
             </div>
           </CardHeader>
           <CardContent>
@@ -253,10 +257,10 @@ const AdminDashboardOverviewPage = () => {
               </div>
             ) : (
               <>
-                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_clients || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.pending_orders || 0}</div>
                 <div className="flex items-center mt-1">
-                  <CheckCircle className="h-3 w-3 text-emerald-500 mr-1" />
-                  <p className="text-xs text-emerald-600 font-medium">Active clients</p>
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                  <p className="text-xs text-green-600 font-medium">+0.0% order growth</p>
                 </div>
               </>
             )}

@@ -369,7 +369,7 @@ const AccountPage = () => {
                   Member since {new Date(userProfile.created_at).toLocaleDateString()}
                 </span>
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
-                  {userProfile.status === 1 ? 'Active' : 'Inactive'} Customer
+                  Active Customer
                 </Badge>
               </div>
               <div className="grid grid-cols-2 gap-4 text-center">

@@ -22,7 +22,7 @@ const ClientVendorManagementPage = () => {
   const [isViewVendorOpen, setIsViewVendorOpen] = useState(false);
   const [isEditVendorOpen, setIsEditVendorOpen] = useState(false);
   const [isAllVendorsOpen, setIsAllVendorsOpen] = useState(false);
-  const [isAllApplicationsOpen, setIsAllApplicationsOpen] = useState(false);
+
   const [editForm, setEditForm] = useState<Partial<ClientVendor>>({});
   const [vendors, setVendors] = useState<ClientVendor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,27 +90,7 @@ const ClientVendorManagementPage = () => {
     setIsEditVendorOpen(true);
   };
 
-  const handleApproveVendor = async (vendorId: string, vendorName: string) => {
-    try {
-      await handleStatusUpdate(vendorId, 'active');
-      toast.success(`Approved ${vendorName}.`);
-    } catch (error) {
-      toast.error(`Failed to approve ${vendorName}.`);
-    }
-  };
 
-  const handleRejectVendor = async (vendorId: string, vendorName: string) => {
-    try {
-      await handleStatusUpdate(vendorId, 'rejected');
-      toast.error(`Rejected ${vendorName}.`);
-    } catch (error) {
-      toast.error(`Failed to reject ${vendorName}.`);
-    }
-  };
-
-  const handleReviewAllApplications = () => {
-    setIsAllApplicationsOpen(true);
-  };
 
   const handleViewAllVendors = () => {
     setIsAllVendorsOpen(true);
@@ -136,7 +116,7 @@ const ClientVendorManagementPage = () => {
     vendor?.contact_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const pendingVendors = (vendors || []).filter(vendor => vendor?.status === 'pending');
+
 
   if (loading) {
     return (
@@ -162,9 +142,7 @@ const ClientVendorManagementPage = () => {
             <UserPlus className="mr-2 h-4 w-4" />
             Invite Vendors
           </Button>
-          <Button variant="outline" onClick={handleReviewAllApplications}>
-            Review All Applications
-          </Button>
+
         </div>
       </div>
 
@@ -226,9 +204,9 @@ const ClientVendorManagementPage = () => {
                     </TableCell>
 
                     <TableCell>
-                      <Badge variant={vendor.status === "active" ? "default" : "destructive"}
-                             className={vendor.status === "active" ? "bg-primary/10 text-primary hover:bg-primary/10" : ""}>
-                        {vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}
+                      <Badge variant={vendor.status === "active" ? "default" : ""}
+                             className={ "bg-primary/10 text-primary hover:bg-primary/10" }>
+                       Active
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -247,64 +225,7 @@ const ClientVendorManagementPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <UserPlus className="h-5 w-5 text-orange-600" />
-            </div>
-            Pending Approvals
-            {pendingVendors.length > 0 && (
-              <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-                {pendingVendors.length}
-              </Badge>
-            )}
-          </CardTitle>
-          <CardDescription>Review new vendor applications.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {pendingVendors.length > 0 ? (
-            <div className="space-y-4">
-              {pendingVendors.map((vendor) => (
-                <div key={vendor.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{vendor?.company_name || vendor?.contact_name}</p>
-                    <p className="text-sm text-gray-500">{vendor?.email}</p>
-                    <Badge variant="outline" className="mt-1 bg-blue-50 text-blue-700 border-blue-200">
-                      {vendor?.services_count || 0} services
-                    </Badge>
-                  </div>
-                  <div className="flex space-x-2 mt-3 sm:mt-0">
-                    <Button
-                      onClick={() => handleApproveVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
-                      className="bg-green-600 hover:bg-green-700"
-                      size="sm"
-                    >
-                      <CheckCircle className="mr-1 h-4 w-4" />
-                      Approve
-                    </Button>
-                    <Button
-                      onClick={() => handleRejectVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600 border-red-200 hover:bg-red-50"
-                    >
-                      <XCircle className="mr-1 h-4 w-4" />
-                      Reject
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <UserPlus className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-600">No pending vendor applications at this time.</p>
-              <p className="text-sm text-gray-500 mt-1">New applications will appear here for your review.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
 
 
 
@@ -577,65 +498,7 @@ const ClientVendorManagementPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* All Applications Dialog */}
-      <Dialog open={isAllApplicationsOpen} onOpenChange={setIsAllApplicationsOpen}>
-        <DialogContent className="sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>All Vendor Applications</DialogTitle>
-            <DialogDescription>Review all pending vendor applications.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {pendingVendors.length > 0 ? (
-              pendingVendors.map((vendor) => (
-                <Card key={vendor.id} className="border-l-4 border-l-orange-500">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold">{vendor?.company_name || vendor?.contact_name}</h3>
-                        <p className="text-gray-600 flex items-center gap-2 mt-1">
-                          <Mail className="h-4 w-4" />
-                          {vendor?.email}
-                        </p>
-                        {vendor?.phone && (
-                          <p className="text-gray-600 flex items-center gap-2 mt-1">
-                            <Phone className="h-4 w-4" />
-                            {vendor.phone}
-                          </p>
-                        )}
-                        <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200">
-                          {vendor?.services_count || 0} services
-                        </Badge>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          onClick={() => handleApproveVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <CheckCircle className="mr-1 h-4 w-4" />
-                          Approve
-                        </Button>
-                        <Button
-                          onClick={() => handleRejectVendor(vendor?.id, vendor?.company_name || vendor?.contact_name)}
-                          variant="outline"
-                          className="text-red-600 border-red-200 hover:bg-red-50"
-                        >
-                          <XCircle className="mr-1 h-4 w-4" />
-                          Reject
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <UserPlus className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600">No pending applications at this time.</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 };
