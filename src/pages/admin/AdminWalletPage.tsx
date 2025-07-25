@@ -420,7 +420,7 @@ const AdminWalletPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="h-5 w-5" />
-            Transaction History
+            Purchase History
           </CardTitle>
           <CardDescription>View your platform earnings, withdrawals, and payment history.</CardDescription>
         </CardHeader>

@@ -179,7 +179,7 @@ const ClientWalletPage = () => {
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Wallet & Payments</h1>
         <p className="text-lg text-gray-700 mb-4">
-          Manage your marketplace earnings and transaction history.
+          Manage your marketplace earnings and purchase history.
         </p>
       </div>
 
@@ -437,7 +437,7 @@ const ClientWalletPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="h-5 w-5" />
-            Transaction History
+            Purchase History
           </CardTitle>
           <CardDescription>View your earnings, withdrawals, and payment history.</CardDescription>
         </CardHeader>

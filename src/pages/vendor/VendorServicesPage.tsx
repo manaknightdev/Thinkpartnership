@@ -32,6 +32,7 @@ const VendorServicesPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<string>("all");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -54,7 +55,6 @@ const VendorServicesPage = () => {
     tags: [],
     images: [],
     response_time: "",
-    delivery_time: "",
     service_areas: [],
     requirements: "",
   });
@@ -100,6 +100,19 @@ const VendorServicesPage = () => {
     try {
       setIsCreating(true);
       setError("");
+
+      // Validate required fields including image
+      if (!newService.title || !newService.description || !newService.category_id || !newService.base_price) {
+        setError("Please fill in all required fields");
+        showError("Please fill in all required fields");
+        return;
+      }
+
+      if (!selectedImage) {
+        setError("Please upload a service image");
+        showError("Please upload a service image");
+        return;
+      }
 
       const response = await VendorServicesAPI.createService(newService);
 
@@ -160,7 +173,6 @@ const VendorServicesPage = () => {
         tags: newService.tags,
         images: newService.images,
         response_time: newService.response_time,
-        delivery_time: newService.delivery_time,
         service_areas: newService.service_areas,
         requirements: newService.requirements,
       };
@@ -264,7 +276,6 @@ const VendorServicesPage = () => {
       tags: [],
       images: [],
       response_time: "",
-      delivery_time: "",
       service_areas: [],
       requirements: "",
     });
@@ -290,7 +301,6 @@ const VendorServicesPage = () => {
       tags: service.tags || [],
       images: service.images || [],
       response_time: service.response_time || "",
-      delivery_time: service.delivery_time || "",
       service_areas: service.service_areas || [],
       requirements: service.requirements || "",
     });
@@ -337,18 +347,38 @@ const VendorServicesPage = () => {
 
 
 
+  // Filter services based on service type
+  const filteredServices = services.filter(service => {
+    if (serviceTypeFilter === 'all') return true;
+    if (serviceTypeFilter === 'flat_fee') return !service.service_type || service.service_type === 'flat_fee';
+    if (serviceTypeFilter === 'custom') return service.service_type === 'custom';
+    return true;
+  });
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Services</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Flat Fee Services</h1>
           <p className="text-gray-600 mt-1">
-            Manage your service offerings and pricing.
+            Manage your flat fee service offerings and pricing.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Service Type Filter */}
+          <Select value={serviceTypeFilter} onValueChange={setServiceTypeFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Service Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Services</SelectItem>
+              <SelectItem value="flat_fee">Flat Fee</SelectItem>
+              <SelectItem value="custom">Custom Pricing</SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* View Toggle */}
           <div className="flex items-center border rounded-lg p-1">
             <Button
@@ -414,7 +444,7 @@ const VendorServicesPage = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-base-price">Base Price *</Label>
+                  <Label htmlFor="new-base-price">Price *</Label>
                   <Input
                     id="new-base-price"
                     type="number"
@@ -446,7 +476,7 @@ const VendorServicesPage = () => {
 
                 {/* Image Upload Section */}
                 <div className="space-y-2">
-                  <Label>Service Image</Label>
+                  <Label>Service Image *</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                     <input
                       ref={fileInputRef}
@@ -467,6 +497,9 @@ const VendorServicesPage = () => {
                       </Button>
                       <p className="text-sm text-gray-500">
                         Upload one image (JPG, PNG, GIF)
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Recommended size: 800x600 pixels or larger
                       </p>
                     </div>
                   </div>
@@ -492,26 +525,7 @@ const VendorServicesPage = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="response-time">Response Time</Label>
-                    <Input
-                      id="response-time"
-                      placeholder="e.g., 24 hours"
-                      value={newService.response_time}
-                      onChange={(e) => setNewService({ ...newService, response_time: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="delivery-time">Delivery Time</Label>
-                    <Input
-                      id="delivery-time"
-                      placeholder="e.g., 3-5 days"
-                      value={newService.delivery_time}
-                      onChange={(e) => setNewService({ ...newService, delivery_time: e.target.value })}
-                    />
-                  </div>
-                </div>
+
               </div>
 
               {/* Fixed button at bottom */}
@@ -549,10 +563,10 @@ const VendorServicesPage = () => {
       )}
 
       {/* Services Display */}
-      {services.length > 0 ? (
+      {filteredServices.length > 0 ? (
         viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
+            {filteredServices.map((service) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video relative overflow-hidden">
                   {service.images && service.images.length > 0 ? (
@@ -606,7 +620,7 @@ const VendorServicesPage = () => {
         ) : (
           // List View
           <div className="space-y-3">
-            {services.map((service) => (
+            {filteredServices.map((service) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
@@ -670,7 +684,7 @@ const VendorServicesPage = () => {
             ))}
           </div>
         )
-      ) : (
+      ) : services.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -679,6 +693,17 @@ const VendorServicesPage = () => {
             <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Your First Service
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="text-center py-12">
+          <CardContent>
+            <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No services match your filter</h3>
+            <p className="text-gray-600 mb-4">Try selecting a different service type or clear the filter.</p>
+            <Button variant="outline" onClick={() => setServiceTypeFilter('all')}>
+              Clear Filter
             </Button>
           </CardContent>
         </Card>
@@ -722,7 +747,7 @@ const VendorServicesPage = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-base-price">Base Price *</Label>
+              <Label htmlFor="edit-base-price">Price *</Label>
               <Input
                 id="edit-base-price"
                 type="number"
@@ -787,6 +812,9 @@ const VendorServicesPage = () => {
                   </Button>
                   <p className="text-sm text-gray-500">
                     Upload one image (JPG, PNG, GIF)
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Recommended size: 800x600 pixels or larger
                   </p>
                 </div>
               </div>

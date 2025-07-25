@@ -228,7 +228,7 @@ const AdminTransactionsPage = () => {
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl font-semibold text-gray-900">Transaction History</CardTitle>
+              <CardTitle className="text-xl font-semibold text-gray-900">Purchase History</CardTitle>
               <CardDescription className="text-gray-600 mt-1">
                 Filter and review all completed, pending, and cancelled orders
               </CardDescription>

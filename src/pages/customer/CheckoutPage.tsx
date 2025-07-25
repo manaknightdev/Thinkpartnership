@@ -3,10 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, Clock, Shield, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Shield, Loader2, Plus, Minus } from "lucide-react";
 import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
 
 const CheckoutPage = () => {
@@ -15,6 +17,7 @@ const CheckoutPage = () => {
   const [service, setService] = useState<ServiceDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [quantity, setQuantity] = useState(1);
 
   // Fetch service details by name
   useEffect(() => {
@@ -60,6 +63,12 @@ const CheckoutPage = () => {
           if (serviceData.base_price && typeof serviceData.base_price === 'string') {
             serviceData.base_price = parseFloat(serviceData.base_price);
           }
+
+          // Set initial quantity for custom services
+          if ((serviceData as any).service_type === 'custom' && (serviceData as any).min_quantity) {
+            setQuantity((serviceData as any).min_quantity);
+          }
+
           setService(serviceData);
         }
       } catch (err: any) {
@@ -85,6 +94,34 @@ const CheckoutPage = () => {
       navigate("/marketplace/payment-success");
     }, 2000);
   };
+
+  // Helper functions for quantity management
+  const isCustomService = service && (service as any).service_type === 'custom';
+  const minQuantity = isCustomService ? (service as any).min_quantity || 1 : 1;
+  const maxQuantity = isCustomService ? (service as any).max_quantity : null;
+  const unitType = isCustomService ? (service as any).unit_type || 'unit' : 'service';
+
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity < minQuantity) return;
+    if (maxQuantity && newQuantity > maxQuantity) return;
+    setQuantity(newQuantity);
+  };
+
+  const incrementQuantity = () => {
+    if (!maxQuantity || quantity < maxQuantity) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const decrementQuantity = () => {
+    if (quantity > minQuantity) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  // Calculate total amount
+  const basePrice = typeof service?.base_price === 'number' ? service.base_price : parseFloat(service?.base_price || '0');
+  const totalAmount = isCustomService ? basePrice * quantity : basePrice;
 
   // Loading state
   if (loading) {
@@ -233,18 +270,83 @@ const CheckoutPage = () => {
                         ))}
                       </div>
 
-                      <div className="border-t pt-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-gray-600">Service Price</span>
-                          <div className="flex items-center space-x-2">
+                      <div className="border-t pt-4 space-y-4">
+                        {/* Quantity Selector for Custom Services */}
+                        {isCustomService && (
+                          <div className="space-y-3">
+                            <Label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+                              Quantity ({unitType}s)
+                            </Label>
+                            <div className="flex items-center space-x-3">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={decrementQuantity}
+                                disabled={quantity <= minQuantity}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <Input
+                                id="quantity"
+                                type="number"
+                                value={quantity}
+                                onChange={(e) => handleQuantityChange(parseInt(e.target.value) || minQuantity)}
+                                min={minQuantity}
+                                max={maxQuantity || undefined}
+                                className="w-20 text-center"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={incrementQuantity}
+                                disabled={maxQuantity ? quantity >= maxQuantity : false}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            {minQuantity > 1 && (
+                              <p className="text-xs text-gray-500">
+                                Minimum quantity: {minQuantity} {unitType}s
+                              </p>
+                            )}
+                            {maxQuantity && (
+                              <p className="text-xs text-gray-500">
+                                Maximum quantity: {maxQuantity} {unitType}s
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Pricing Breakdown */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">
+                              {isCustomService ? `Price per ${unitType}` : 'Service Price'}
+                            </span>
                             <span className="text-lg font-bold text-gray-900">
-                              ${typeof service.base_price === 'number' ? service.base_price.toFixed(2) : parseFloat(service.base_price || '0').toFixed(2)}
+                              ${basePrice.toFixed(2)}
                             </span>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-gray-600">
-                          <span>Delivery Time</span>
-                          <span>{service.delivery_time}</span>
+
+                          {isCustomService && quantity > 1 && (
+                            <div className="flex items-center justify-between text-sm text-gray-600">
+                              <span>Quantity</span>
+                              <span>{quantity} {unitType}s</span>
+                            </div>
+                          )}
+
+                          {isCustomService && (
+                            <div className="flex items-center justify-between pt-2 border-t">
+                              <span className="font-semibold text-gray-900">Total Amount</span>
+                              <span className="text-xl font-bold text-green-600">
+                                ${totalAmount.toFixed(2)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -255,11 +357,13 @@ const CheckoutPage = () => {
               {/* Payment Form */}
               <div className="lg:col-span-3">
                 <PaymentForm
-                  amount={typeof service.base_price === 'number' ? service.base_price : parseFloat(service.base_price || '0')}
-                  serviceName={service.title}
+                  amount={totalAmount}
+                  serviceName={`${service.title}${isCustomService && quantity > 1 ? ` (${quantity} ${unitType}s)` : ''}`}
                   serviceId={service.id}
                   vendorId={service.vendor?.id}
-                  serviceType="fixed"
+                  serviceType={isCustomService ? "custom" : "fixed"}
+                  quantity={isCustomService ? quantity : 1}
+                  unitType={isCustomService ? unitType : undefined}
                   onPaymentComplete={handlePaymentComplete}
                 />
               </div>

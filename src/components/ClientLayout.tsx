@@ -63,6 +63,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard, exact: false },
     // { name: "Tasks & Follow-ups", path: "/client-portal/tasks", icon: CheckSquare, exact: false },
     { name: "Reports", path: "/client-portal/reports", icon: BarChart, exact: false },
+    { name: "Marketplace Orders", path: "/client-portal/orders", icon: ListOrdered, exact: false },
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/client-portal/customers", icon: User, exact: false },
     { name: "Invite System", path: "/client-portal/invites", icon: UserPlus, exact: false },
@@ -71,7 +72,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     { name: "Wallet & Payments", path: "/client-portal/wallet", icon: Wallet, exact: false },
     // { name: "Set Rules", path: "/client-portal/rules", icon: Settings, exact: false },
     { name: "Branding", path: "/client-portal/branding", icon: Palette, exact: false },
-    { name: "Marketplace Orders", path: "/client-portal/orders", icon: ListOrdered, exact: false },
+    
     { name: "Help & Support", path: "/client-portal/help", icon: HelpCircle, exact: false },
   ];
 

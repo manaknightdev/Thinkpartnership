@@ -103,8 +103,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Default route redirects to customer login */}
-          <Route path="/" element={<Navigate to="/marketplace/login" replace />} />
+          {/* Default route redirects to public marketplace */}
+          <Route path="/" element={<Navigate to="/marketplace" replace />} />
 
           {/* Legacy routes for other portals */}
           <Route path="/signup" element={<SignUp />} />
@@ -132,11 +132,13 @@ const App = () => (
           {/* Admin Authentication Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
 
-          {/* Protected Marketplace Routes */}
-          <Route path="/marketplace" element={<ProtectedRoute><CustomerBrowseServicesPage /></ProtectedRoute>} />
-          <Route path="/marketplace/categories" element={<ProtectedRoute><CategoriesPage /></ProtectedRoute>} />
-          <Route path="/marketplace/services" element={<ProtectedRoute><AllServicesPage /></ProtectedRoute>} />
-          <Route path="/marketplace/services/:id" element={<ProtectedRoute><ServiceDetailsPage /></ProtectedRoute>} />
+          {/* Public Marketplace Routes - No authentication required for browsing */}
+          <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
+          <Route path="/marketplace/categories" element={<CategoriesPage />} />
+          <Route path="/marketplace/services" element={<AllServicesPage />} />
+          <Route path="/marketplace/services/:id" element={<ServiceDetailsPage />} />
+
+          {/* Protected Marketplace Routes - Authentication required for actions */}
           <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
           <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
           <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />

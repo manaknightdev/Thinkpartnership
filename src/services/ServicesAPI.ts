@@ -7,7 +7,7 @@ export interface ServiceFilters {
   search?: string;
   category?: string;
   location?: string;
-  delivery?: string;
+  service_type?: string;
   sort?: string;
 }
 
@@ -18,6 +18,10 @@ export interface Service {
   description: string;
   price: string;
   base_price: number;
+  service_type?: string;
+  unit_type?: string;
+  min_quantity?: number;
+  max_quantity?: number;
   vendor: string;
   vendor_image: string;
   vendor_rating: number;
@@ -26,7 +30,6 @@ export interface Service {
   category: string;
   category_slug: string;
   response_time: string;
-  delivery_time: string;
   rating: number;
   total_reviews: number;
   tags: string[];

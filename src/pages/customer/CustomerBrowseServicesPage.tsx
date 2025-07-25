@@ -46,10 +46,10 @@ const CustomerBrowseServicesPage = () => {
         setIsLoading(true);
         setError("");
 
-        // Fetch categories and featured services
+        // Fetch categories and featured services (no sort to get all services, then sort on frontend)
         const [categoriesResponse, servicesResponse] = await Promise.all([
           ServicesAPI.getCategories(),
-          ServicesAPI.getServices({ limit: 6, sort: 'popular' })
+          ServicesAPI.getServices({ limit: 12 }) // Increased limit to get more services including newer ones
         ]);
 
         if (categoriesResponse.error) {
@@ -61,7 +61,21 @@ const CustomerBrowseServicesPage = () => {
         }
 
         setCategories(categoriesResponse.categories);
-        setFeaturedServices(servicesResponse.services);
+
+        // Sort featured services by ID (newest first - higher IDs are newer) on frontend
+        const sortedFeaturedServices = [...servicesResponse.services]
+          .sort((a, b) => {
+            return b.id - a.id; // Newest first (higher IDs first)
+          })
+          .slice(0, 6); // Take only the first 6 after sorting
+
+        console.log('🏠 Browse page - Featured services:', {
+          totalReceived: servicesResponse.services.length,
+          originalOrder: servicesResponse.services.slice(0, 6).map(s => ({ id: s.id, title: s.title })),
+          sortedOrder: sortedFeaturedServices.map(s => ({ id: s.id, title: s.title }))
+        });
+
+        setFeaturedServices(sortedFeaturedServices);
       } catch (err: any) {
         setError(err.message || 'Failed to load data');
       } finally {
@@ -334,10 +348,7 @@ const CustomerBrowseServicesPage = () => {
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="text-xl font-bold text-gray-900">${service.base_price}</span>
                       </div>
-                      <div className="flex items-center space-x-1 text-xs text-gray-500">
-                        <Clock className="w-3 h-3" />
-                        <span>{service.delivery_time}</span>
-                      </div>
+
                     </div>
                     <Button
                       size="sm"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,12 +27,15 @@ interface ServiceTier {
   id: number;
   tier_name: string;
   price: number;
+  base_price: number;
+  unit_type: string;
+  min_quantity: number;
+  max_quantity?: number;
   description: string;
   tier_description?: string;
   features: string[];
   is_popular?: boolean;
-  images?: string[];
-  delivery_time?: string;
+  images: string[];
   revisions_included?: number;
   sort_order?: number;
   status?: number;
@@ -53,10 +56,13 @@ const VendorServiceTiersPage = () => {
     id: 0,
     tier_name: "",
     price: 0,
+    base_price: 0,
+    unit_type: "service",
+    min_quantity: 1,
+    max_quantity: undefined,
     description: "",
     features: [""],
     images: [],
-    delivery_time: "",
     revisions_included: 0,
     is_popular: false
   });
@@ -144,8 +150,18 @@ const VendorServiceTiersPage = () => {
   };
 
   const handleAddTier = async () => {
-    if (!newTier.tier_name || !newTier.description || newTier.price <= 0) {
-      toast.error("Please fill in all required fields");
+    if (!newTier.tier_name || !newTier.description || (newTier.base_price || newTier.price) <= 0) {
+      toast.error("Please fill in service name, description, and base price");
+      return;
+    }
+
+    if (!newTier.unit_type) {
+      toast.error("Please specify the unit type (e.g., room, hour, service)");
+      return;
+    }
+
+    if (!newTier.images || newTier.images.length === 0) {
+      toast.error("Please upload at least one image for your service");
       return;
     }
 
@@ -156,9 +172,13 @@ const VendorServiceTiersPage = () => {
         service_id: 0, // Custom service tier (not tied to specific service)
         tier_name: newTier.tier_name,
         tier_description: newTier.description,
-        price: newTier.price,
+        description: newTier.description,
+        price: newTier.base_price || newTier.price,
+        base_price: newTier.base_price || newTier.price,
+        unit_type: newTier.unit_type,
+        min_quantity: newTier.min_quantity,
+        max_quantity: newTier.max_quantity,
         features: newTier.features.filter(f => f.trim() !== ""),
-        delivery_time: newTier.delivery_time || '',
         revisions_included: newTier.revisions_included || 0,
         is_popular: newTier.is_popular || false,
         images: newTier.images || []
@@ -167,16 +187,19 @@ const VendorServiceTiersPage = () => {
       const response = await VendorServiceTiersAPI.createServiceTier(tierData);
       
       if (!response.error) {
-        toast.success("Service tier created successfully!");
+        toast.success("Custom service created successfully!");
         setIsAddModalOpen(false);
         setNewTier({
           id: 0,
           tier_name: "",
           price: 0,
+          base_price: 0,
+          unit_type: "service",
+          min_quantity: 1,
+          max_quantity: undefined,
           description: "",
           features: [""],
           images: [],
-          delivery_time: "",
           revisions_included: 0,
           is_popular: false
         });
@@ -213,9 +236,13 @@ const VendorServiceTiersPage = () => {
         service_id: 0,
         tier_name: editingTier.tier_name,
         tier_description: editingTier.description,
-        price: editingTier.price,
+        description: editingTier.description,
+        price: editingTier.base_price || editingTier.price,
+        base_price: editingTier.base_price || editingTier.price,
+        unit_type: editingTier.unit_type,
+        min_quantity: editingTier.min_quantity,
+        max_quantity: editingTier.max_quantity,
         features: editingTier.features.filter(f => f.trim() !== ""),
-        delivery_time: editingTier.delivery_time || '',
         revisions_included: editingTier.revisions_included || 0,
         is_popular: editingTier.is_popular || false,
         images: editingTier.images || []
@@ -224,7 +251,7 @@ const VendorServiceTiersPage = () => {
       const response = await VendorServiceTiersAPI.updateServiceTier(editingTier.id, updateData);
       
       if (!response.error) {
-        toast.success("Service tier updated successfully!");
+        toast.success("Custom service updated successfully!");
         setIsEditModalOpen(false);
         setEditingTier(null);
         loadServiceTiers(); // Reload the list
@@ -248,7 +275,7 @@ const VendorServiceTiersPage = () => {
       const response = await VendorServiceTiersAPI.deleteServiceTier(tierId);
       
       if (!response.error) {
-        toast.success("Service tier deleted successfully!");
+        toast.success("Custom service deleted successfully!");
         loadServiceTiers(); // Reload the list
       } else {
         toast.error(response.message || 'Failed to delete service tier');
@@ -332,23 +359,16 @@ const VendorServiceTiersPage = () => {
     return icons[index % icons.length];
   };
 
-  const getTierColor = (index: number) => {
-    const colors = [
-      "border-blue-200 bg-blue-50",
-      "border-purple-200 bg-purple-50",
-      "border-yellow-200 bg-yellow-50"
-    ];
-    return colors[index % colors.length];
-  };
+
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Custom Service</h1>
+          <h1 className="text-3xl font-bold text-gray-900">My Custom Services</h1>
           <p className="text-gray-600 mt-1">
-            Create and manage your custom service. These services will be available when creating new orders for customers.
+            Create and manage your custom services with quantity-based pricing. Perfect for services like painting rooms, hourly work, or any service where price varies by quantity.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -377,9 +397,9 @@ const VendorServiceTiersPage = () => {
             <Card className="text-center py-12">
               <CardContent>
                 <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Services Yet</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Custom Services Yet</h3>
                 <p className="text-gray-600 mb-6">
-                  Create your first service to start offering custom pricing to your customers.
+                  Create your first custom service with quantity-based pricing. Perfect for services like painting rooms ($10/room), hourly work ($50/hour), or any service where price varies by quantity.
                 </p>
                 <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                   <DialogTrigger asChild>
@@ -392,23 +412,24 @@ const VendorServiceTiersPage = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {serviceTiers.map((tier, index) => (
                 <Card
                   key={tier.id}
-                  className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${getTierColor(index)} h-fit`}
+                  className="relative border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-md"
                 >
                   {tier.is_popular && (
-                    <div className="absolute top-0 left-0 right-0 bg-purple-600 text-white text-center py-2 text-sm font-medium">
-                      Most Popular
+                    <div className="absolute -top-2 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                      Popular
                     </div>
                   )}
 
-                  <CardHeader className={tier.is_popular ? "pt-12" : ""}>
-                    {/* Service Image */}
-                    <div className="relative mb-4">
-                      {tier.images && tier.images.length > 0 ? (
-                        <div className="w-full h-48 rounded-lg overflow-hidden bg-gray-100">
+                  <CardContent className="p-4">
+                    {/* Header with image and actions */}
+                    <div className="flex items-start gap-3 mb-3">
+                      {/* Service Image */}
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {tier.images && tier.images.length > 0 ? (
                           <img
                             src={getImageUrl(tier.images[0])}
                             alt={tier.tier_name}
@@ -417,73 +438,75 @@ const VendorServiceTiersPage = () => {
                               e.currentTarget.src = getPlaceholderImage();
                             }}
                           />
-                        </div>
-                      ) : (
-                        <div className="w-full h-48 rounded-lg bg-gray-100 flex items-center justify-center">
-                          <div className="text-center">
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
                             {getTierIcon(index)}
-                            <p className="text-sm text-gray-500 mt-2">No image</p>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
 
-                      {/* Action buttons overlay */}
-                      <div className="absolute top-2 right-2 flex gap-2">
-                        <Button variant="secondary" size="sm" onClick={() => handleEditTier(tier)} className="bg-white/90 hover:bg-white">
+                      {/* Service Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 truncate">{tier.tier_name}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">{tier.description || tier.tier_description}</p>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditTier(tier)} className="h-8 w-8 p-0">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="secondary" size="sm" onClick={() => handleDeleteTier(tier.id)} className="bg-white/90 hover:bg-white text-red-600">
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteTier(tier.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
 
-                    <CardTitle className="text-xl text-center">{tier.tier_name}</CardTitle>
-                    <CardDescription className="text-base text-center">
-                      {tier.description || tier.tier_description}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4 pt-4">
-                    {/* Price */}
-                    <div className="text-center">
-                      <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-3xl font-bold text-gray-900">${tier.price}</span>
-                        <span className="text-gray-600">/service</span>
+                    {/* Price and Unit Info */}
+                    <div className="mb-3">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-gray-900">${tier.base_price || tier.price}</span>
+                        <span className="text-gray-600">/{tier.unit_type || 'service'}</span>
                       </div>
+                      {tier.min_quantity && tier.min_quantity > 1 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Min: {tier.min_quantity} {tier.unit_type || 'service'}(s)
+                          {tier.max_quantity && ` • Max: ${tier.max_quantity}`}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Features */}
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">What's included:</h4>
-                      <ul className="space-y-1">
+                    {/* Features (condensed) */}
+                    <div className="mb-3">
+                      <div className="flex flex-wrap gap-1">
                         {(Array.isArray(tier.features) ? tier.features :
                           typeof tier.features === 'string' ? JSON.parse(tier.features) : []
-                        ).slice(0, 4).map((feature: string, featureIndex: number) => (
-                          <li key={featureIndex} className="flex items-start gap-2">
-                            <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-gray-700">{feature}</span>
-                          </li>
+                        ).slice(0, 3).map((feature: string, featureIndex: number) => (
+                          <span key={featureIndex} className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
+                            <Check className="h-3 w-3" />
+                            {feature}
+                          </span>
                         ))}
                         {(Array.isArray(tier.features) ? tier.features :
                           typeof tier.features === 'string' ? JSON.parse(tier.features) : []
-                        ).length > 4 && (
-                          <li className="text-sm text-gray-500 ml-6">
+                        ).length > 3 && (
+                          <span className="text-xs text-gray-500 px-2 py-1">
                             +{(Array.isArray(tier.features) ? tier.features :
                               typeof tier.features === 'string' ? JSON.parse(tier.features) : []
-                            ).length - 4} more features
-                          </li>
+                            ).length - 3} more
+                          </span>
                         )}
-                      </ul>
+                      </div>
                     </div>
 
-                    {/* Action Button */}
-                    <Button
-                      className="w-full"
-                      variant={tier.is_popular ? "default" : "outline"}
-                    >
-                      {tier.is_popular ? "Most Popular" : "Available for Orders"}
-                    </Button>
+                    {/* Status */}
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        Active
+                      </span>
+
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -498,30 +521,64 @@ const VendorServiceTiersPage = () => {
           <DialogHeader>
             <DialogTitle>Add Custom Service</DialogTitle>
             <DialogDescription>
-              Create a new service tier with custom pricing and features.
+              Create a custom service with quantity-based pricing. Perfect for services like painting rooms, hourly work, or any service where price varies by quantity.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4 overflow-y-auto flex-1 pr-2">
             <div>
-              <Label htmlFor="tier-name">Tier Name</Label>
+              <Label htmlFor="tier-name">Service Name</Label>
               <Input
                 id="tier-name"
-                placeholder="e.g., Basic Plumbing, Premium Electrical"
+                placeholder="e.g., Room Painting, Electrical Installation"
                 value={newTier.tier_name}
                 onChange={(e) => setNewTier({...newTier, tier_name: e.target.value})}
               />
             </div>
 
-            <div>
-              <Label htmlFor="tier-price">Starting at ($)</Label>
-              <Input
-                id="tier-price"
-                type="number"
-                placeholder="0"
-                value={newTier.price || ""}
-                onChange={(e) => setNewTier({...newTier, price: parseInt(e.target.value) || 0})}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="tier-price">Base Price ($)</Label>
+                <Input
+                  id="tier-price"
+                  type="number"
+                  placeholder="0"
+                  value={newTier.base_price || ""}
+                  onChange={(e) => setNewTier({...newTier, base_price: parseFloat(e.target.value) || 0, price: parseFloat(e.target.value) || 0})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="unit-type">Unit Type</Label>
+                <Input
+                  id="unit-type"
+                  placeholder="e.g., room, hour, service"
+                  value={newTier.unit_type}
+                  onChange={(e) => setNewTier({...newTier, unit_type: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="min-quantity">Min Quantity</Label>
+                <Input
+                  id="min-quantity"
+                  type="number"
+                  placeholder="1"
+                  value={newTier.min_quantity || ""}
+                  onChange={(e) => setNewTier({...newTier, min_quantity: parseInt(e.target.value) || 1})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="max-quantity">Max Quantity (Optional)</Label>
+                <Input
+                  id="max-quantity"
+                  type="number"
+                  placeholder="No limit"
+                  value={newTier.max_quantity || ""}
+                  onChange={(e) => setNewTier({...newTier, max_quantity: e.target.value ? parseInt(e.target.value) : undefined})}
+                />
+              </div>
             </div>
 
             <div>
@@ -655,16 +712,16 @@ const VendorServiceTiersPage = () => {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Edit Service Tier</DialogTitle>
+            <DialogTitle>Edit Custom Service</DialogTitle>
             <DialogDescription>
-              Update your service tier details.
+              Update your custom service details and pricing.
             </DialogDescription>
           </DialogHeader>
 
           {editingTier && (
             <div className="grid gap-4 py-4 overflow-y-auto flex-1 pr-2">
               <div>
-                <Label htmlFor="edit-tier-name">Tier Name</Label>
+                <Label htmlFor="edit-tier-name">Service Name</Label>
                 <Input
                   id="edit-tier-name"
                   value={editingTier.tier_name}
@@ -672,14 +729,45 @@ const VendorServiceTiersPage = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="edit-tier-price">Price ($)</Label>
-                <Input
-                  id="edit-tier-price"
-                  type="number"
-                  value={editingTier.price}
-                  onChange={(e) => setEditingTier({...editingTier, price: parseInt(e.target.value) || 0})}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-tier-price">Base Price ($)</Label>
+                  <Input
+                    id="edit-tier-price"
+                    type="number"
+                    value={editingTier.base_price || editingTier.price}
+                    onChange={(e) => setEditingTier({...editingTier, base_price: parseFloat(e.target.value) || 0, price: parseFloat(e.target.value) || 0})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-unit-type">Unit Type</Label>
+                  <Input
+                    id="edit-unit-type"
+                    value={editingTier.unit_type || 'service'}
+                    onChange={(e) => setEditingTier({...editingTier, unit_type: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-min-quantity">Min Quantity</Label>
+                  <Input
+                    id="edit-min-quantity"
+                    type="number"
+                    value={editingTier.min_quantity || 1}
+                    onChange={(e) => setEditingTier({...editingTier, min_quantity: parseInt(e.target.value) || 1})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-max-quantity">Max Quantity (Optional)</Label>
+                  <Input
+                    id="edit-max-quantity"
+                    type="number"
+                    value={editingTier.max_quantity || ""}
+                    onChange={(e) => setEditingTier({...editingTier, max_quantity: e.target.value ? parseInt(e.target.value) : undefined})}
+                  />
+                </div>
               </div>
 
               <div>

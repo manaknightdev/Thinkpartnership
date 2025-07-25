@@ -8,12 +8,12 @@ export interface VendorService {
   description: string;
   short_description: string;
   base_price: number;
+  service_type?: string;
   pricing_tiers: PricingTier[];
   features: string[];
   tags: string[];
   images: string[];
   response_time: string;
-  delivery_time: string;
   service_areas: string[];
   requirements: string;
   rating: number;

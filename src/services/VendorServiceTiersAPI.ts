@@ -4,12 +4,23 @@ export interface ServiceTier {
   id: number;
   service_id: number;
   tier_name: string;
-  tier_description: string;
+  tier_description?: string;
+  description?: string;
   price: number;
+  base_price: number;
+  unit_type: string;
+  min_quantity: number;
+  max_quantity?: number;
   features: string[];
-  is_featured: boolean;
+  images: string[];
+  delivery_time?: string;
+  revisions_included?: number;
+  is_popular?: boolean;
+  is_featured?: boolean;
   featured_until?: string;
   featured_position?: number;
+  sort_order?: number;
+  status?: number;
   created_at: string;
   updated_at: string;
   service_title?: string;
@@ -44,9 +55,20 @@ export interface PlacementPackage {
 export interface CreateTierData {
   service_id: number;
   tier_name: string;
-  tier_description: string;
-  price: number;
+  tier_description?: string;
+  description?: string;
+  price?: number;
+  base_price: number;
+  unit_type: string;
+  min_quantity?: number;
+  max_quantity?: number;
   features: string[];
+  images: string[];
+  delivery_time?: string;
+  revisions_included?: number;
+  is_popular?: boolean;
+  sort_order?: number;
+  status?: number;
 }
 
 export interface PurchasePlacementData {

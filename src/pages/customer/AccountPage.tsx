@@ -683,7 +683,7 @@ const AccountPage = () => {
         {/* Transaction History */}
         <Card>
           <CardHeader>
-            <CardTitle>Transaction History</CardTitle>
+            <CardTitle>Purchase History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

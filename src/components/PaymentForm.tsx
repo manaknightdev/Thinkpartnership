@@ -21,10 +21,12 @@ interface PaymentFormProps {
   serviceId: number;
   vendorId?: number;
   serviceType?: 'fixed' | 'custom';
+  quantity?: number;
+  unitType?: string;
   onPaymentComplete?: (paymentData: any) => void;
 }
 
-export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceType = 'fixed', onPaymentComplete }: PaymentFormProps) => {
+export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceType = 'fixed', quantity = 1, unitType, onPaymentComplete }: PaymentFormProps) => {
   const [processing, setProcessing] = useState(false);
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
   const [checkingStripe, setCheckingStripe] = useState(true);
@@ -93,7 +95,9 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
             vendor_id: vendorId,
             amount: numericAmount,
             payment_intent_id: paymentResponse.payment_intent_id,
-            service_type: serviceType
+            service_type: serviceType,
+            quantity: quantity,
+            unit_type: unitType
           });
 
           if (orderData.error) {
@@ -144,7 +148,14 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">{serviceName}</span>
+              <div className="flex flex-col">
+                <span className="text-gray-600">{serviceName}</span>
+                {serviceType === 'custom' && quantity > 1 && (
+                  <span className="text-sm text-gray-500">
+                    {quantity} {unitType}s × ${(numericAmount / quantity).toFixed(2)} each
+                  </span>
+                )}
+              </div>
               <span className="font-semibold">${numericAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">

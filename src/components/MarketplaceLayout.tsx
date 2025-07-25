@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
 import UserAPI, { UserProfile } from "@/services/UserAPI";
 import NotificationsAPI from "@/services/NotificationsAPI";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Search,
   FileText,
@@ -20,7 +21,9 @@ import {
   List,
   LogOut,
   ChevronDown,
-  MessageCircle
+  MessageCircle,
+  UserPlus,
+  LogIn
 } from "lucide-react";
 
 interface MarketplaceLayoutProps {
@@ -34,14 +37,23 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const navigate = useNavigate();
   const [orderCount, setOrderCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [requestCount] = useState(2);
 
-  // User profile state
+  // Use the auth hook
+  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
+
+  // User profile state (for additional profile data if needed)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  // Fetch user profile and notification count
+  // Fetch user profile and notification count only when authenticated
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!isAuthenticated) {
+        setProfileLoading(false);
+        return;
+      }
+
       try {
         setProfileLoading(true);
 
@@ -64,31 +76,38 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     };
 
     fetchUserData();
-  }, []);
+  }, [isAuthenticated]);
 
   // Get display name
   const getDisplayName = () => {
-    if (!userProfile) return 'User';
-    const firstName = userProfile.first_name || '';
-    const lastName = userProfile.last_name || '';
+    if (!user) return 'User';
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
     return firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || 'User';
   };
 
   // Get first name for header
   const getFirstName = () => {
-    if (!userProfile) return 'User';
-    return userProfile.first_name || 'User';
+    if (!user) return 'User';
+    return user.first_name || 'User';
   };
 
-  const sidebarItems = [
+  // Define sidebar items based on authentication status
+  const publicSidebarItems = [
     { name: "Browse", path: "/marketplace", icon: Home, exact: true },
-    // { name: "Categories", path: "/marketplace/categories", icon: Grid3X3 },
+    { name: "All Services", path: "/marketplace/services", icon: List },
+  ];
+
+  const authenticatedSidebarItems = [
+    { name: "Browse", path: "/marketplace", icon: Home, exact: true },
     { name: "All Services", path: "/marketplace/services", icon: List },
     { name: "My Orders", path: "/marketplace/orders", icon: FileText },
     { name: "Messages", path: "/marketplace/messages", icon: MessageCircle },
     { name: "Account", path: "/marketplace/account", icon: Settings },
     { name: "Help", path: "/marketplace/help", icon: HelpCircle },
   ];
+
+  const sidebarItems = isAuthenticated ? authenticatedSidebarItems : publicSidebarItems;
 
   const isActive = (path: string, exact = false) => {
     if (exact) {
@@ -107,12 +126,15 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     navigate('/marketplace/notifications');
   };
 
+  const handleRequestsClick = () => {
+    navigate('/marketplace/requests');
+  };
+
 
 
   const handleLogout = () => {
-    // In a real app, this would clear auth tokens and redirect
-    console.log('Logging out...');
-    navigate('/');
+    logout();
+    navigate('/marketplace');
   };
 
   return (
@@ -185,26 +207,75 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Notifications */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative"
-              onClick={handleNotificationClick}
-              title="View notifications"
-            >
-              <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center p-0">
-                  {notificationCount}
-                </Badge>
-              )}
-            </Button>
+            {authLoading ? (
+              <>
+                {/* Loading state - show skeleton buttons */}
+                <div className="flex items-center space-x-3">
+                  <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </>
+            ) : isAuthenticated ? (
+              <>
+                {/* Notifications - Only show when authenticated */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative"
+                  onClick={handleNotificationClick}
+                  title="View notifications"
+                >
+                  <Bell className="h-5 w-5" />
+                  {notificationCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center p-0">
+                      {notificationCount}
+                    </Badge>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Login/Signup buttons for unauthenticated users */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/marketplace/login')}
+                  className="text-gray-700 hover:text-green-600"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Log In</span>
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => navigate('/marketplace/signup')}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Sign Up</span>
+                </Button>
+              </>
+            )}
 
+            {!authLoading && isAuthenticated && (
+              <>
+                {/* Service Requests - Only show when authenticated */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative"
+                  onClick={handleRequestsClick}
+                  title="View service requests"
+                >
+                  <FileText className="h-5 w-5" />
+                  {requestCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
+                      {requestCount}
+                    </Badge>
+                  )}
+                </Button>
 
-
-            {/* User Menu */}
-            <DropdownMenu>
+                {/* User Menu - Only show when authenticated */}
+                <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                   {userProfile?.photo ? (
@@ -219,7 +290,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                     </div>
                   )}
                   <span className="hidden sm:block text-sm font-medium">
-                    {profileLoading ? 'Loading...' : getFirstName()}
+                    {authLoading ? 'Loading...' : getFirstName()}
                   </span>
                   <ChevronDown className="h-3 w-3 text-gray-500" />
                 </Button>
@@ -227,10 +298,10 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-3 py-2 border-b border-gray-100">
                   <p className="text-sm font-medium text-gray-900">
-                    {profileLoading ? 'Loading...' : getDisplayName()}
+                    {authLoading ? 'Loading...' : getDisplayName()}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {profileLoading ? 'Loading...' : userProfile?.email || 'No email'}
+                    {authLoading ? 'Loading...' : user?.email || 'No email'}
                   </p>
                 </div>
                 <DropdownMenuItem onClick={() => navigate('/marketplace/account')}>
@@ -248,6 +319,8 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+              </>
+            )}
           </div>
         </div>
       </header>

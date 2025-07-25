@@ -12,17 +12,18 @@ import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
 import API_CONFIG from "@/config/api";
 import {
   Search,
-  Filter,
-  SlidersHorizontal,
-  MapPin,
-  Clock,
   ChevronDown,
   Loader2,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
 
+let renderCounter = 0;
+
 const AllServicesPage = () => {
+  renderCounter++;
+  console.log(`🔄 AllServicesPage render #${renderCounter}`);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ const AllServicesPage = () => {
     return `${API_CONFIG.BASE_URL}${imagePath}`; // Convert relative path to full URL
   };
   const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'all');
-  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState(searchParams.get('delivery') || 'all');
+  const [selectedServiceType, setSelectedServiceType] = useState(searchParams.get('service_type') || 'all');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'best-match');
 
   // API state
@@ -46,7 +47,7 @@ const AllServicesPage = () => {
   const [totalServices, setTotalServices] = useState(0);
   const [error, setError] = useState('');
 
-  const servicesPerPage = 12;
+  const servicesPerPage = 50; // Increased to show more services per page
 
   // Fetch services and categories
   useEffect(() => {
@@ -69,7 +70,7 @@ const AllServicesPage = () => {
           search: searchTerm || undefined,
           category: selectedCategory !== 'all' ? selectedCategory : undefined,
           location: selectedLocation !== 'all' ? selectedLocation : undefined,
-          delivery: selectedDeliveryTime !== 'all' ? selectedDeliveryTime : undefined,
+          service_type: selectedServiceType !== 'all' ? selectedServiceType : undefined,
           sort: sortBy !== 'best-match' ? sortBy : undefined
         };
 
@@ -81,8 +82,39 @@ const AllServicesPage = () => {
           throw new Error('Failed to load services');
         }
 
-        setServices(servicesResponse.services);
-        setTotalServices(servicesResponse.total || servicesResponse.services.length);
+        console.log('📊 API Response:', {
+          servicesCount: servicesResponse.services.length,
+          totalFromPagination: servicesResponse.pagination?.total,
+          selectedServiceType: selectedServiceType,
+          filters: filters
+        });
+
+        // Debug: Log service types
+        const serviceTypes = servicesResponse.services.map(s => ({
+          title: s.title,
+          service_type: s.service_type,
+          base_price: s.base_price
+        }));
+        console.log('🎯 Service types in response:', serviceTypes);
+
+        console.log('🔄 Setting services state:', {
+          newServicesCount: servicesResponse.services.length,
+          newTotalServices: servicesResponse.pagination?.total || servicesResponse.services.length,
+          serviceIds: servicesResponse.services.map(s => s.id)
+        });
+
+        // Sort services by ID (last to first - newest services have higher IDs) on frontend
+        const sortedServices = [...servicesResponse.services].sort((a, b) => {
+          return b.id - a.id; // Last to first (newest services with higher IDs first)
+        });
+
+        console.log('📅 Services sorted by ID (newest first):', {
+          originalOrder: servicesResponse.services.slice(0, 3).map(s => ({ id: s.id, title: s.title })),
+          sortedOrder: sortedServices.slice(0, 3).map(s => ({ id: s.id, title: s.title }))
+        });
+
+        setServices(sortedServices);
+        setTotalServices(servicesResponse.pagination?.total || servicesResponse.services.length);
       } catch (err: any) {
         setError(err.message || 'Failed to load data');
       } finally {
@@ -91,7 +123,7 @@ const AllServicesPage = () => {
     };
 
     fetchData();
-  }, [currentPage, searchTerm, selectedCategory, selectedLocation, selectedDeliveryTime, sortBy]);
+  }, [currentPage, searchTerm, selectedCategory, selectedLocation, selectedServiceType, sortBy]);
 
   // Handle search
   // const handleSearch = () => {
@@ -253,18 +285,14 @@ const AllServicesPage = () => {
                     </SelectContent>
                   </Select>
 
-
-
-                  <Select value={selectedDeliveryTime} onValueChange={setSelectedDeliveryTime}>
+                  <Select value={selectedServiceType} onValueChange={setSelectedServiceType}>
                     <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Delivery Time" />
+                      <SelectValue placeholder="Service Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Any Time</SelectItem>
-                      <SelectItem value="same-day">Same Day</SelectItem>
-                      <SelectItem value="1-day">Within 1 Day</SelectItem>
-                      <SelectItem value="3-days">Within 3 Days</SelectItem>
-                      <SelectItem value="1-week">Within 1 Week</SelectItem>
+                      <SelectItem value="all">All Services</SelectItem>
+                      <SelectItem value="flat_fee">Flat Fee</SelectItem>
+                      <SelectItem value="custom">Custom Pricing</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -276,15 +304,15 @@ const AllServicesPage = () => {
                       <SelectItem value="best-match">Best Match</SelectItem>
                       <SelectItem value="price-low">Price: Low to High</SelectItem>
                       <SelectItem value="price-high">Price: High to Low</SelectItem>
-
                       <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="oldest">Oldest First</SelectItem>
                       <SelectItem value="popular">Most Popular</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Active Filters Display */}
-                {(selectedCategory !== "all" || selectedLocation !== "all" || selectedDeliveryTime !== "all" || sortBy !== "best-match") && (
+                {(selectedCategory !== "all" || selectedLocation !== "all" || selectedServiceType !== "all" || sortBy !== "best-match") && (
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm text-gray-600">Active filters:</span>
                     {selectedCategory !== "all" && (
@@ -300,20 +328,21 @@ const AllServicesPage = () => {
                       </Badge>
                     )}
 
-                    {selectedDeliveryTime !== "all" && (
-                      <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                        {selectedDeliveryTime}
-                        <button onClick={() => setSelectedDeliveryTime("all")} className="ml-1 hover:text-purple-900">×</button>
+                    {selectedServiceType !== "all" && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                        {selectedServiceType === 'flat_fee' ? 'Flat Fee' : 'Custom Pricing'}
+                        <button onClick={() => setSelectedServiceType("all")} className="ml-1 hover:text-blue-900">×</button>
                       </Badge>
                     )}
+
+
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => {
                         setSelectedCategory("all");
                         setSelectedLocation("all");
-
-                        setSelectedDeliveryTime("all");
+                        setSelectedServiceType("all");
                         setSortBy("best-match");
                       }}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
@@ -371,8 +400,15 @@ const AllServicesPage = () => {
                   </Card>
                 ))
               ) : services.length > 0 ? (
-                services.map((service, index) => (
-                <Card key={service.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl">
+                (() => {
+                  console.log('🎨 Rendering services:', {
+                    servicesCount: services.length,
+                    serviceIds: services.map(s => s.id),
+                    serviceTypes: services.map(s => ({ id: s.id, title: s.title, type: s.service_type }))
+                  });
+                  return services;
+                })().map((service, index) => (
+                <Card key={`service-${service.id}-${index}`} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-2xl">
                   <div className="relative overflow-hidden rounded-t-2xl">
                     <img
                       src={service.images?.[0] ? getImageUrl(service.images[0]) : "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center"}
@@ -411,10 +447,7 @@ const AllServicesPage = () => {
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="text-xl font-bold text-gray-900">{service.price}</span>
                         </div>
-                        <div className="flex items-center space-x-1 text-xs text-gray-500">
-                          <Clock className="w-3 h-3" />
-                          <span>{service.delivery_time}</span>
-                        </div>
+
                       </div>
                       <Button
                         size="sm"
@@ -441,7 +474,7 @@ const AllServicesPage = () => {
                         setSearchTerm('');
                         setSelectedCategory('all');
                         setSelectedLocation('all');
-                        setSelectedDeliveryTime('all');
+                        setSelectedServiceType('all');
                         setSortBy('best-match');
                         setCurrentPage(1);
                       }}
@@ -540,7 +573,7 @@ const AllServicesPage = () => {
                         Loading more...
                       </>
                     ) : (
-                      `Load More (${Math.max(0, sortedServices.length - (currentPage * servicesPerPage))} remaining)`
+                      `Load More (${Math.max(0, totalServices - (currentPage * servicesPerPage))} remaining)`
                     )}
                   </Button>
                 </div>

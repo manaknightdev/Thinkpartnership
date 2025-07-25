@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
 import ChatAPI from "@/services/ChatAPI";
+import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowLeft,
   Phone,
@@ -14,12 +15,15 @@ import {
   CheckCircle,
   MessageCircle,
   Award,
-  Loader2
+  Loader2,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 
 const ServiceDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [service, setService] = useState<ServiceDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,6 +62,11 @@ const ServiceDetailsPage = () => {
 
   // Handle starting a chat with the vendor
   const handleStartChat = async () => {
+    if (!isAuthenticated) {
+      navigate('/marketplace/login');
+      return;
+    }
+
     if (!service || !service.vendor) {
       setError("Service or vendor information not available");
       return;
@@ -254,27 +263,66 @@ const ServiceDetailsPage = () => {
                     ))}
                   </>
                 ) : (
-                  // Fixed Price System
+                  // Fixed Price or Custom Service System
                   <div className="text-center p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                     <div className="text-4xl font-bold text-green-600 mb-2">
                       ${service.base_price}
+                      {(service as any).service_type === 'custom' && (service as any).unit_type && (
+                        <span className="text-lg text-gray-600">/{(service as any).unit_type}</span>
+                      )}
                     </div>
-                    <p className="text-gray-600">Starting price</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Delivery: {service.delivery_time}
+                    <p className="text-gray-600">
+                      {(service as any).service_type === 'custom' ? 'Price per unit' : 'Starting price'}
                     </p>
+                    {(service as any).service_type === 'custom' && (
+                      <div className="mt-2 text-sm text-gray-500">
+                        {(service as any).min_quantity && (
+                          <p>
+                            Minimum quantity: {(service as any).min_quantity} {(service as any).unit_type}
+                            {(service as any).max_quantity && ` • Maximum: ${(service as any).max_quantity}`}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <Separator />
 
-                <Button
-                  size="lg"
-                  className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
-                >
-                  Request Service Now
-                </Button>
+                {isAuthenticated ? (
+                  <Button
+                    size="lg"
+                    className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                    onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
+                  >
+                    Request Service Now
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-center text-gray-600 text-sm">
+                      Please log in or create an account to purchase this service
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="text-lg py-6 border-green-600 text-green-600 hover:bg-green-50"
+                        onClick={() => navigate('/marketplace/login')}
+                      >
+                        <LogIn className="w-5 h-5 mr-2" />
+                        Log In
+                      </Button>
+                      <Button
+                        size="lg"
+                        className="text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                        onClick={() => navigate('/marketplace/signup')}
+                      >
+                        <UserPlus className="w-5 h-5 mr-2" />
+                        Sign Up
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <Button
                   size="lg"
