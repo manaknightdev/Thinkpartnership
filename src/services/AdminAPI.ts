@@ -186,6 +186,27 @@ class AdminAPI {
     return response.data;
   }
 
+  // Admin Login as Client
+  async loginAsClient(clientId: number): Promise<{
+    error: boolean;
+    message: string;
+    token?: string;
+    refresh_token?: string;
+    client_id?: number;
+    user?: {
+      id: number;
+      email: string;
+      company_name: string;
+      contact_name: string;
+      role: string;
+    };
+  }> {
+    const response = await adminApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_AUTH.LOGIN_AS_CLIENT, {
+      client_id: clientId
+    });
+    return response.data;
+  }
+
   // Profile Methods
   async getProfile(): Promise<AdminProfile> {
     const response = await adminApiClient.get(API_CONFIG.ENDPOINTS.ADMIN_AUTH.PROFILE);

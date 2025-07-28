@@ -2,9 +2,9 @@ import adminApiClient from '@/config/adminAxios';
 import { API_CONFIG } from '@/config/api';
 
 export interface AdminWalletBalance {
-  balance: string | number;
+  available_balance: string | number;
   pending_balance: string | number;
-  total_earned: string | number;
+  total_earnings: string | number;
   total_withdrawals: string | number;
   currency: string;
 }

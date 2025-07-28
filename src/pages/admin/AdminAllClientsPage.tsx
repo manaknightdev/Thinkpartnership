@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { AddClientModal } from "@/components/modals/AddClientModal";
 import { ViewEditClientModal } from "@/components/modals/ViewEditClientModal";
 import AdminAPI from '@/services/AdminAPI';
+import ClientAPI from '@/services/ClientAPI';
 import { showError, showSuccess } from '@/utils/toast';
 import {
   Search,
@@ -152,6 +153,7 @@ const AdminAllClientsPage = () => {
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginAsClientLoading, setLoginAsClientLoading] = useState<number | null>(null);
 
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -212,10 +214,40 @@ const AdminAllClientsPage = () => {
     toast.warning(`Suspending ${clientName}...`);
   };
 
-  const handleLoginAsClient = (client: any) => {
-    toast.success(`Logging in as ${client.name}...`);
-    // Navigate to client portal
-    navigate('/client-portal');
+  const handleLoginAsClient = async (client: any) => {
+    try {
+      setLoginAsClientLoading(client.id);
+      showSuccess(`Logging in as ${client.name || client.company_name}...`);
+
+      // Call admin API to get client authentication token
+      const response = await AdminAPI.loginAsClient(client.id);
+
+      if (response.error) {
+        showError(response.message || 'Failed to login as client');
+        return;
+      }
+
+      // Store client authentication data
+      if (response.token && response.user) {
+        ClientAPI.storeAuthData({
+          error: false,
+          message: 'Success',
+          token: response.token,
+          client_id: response.client_id?.toString(),
+          user: response.user
+        });
+      }
+
+      // Navigate to client portal
+      navigate('/client-portal');
+      showSuccess(`Successfully logged in as ${client.name || client.company_name}`);
+
+    } catch (error: any) {
+      console.error('Error logging in as client:', error);
+      showError(error.response?.data?.message || 'Failed to login as client. Please try again.');
+    } finally {
+      setLoginAsClientLoading(null);
+    }
   };
 
   const handleAddNewClient = () => {
@@ -539,9 +571,16 @@ const AdminAllClientsPage = () => {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Client
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleLoginAsClient(client)}>
-                            <LogIn className="mr-2 h-4 w-4" />
-                            Login as Client
+                          <DropdownMenuItem
+                            onClick={() => handleLoginAsClient(client)}
+                            disabled={loginAsClientLoading === client.id}
+                          >
+                            {loginAsClientLoading === client.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <LogIn className="mr-2 h-4 w-4" />
+                            )}
+                            {loginAsClientLoading === client.id ? 'Logging in...' : 'Login as Client'}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

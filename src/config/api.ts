@@ -74,6 +74,7 @@ export const API_CONFIG = {
     ADMIN_AUTH: {
       LOGIN: '/api/marketplace/admin/auth/login',
       PROFILE: '/api/marketplace/admin/auth/profile',
+      LOGIN_AS_CLIENT: '/api/marketplace/admin/auth/login-as-client',
     },
     // Admin Stripe Integration
     ADMIN_STRIPE: {

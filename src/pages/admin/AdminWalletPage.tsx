@@ -65,7 +65,9 @@ const AdminWalletPage = () => {
         AdminWalletAPI.getWalletTransactions()
       ]);
 
-      setWalletBalance(balanceData);
+      // Extract balance data from the response structure
+      const balance = (balanceData as any).balance || balanceData;
+      setWalletBalance(balance as AdminWalletBalance);
       setTransactions(transactionData.transactions || []);
 
       // Load Stripe account status separately (non-critical)
@@ -97,12 +99,12 @@ const AdminWalletPage = () => {
 
   // Calculate totals
   const totalIncome = (transactions || [])
-    .filter(t => t.amount > 0)
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter(t => parseFloat(String(t.amount)) > 0)
+    .reduce((sum, t) => sum + parseFloat(String(t.amount)), 0);
 
   const totalWithdrawals = Math.abs((transactions || [])
-    .filter(t => t.amount < 0 && t.type === "withdrawal")
-    .reduce((sum, t) => sum + t.amount, 0));
+    .filter(t => parseFloat(String(t.amount)) < 0 && t.type === "withdrawal")
+    .reduce((sum, t) => sum + parseFloat(String(t.amount)), 0));
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -201,7 +203,7 @@ const AdminWalletPage = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {isBalanceVisible
-                ? `$${parseFloat(walletBalance?.balance || '0').toFixed(2)}`
+                ? `$${parseFloat(String(walletBalance?.available_balance || '0')).toFixed(2)}`
                 : '••••••'
               }
             </div>
@@ -219,7 +221,7 @@ const AdminWalletPage = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {isBalanceVisible
-                ? `$${parseFloat(walletBalance?.pending_balance || '0').toFixed(2)}`
+                ? `$${parseFloat(String(walletBalance?.pending_balance || '0')).toFixed(2)}`
                 : '••••••'
               }
             </div>
@@ -237,7 +239,7 @@ const AdminWalletPage = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {isBalanceVisible
-                ? `$${parseFloat(walletBalance?.total_earned || '0').toFixed(2)}`
+                ? `$${parseFloat(String(walletBalance?.total_earnings || '0')).toFixed(2)}`
                 : '••••••'
               }
             </div>
@@ -255,7 +257,7 @@ const AdminWalletPage = () => {
           <CardContent>
             <div className="text-2xl font-bold">
               {isBalanceVisible
-                ? `$${parseFloat(walletBalance?.total_withdrawals || '0').toFixed(2)}`
+                ? `$${parseFloat(String(walletBalance?.total_withdrawals || '0')).toFixed(2)}`
                 : '••••••'
               }
             </div>
@@ -468,9 +470,9 @@ const AdminWalletPage = () => {
                         </TableCell>
                         <TableCell>
                           <span className={`font-semibold ${
-                            parseFloat(transaction.amount) > 0 ? 'text-green-600' : 'text-red-600'
+                            parseFloat(String(transaction.amount)) > 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {parseFloat(transaction.amount) > 0 ? '+' : ''}${Math.abs(parseFloat(transaction.amount)).toFixed(2)}
+                            {parseFloat(String(transaction.amount)) > 0 ? '+' : ''}${Math.abs(parseFloat(String(transaction.amount))).toFixed(2)}
                           </span>
                         </TableCell>
                         <TableCell>
