@@ -37,6 +37,29 @@ const ChatPage = () => {
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [allChats, setAllChats] = useState<Chat[]>([]);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // Function to load messages for the current chat
+  const loadMessages = async (chatIdToLoad: string) => {
+    try {
+      const messagesResponse = await ChatAPI.getChatMessages(parseInt(chatIdToLoad));
+      if (!messagesResponse.error) {
+        setMessages(messagesResponse.messages || []);
+
+        // Also refresh the chat list to update last message and unread counts
+        try {
+          const chatsResponse = await ChatAPI.getChats();
+          if (!chatsResponse.error) {
+            setAllChats(chatsResponse.chats);
+          }
+        } catch (error) {
+          console.error('Error refreshing chat list during message load:', error);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading messages:', err);
+    }
+  };
 
   // Load chat data and messages
   useEffect(() => {
@@ -68,12 +91,14 @@ const ChatPage = () => {
         setCurrentChat(chat);
 
         // Load messages for this chat
-        const messagesResponse = await ChatAPI.getChatMessages(parseInt(chatId));
-        if (messagesResponse.error) {
-          throw new Error('Failed to load messages');
-        }
+        await loadMessages(chatId);
 
-        setMessages(messagesResponse.messages || []);
+        // Set up polling for new messages every 3 seconds
+        const interval = setInterval(() => {
+          loadMessages(chatId);
+        }, 3000);
+        setPollingInterval(interval);
+
       } catch (err: any) {
         console.error('Error loading chat:', err);
         setError(err.message || 'Failed to load chat');
@@ -83,12 +108,29 @@ const ChatPage = () => {
     };
 
     loadChatData();
+
+    // Cleanup polling on unmount or chatId change
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        setPollingInterval(null);
+      }
+    };
   }, [chatId]);
 
   // Check Stripe connection status on component mount
   useEffect(() => {
     checkStripeConnection();
   }, []);
+
+  // Cleanup polling on component unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
 
 
 
@@ -104,12 +146,13 @@ const ChatPage = () => {
     if (!message.trim() || !chatId || !currentChat) return;
 
     const messageText = message.trim();
+    const optimisticId = Date.now();
     setMessage("");
 
     try {
       // Optimistically add message to UI
       const optimisticMessage: ChatMessage = {
-        id: Date.now(), // Temporary ID
+        id: optimisticId, // Temporary ID
         message: messageText,
         sender_type: 'customer',
         message_type: 0,
@@ -130,17 +173,25 @@ const ChatPage = () => {
         throw new Error(response.message || 'Failed to send message');
       }
 
-      // Update the optimistic message with real data
-      setMessages(prev => (prev || []).map(msg =>
-        msg.id === optimisticMessage.id
-          ? { ...optimisticMessage, id: response.data.id }
-          : msg
-      ));
+      // Refresh messages to get the latest state from server
+      if (chatId) {
+        await loadMessages(chatId);
+      }
+
+      // Also refresh the chat list to update last message
+      try {
+        const chatsResponse = await ChatAPI.getChats();
+        if (!chatsResponse.error) {
+          setAllChats(chatsResponse.chats);
+        }
+      } catch (error) {
+        console.error('Error refreshing chat list:', error);
+      }
 
     } catch (err: any) {
       console.error('Error sending message:', err);
       // Remove optimistic message on error
-      setMessages(prev => (prev || []).filter(msg => msg.id !== Date.now()));
+      setMessages(prev => (prev || []).filter(msg => msg.id !== optimisticId));
       setError(err.message || 'Failed to send message');
       setMessage(messageText); // Restore message text
     }

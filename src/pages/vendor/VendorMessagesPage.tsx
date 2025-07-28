@@ -82,6 +82,7 @@ const VendorMessagesPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Vendor's custom service tiers (created by vendor in Service Tiers page)
   const vendorServiceTiers = [
@@ -177,21 +178,39 @@ const VendorMessagesPage = () => {
   };
 
   // Load messages for a specific chat
-  const loadMessages = async (chatId: number) => {
+  const loadMessages = async (chatId: number, silent: boolean = false) => {
     try {
-      setLoadingMessages(true);
+      if (!silent) {
+        setLoadingMessages(true);
+      }
       const response = await VendorMessagesAPI.getMessages(chatId);
       if (!response.error) {
         setMessages(response.messages);
         setTimeout(scrollToBottom, 100);
-      } else {
+
+        // Also refresh the chat list to update last message and unread counts
+        if (silent) {
+          try {
+            const chatsResponse = await VendorMessagesAPI.getChats();
+            if (!chatsResponse.error) {
+              setChats(chatsResponse.chats);
+            }
+          } catch (error) {
+            console.error('Error refreshing chat list during message load:', error);
+          }
+        }
+      } else if (!silent) {
         toast.error("Failed to load messages");
       }
     } catch (error) {
       console.error("Error loading messages:", error);
-      toast.error("Failed to load messages");
+      if (!silent) {
+        toast.error("Failed to load messages");
+      }
     } finally {
-      setLoadingMessages(false);
+      if (!silent) {
+        setLoadingMessages(false);
+      }
     }
   };
 
@@ -295,6 +314,31 @@ const VendorMessagesPage = () => {
     }
   }, [selectedChatId, customers]);
 
+  // Set up polling for messages when a chat is selected
+  useEffect(() => {
+    // Clear existing polling
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+
+    // Set up new polling if chat is selected
+    if (selectedChatId) {
+      const interval = setInterval(() => {
+        loadMessages(selectedChatId, true); // Silent loading for polling
+      }, 3000);
+      setPollingInterval(interval);
+    }
+
+    // Cleanup on unmount or chat change
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        setPollingInterval(null);
+      }
+    };
+  }, [selectedChatId]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -302,6 +346,15 @@ const VendorMessagesPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Cleanup polling on component unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
 
   const handleSendMessage = async () => {
     if (!message.trim() || !selectedChatId || sending) return;

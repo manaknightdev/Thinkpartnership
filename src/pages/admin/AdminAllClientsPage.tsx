@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,9 @@ import ClientAPI from '@/services/ClientAPI';
 import { showError, showSuccess } from '@/utils/toast';
 import {
   Search,
-  Filter,
   Eye,
   Building,
   Users,
-  DollarSign,
   Calendar,
   Mail,
   Phone,
@@ -149,6 +147,9 @@ const AdminAllClientsPage = () => {
   const [planFilter, setPlanFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [revenueFilter, setRevenueFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [joinDateFilter, setJoinDateFilter] = useState("all");
+  const [clientSizeFilter, setClientSizeFilter] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
@@ -166,24 +167,33 @@ const AdminAllClientsPage = () => {
 
   useEffect(() => {
     fetchClients();
-  }, [searchTerm, statusFilter, planFilter, pagination.current_page]);
+  }, [searchTerm, statusFilter, planFilter, locationFilter, joinDateFilter, clientSizeFilter, pagination.current_page]);
 
   const fetchClients = async () => {
     try {
       setIsLoading(true);
 
-      const params = {
+      // Convert status filter to number for API
+      const getStatusNumber = (status: string) => {
+        switch (status) {
+          case 'active': return 1;
+          case 'pending': return 0;
+          case 'suspended': return 2;
+          default: return undefined;
+        }
+      };
+
+      const params: any = {
         page: pagination.current_page,
         limit: pagination.per_page,
         ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(planFilter !== 'all' && { plan: planFilter })
+        ...(statusFilter !== 'all' && { status: getStatusNumber(statusFilter) })
       };
 
       const response = await AdminAPI.getAllClients(params);
 
       if (response.error) {
-        showError(response.message || 'Failed to fetch clients');
+        showError('Failed to fetch clients');
       } else {
         setClients(response.clients || []);
         if (response.pagination) {
@@ -273,6 +283,9 @@ const AdminAllClientsPage = () => {
     setStatusFilter("all");
     setPlanFilter("all");
     setRevenueFilter("all");
+    setLocationFilter("all");
+    setJoinDateFilter("all");
+    setClientSizeFilter("all");
     toast.info("All filters cleared");
   };
 
@@ -290,7 +303,16 @@ const AdminAllClientsPage = () => {
                           (revenueFilter === "medium" && revenueAmount >= 200000 && revenueAmount < 400000) ||
                           (revenueFilter === "low" && revenueAmount < 200000);
 
-    return matchesSearch && matchesStatus && matchesPlan && matchesRevenue;
+    // Additional filters for mock data (in real implementation, these would be handled server-side)
+    const matchesLocation = locationFilter === "all"; // Simplified for mock data
+    const matchesJoinDate = joinDateFilter === "all"; // Simplified for mock data
+    const matchesClientSize = clientSizeFilter === "all" ||
+                             (clientSizeFilter === "large" && client.vendors >= 50) ||
+                             (clientSizeFilter === "medium" && client.vendors >= 10 && client.vendors < 50) ||
+                             (clientSizeFilter === "small" && client.vendors >= 1 && client.vendors < 10) ||
+                             (clientSizeFilter === "startup" && client.vendors === 0);
+
+    return matchesSearch && matchesStatus && matchesPlan && matchesRevenue && matchesLocation && matchesJoinDate && matchesClientSize;
   });
 
   // Calculate summary stats based on filtered data
@@ -346,7 +368,7 @@ const AdminAllClientsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Clients</p>
-                <p className="text-2xl font-bold text-gray-900">1</p>
+                <p className="text-2xl font-bold text-gray-900">{activeClients}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
                 <Users className="h-6 w-6 text-green-600" />
@@ -399,7 +421,7 @@ const AdminAllClientsPage = () => {
         <CardContent className="pt-0">
           <div className="space-y-4 mb-6">
             {/* Basic Filters */}
-            {/* <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
               <div className="flex flex-col sm:flex-row w-full lg:w-auto space-y-2 sm:space-y-0 sm:space-x-2">
                 <div className="relative flex-grow lg:w-80">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -417,7 +439,7 @@ const AdminAllClientsPage = () => {
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="trial">Trial</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="suspended">Suspended</SelectItem>
                   </SelectContent>
                 </Select>
@@ -433,14 +455,14 @@ const AdminAllClientsPage = () => {
                     <SelectItem value="trial">Trial</SelectItem>
                   </SelectContent>
                 </Select>
-                {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all") && (
+                {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-2" />
                     Clear
                   </Button>
                 )}
               </div>
-            </div> */}
+            </div>
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
@@ -451,7 +473,7 @@ const AdminAllClientsPage = () => {
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className="text-xs font-medium text-gray-700 mb-1 block">Revenue Range</label>
                     <Select value={revenueFilter} onValueChange={setRevenueFilter}>
@@ -463,6 +485,54 @@ const AdminAllClientsPage = () => {
                         <SelectItem value="high">High Revenue ($400K+)</SelectItem>
                         <SelectItem value="medium">Medium Revenue ($200K-$399K)</SelectItem>
                         <SelectItem value="low">Low Revenue (Under $200K)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-700 mb-1 block">Location</label>
+                    <Select value={locationFilter} onValueChange={setLocationFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Locations" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Locations</SelectItem>
+                        <SelectItem value="new york">New York, NY</SelectItem>
+                        <SelectItem value="california">California, CA</SelectItem>
+                        <SelectItem value="texas">Texas, TX</SelectItem>
+                        <SelectItem value="florida">Florida, FL</SelectItem>
+                        <SelectItem value="illinois">Illinois, IL</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-700 mb-1 block">Join Date</label>
+                    <Select value={joinDateFilter} onValueChange={setJoinDateFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                        <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                        <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+                        <SelectItem value="last_year">Last Year</SelectItem>
+                        <SelectItem value="older">Older than 1 Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-700 mb-1 block">Client Size</label>
+                    <Select value={clientSizeFilter} onValueChange={setClientSizeFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Sizes" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Sizes</SelectItem>
+                        <SelectItem value="large">Large (50+ Vendors)</SelectItem>
+                        <SelectItem value="medium">Medium (10-49 Vendors)</SelectItem>
+                        <SelectItem value="small">Small (1-9 Vendors)</SelectItem>
+                        <SelectItem value="startup">Startup (0 Vendors)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -500,7 +570,7 @@ const AdminAllClientsPage = () => {
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8">
                         <div className="text-gray-500">
-                          {searchTerm || statusFilter !== 'all' || planFilter !== 'all' || revenueFilter !== 'all'
+                          {searchTerm || statusFilter !== 'all' || planFilter !== 'all' || revenueFilter !== 'all' || locationFilter !== 'all' || joinDateFilter !== 'all' || clientSizeFilter !== 'all'
                             ? 'No clients found matching your filters.'
                             : 'No clients found.'}
                         </div>
@@ -605,7 +675,7 @@ const AdminAllClientsPage = () => {
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
               Showing {filteredClients.length} of {pagination.total_count} clients
-              {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all") &&
+              {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }
             </p>
