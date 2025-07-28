@@ -219,6 +219,31 @@ const AdminDashboardOverviewPage = () => {
 
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Total Clients</CardTitle>
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Users className="h-4 w-4 text-purple-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="text-2xl font-bold text-gray-400">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_clients || 0}</div>
+                <div className="flex items-center mt-1">
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                  <p className="text-xs text-green-600 font-medium">+0.0% growth this quarter</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">Total Customers</CardTitle>
             <div className="p-2 bg-pink-100 rounded-lg">
               <TrendingUp className="h-4 w-4 text-pink-600" />

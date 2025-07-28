@@ -158,18 +158,10 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
               </div>
               <span className="font-semibold">${numericAmount.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Service Fee</span>
-              <span className="font-semibold">$5.00</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Processing Fee</span>
-              <span className="font-semibold">$2.50</span>
-            </div>
             <Separator />
             <div className="flex justify-between items-center text-lg font-bold">
               <span>Total</span>
-              <span>${(numericAmount + 7.50).toFixed(2)}</span>
+              <span>${numericAmount.toFixed(2)}</span>
             </div>
           </div>
         </CardContent>
@@ -253,7 +245,7 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
         ) : !stripeConnected ? (
           'Connect Stripe to Pay'
         ) : (
-          `Pay $${(numericAmount + 7.50).toFixed(2)}`
+          `Pay $${numericAmount.toFixed(2)}`
         )}
       </Button>
 
