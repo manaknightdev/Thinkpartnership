@@ -39,21 +39,43 @@ const ChatPage = () => {
   const [allChats, setAllChats] = useState<Chat[]>([]);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
+  // Update specific chat's last message without refreshing entire list
+  const updateChatLastMessage = (chatId: string, lastMessage: string) => {
+    setAllChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id.toString() === chatId
+          ? {
+              ...chat,
+              last_message: lastMessage,
+              last_message_time: new Date().toISOString()
+            }
+          : chat
+      )
+    );
+  };
+
   // Function to load messages for the current chat
-  const loadMessages = async (chatIdToLoad: string) => {
+  const loadMessages = async (chatIdToLoad: string, silent: boolean = false) => {
     try {
       const messagesResponse = await ChatAPI.getChatMessages(parseInt(chatIdToLoad));
       if (!messagesResponse.error) {
         setMessages(messagesResponse.messages || []);
 
-        // Also refresh the chat list to update last message and unread counts
-        try {
-          const chatsResponse = await ChatAPI.getChats();
-          if (!chatsResponse.error) {
-            setAllChats(chatsResponse.chats);
+        // Also refresh the chat list to update last message and unread counts (only during polling)
+        if (silent) {
+          try {
+            const chatsResponse = await ChatAPI.getChats();
+            if (!chatsResponse.error) {
+              // Only update chats if there are actual changes to prevent unnecessary re-renders
+              const currentChatsJson = JSON.stringify(allChats);
+              const newChatsJson = JSON.stringify(chatsResponse.chats);
+              if (currentChatsJson !== newChatsJson) {
+                setAllChats(chatsResponse.chats);
+              }
+            }
+          } catch (error) {
+            console.error('Error refreshing chat list during message load:', error);
           }
-        } catch (error) {
-          console.error('Error refreshing chat list during message load:', error);
         }
       }
     } catch (err) {
@@ -173,20 +195,13 @@ const ChatPage = () => {
         throw new Error(response.message || 'Failed to send message');
       }
 
-      // Refresh messages to get the latest state from server
+      // Refresh messages to get the latest state from server (silently)
       if (chatId) {
-        await loadMessages(chatId);
+        await loadMessages(chatId, true);
       }
 
-      // Also refresh the chat list to update last message
-      try {
-        const chatsResponse = await ChatAPI.getChats();
-        if (!chatsResponse.error) {
-          setAllChats(chatsResponse.chats);
-        }
-      } catch (error) {
-        console.error('Error refreshing chat list:', error);
-      }
+      // Update just this chat's last message without refreshing entire list
+      updateChatLastMessage(chatId, messageText);
 
     } catch (err: any) {
       console.error('Error sending message:', err);

@@ -177,6 +177,21 @@ const VendorMessagesPage = () => {
     }
   };
 
+  // Update specific chat's last message without refreshing entire list
+  const updateChatLastMessage = (chatId: number, lastMessage: string) => {
+    setChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id === chatId
+          ? {
+              ...chat,
+              last_message: lastMessage,
+              last_message_time: new Date().toISOString()
+            }
+          : chat
+      )
+    );
+  };
+
   // Load messages for a specific chat
   const loadMessages = async (chatId: number, silent: boolean = false) => {
     try {
@@ -188,12 +203,17 @@ const VendorMessagesPage = () => {
         setMessages(response.messages);
         setTimeout(scrollToBottom, 100);
 
-        // Also refresh the chat list to update last message and unread counts
+        // Also refresh the chat list to update last message and unread counts (only during polling)
         if (silent) {
           try {
             const chatsResponse = await VendorMessagesAPI.getChats();
             if (!chatsResponse.error) {
-              setChats(chatsResponse.chats);
+              // Only update chats if there are actual changes to prevent unnecessary re-renders
+              const currentChatsJson = JSON.stringify(chats);
+              const newChatsJson = JSON.stringify(chatsResponse.chats);
+              if (currentChatsJson !== newChatsJson) {
+                setChats(chatsResponse.chats);
+              }
             }
           } catch (error) {
             console.error('Error refreshing chat list during message load:', error);
@@ -359,19 +379,21 @@ const VendorMessagesPage = () => {
   const handleSendMessage = async () => {
     if (!message.trim() || !selectedChatId || sending) return;
 
+    const messageText = message.trim();
+
     try {
       setSending(true);
       const response = await VendorMessagesAPI.sendMessage(selectedChatId, {
-        message: message.trim()
+        message: messageText
       });
 
       if (!response.error) {
         setMessage("");
         toast.success("Message sent!");
-        // Reload messages to get the updated list
-        await loadMessages(selectedChatId);
-        // Reload chats to update last message
-        await loadChats();
+        // Reload messages to get the updated list (silently)
+        await loadMessages(selectedChatId, true);
+        // Update just this chat's last message without refreshing entire list
+        updateChatLastMessage(selectedChatId, messageText);
       } else {
         toast.error("Failed to send message");
       }
@@ -407,10 +429,11 @@ const VendorMessagesPage = () => {
         setShowQuoteModal(false);
         setQuoteData({ service: "", price: "", description: "", validUntil: "" });
         toast.success("Quote sent successfully!");
-        // Reload messages to show the new quote
-        await loadMessages(selectedChatId);
-        // Reload chats to update last message
-        await loadChats();
+        // Reload messages to show the new quote (silently)
+        await loadMessages(selectedChatId, true);
+        // Update just this chat's last message without refreshing entire list
+        const quoteMessage = `I've prepared a quote for your project: ${quoteData.service}`;
+        updateChatLastMessage(selectedChatId, quoteMessage);
       } else {
         toast.error("Failed to send quote");
       }
