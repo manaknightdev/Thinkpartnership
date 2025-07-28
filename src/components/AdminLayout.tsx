@@ -54,7 +54,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: "All Transactions", path: "/admin-portal/transactions", icon: DollarSign, exact: false },
     { name: "Wallet & Payments", path: "/admin-portal/wallet", icon: Wallet, exact: false },
     // { name: "Vendor Approvals", path: "/admin-portal/vendor-approvals", icon: Shield, exact: false },
-    { name: "Global Revenue Rules", path: "/admin-portal/revenue-rules", icon: Settings, exact: false },
+
     // { name: "Usage Reports", path: "/admin-portal/reports", icon: BarChart, exact: false },
     // { name: "Manual Commissions", path: "/admin-portal/manual-commissions", icon: PlusCircle, exact: false },
     // { name: "License Management", path: "/admin-portal/license-management", icon: Key, exact: false },
@@ -72,8 +72,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     toast.info("Logging out from Admin Portal...");
+    // Clear admin auth data
+    localStorage.removeItem('admin_auth_token');
+    localStorage.removeItem('admin_refresh_token');
+    localStorage.removeItem('admin_user_data');
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/admin/login";
     }, 500);
   };
 

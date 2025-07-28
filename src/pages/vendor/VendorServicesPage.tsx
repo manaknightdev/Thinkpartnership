@@ -50,6 +50,7 @@ const VendorServicesPage = () => {
     short_description: "",
     category_id: 0,
     base_price: 0,
+    referral_percentage: 0,
     pricing_tiers: [],
     features: [],
     tags: [],
@@ -168,6 +169,7 @@ const VendorServicesPage = () => {
         short_description: newService.short_description,
         category_id: newService.category_id,
         base_price: newService.base_price,
+        referral_percentage: newService.referral_percentage,
         pricing_tiers: newService.pricing_tiers,
         features: newService.features,
         tags: newService.tags,
@@ -271,6 +273,7 @@ const VendorServicesPage = () => {
       short_description: "",
       category_id: 0,
       base_price: 0,
+      referral_percentage: 0,
       pricing_tiers: [],
       features: [],
       tags: [],
@@ -296,6 +299,7 @@ const VendorServicesPage = () => {
       short_description: service.short_description || "",
       category_id: 0, // You might need to map this from service data
       base_price: service.base_price,
+      referral_percentage: service.referral_percentage || 0,
       pricing_tiers: service.pricing_tiers || [],
       features: service.features || [],
       tags: service.tags || [],
@@ -452,6 +456,23 @@ const VendorServicesPage = () => {
                     value={newService.base_price}
                     onChange={(e) => setNewService({ ...newService, base_price: parseFloat(e.target.value) || 0 })}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="new-referral-percentage">Referral Percentage (%)</Label>
+                  <Input
+                    id="new-referral-percentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    placeholder="0"
+                    value={newService.referral_percentage || ""}
+                    onChange={(e) => setNewService({ ...newService, referral_percentage: parseFloat(e.target.value) || 0 })}
+                  />
+                  <p className="text-sm text-gray-500">
+                    Percentage of gross revenue you want to share for referrals. Platform takes 10% of this amount, remaining is split 50/50 between client and referring vendor.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -754,6 +775,21 @@ const VendorServicesPage = () => {
                 value={newService.base_price}
                 onChange={(e) => setNewService({ ...newService, base_price: parseFloat(e.target.value) || 0 })}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-referral-percentage">Referral Percentage (%)</Label>
+              <Input
+                id="edit-referral-percentage"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={newService.referral_percentage || ""}
+                onChange={(e) => setNewService({ ...newService, referral_percentage: parseFloat(e.target.value) || 0 })}
+              />
+              <p className="text-sm text-gray-500">
+                Percentage of gross revenue you want to share for referrals. Platform takes 10% of this amount, remaining is split 50/50 between client and referring vendor.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-service-description">Service Description *</Label>

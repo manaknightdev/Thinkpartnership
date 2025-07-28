@@ -12,7 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import AuthAPI, { LoginData } from '@/services/AuthAPI';
+import MarketplaceAuthAPI, { MarketplaceLoginData } from '@/services/MarketplaceAuthAPI';
+import { useClient } from '@/contexts/ClientContext';
 import { showSuccess, showError } from '@/utils/toast';
 
 const loginSchema = z.object({
@@ -25,9 +26,21 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const CustomerLogin = () => {
   const navigate = useNavigate();
+  const { client, clientSlug } = useClient();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Debug: Check URL parameters directly
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientParam = urlParams.get('client');
+
+  console.log('🔍 Login page debug:', {
+    urlClientParam: clientParam,
+    clientFromContext: client,
+    clientSlugFromContext: clientSlug,
+    currentURL: window.location.href
+  });
 
   const {
     register,
@@ -43,13 +56,19 @@ const CustomerLogin = () => {
     setError('');
 
     try {
-      const loginData: LoginData = {
+      const loginData: MarketplaceLoginData = {
         email: data.email,
         password: data.password,
         is_refresh: data.remember,
       };
 
-      const response = await AuthAPI.login(loginData);
+      console.log('🔐 Logging in with auto-detection (no client parameter needed):', {
+        email: data.email,
+        autoDetectClient: true
+      });
+
+      // No client parameter needed - backend will auto-detect from customer email
+      const response = await MarketplaceAuthAPI.login(loginData);
 
       if (response.error) {
         setError(response.message);
@@ -57,9 +76,11 @@ const CustomerLogin = () => {
       }
 
       // Store auth data
-      AuthAPI.storeAuthData(response);
+      MarketplaceAuthAPI.storeAuthData(response);
 
-      showSuccess('Welcome back! You have been successfully logged in.');
+      // Use client name from response (auto-detected by backend)
+      const detectedClientName = response.client_name || 'the marketplace';
+      showSuccess(`Welcome back to ${detectedClientName}!`);
 
       // Redirect to marketplace
       navigate('/marketplace');

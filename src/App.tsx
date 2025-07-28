@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ClientProvider } from "./contexts/ClientContext";
 
 import NotFound from "./pages/NotFound";
 import SignUp from "./pages/SignUp";
@@ -83,7 +84,7 @@ import AdminAllCustomersPage from "./pages/admin/AdminAllCustomersPage";
 import AdminTransactionsPage from "./pages/admin/AdminTransactionsPage";
 import AdminWalletPage from "./pages/admin/AdminWalletPage";
 import AdminVendorApprovalsPage from "./pages/admin/AdminVendorApprovalsPage";
-import AdminRevenueRulesPage from "./pages/admin/AdminRevenueRulesPage";
+
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminManualCommissionsPage from "./pages/admin/AdminManualCommissionsPage";
 import AdminLicenseManagementPage from "./pages/admin/AdminLicenseManagementPage";
@@ -102,15 +103,64 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Default route redirects to public marketplace */}
-          <Route path="/" element={<Navigate to="/marketplace" replace />} />
+        <ClientProvider>
+          <Routes>
+          {/* Multi-Client Routes - Support /clientname/marketplace pattern */}
+          {/* Client-specific marketplace routes - INVITE-ONLY REGISTRATION */}
+          <Route path="/:clientSlug/marketplace" element={<CustomerBrowseServicesPage />} />
+          <Route path="/:clientSlug/marketplace/login" element={<CustomerLogin />} />
+          <Route path="/:clientSlug/marketplace/signup" element={<CustomerSignup />} />
+          <Route path="/:clientSlug/marketplace/register" element={<CustomerSignup />} />
+          <Route path="/:clientSlug/marketplace/invite/customer" element={<CustomerSignup />} />
+          <Route path="/:clientSlug/marketplace/invite/vendor" element={<VendorSignup />} />
+          <Route path="/:clientSlug/marketplace/categories" element={<CategoriesPage />} />
+          <Route path="/:clientSlug/marketplace/services" element={<AllServicesPage />} />
+          <Route path="/:clientSlug/marketplace/services/:id" element={<ServiceDetailsPage />} />
+          <Route path="/:clientSlug/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/:clientSlug/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
 
-          {/* Legacy routes for other portals */}
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
+          {/* Client-specific vendor routes - INVITE-ONLY */}
+          <Route path="/:clientSlug/vendor/login" element={<VendorLogin />} />
+          <Route path="/:clientSlug/vendor/signup" element={<VendorSignup />} />
+          <Route path="/:clientSlug/vendor/register" element={<VendorSignup />} />
+          <Route path="/:clientSlug/vendor/invite" element={<VendorSignup />} />
+
+          {/* Default route - Show client selection or redirect */}
+          <Route path="/" element={<Navigate to="/select-client" replace />} />
+
+          {/* Client selection page for users without client context */}
+          <Route path="/select-client" element={<div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="max-w-md w-full space-y-8 p-8">
+              <div className="text-center">
+                <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                  Access Required
+                </h2>
+                <p className="mt-2 text-sm text-gray-600">
+                  Please access the marketplace through your client's specific link.
+                </p>
+                <p className="mt-4 text-xs text-gray-500">
+                  Contact your service provider for the correct marketplace URL.
+                </p>
+              </div>
+            </div>
+          </div>} />
+
+          {/* Legacy routes - DISABLED for multi-client */}
+          <Route path="/signup" element={<Navigate to="/select-client" replace />} />
+          <Route path="/login" element={<Navigate to="/select-client" replace />} />
           <Route path="/onboarding-client" element={<OnboardingClient />} />
-          <Route path="/onboarding-vendor" element={<OnboardingVendor />} />
+          <Route path="/onboarding-vendor" element={<Navigate to="/select-client" replace />} />
 
           {/* Customer Authentication Routes */}
           <Route path="/marketplace/login" element={<CustomerLogin />} />
@@ -134,6 +184,9 @@ const App = () => (
 
           {/* Public Marketplace Routes - No authentication required for browsing */}
           <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
+          <Route path="/marketplace/login" element={<CustomerLogin />} />
+          <Route path="/marketplace/register" element={<CustomerSignup />} />
+          <Route path="/marketplace/signup" element={<CustomerSignup />} />
           <Route path="/marketplace/categories" element={<CategoriesPage />} />
           <Route path="/marketplace/services" element={<AllServicesPage />} />
           <Route path="/marketplace/services/:id" element={<ServiceDetailsPage />} />
@@ -212,7 +265,7 @@ const App = () => (
             <Route path="transactions" element={<AdminTransactionsPage />} />
             <Route path="wallet" element={<AdminWalletPage />} />
             <Route path="vendor-approvals" element={<AdminVendorApprovalsPage />} />
-            <Route path="revenue-rules" element={<AdminRevenueRulesPage />} />
+
             <Route path="reports" element={<AdminReportsPage />} />
             <Route path="manual-commissions" element={<AdminManualCommissionsPage />} />
             <Route path="license-management" element={<AdminLicenseManagementPage />} />
@@ -225,6 +278,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </ClientProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

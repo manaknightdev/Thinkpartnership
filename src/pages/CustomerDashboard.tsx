@@ -17,8 +17,12 @@ const CustomerDashboard = () => {
 
   const handleLogout = () => {
     toast.info("Logging out...");
+    // Clear customer auth data
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_data');
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/marketplace/login";
     }, 500);
   };
 

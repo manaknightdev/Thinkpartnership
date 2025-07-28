@@ -28,6 +28,7 @@ interface ServiceTier {
   tier_name: string;
   price: number;
   base_price: number;
+  referral_percentage?: number;
   unit_type: string;
   min_quantity: number;
   max_quantity?: number;
@@ -57,6 +58,7 @@ const VendorServiceTiersPage = () => {
     tier_name: "",
     price: 0,
     base_price: 0,
+    referral_percentage: 0,
     unit_type: "service",
     min_quantity: 1,
     max_quantity: undefined,
@@ -175,6 +177,7 @@ const VendorServiceTiersPage = () => {
         description: newTier.description,
         price: newTier.base_price || newTier.price,
         base_price: newTier.base_price || newTier.price,
+        referral_percentage: newTier.referral_percentage || 0,
         unit_type: newTier.unit_type,
         min_quantity: newTier.min_quantity,
         max_quantity: newTier.max_quantity,
@@ -194,6 +197,7 @@ const VendorServiceTiersPage = () => {
           tier_name: "",
           price: 0,
           base_price: 0,
+          referral_percentage: 0,
           unit_type: "service",
           min_quantity: 1,
           max_quantity: undefined,
@@ -558,6 +562,23 @@ const VendorServiceTiersPage = () => {
               </div>
             </div>
 
+            <div>
+              <Label htmlFor="referral-percentage">Referral Percentage (%)</Label>
+              <Input
+                id="referral-percentage"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                placeholder="0"
+                value={newTier.referral_percentage || ""}
+                onChange={(e) => setNewTier({...newTier, referral_percentage: parseFloat(e.target.value) || 0})}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Percentage of gross revenue you want to share for referrals. Platform takes 10% of this amount, remaining is split 50/50 between client and referring vendor.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="min-quantity">Min Quantity</Label>
@@ -747,6 +768,22 @@ const VendorServiceTiersPage = () => {
                     onChange={(e) => setEditingTier({...editingTier, unit_type: e.target.value})}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-referral-percentage">Referral Percentage (%)</Label>
+                <Input
+                  id="edit-referral-percentage"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={editingTier.referral_percentage || ""}
+                  onChange={(e) => setEditingTier({...editingTier, referral_percentage: parseFloat(e.target.value) || 0})}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Percentage of gross revenue you want to share for referrals. Platform takes 10% of this amount, remaining is split 50/50 between client and referring vendor.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

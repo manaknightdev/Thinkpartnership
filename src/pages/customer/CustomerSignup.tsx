@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,7 +13,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 
 import AuthAPI, { RegisterData } from '@/services/AuthAPI';
+import MarketplaceAuthAPI, { MarketplaceRegisterData } from '@/services/MarketplaceAuthAPI';
 import { showSuccess, showError } from '@/utils/toast';
+import { useClient } from '@/contexts/ClientContext';
 
 const signupSchema = z.object({
   first_name: z.string().min(2, 'First name must be at least 2 characters'),
@@ -33,7 +35,9 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 const CustomerSignup = () => {
   const navigate = useNavigate();
+  const { clientSlug } = useParams();
   const [searchParams] = useSearchParams();
+  const { client, isLoading: clientLoading, error: clientError, getInviteCode } = useClient();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +48,7 @@ const CustomerSignup = () => {
     clientId?: string;
     isReferral: boolean;
     referralType?: string;
+    inviteCode?: string;
   }>({ isReferral: false });
 
   const {
@@ -55,30 +60,65 @@ const CustomerSignup = () => {
     resolver: zodResolver(signupSchema),
   });
 
-  // Handle referral codes from URL parameters
+  // Handle referral codes and invite codes from URL parameters and client context
   useEffect(() => {
     const ref = searchParams.get('ref');
     const vendor = searchParams.get('vendor');
-    const client = searchParams.get('client');
+    const clientParam = searchParams.get('client');
     const type = searchParams.get('type');
+    const invite = searchParams.get('invite') || searchParams.get('code');
 
-    if (ref || vendor || client) {
+    // Get invite code from client context if available
+    const contextInviteCode = getInviteCode();
+
+    if (ref || vendor || clientParam || invite || contextInviteCode) {
       setReferralInfo({
         referralCode: ref || undefined,
         vendorId: vendor || undefined,
-        clientId: client || undefined,
+        clientId: clientParam || client?.id?.toString() || undefined,
         referralType: type || undefined,
+        inviteCode: invite || contextInviteCode || undefined,
         isReferral: true
       });
     }
-  }, [searchParams]);
+  }, [searchParams, client, getInviteCode]);
+
+  // Redirect if no client context is available (but allow invite links)
+  useEffect(() => {
+    if (!clientLoading && !client && !clientSlug) {
+      // Check if this is an invite link before redirecting
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasInviteParams = urlParams.get('ref') || urlParams.get('invite') || urlParams.get('code') || urlParams.get('client');
+
+      if (!hasInviteParams) {
+        console.log('❌ No client context and no invite parameters, redirecting to select-client');
+        navigate('/select-client');
+      } else {
+        console.log('✅ Invite parameters found, allowing signup even without client context');
+      }
+    }
+  }, [client, clientLoading, clientSlug, navigate]);
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const registerData: RegisterData = {
+      // Check if we have client context or invite parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasInviteParams = urlParams.get('ref') || urlParams.get('invite') || urlParams.get('code') || urlParams.get('client');
+
+      if (!client && !hasInviteParams) {
+        setError('Client context not available. Please access through a valid client marketplace.');
+        return;
+      }
+
+      // If we don't have client context but have invite params, we'll let the backend handle it
+      if (!client && hasInviteParams) {
+        console.log('⚠️ No client context but invite params present, proceeding with registration');
+      }
+
+      const registerData: MarketplaceRegisterData = {
         email: data.email,
         password: data.password,
         first_name: data.first_name,
@@ -88,10 +128,22 @@ const CustomerSignup = () => {
         // Include referral data if available
         ...(referralInfo.referralCode && { referral_code: referralInfo.referralCode }),
         ...(referralInfo.vendorId && { vendor_id: referralInfo.vendorId }),
-        ...(referralInfo.clientId && { client_id: referralInfo.clientId }),
+        ...(referralInfo.inviteCode && { invite_code: referralInfo.inviteCode }),
       };
 
-      const response = await AuthAPI.register(registerData);
+      // Use client ID directly instead of clientSlug
+      const clientIdentifier = client?.id?.toString() || clientSlug;
+
+      console.log('🚀 Registering customer with client context:', {
+        client: client?.company_name,
+        clientId: client?.id,
+        clientSlug: clientSlug,
+        clientIdentifier: clientIdentifier,
+        hasInviteCode: !!referralInfo.inviteCode,
+        hasReferralCode: !!referralInfo.referralCode
+      });
+
+      const response = await MarketplaceAuthAPI.register(registerData, clientIdentifier);
 
       if (response.error) {
         setError(response.message);
@@ -99,12 +151,13 @@ const CustomerSignup = () => {
       }
 
       // Store auth data
-      AuthAPI.storeAuthData(response);
+      MarketplaceAuthAPI.storeAuthData(response);
 
-      showSuccess('Welcome to ThinkPartnership! Your account has been created successfully.');
+      const clientName = client?.company_name || 'the marketplace';
+      showSuccess(`Welcome to ${clientName}! Your account has been created successfully. Please login to continue.`);
 
-      // Redirect to marketplace
-      navigate('/marketplace');
+      // Redirect to login page (no client parameter needed - auto-detection will work)
+      navigate('/marketplace/login');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -117,8 +170,30 @@ const CustomerSignup = () => {
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">ThinkPartnership</h1>
+          {client?.logo_url ? (
+            <img
+              src={client.logo_url}
+              alt={client.company_name}
+              className="h-12 mx-auto mb-4"
+            />
+          ) : (
+            <div className="h-12 w-12 mx-auto mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
+              <span className="text-xl font-bold text-gray-600">
+                {client?.company_name?.charAt(0) || 'T'}
+              </span>
+            </div>
+          )}
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {client?.company_name || 'ThinkPartnership'}
+          </h1>
           <p className="text-gray-600">Join our marketplace community</p>
+          {referralInfo.isReferral && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-700">
+                🎉 You've been invited to join {client?.company_name || 'our marketplace'}!
+              </p>
+            </div>
+          )}
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
@@ -359,7 +434,7 @@ const CustomerSignup = () => {
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
                 <Link
-                  to="/marketplace/login"
+                  to={clientSlug ? `/${clientSlug}/marketplace/login` : '/marketplace/login'}
                   className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
                 >
                   Sign in here

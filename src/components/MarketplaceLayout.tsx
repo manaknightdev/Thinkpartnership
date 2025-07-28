@@ -8,6 +8,8 @@ import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
 import UserAPI, { UserProfile } from "@/services/UserAPI";
 import NotificationsAPI from "@/services/NotificationsAPI";
 import { useAuth } from "@/hooks/useAuth";
+import { useClient } from "@/contexts/ClientContext";
+import MarketplaceAuthAPI from "@/services/MarketplaceAuthAPI";
 import {
   Search,
   FileText,
@@ -41,6 +43,9 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
 
   // Use the auth hook
   const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
+
+  // Use client context to get client name
+  const { client } = useClient();
 
   // User profile state (for additional profile data if needed)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -90,6 +95,27 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const getFirstName = () => {
     if (!user) return 'User';
     return user.first_name || 'User';
+  };
+
+  // Get marketplace name - show client name if authenticated, otherwise default
+  const getMarketplaceName = () => {
+    // First try to get from MarketplaceAuthAPI (has client_name)
+    const marketplaceUserData = MarketplaceAuthAPI.getUserData();
+    if (isAuthenticated && marketplaceUserData && marketplaceUserData.client_name) {
+      return marketplaceUserData.client_name;
+    }
+
+    // Fallback to regular user data
+    if (isAuthenticated && user && user.client_name) {
+      return user.client_name;
+    }
+
+    // Fallback to client context
+    if (client && client.company_name) {
+      return client.company_name;
+    }
+
+    return 'RealPartnersOS';
   };
 
   // Define sidebar items based on authentication status
@@ -172,9 +198,9 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Logo */}
+            {/* Logo - Show client name when authenticated */}
             <Link to="/marketplace" className="text-xl font-bold text-green-600">
-              RealPartnersOS
+              {getMarketplaceName()}
             </Link>
           </div>
 

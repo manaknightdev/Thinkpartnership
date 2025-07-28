@@ -89,8 +89,12 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   const handleLogout = () => {
     toast.info("Logging out...");
+    // Clear client auth data
+    localStorage.removeItem('client_token');
+    localStorage.removeItem('client_id');
+    localStorage.removeItem('client_user');
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/client/login";
     }, 500);
   };
 

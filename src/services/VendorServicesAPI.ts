@@ -8,6 +8,7 @@ export interface VendorService {
   description: string;
   short_description: string;
   base_price: number;
+  referral_percentage?: number;
   service_type?: string;
   pricing_tiers: PricingTier[];
   features: string[];
@@ -37,6 +38,7 @@ export interface CreateServiceData {
   short_description?: string;
   category_id: number;
   base_price: number;
+  referral_percentage?: number;
   pricing_tiers?: PricingTier[];
   features?: string[];
   tags?: string[];
@@ -53,6 +55,7 @@ export interface UpdateServiceData {
   short_description?: string;
   category_id?: number;
   base_price?: number;
+  referral_percentage?: number;
   pricing_tiers?: PricingTier[];
   features?: string[];
   tags?: string[];

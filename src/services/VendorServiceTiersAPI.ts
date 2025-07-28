@@ -8,6 +8,7 @@ export interface ServiceTier {
   description?: string;
   price: number;
   base_price: number;
+  referral_percentage?: number;
   unit_type: string;
   min_quantity: number;
   max_quantity?: number;
@@ -59,6 +60,7 @@ export interface CreateTierData {
   description?: string;
   price?: number;
   base_price: number;
+  referral_percentage?: number;
   unit_type: string;
   min_quantity?: number;
   max_quantity?: number;
