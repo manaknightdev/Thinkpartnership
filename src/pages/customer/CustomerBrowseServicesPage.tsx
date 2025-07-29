@@ -332,12 +332,27 @@ const CustomerBrowseServicesPage = () => {
                   {/* Category and Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {/* Category Badge */}
-                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                    <Badge
+                      variant="outline"
+                      className="text-xs bg-blue-50 text-blue-700 border-blue-200 rounded-full cursor-pointer hover:bg-blue-100 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCategoryClick(service.category_slug || service.category.toLowerCase().replace(/\s+/g, '-'));
+                      }}
+                    >
                       {service.category}
                     </Badge>
                     {/* Category Tags */}
                     {Array.isArray(service.category_tags) && service.category_tags.slice(0, 2).map((tag: string, tagIndex: number) => (
-                      <Badge key={tagIndex} variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full">
+                      <Badge
+                        key={tagIndex}
+                        variant="secondary"
+                        className="text-xs bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCategoryClick(tag.toLowerCase().replace(/\s+/g, '-'));
+                        }}
+                      >
                         {tag}
                       </Badge>
                     ))}
@@ -388,24 +403,32 @@ const CustomerBrowseServicesPage = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
-            {mockCategories.map((category) => (
-              <Card key={category.name} className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 rounded-2xl overflow-hidden">
-                <CardContent className="p-6 text-center">
-                  <div className={`w-16 h-16 ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
-                    <category.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-base mb-2 text-gray-900 group-hover:text-green-600 transition-colors duration-300">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-2">
-                    {category.description}
-                  </p>
-                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
-                    {category.count} services
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
+            {categories.slice(0, 8).map((category, index) => {
+              const IconComponent = getCategoryIcon(category.name);
+              const color = getCategoryColor(index);
+              return (
+                <Card
+                  key={category.slug}
+                  className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 rounded-2xl overflow-hidden"
+                  onClick={() => handleCategoryClick(category.slug)}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className={`w-16 h-16 ${color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
+                      <IconComponent className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-base mb-2 text-gray-900 group-hover:text-green-600 transition-colors duration-300">
+                      {category.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-2">
+                      {category.description || 'Professional services'}
+                    </p>
+                    <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                      Popular
+                    </Badge>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           <div className="text-center mt-12">

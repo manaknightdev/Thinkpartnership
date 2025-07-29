@@ -125,26 +125,12 @@ const getStatusVariant = (status: string) => {
   }
 };
 
-const getPlanColor = (plan: string) => {
-  switch (plan) {
-    case "Enterprise":
-      return "bg-purple-100 text-purple-800 hover:bg-purple-100";
-    case "Professional":
-      return "bg-blue-100 text-blue-800 hover:bg-blue-100";
-    case "Basic":
-      return "bg-green-100 text-green-800 hover:bg-green-100";
-    case "Trial":
-      return "bg-orange-100 text-orange-800 hover:bg-orange-100";
-    default:
-      return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-  }
-};
+
 
 const AdminAllClientsPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [planFilter, setPlanFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [revenueFilter, setRevenueFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -167,7 +153,7 @@ const AdminAllClientsPage = () => {
 
   useEffect(() => {
     fetchClients();
-  }, [searchTerm, statusFilter, planFilter, locationFilter, joinDateFilter, clientSizeFilter, pagination.current_page]);
+  }, [searchTerm, statusFilter, locationFilter, joinDateFilter, clientSizeFilter, pagination.current_page]);
 
   const fetchClients = async () => {
     try {
@@ -195,7 +181,26 @@ const AdminAllClientsPage = () => {
       if (response.error) {
         showError('Failed to fetch clients');
       } else {
-        setClients(response.clients || []);
+        // Transform API response to match expected format
+        const transformedClients = (response.clients || []).map((client: any) => ({
+          id: client.id,
+          name: client.company_name || client.contact_name || 'N/A',
+          email: client.email,
+          phone: client.phone || 'N/A',
+          website: client.custom_domain || `${client.marketplace_subdomain}.marketplace.com` || 'N/A',
+          status: client.status === 1 ? 'Active' : 'Inactive',
+          plan: 'Standard', // Remove plan references as requested
+          vendors: client.total_vendors || 0,
+          customers: client.total_customers || 0,
+          totalRevenue: `$${parseFloat(client.total_revenue || 0).toFixed(2)}`,
+          joinDate: client.join_date,
+          businessType: client.business_type,
+          city: client.city,
+          province: client.province,
+          commissionRate: client.commission_rate
+        }));
+
+        setClients(transformedClients);
         if (response.pagination) {
           setPagination(response.pagination);
         }
@@ -278,10 +283,48 @@ const AdminAllClientsPage = () => {
     setShowAdvancedFilters(!showAdvancedFilters);
   };
 
+  const handleExportData = async () => {
+    try {
+      toast.info("Preparing clients data export...");
+
+      // Create CSV content
+      const headers = ['Client Name', 'Email', 'Phone', 'Website', 'Status', 'Vendors', 'Customers', 'Revenue', 'Join Date'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredClients.map(client => [
+          `"${client.name}"`,
+          `"${client.email}"`,
+          `"${client.phone}"`,
+          `"${client.website}"`,
+          `"${client.status}"`,
+          client.vendors,
+          client.customers,
+          `"${client.totalRevenue}"`,
+          `"${new Date(client.joinDate).toLocaleDateString()}"`
+        ].join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `clients-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Clients data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting clients data:', error);
+      showError('Failed to export clients data. Please try again.');
+    }
+  };
+
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setPlanFilter("all");
     setRevenueFilter("all");
     setLocationFilter("all");
     setJoinDateFilter("all");
@@ -295,7 +338,6 @@ const AdminAllClientsPage = () => {
                          client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (client.website && client.website.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === "all" || client.status.toLowerCase() === statusFilter;
-    const matchesPlan = planFilter === "all" || client.plan.toLowerCase() === planFilter;
 
     const revenueAmount = client.totalRevenue ? parseFloat(client.totalRevenue.replace('$', '').replace(',', '')) : 0;
     const matchesRevenue = revenueFilter === "all" ||
@@ -312,7 +354,7 @@ const AdminAllClientsPage = () => {
                              (clientSizeFilter === "small" && client.vendors >= 1 && client.vendors < 10) ||
                              (clientSizeFilter === "startup" && client.vendors === 0);
 
-    return matchesSearch && matchesStatus && matchesPlan && matchesRevenue && matchesLocation && matchesJoinDate && matchesClientSize;
+    return matchesSearch && matchesStatus && matchesRevenue && matchesLocation && matchesJoinDate && matchesClientSize;
   });
 
   // Calculate summary stats based on filtered data
@@ -336,7 +378,7 @@ const AdminAllClientsPage = () => {
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Advanced Filters
           </Button> */}
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportData}>
             <Building className="h-4 w-4 mr-2" />
             Export Data
           </Button>
@@ -443,19 +485,7 @@ const AdminAllClientsPage = () => {
                     <SelectItem value="suspended">Suspended</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={planFilter} onValueChange={setPlanFilter}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Plans</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="trial">Trial</SelectItem>
-                  </SelectContent>
-                </Select>
-                {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") && (
+                {(searchTerm || statusFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") && (
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-2" />
                     Clear
@@ -548,7 +578,6 @@ const AdminAllClientsPage = () => {
                   <TableRow>
                     <TableHead className="font-semibold text-gray-900">Client Name</TableHead>
                     <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Plan</TableHead>
                     <TableHead className="font-semibold text-gray-900">Vendors</TableHead>
                     <TableHead className="font-semibold text-gray-900">Customers</TableHead>
                     <TableHead className="font-semibold text-gray-900">Revenue</TableHead>
@@ -570,7 +599,7 @@ const AdminAllClientsPage = () => {
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8">
                         <div className="text-gray-500">
-                          {searchTerm || statusFilter !== 'all' || planFilter !== 'all' || revenueFilter !== 'all' || locationFilter !== 'all' || joinDateFilter !== 'all' || clientSizeFilter !== 'all'
+                          {searchTerm || statusFilter !== 'all' || revenueFilter !== 'all' || locationFilter !== 'all' || joinDateFilter !== 'all' || clientSizeFilter !== 'all'
                             ? 'No clients found matching your filters.'
                             : 'No clients found.'}
                         </div>
@@ -604,11 +633,6 @@ const AdminAllClientsPage = () => {
                           {client.phone}
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getPlanColor(client.plan)}>
-                        {client.plan}
-                      </Badge>
                     </TableCell>
                     <TableCell className="text-gray-900 font-medium">{client.vendors}</TableCell>
                     <TableCell className="text-gray-900 font-medium">{client.customers}</TableCell>
@@ -674,8 +698,8 @@ const AdminAllClientsPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredClients.length} of {pagination.total_count} clients
-              {(searchTerm || statusFilter !== "all" || planFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") &&
+              Showing {filteredClients.length} of {pagination.total_count || filteredClients.length} clients
+              {(searchTerm || statusFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }
             </p>

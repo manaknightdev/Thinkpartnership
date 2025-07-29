@@ -94,17 +94,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
     }, 500);
   };
 
-  // Show loading state while profile is being loaded
-  if (isLoadingProfile) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading vendor profile...</p>
-        </div>
-      </div>
-    );
-  }
+  // Don't show full-screen loading - let header and sidebar render
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -287,8 +277,16 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
           "flex-1 transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-64"
         )}>
-          {children}
-
+          {isLoadingProfile ? (
+            <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-50">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading...</p>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>

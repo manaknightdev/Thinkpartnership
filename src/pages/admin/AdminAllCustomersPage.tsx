@@ -281,6 +281,47 @@ const AdminAllCustomersPage = () => {
     toast.info("All filters cleared");
   };
 
+  const handleExportData = async () => {
+    try {
+      toast.info("Preparing customers data export...");
+
+      // Create CSV content
+      const headers = ['Customer Name', 'Email', 'Phone', 'Status', 'Total Spent', 'Orders', 'Join Date', 'Last Order'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredCustomers.map(customer => {
+          const customerName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'N/A';
+          return [
+            `"${customerName}"`,
+            `"${customer.email}"`,
+            `"${customer.phone || 'N/A'}"`,
+            `"${customer.status === 0 ? 'Active' : customer.status === 1 ? 'Inactive' : 'Suspended'}"`,
+            `"$${customer.total_spent || 0}"`,
+            customer.completed_orders || 0,
+            `"${customer.join_date ? new Date(customer.join_date).toLocaleDateString() : 'N/A'}"`,
+            `"${customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : 'N/A'}"`
+          ].join(',');
+        })
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `customers-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Customers data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting customers data:', error);
+      showError('Failed to export customers data. Please try again.');
+    }
+  };
+
   // Use customers directly since filtering is done server-side via API
   const filteredCustomers = customers.length > 0 ? customers : mockCustomers.filter(customer => {
     const customerName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim();
@@ -329,7 +370,7 @@ const AdminAllCustomersPage = () => {
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Advanced Filters
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportData}>
             <Users className="h-4 w-4 mr-2" />
             Export Data
           </Button>

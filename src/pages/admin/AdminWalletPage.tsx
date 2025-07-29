@@ -160,6 +160,42 @@ const AdminWalletPage = () => {
     }
   };
 
+  const handleExportData = async () => {
+    try {
+      toast.info("Preparing wallet transactions export...");
+
+      // Create CSV content
+      const headers = ['Date', 'Type', 'Description', 'Amount', 'Status', 'Transaction ID'];
+      const csvContent = [
+        headers.join(','),
+        ...transactions.map(transaction => [
+          `"${new Date(transaction.created_at).toLocaleDateString()}"`,
+          `"${transaction.type}"`,
+          `"${transaction.description}"`,
+          `"$${parseFloat(String(transaction.amount)).toFixed(2)}"`,
+          `"${transaction.status}"`,
+          `"${transaction.id || 'N/A'}"`
+        ].join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `admin-wallet-transactions-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Wallet transactions exported successfully!');
+    } catch (error) {
+      console.error('Error exporting wallet data:', error);
+      toast.error('Failed to export wallet data. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -179,7 +215,7 @@ const AdminWalletPage = () => {
           </p>
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportData}>
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>

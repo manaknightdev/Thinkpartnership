@@ -302,7 +302,7 @@ const NotificationsPage = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">No notifications</h2>
               <p className="text-gray-600 mb-8">You're all caught up! Check back later for updates.</p>
               <Button
-                onClick={() => navigate('/marketplace')}
+                onClick={() => navigate('/marketplace/services')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Browse Services

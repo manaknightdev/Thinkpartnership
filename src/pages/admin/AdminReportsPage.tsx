@@ -28,8 +28,59 @@ const mockTopVendors = [
 ];
 
 const AdminReportsPage = () => {
-  const handleExportAllReports = () => {
-    toast.info("Exporting all reports data...");
+  const handleExportAllReports = async () => {
+    try {
+      toast.info("Preparing reports data export...");
+
+      // Create comprehensive CSV content with all report data
+      const headers = ['Report Type', 'Client/Vendor', 'Revenue', 'Platform Revenue', 'Referrals', 'Period'];
+      const csvContent = [
+        headers.join(','),
+        // Overall revenue data
+        ...mockOverallRevenueData.map(item => [
+          'Overall Revenue',
+          `"${item.client}"`,
+          `"$${item.totalRevenue.toLocaleString()}"`,
+          `"$${item.platformRevenue.toLocaleString()}"`,
+          'N/A',
+          `"${item.month}"`
+        ].join(',')),
+        // Top clients data
+        ...mockTopClients.map(client => [
+          'Top Client',
+          `"${client.name}"`,
+          `"${client.totalRevenue}"`,
+          'N/A',
+          client.referrals,
+          'Current Period'
+        ].join(',')),
+        // Top vendors data
+        ...mockTopVendors.map(vendor => [
+          'Top Vendor',
+          `"${vendor.name}"`,
+          `"${vendor.totalRevenue}"`,
+          'N/A',
+          vendor.referrals,
+          'Current Period'
+        ].join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `admin-reports-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Reports data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting reports data:', error);
+      toast.error('Failed to export reports data. Please try again.');
+    }
   };
 
   // Calculate summary stats

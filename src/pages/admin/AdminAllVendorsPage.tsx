@@ -240,6 +240,46 @@ const AdminAllVendorsPage = () => {
     toast.info("All filters cleared");
   };
 
+  const handleExportData = async () => {
+    try {
+      toast.info("Preparing vendors data export...");
+
+      // Create CSV content
+      const headers = ['Vendor Name', 'Email', 'Phone', 'Location', 'Services', 'Status', 'Rating', 'Orders', 'Revenue', 'Join Date'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredVendors.map(vendor => [
+          `"${vendor.name}"`,
+          `"${vendor.email}"`,
+          `"${vendor.phone || 'N/A'}"`,
+          `"${vendor.location || 'N/A'}"`,
+          `"${vendor.services || 'N/A'}"`,
+          `"${vendor.status}"`,
+          vendor.rating || 'N/A',
+          vendor.orders || 0,
+          `"${vendor.totalRevenue || '$0'}"`,
+          `"${vendor.joinDate ? new Date(vendor.joinDate).toLocaleDateString() : 'N/A'}"`
+        ].join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `vendors-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Vendors data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting vendors data:', error);
+      showError('Failed to export vendors data. Please try again.');
+    }
+  };
+
   // Use vendors directly since filtering is done server-side via API
   const filteredVendors = vendors.length > 0 ? vendors : mockVendors.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -274,7 +314,7 @@ const AdminAllVendorsPage = () => {
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Advanced Filters
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportData}>
             <Users className="h-4 w-4 mr-2" />
             Export List
           </Button>

@@ -39,7 +39,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const navigate = useNavigate();
   const [orderCount, setOrderCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [requestCount] = useState(2);
+
 
   // Use the auth hook
   const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
@@ -152,9 +152,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     navigate('/marketplace/notifications');
   };
 
-  const handleRequestsClick = () => {
-    navigate('/marketplace/requests');
-  };
+
 
 
 
@@ -284,21 +282,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
 
             {!authLoading && isAuthenticated && (
               <>
-                {/* Service Requests - Only show when authenticated */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative"
-                  onClick={handleRequestsClick}
-                  title="View service requests"
-                >
-                  <FileText className="h-5 w-5" />
-                  {requestCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
-                      {requestCount}
-                    </Badge>
-                  )}
-                </Button>
+
 
                 {/* User Menu - Only show when authenticated */}
                 <DropdownMenu>
@@ -371,7 +355,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                     ? "bg-green-100 text-green-700 shadow-sm border border-green-200"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm"
                 )}
-                title={sidebarCollapsed ? item.name : undefined}
+
               >
                 <item.icon className={cn("flex-shrink-0", sidebarCollapsed ? "h-5 w-5" : "h-5 w-5")} />
                 {!sidebarCollapsed && <span>{item.name}</span>}

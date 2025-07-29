@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/utils/dateFormat";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ORDER_STATUSES, getOrderStatusVariant, type OrderStatus } from "@/utils/orderStatus";
 
 const CustomerOrdersPage = () => {
@@ -24,25 +25,35 @@ const CustomerOrdersPage = () => {
   const [error, setError] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const ordersPerPage = 10;
 
   // Load orders on component mount
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [currentPage]);
 
   const loadOrders = async () => {
     try {
       setLoading(true);
       setError('');
 
-      const response = await OrdersAPI.getCustomerOrders();
+      const response = await OrdersAPI.getCustomerOrders({
+        page: currentPage,
+        limit: ordersPerPage
+      });
 
       if (response.error) {
         setError(response.message || 'Failed to load orders');
         return;
       }
 
+      // Orders are already sorted by backend (newest first)
       setOrders(response.data.orders);
+      setTotalPages(response.data.pagination?.pages || 1);
+      setTotalOrders(response.data.pagination?.total || response.data.orders.length);
     } catch (err: any) {
       setError(err.message || 'Failed to load orders');
       console.error('Error loading orders:', err);
@@ -164,6 +175,38 @@ const CustomerOrdersPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6">
+            <div className="text-sm text-gray-600">
+              Showing {((currentPage - 1) * ordersPerPage) + 1}-{Math.min(currentPage * ordersPerPage, totalOrders)} of {totalOrders} orders
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <span className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         {selectedOrder && (
           <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>

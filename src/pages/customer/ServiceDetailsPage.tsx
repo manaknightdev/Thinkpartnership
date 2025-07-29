@@ -119,8 +119,8 @@ const ServiceDetailsPage = () => {
         <p className="text-lg text-gray-700 mb-8">
           {error || "The service you are looking for does not exist."}
         </p>
-        <Button onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        <Button onClick={() => navigate('/marketplace/services')}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Services
         </Button>
       </div>
     );
@@ -147,9 +147,9 @@ const ServiceDetailsPage = () => {
             <Button
               variant="secondary"
               className="mb-6 bg-white/90 hover:bg-white text-black"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/marketplace/services')}
             >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Services
             </Button>
           </div>
 
@@ -165,6 +165,18 @@ const ServiceDetailsPage = () => {
                 <div>
                   <p className="text-sm opacity-90">Service Provider</p>
                   <p className="font-semibold">{service.vendor?.name}</p>
+                  {/* Vendor Location */}
+                  {(service.vendor?.city || service.vendor?.province) && (
+                    <div className="flex items-center gap-1 text-sm opacity-75 mt-1">
+                      <MapPin className="w-3 h-3" />
+                      <span>
+                        {service.vendor.city && service.vendor.province
+                          ? `${service.vendor.city}, ${service.vendor.province}`
+                          : service.vendor.city || service.vendor.province
+                        }
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">{service.title}</h1>

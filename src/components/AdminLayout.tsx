@@ -48,7 +48,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: "Dashboard Overview", path: "/admin-portal/overview", icon: LayoutDashboard, exact: false },
     { name: "Admin Profile", path: "/admin-portal/profile", icon: User, exact: false },
     // { name: "Tasks & Follow-ups", path: "/admin-portal/tasks", icon: CheckSquare, exact: false },
-    { name: "Client", path: "/admin-portal/clients", icon: Building, exact: false },
+    { name: "All Clients", path: "/admin-portal/clients", icon: Building, exact: false },
     { name: "All Vendors", path: "/admin-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/admin-portal/customers", icon: UserCheck, exact: false },
     { name: "All Transactions", path: "/admin-portal/transactions", icon: DollarSign, exact: false },

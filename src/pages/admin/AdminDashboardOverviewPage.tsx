@@ -81,27 +81,57 @@ const AdminDashboardOverviewPage = () => {
 
   const handleExportData = async () => {
     try {
-      toast.info("Preparing data export...");
+      toast.info("Preparing dashboard data export...");
 
-      const response = await AdminAPI.exportData({
-        type: 'transactions',
-        start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Last 30 days
-        end_date: new Date().toISOString().split('T')[0]
-      });
+      // Create comprehensive CSV content with dashboard data
+      const headers = ['Metric Type', 'Metric Name', 'Value', 'Period'];
+      const csvContent = [
+        headers.join(','),
+        // Dashboard stats
+        ...(dashboardStats ? [
+          ['Dashboard Stats', 'Total Clients', dashboardStats.total_clients || 0, 'Current'],
+          ['Dashboard Stats', 'Total Vendors', dashboardStats.total_vendors || 0, 'Current'],
+          ['Dashboard Stats', 'Total Customers', dashboardStats.total_customers || 0, 'Current'],
+          ['Dashboard Stats', 'Total Transactions', dashboardStats.total_transactions || 0, 'Current'],
+          ['Dashboard Stats', 'Platform Revenue', `"${dashboardStats.total_platform_revenue || '$0'}"`, 'Total'],
+          ['Dashboard Stats', 'Monthly Revenue', `"${dashboardStats.month_revenue || '$0'}"`, 'Current Month'],
+          ['Dashboard Stats', 'Active Clients', dashboardStats.active_clients || 0, 'Current'],
+          ['Dashboard Stats', 'Active Vendors', dashboardStats.active_vendors || 0, 'Current'],
+          ['Dashboard Stats', 'Pending Vendors', dashboardStats.pending_vendors || 0, 'Current'],
+          ['Dashboard Stats', 'Pending Clients', dashboardStats.pending_clients || 0, 'Current'],
+          ['Dashboard Stats', 'Pending Orders', dashboardStats.pending_orders || 0, 'Current']
+        ] : []).map(row => row.join(',')),
+        // Revenue analytics
+        ...(revenueAnalytics ? revenueAnalytics.map(item => [
+          'Revenue Analytics',
+          `"${item.month}"`,
+          `"${item.total_revenue}"`,
+          'Monthly'
+        ].join(',')) : []),
+        // Chart data
+        ...chartData.map(item => [
+          'Chart Data',
+          `"${item.name}"`,
+          `"Revenue: $${item.revenue}, Vendors: ${item.vendors}, Transactions: ${item.transactions}"`,
+          'Monthly'
+        ].join(','))
+      ].join('\n');
 
-      if (response.error) {
-        showError(response.message || 'Failed to export data');
-      } else {
-        if (response.download_url) {
-          window.open(response.download_url, '_blank');
-          toast.success("Data export ready for download!");
-        } else {
-          toast.success(response.message || "Data export initiated successfully!");
-        }
-      }
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `admin-dashboard-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Dashboard data exported successfully!');
     } catch (error) {
-      console.error('Error exporting data:', error);
-      showError('Failed to export data. Please try again.');
+      console.error('Error exporting dashboard data:', error);
+      showError('Failed to export dashboard data. Please try again.');
     }
   };
 

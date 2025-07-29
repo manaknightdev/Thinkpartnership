@@ -26,7 +26,8 @@ import {
   CheckCircle,
   ExternalLink,
   AlertCircle,
-  DollarSign
+  DollarSign,
+  XCircle
 } from "lucide-react";
 
 const AccountPage = () => {
@@ -159,13 +160,25 @@ const AccountPage = () => {
         throw new Error(response.message || 'Failed to upload avatar');
       }
 
-      // Update the user profile with new avatar
-      if (userProfile) {
-        setUserProfile({
-          ...userProfile,
-          avatar: response.avatar_url
+      // Reload the profile to get the updated photo from the backend
+      const profileResponse = await UserAPI.getProfile();
+      if (!profileResponse.error) {
+        setUserProfile(profileResponse.user);
+        setFormData({
+          first_name: profileResponse.user.first_name,
+          last_name: profileResponse.user.last_name,
+          phone: profileResponse.user.phone,
+          address: profileResponse.user.address || '',
+          city: profileResponse.user.city || '',
+          province: profileResponse.user.province || '',
+          postal_code: profileResponse.user.postal_code || '',
+          bio: profileResponse.user.bio || '',
+          email_notifications: profileResponse.user.email_notifications || true,
+          sms_notifications: profileResponse.user.sms_notifications || false,
+          marketing_emails: profileResponse.user.marketing_emails || false
         });
       }
+
       setSuccess('Avatar updated successfully!');
     } catch (err: any) {
       setError(err.message || 'Failed to upload avatar');
@@ -298,8 +311,9 @@ const AccountPage = () => {
       <MarketplaceLayout>
         <div className="min-h-screen bg-gray-50">
           <div className="max-w-6xl mx-auto px-4 py-8">
-            <Alert>
-              <AlertDescription>{error}</AlertDescription>
+            <Alert className="border-red-200 bg-red-50">
+              <XCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800">{error}</AlertDescription>
             </Alert>
           </div>
         </div>
@@ -335,29 +349,33 @@ const AccountPage = () => {
                 alt="Profile"
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
               />
-              <label htmlFor="avatar-upload">
-                <Button
-                  size="sm"
-                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-green-600 hover:bg-green-700"
-                  disabled={saving}
-                  asChild
-                >
-                  <span>
-                    {saving ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Camera className="w-4 h-4" />
-                    )}
-                  </span>
-                </Button>
-              </label>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="hidden"
-              />
+              {isEditing && (
+                <>
+                  <label htmlFor="avatar-upload">
+                    <Button
+                      size="sm"
+                      className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-green-600 hover:bg-green-700"
+                      disabled={saving}
+                      asChild
+                    >
+                      <span>
+                        {saving ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Camera className="w-4 h-4" />
+                        )}
+                      </span>
+                    </Button>
+                  </label>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                </>
+              )}
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -680,59 +698,7 @@ const AccountPage = () => {
           </CardContent>
         </Card>
 
-        {/* Transaction History */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Purchase History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { date: "2024-01-15", amount: "$150.00", service: "Emergency Plumbing Repair", status: "Completed", type: "Payment" },
-                { date: "2024-01-10", amount: "$200.00", service: "Deep House Cleaning", status: "Completed", type: "Payment" },
-                { date: "2024-01-05", amount: "$80.00", service: "Professional Lawn Care", status: "Completed", type: "Payment" },
-                { date: "2024-01-01", amount: "$500.00", service: "Premium Home Painting", status: "Completed", type: "Payment" }
-              ].map((transaction, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-900">{transaction.service}</div>
-                    <div className="text-sm text-gray-600">{transaction.date} • {transaction.type}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium text-gray-900">{transaction.amount}</div>
-                    <Badge className="bg-green-100 text-green-700 text-xs">{transaction.status}</Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 text-center">
-              <Button variant="outline">View All Transactions</Button>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Payment Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Payment notifications</Label>
-                <p className="text-sm text-gray-600">Get notified when payments are processed</p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Transaction notifications</Label>
-                <p className="text-sm text-gray-600">Get notified about withdrawals and deposits</p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   };
@@ -837,8 +803,9 @@ const AccountPage = () => {
           <section className="py-4">
             <div className="max-w-7xl mx-auto px-4">
               {error && (
-                <Alert className="mb-4">
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert className="mb-4 border-red-200 bg-red-50">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800">{error}</AlertDescription>
                 </Alert>
               )}
               {success && (

@@ -26,6 +26,8 @@ export interface Service {
   vendor_image: string;
   vendor_rating: number;
   vendor_verified: boolean;
+  vendor_city?: string;
+  vendor_province?: string;
   completed_orders: number;
   category: string;
   category_slug: string;

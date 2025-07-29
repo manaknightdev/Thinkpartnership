@@ -92,25 +92,39 @@ const AdminTransactionsPage = () => {
 
   const handleExport = async () => {
     try {
-      toast.info("Exporting transactions data...");
-      const response = await AdminAPI.exportTransactions({
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(vendorFilter !== 'all' && { vendor: vendorFilter }),
-        ...(dateRangeFilter !== 'all' && { date_range: dateRangeFilter }),
-        ...(amountRangeFilter !== 'all' && { amount_range: amountRangeFilter }),
-        ...(paymentMethodFilter !== 'all' && { payment_method: paymentMethodFilter })
-      });
+      toast.info("Preparing transactions data export...");
 
-      if (response.error) {
-        showError(response.message || 'Failed to export transactions');
-      } else {
-        showSuccess('Transactions exported successfully');
-        // Handle file download if needed
-        if (response.download_url) {
-          window.open(response.download_url, '_blank');
-        }
-      }
+      // Use current filtered transactions or fetch all if needed
+      const dataToExport = filteredTransactions.length > 0 ? filteredTransactions : mockTransactions;
+
+      // Create CSV content
+      const headers = ['Transaction ID', 'Vendor', 'Customer', 'Service', 'Amount', 'Date', 'Status', 'Payment Method'];
+      const csvContent = [
+        headers.join(','),
+        ...dataToExport.map(txn => [
+          `"${txn.id}"`,
+          `"${txn.vendor}"`,
+          `"${txn.customer}"`,
+          `"${txn.service}"`,
+          `"${txn.amount}"`,
+          `"${txn.date}"`,
+          `"${txn.status}"`,
+          `"${txn.paymentMethod}"`
+        ].join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `admin-transactions-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Transactions data exported successfully!');
     } catch (error) {
       console.error('Error exporting transactions:', error);
       showError('Failed to export transactions. Please try again.');

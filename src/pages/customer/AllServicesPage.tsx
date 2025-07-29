@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Loader2,
   ChevronLeft,
+  MapPin,
   ChevronRight
 } from "lucide-react";
 
@@ -40,6 +41,7 @@ const AllServicesPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'all');
   const [selectedServiceType, setSelectedServiceType] = useState(searchParams.get('service_type') || 'all');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'best-match');
+  const [dateFilter, setDateFilter] = useState(searchParams.get('date') || 'all');
 
   // API state
   const [services, setServices] = useState<Service[]>([]);
@@ -71,7 +73,8 @@ const AllServicesPage = () => {
           category: selectedCategory !== 'all' ? selectedCategory : undefined,
           location: selectedLocation !== 'all' ? selectedLocation : undefined,
           service_type: selectedServiceType !== 'all' ? selectedServiceType : undefined,
-          sort: sortBy !== 'best-match' ? sortBy : undefined
+          sort: sortBy !== 'best-match' ? sortBy : undefined,
+          date: dateFilter !== 'all' ? dateFilter : undefined
         };
 
         console.log('🔍 Fetching services with filters:', filters);
@@ -123,7 +126,7 @@ const AllServicesPage = () => {
     };
 
     fetchData();
-  }, [currentPage, searchTerm, selectedCategory, selectedLocation, selectedServiceType, sortBy]);
+  }, [currentPage, searchTerm, selectedCategory, selectedLocation, selectedServiceType, sortBy, dateFilter]);
 
   // Handle search
   // const handleSearch = () => {
@@ -296,6 +299,19 @@ const AllServicesPage = () => {
                     </SelectContent>
                   </Select>
 
+                  <Select value={dateFilter} onValueChange={setDateFilter}>
+                    <SelectTrigger className="w-36">
+                      <SelectValue placeholder="Date" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">This Week</SelectItem>
+                      <SelectItem value="month">This Month</SelectItem>
+                      <SelectItem value="year">This Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Sort by" />
@@ -307,34 +323,39 @@ const AllServicesPage = () => {
                       <SelectItem value="newest">Newest First</SelectItem>
                       <SelectItem value="oldest">Oldest First</SelectItem>
                       <SelectItem value="popular">Most Popular</SelectItem>
+                      <SelectItem value="rating">Highest Rated</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Active Filters Display */}
-                {(selectedCategory !== "all" || selectedLocation !== "all" || selectedServiceType !== "all" || sortBy !== "best-match") && (
+                {(selectedCategory !== "all" || selectedLocation !== "all" || selectedServiceType !== "all" || dateFilter !== "all" || sortBy !== "best-match") && (
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm text-gray-600">Active filters:</span>
                     {selectedCategory !== "all" && (
                       <Badge variant="secondary" className="bg-green-100 text-green-700">
-                        {selectedCategory}
+                        {categories.find(c => c.slug === selectedCategory)?.name || selectedCategory}
                         <button onClick={() => setSelectedCategory("all")} className="ml-1 hover:text-green-900">×</button>
                       </Badge>
                     )}
                     {selectedLocation !== "all" && (
                       <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                        {selectedLocation}
+                        {selectedLocation.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         <button onClick={() => setSelectedLocation("all")} className="ml-1 hover:text-blue-900">×</button>
                       </Badge>
                     )}
-
                     {selectedServiceType !== "all" && (
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-700">
                         {selectedServiceType === 'flat_fee' ? 'Flat Fee' : 'Custom Pricing'}
-                        <button onClick={() => setSelectedServiceType("all")} className="ml-1 hover:text-blue-900">×</button>
+                        <button onClick={() => setSelectedServiceType("all")} className="ml-1 hover:text-purple-900">×</button>
                       </Badge>
                     )}
-
+                    {dateFilter !== "all" && (
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-700">
+                        {dateFilter === 'today' ? 'Today' : dateFilter === 'week' ? 'This Week' : dateFilter === 'month' ? 'This Month' : dateFilter === 'year' ? 'This Year' : dateFilter}
+                        <button onClick={() => setDateFilter("all")} className="ml-1 hover:text-orange-900">×</button>
+                      </Badge>
+                    )}
 
                     <Button
                       variant="ghost"
@@ -343,6 +364,7 @@ const AllServicesPage = () => {
                         setSelectedCategory("all");
                         setSelectedLocation("all");
                         setSelectedServiceType("all");
+                        setDateFilter("all");
                         setSortBy("best-match");
                       }}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
@@ -427,6 +449,18 @@ const AllServicesPage = () => {
                       <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                         {service.description}
                       </p>
+                      {/* Vendor Location */}
+                      {(service.vendor_city || service.vendor_province) && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                          <MapPin className="w-3 h-3" />
+                          <span>
+                            {service.vendor_city && service.vendor_province
+                              ? `${service.vendor_city}, ${service.vendor_province}`
+                              : service.vendor_city || service.vendor_province
+                            }
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -475,6 +509,7 @@ const AllServicesPage = () => {
                         setSelectedCategory('all');
                         setSelectedLocation('all');
                         setSelectedServiceType('all');
+                        setDateFilter('all');
                         setSortBy('best-match');
                         setCurrentPage(1);
                       }}

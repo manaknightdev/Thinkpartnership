@@ -28,6 +28,7 @@ export interface UpdateProfileData {
   first_name?: string;
   last_name?: string;
   phone?: string;
+  photo?: string;
   address?: string;
   city?: string;
   province?: string;
@@ -118,7 +119,7 @@ class UserAPI {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await apiClient.post('/customer/upload-avatar', formData, {
+      const response = await apiClient.post('/api/marketplace/auth/upload-avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
