@@ -417,42 +417,58 @@ const VendorServiceTiersPage = () => {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {serviceTiers.map((tier, index) => (
-                <Card
-                  key={tier.id}
-                  className="relative border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-md"
-                >
-                  {tier.is_popular && (
-                    <div className="absolute -top-2 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                      Popular
-                    </div>
-                  )}
+              {serviceTiers.map((tier, index) => {
+                // Ensure all fields are properly defined to avoid accidental rendering
+                const tierData = {
+                  id: tier.id,
+                  tier_name: tier.tier_name || '',
+                  description: tier.description || tier.tier_description || '',
+                  base_price: tier.base_price || tier.price || 0,
+                  unit_type: tier.unit_type || 'service',
+                  min_quantity: tier.min_quantity || 1,
+                  max_quantity: tier.max_quantity,
+                  features: Array.isArray(tier.features) ? tier.features :
+                           typeof tier.features === 'string' ? JSON.parse(tier.features || '[]') : [],
+                  images: Array.isArray(tier.images) ? tier.images :
+                         typeof tier.images === 'string' ? JSON.parse(tier.images || '[]') : [],
+                  is_popular: tier.is_popular || false
+                };
 
-                  <CardContent className="p-4">
-                    {/* Header with image and actions */}
-                    <div className="flex items-start gap-3 mb-3">
-                      {/* Service Image */}
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                        {tier.images && tier.images.length > 0 ? (
-                          <img
-                            src={getImageUrl(tier.images[0])}
-                            alt={tier.tier_name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = getPlaceholderImage();
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            {getTierIcon(index)}
-                          </div>
-                        )}
+                return (
+                  <Card
+                    key={`service-tier-${tierData.id}`}
+                    className="relative border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:shadow-md"
+                  >
+                    {tierData.is_popular && (
+                      <div className="absolute -top-2 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Popular
                       </div>
+                    )}
+                    <CardContent className="p-4">
+                      {/* Header with image and actions */}
+                      <div className="flex items-start gap-3 mb-3">
+                        {/* Service Image */}
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          {tierData.images && tierData.images.length > 0 ? (
+                            <img
+                              src={getImageUrl(tierData.images[0])}
+                              alt={tierData.tier_name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = getPlaceholderImage();
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              {getTierIcon(index)}
+                            </div>
+                          )}
+                        </div>
 
                       {/* Service Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 truncate">{tier.tier_name}</h3>
-                        <p className="text-sm text-gray-600 line-clamp-2">{tier.description || tier.tier_description}</p>
+                        <h3 className="font-semibold text-gray-900 truncate">{tierData.tier_name}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">{tierData.description}</p>
                       </div>
 
                       {/* Action buttons */}
@@ -460,7 +476,7 @@ const VendorServiceTiersPage = () => {
                         <Button variant="ghost" size="sm" onClick={() => handleEditTier(tier)} className="h-8 w-8 p-0">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteTier(tier.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteTier(tierData.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -469,13 +485,13 @@ const VendorServiceTiersPage = () => {
                     {/* Price and Unit Info */}
                     <div className="mb-3">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-gray-900">${tier.base_price || tier.price}</span>
-                        <span className="text-gray-600">/{tier.unit_type || 'service'}</span>
+                        <span className="text-2xl font-bold text-gray-900">${tierData.base_price}</span>
+                        <span className="text-gray-600">/{tierData.unit_type}</span>
                       </div>
-                      {tier.min_quantity && tier.min_quantity > 1 && (
+                      {tierData.min_quantity && tierData.min_quantity > 1 && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Min: {tier.min_quantity} {tier.unit_type || 'service'}(s)
-                          {tier.max_quantity && ` • Max: ${tier.max_quantity}`}
+                          Min: {tierData.min_quantity} {tierData.unit_type}(s)
+                          {tierData.max_quantity && ` • Max: ${tierData.max_quantity}`}
                         </p>
                       )}
                     </div>
@@ -483,21 +499,15 @@ const VendorServiceTiersPage = () => {
                     {/* Features (condensed) */}
                     <div className="mb-3">
                       <div className="flex flex-wrap gap-1">
-                        {(Array.isArray(tier.features) ? tier.features :
-                          typeof tier.features === 'string' ? JSON.parse(tier.features) : []
-                        ).slice(0, 3).map((feature: string, featureIndex: number) => (
+                        {tierData.features.slice(0, 3).map((feature: string, featureIndex: number) => (
                           <span key={featureIndex} className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
                             <Check className="h-3 w-3" />
                             {feature}
                           </span>
                         ))}
-                        {(Array.isArray(tier.features) ? tier.features :
-                          typeof tier.features === 'string' ? JSON.parse(tier.features) : []
-                        ).length > 3 && (
+                        {tierData.features.length > 3 && (
                           <span className="text-xs text-gray-500 px-2 py-1">
-                            +{(Array.isArray(tier.features) ? tier.features :
-                              typeof tier.features === 'string' ? JSON.parse(tier.features) : []
-                            ).length - 3} more
+                            +{tierData.features.length - 3} more
                           </span>
                         )}
                       </div>
@@ -513,7 +523,8 @@ const VendorServiceTiersPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -542,7 +553,7 @@ const VendorServiceTiersPage = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="tier-price">Base Price ($)</Label>
+                <Label htmlFor="tier-price">Price ($)</Label>
                 <Input
                   id="tier-price"
                   type="number"
@@ -649,6 +660,7 @@ const VendorServiceTiersPage = () => {
             {/* Image Upload Section */}
             <div>
               <Label>Service Images</Label>
+              <p className="text-sm text-gray-500 mb-2">Recommended size: 800x600px or larger for best quality</p>
               <div className="space-y-2">
                 {newTier.images && newTier.images.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
@@ -752,7 +764,7 @@ const VendorServiceTiersPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="edit-tier-price">Base Price ($)</Label>
+                  <Label htmlFor="edit-tier-price">Price ($)</Label>
                   <Input
                     id="edit-tier-price"
                     type="number"
@@ -853,6 +865,7 @@ const VendorServiceTiersPage = () => {
               {/* Image Upload Section for Edit */}
               <div>
                 <Label>Service Images</Label>
+                <p className="text-sm text-gray-500 mb-2">Recommended size: 800x600px or larger for best quality</p>
                 <div className="space-y-2">
                   {editingTier.images && editingTier.images.length > 0 && (
                     <div className="grid grid-cols-2 gap-2">

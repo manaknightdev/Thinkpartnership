@@ -222,7 +222,7 @@ const CustomerBrowseServicesPage = () => {
             </div>
 
             {/* Popular Searches */}
-            <div className="flex flex-wrap justify-center gap-4 mb-12">
+            {/* <div className="flex flex-wrap justify-center gap-4 mb-12">
               <span className="text-gray-500 text-base font-medium">Popular:</span>
               {["Plumbing", "Electrical", "HVAC", "Roofing", "Flooring", "Painting"].map((term) => (
                 <Button
@@ -238,7 +238,7 @@ const CustomerBrowseServicesPage = () => {
                   {term}
                 </Button>
               ))}
-            </div>
+            </div> */}
 
             {/* Trust Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">

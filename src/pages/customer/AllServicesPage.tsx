@@ -450,12 +450,12 @@ const AllServicesPage = () => {
                         {service.description}
                       </p>
                       {/* Vendor Location */}
-                      {(service.vendor_city || service.vendor_province) && (
+                      {( service.vendor_province) && (
                         <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
                           <MapPin className="w-3 h-3" />
                           <span>
-                            {service.vendor_city && service.vendor_province
-                              ? `${service.vendor_city}, ${service.vendor_province}`
+                            {service.vendor_province
+                              ? `${service.vendor_province}`
                               : service.vendor_city || service.vendor_province
                             }
                           </span>
@@ -479,7 +479,7 @@ const AllServicesPage = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-xl font-bold text-gray-900">{service.price}</span>
+                          <span className="text-xl font-bold text-gray-900">{service.base_price}</span>
                         </div>
 
                       </div>
