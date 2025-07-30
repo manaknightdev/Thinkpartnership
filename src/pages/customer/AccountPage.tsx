@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import { ProfileAvatar } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -160,7 +161,16 @@ const AccountPage = () => {
         throw new Error(response.message || 'Failed to upload avatar');
       }
 
-      // Reload the profile to get the updated photo from the backend
+      // Update the user profile with the new avatar URL immediately
+      if (userProfile && response.avatar_url) {
+        const updatedProfile = {
+          ...userProfile,
+          photo: response.avatar_url
+        };
+        setUserProfile(updatedProfile);
+      }
+
+      // Also reload the profile to ensure we have the latest data
       const profileResponse = await UserAPI.getProfile();
       if (!profileResponse.error) {
         setUserProfile(profileResponse.user);
@@ -344,10 +354,11 @@ const AccountPage = () => {
         <CardContent className="p-6">
           <div className="flex items-center space-x-6">
             <div className="relative">
-              <img
-                src={userProfile.photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
+              <ProfileAvatar
+                photo={userProfile.photo}
+                size="xl"
                 alt="Profile"
-                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                className="border-4 border-white shadow-lg"
               />
               {isEditing && (
                 <>

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ProfileAvatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
 import UserAPI, { UserProfile } from "@/services/UserAPI";
@@ -288,17 +289,11 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                 <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                  {userProfile?.photo ? (
-                    <img
-                      src={userProfile.photo}
-                      alt="Profile"
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-green-600" />
-                    </div>
-                  )}
+                  <ProfileAvatar
+                    photo={userProfile?.photo}
+                    size="sm"
+                    alt="Profile"
+                  />
                   <span className="hidden sm:block text-sm font-medium">
                     {authLoading ? 'Loading...' : getFirstName()}
                   </span>
