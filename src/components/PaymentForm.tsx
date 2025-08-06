@@ -132,40 +132,16 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
     }
   };
 
-  const handlePayPalPayment = async () => {
-    if (!serviceName || !serviceId || !vendorId) {
-      toast.error('Missing payment information');
-      return;
-    }
 
-    setProcessing(true);
-
-    try {
-      // Show professional message about PayPal integration
-      toast.info('PayPal integration is being deployed. Please use Stripe for now!', {
-        duration: 4000,
-      });
-
-      setProcessing(false);
-
-    } catch (error: any) {
-      setProcessing(false);
-      console.error('PayPal payment error:', error);
-      toast.error(error.message || 'PayPal payment failed. Please try again.');
-    }
-  };
 
   const handlePayment = () => {
     if (selectedPaymentMethod === 'stripe') {
       handleStripePayment();
-    } else if (selectedPaymentMethod === 'paypal') {
-      handlePayPalPayment();
     }
   };
 
   const paymentMethods = [
-    { id: "stripe", name: "Stripe Payment", icon: CreditCard, description: "Secure payment with Stripe" },
-    { id: "paypal", name: "PayPal", icon: CreditCard, description: "Pay securely with PayPal" }
+    { id: "stripe", name: "Stripe Payment", icon: CreditCard, description: "Secure payment with Stripe" }
   ];
 
 
@@ -279,15 +255,7 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
             </div>
           )}
 
-          {/* PayPal Info */}
-          {selectedPaymentMethod === 'paypal' && (
-            <div className="p-3 border border-blue-200 rounded-lg bg-blue-50">
-              <div className="flex items-center space-x-2">
-                <CreditCard className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-800">You'll be redirected to PayPal to complete your payment</span>
-              </div>
-            </div>
-          )}
+
         </CardContent>
       </Card>
 
@@ -323,8 +291,6 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
           </div>
         ) : selectedPaymentMethod === 'stripe' && !stripeConnected ? (
           'Connect Stripe to Pay'
-        ) : selectedPaymentMethod === 'paypal' ? (
-          `Pay $${numericAmount.toFixed(2)} with PayPal`
         ) : (
           `Pay $${numericAmount.toFixed(2)} with Stripe`
         )}

@@ -56,9 +56,7 @@ const AccountPage = () => {
   const [stripeAccount, setStripeAccount] = useState<StripeAccountStatus | null>(null);
   const [stripeLoading, setStripeLoading] = useState(false);
 
-  // PayPal account state
-  const [paypalAccount, setPaypalAccount] = useState<{connected: boolean, email?: string} | null>(null);
-  const [paypalLoading, setPaypalLoading] = useState(false);
+
 
   // Fetch user profile
   useEffect(() => {
@@ -89,8 +87,7 @@ const AccountPage = () => {
 
         // Load Stripe account status
         await loadStripeAccountStatus();
-        // Load PayPal account status
-        await loadPayPalAccountStatus();
+
       } catch (err: any) {
         setError(err.message || 'Failed to load profile');
       } finally {
@@ -215,17 +212,7 @@ const AccountPage = () => {
     }
   };
 
-  // Load PayPal account status
-  const loadPayPalAccountStatus = async () => {
-    try {
-      // For now, simulate PayPal account status
-      // In a real implementation, you would call a PayPal API
-      setPaypalAccount({ connected: false });
-    } catch (err: any) {
-      console.error('Failed to load PayPal account status:', err);
-      setPaypalAccount({ connected: false });
-    }
-  };
+
 
   // Handle Stripe account connection
   const handleStripeConnect = async () => {
@@ -261,45 +248,7 @@ const AccountPage = () => {
     }
   };
 
-  // Handle PayPal account connection
-  const handlePayPalConnect = async () => {
-    try {
-      setPaypalLoading(true);
-      setError('');
 
-      // Show professional message about PayPal integration
-      toast.info('PayPal integration is being deployed. Please check back soon!', {
-        duration: 4000,
-      });
-
-      setPaypalLoading(false);
-
-    } catch (err: any) {
-      setError(err.message || 'Failed to connect PayPal account');
-      setPaypalLoading(false);
-    }
-  };
-
-  // Handle PayPal account disconnection
-  const handlePayPalDisconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect your PayPal account?')) {
-      return;
-    }
-
-    try {
-      setPaypalLoading(true);
-      setError('');
-      setSuccess('');
-
-      // Simulate disconnection
-      setPaypalAccount({ connected: false });
-      setSuccess('PayPal account disconnected successfully!');
-    } catch (err: any) {
-      setError(err.message || 'Failed to disconnect PayPal account');
-    } finally {
-      setPaypalLoading(false);
-    }
-  };
 
   // Check for Stripe connection status from URL params
   useEffect(() => {
@@ -768,105 +717,7 @@ const AccountPage = () => {
           </CardContent>
         </Card>
 
-        {/* PayPal Account Connection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
-              PayPal Account Connection
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Connect your PayPal account as an alternative payment method for making purchases.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {paypalAccount ? (
-              <div className="space-y-4">
-                {/* Account Status */}
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      paypalAccount.connected
-                        ? 'bg-blue-100 text-blue-600'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {paypalAccount.connected ? (
-                        <CheckCircle className="w-6 h-6" />
-                      ) : (
-                        <CreditCard className="w-6 h-6" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {paypalAccount.connected ? 'PayPal Account Connected' : 'PayPal Account Not Connected'}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {paypalAccount.connected
-                          ? 'Your PayPal account is ready for payments'
-                          : 'Connect your PayPal account for easy payments'
-                        }
-                      </div>
-                      {paypalAccount.email && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          {paypalAccount.email}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {paypalAccount.connected ? (
-                      <Button
-                        variant="outline"
-                        onClick={handlePayPalDisconnect}
-                        disabled={paypalLoading}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        {paypalLoading ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <X className="w-4 h-4 mr-2" />
-                        )}
-                        Disconnect
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handlePayPalConnect}
-                        disabled={paypalLoading}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        {paypalLoading ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                        )}
-                        Connect PayPal Account
-                      </Button>
-                    )}
-                  </div>
-                </div>
 
-                {/* PayPal Benefits */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <CreditCard className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium text-blue-800">PayPal Benefits</span>
-                  </div>
-                  <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
-                    <li>Quick and secure payments</li>
-                    <li>Buyer protection</li>
-                    <li>No need to share card details</li>
-                    <li>Available worldwide</li>
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-600">Loading PayPal account status...</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
       </div>
     );

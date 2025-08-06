@@ -54,7 +54,7 @@ const HelpSupportPage = () => {
       id: 3,
       category: "payments",
       question: "What payment methods do you accept?",
-      answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and bank transfers. All payments are processed securely through Stripe.",
+      answer: "We accept all major credit cards (Visa, MasterCard, American Express), Apple Pay, Google Pay, and bank transfers. All payments are processed securely through Stripe.",
 
     },
     {

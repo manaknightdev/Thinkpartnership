@@ -155,7 +155,7 @@ const AdminLicenseManagementPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            This section would integrate with your chosen payment gateway (e.g., Stripe, PayPal) to display
+            This section would integrate with your chosen payment gateway (e.g., Stripe) to display
             real-time payment statuses, upcoming renewals, and allow for manual invoice generation or payment collection.
           </p>
           <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">

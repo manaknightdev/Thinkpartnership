@@ -76,6 +76,14 @@ const ServiceDetailsPage = () => {
       setStartingChat(true);
       setError("");
 
+      console.log('Starting REGULAR chat with data:', {
+        service_id: service.id,
+        vendor_id: service.vendor.id,
+        service_title: service.title,
+        service_type: (service as any).service_type,
+        full_service: service
+      });
+
       const response = await ChatAPI.startChat({
         service_id: service.id,
         vendor_id: service.vendor.id,
@@ -114,23 +122,43 @@ const ServiceDetailsPage = () => {
       setStartingChat(true);
       setError("");
 
+      console.log('Starting QUOTE chat with data:', {
+        service_id: service.id,
+        vendor_id: service.vendor.id,
+        service_title: service.title,
+        service_type: (service as any).service_type,
+        full_service: service
+      });
+
       const response = await ChatAPI.startChat({
         service_id: service.id,
         vendor_id: service.vendor.id,
         initial_message: `Hi! I would like to request a quote for your service "${service.title}". Please provide me with a detailed quote including pricing and any additional information.`
       });
 
+      console.log('Chat API response:', response);
+
       if (response.error) {
-        throw new Error(response.message || 'Failed to start chat');
+        console.error('Chat API returned error:', response.message);
+        setError(response.message || 'Failed to start chat');
+        return;
+      }
+
+      if (!response.data || !response.data.chat_id) {
+        console.error('Chat API response missing chat_id:', response);
+        setError('Invalid response from chat service');
+        return;
       }
 
       setHasChattedWithSeller(true);
+      console.log('Navigating to chat:', `/marketplace/chat/${response.data.chat_id}`);
       // Navigate to the chat page with the chat ID
       navigate(`/marketplace/chat/${response.data.chat_id}`);
 
     } catch (err: any) {
       console.error('Error starting chat:', err);
-      setError(err.message || 'Failed to start chat');
+      console.error('Full error object:', JSON.stringify(err, null, 2));
+      setError(err.message || err.response?.data?.message || 'Failed to start chat');
     } finally {
       setStartingChat(false);
     }
@@ -340,8 +368,8 @@ const ServiceDetailsPage = () => {
                 <Separator />
 
                 {isAuthenticated ? (
-                  // Check if this is a custom service based on category
-                  service.category?.name === 'Custom Services' || service.category?.slug === 'custom-services' ? (
+                  // Check if this is a custom service based on service_type
+                  (service as any).service_type === 'custom' ? (
                     <Button
                       size="lg"
                       className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
@@ -390,6 +418,13 @@ const ServiceDetailsPage = () => {
                         Sign Up
                       </Button>
                     </div>
+                  </div>
+                )}
+
+                {/* Error Display */}
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-600 text-sm text-center">{error}</p>
                   </div>
                 )}
 

@@ -14,13 +14,13 @@ const mockTransactions = [
   { id: "TXN001", vendor: "Rapid Plumbers", customer: "Alice Smith", service: "Emergency Plumbing", amount: "$250.00", date: "2024-01-15", status: "Completed", paymentMethod: "Credit Card" },
   { id: "TXN002", vendor: "Brush Strokes Pro", customer: "Bob Johnson", service: "Interior Painting", amount: "$1200.00", date: "2024-01-14", status: "Completed", paymentMethod: "Bank Transfer" },
   { id: "TXN003", vendor: "Certified Inspectors Inc.", customer: "Charlie Brown", service: "Home Inspection", amount: "$350.00", date: "2024-01-13", status: "Pending", paymentMethod: "Credit Card" },
-  { id: "TXN004", vendor: "Green Thumb Landscaping", customer: "Diana Prince", service: "Lawn Mowing", amount: "$80.00", date: "2024-01-12", status: "Completed", paymentMethod: "PayPal" },
+  { id: "TXN004", vendor: "Green Thumb Landscaping", customer: "Diana Prince", service: "Lawn Mowing", amount: "$80.00", date: "2024-01-12", status: "Completed", paymentMethod: "Credit Card" },
   { id: "TXN005", vendor: "Sparky Electric", customer: "Eve Adams", service: "Electrical Repair", amount: "$180.00", date: "2024-01-11", status: "Cancelled", paymentMethod: "Credit Card" },
   { id: "TXN006", vendor: "Climate Control Experts", customer: "Frank White", service: "HVAC Tune-up", amount: "$120.00", date: "2024-01-10", status: "Completed", paymentMethod: "Debit Card" },
   { id: "TXN007", vendor: "Rapid Plumbers", customer: "Grace Lee", service: "Drain Cleaning", amount: "$150.00", date: "2024-01-09", status: "Completed", paymentMethod: "Credit Card" },
   { id: "TXN008", vendor: "Climate Control Experts", customer: "Henry Davis", service: "AC Installation", amount: "$2500.00", date: "2024-01-08", status: "Completed", paymentMethod: "Bank Transfer" },
   { id: "TXN009", vendor: "Move It Right", customer: "Ivy Chen", service: "Moving Service", amount: "$450.00", date: "2024-01-07", status: "Pending", paymentMethod: "Credit Card" },
-  { id: "TXN010", vendor: "Brush Strokes Pro", customer: "Jack Wilson", service: "Exterior Painting", amount: "$800.00", date: "2024-01-06", status: "Completed", paymentMethod: "PayPal" },
+  { id: "TXN010", vendor: "Brush Strokes Pro", customer: "Jack Wilson", service: "Exterior Painting", amount: "$800.00", date: "2024-01-06", status: "Completed", paymentMethod: "Credit Card" },
 ];
 
 const getStatusVariant = (status: string) => {
