@@ -347,6 +347,77 @@ class ClientAPI {
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
+
+  // Check if current session is admin impersonation
+  isAdminImpersonation(): boolean {
+    const token = this.getStoredToken();
+    if (!token) return false;
+
+    try {
+      // Decode JWT token to check for impersonation flag
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.is_impersonation === true;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return false;
+    }
+  }
+
+  // Get the admin user ID who is impersonating (if any)
+  getImpersonatingAdminId(): number | null {
+    const token = this.getStoredToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.impersonated_by || null;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  }
+
+  // Return to admin portal (for admin impersonation)
+  async returnToAdminPortal(): Promise<void> {
+    const adminId = this.getImpersonatingAdminId();
+    if (!adminId) {
+      throw new Error('Not an admin impersonation session');
+    }
+
+    try {
+      // Call the backend to get a fresh admin token using the client token
+      const response = await clientApiClient.post('/api/marketplace/admin/auth/return-from-impersonation');
+
+      if (response.data.error) {
+        throw new Error(response.data.message || 'Failed to return to admin portal');
+      }
+
+      // Clear client auth data
+      this.clearAuthData();
+
+      // Store admin auth data
+      const AdminAPI = (await import('./AdminAPI')).default;
+      AdminAPI.storeAuthData({
+        error: false,
+        message: response.data.message,
+        token: response.data.token,
+        refresh_token: response.data.refresh_token,
+        role: response.data.role,
+        user_id: response.data.user_id,
+        first_name: response.data.first_name,
+        last_name: response.data.last_name,
+        email: response.data.email
+      });
+
+      // Redirect to admin portal
+      window.location.href = '/admin-portal';
+    } catch (error: any) {
+      console.error('Error returning to admin portal:', error);
+      // Fallback to admin login
+      this.clearAuthData();
+      window.location.href = '/admin/login?return_from_impersonation=true';
+    }
+  }
 }
 
 export default new ClientAPI();

@@ -30,6 +30,7 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
   const [processing, setProcessing] = useState(false);
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
   const [checkingStripe, setCheckingStripe] = useState(true);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('stripe');
 
   // Ensure amount is a number
   const numericAmount = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
@@ -62,7 +63,7 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
 
 
 
-  const handleSubmit = async () => {
+  const handleStripePayment = async () => {
     if (!stripeConnected) {
       toast.error('Please connect your Stripe account first');
       return;
@@ -131,9 +132,45 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
     }
   };
 
+  const handlePayPalPayment = async () => {
+    if (!serviceName || !serviceId || !vendorId) {
+      toast.error('Missing payment information');
+      return;
+    }
+
+    setProcessing(true);
+
+    try {
+      // Show professional message about PayPal integration
+      toast.info('PayPal integration is being deployed. Please use Stripe for now!', {
+        duration: 4000,
+      });
+
+      setProcessing(false);
+
+    } catch (error: any) {
+      setProcessing(false);
+      console.error('PayPal payment error:', error);
+      toast.error(error.message || 'PayPal payment failed. Please try again.');
+    }
+  };
+
+  const handlePayment = () => {
+    if (selectedPaymentMethod === 'stripe') {
+      handleStripePayment();
+    } else if (selectedPaymentMethod === 'paypal') {
+      handlePayPalPayment();
+    }
+  };
+
   const paymentMethods = [
-    { id: "stripe", name: "Stripe Payment", icon: CreditCard, description: "Secure payment with Stripe" }
+    { id: "stripe", name: "Stripe Payment", icon: CreditCard, description: "Secure payment with Stripe" },
+    { id: "paypal", name: "PayPal", icon: CreditCard, description: "Pay securely with PayPal" }
   ];
+
+
+
+
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -173,39 +210,81 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
           <CardTitle>Payment Method</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {checkingStripe ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-6 h-6 animate-spin mr-2" />
-              <span>Checking Stripe connection...</span>
-            </div>
-          ) : stripeConnected === false ? (
-            <div className="p-6 border-2 border-orange-200 rounded-lg bg-orange-50">
-              <div className="flex items-center space-x-3 mb-4">
-                <AlertCircle className="w-6 h-6 text-orange-600" />
-                <div>
-                  <div className="font-medium text-orange-900">Stripe Account Required</div>
-                  <div className="text-sm text-orange-700">You need to connect your Stripe account to make payments</div>
+          {/* Payment Method Options */}
+          <div className="space-y-3">
+            {paymentMethods.map((method) => (
+              <div
+                key={method.id}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  selectedPaymentMethod === method.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setSelectedPaymentMethod(method.id)}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-5 h-5 rounded-full border-2 ${
+                    selectedPaymentMethod === method.id
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-gray-300'
+                  }`}>
+                    {selectedPaymentMethod === method.id && (
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+                  <method.icon className="w-6 h-6 text-gray-700" />
+                  <div>
+                    <div className="font-medium text-gray-900">{method.name}</div>
+                    <div className="text-sm text-gray-600">{method.description}</div>
+                  </div>
                 </div>
               </div>
-              <Button
-                onClick={handleConnectStripe}
-                className="w-full bg-orange-600 hover:bg-orange-700"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Connect Stripe Account
-              </Button>
+            ))}
+          </div>
+
+          {/* Stripe Connection Status */}
+          {selectedPaymentMethod === 'stripe' && (
+            <div className="mt-4">
+              {checkingStripe ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <span className="text-sm">Checking Stripe connection...</span>
+                </div>
+              ) : stripeConnected === false ? (
+                <div className="p-4 border-2 border-orange-200 rounded-lg bg-orange-50">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <AlertCircle className="w-5 h-5 text-orange-600" />
+                    <div>
+                      <div className="font-medium text-orange-900 text-sm">Stripe Account Required</div>
+                      <div className="text-xs text-orange-700">Connect your Stripe account to use this payment method</div>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleConnectStripe}
+                    size="sm"
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Connect Stripe Account
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-3 border border-green-200 rounded-lg bg-green-50">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-800">Stripe account connected</span>
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="p-4 border-2 border-green-500 rounded-lg bg-green-50">
-              <div className="flex items-center space-x-3">
-                <div className="w-5 h-5 rounded-full border-2 border-green-500 bg-green-500">
-                  <CheckCircle className="w-5 h-5 text-white" />
-                </div>
-                <CreditCard className="w-6 h-6 text-gray-700" />
-                <div>
-                  <div className="font-medium text-gray-900">Stripe Payment</div>
-                  <div className="text-sm text-gray-600">Secure payment with Stripe</div>
-                </div>
+          )}
+
+          {/* PayPal Info */}
+          {selectedPaymentMethod === 'paypal' && (
+            <div className="p-3 border border-blue-200 rounded-lg bg-blue-50">
+              <div className="flex items-center space-x-2">
+                <CreditCard className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-800">You'll be redirected to PayPal to complete your payment</span>
               </div>
             </div>
           )}
@@ -233,8 +312,8 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
 
       {/* Pay Button */}
       <Button
-        onClick={handleSubmit}
-        disabled={processing || !stripeConnected}
+        onClick={handlePayment}
+        disabled={processing || (selectedPaymentMethod === 'stripe' && !stripeConnected)}
         className="w-full h-12 text-lg font-semibold bg-green-600 hover:bg-green-700 disabled:opacity-50"
       >
         {processing ? (
@@ -242,10 +321,12 @@ export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceT
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span>Processing...</span>
           </div>
-        ) : !stripeConnected ? (
+        ) : selectedPaymentMethod === 'stripe' && !stripeConnected ? (
           'Connect Stripe to Pay'
+        ) : selectedPaymentMethod === 'paypal' ? (
+          `Pay $${numericAmount.toFixed(2)} with PayPal`
         ) : (
-          `Pay $${numericAmount.toFixed(2)}`
+          `Pay $${numericAmount.toFixed(2)} with Stripe`
         )}
       </Button>
 

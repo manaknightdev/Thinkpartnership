@@ -201,7 +201,7 @@ const VendorMessagesPage = () => {
       const response = await VendorMessagesAPI.getMessages(chatId);
       if (!response.error) {
         setMessages(response.messages);
-        setTimeout(scrollToBottom, 100);
+        // Only scroll to bottom on initial load, not during polling updates
 
         // Also refresh the chat list to update last message and unread counts (only during polling)
         if (silent) {
@@ -363,9 +363,8 @@ const VendorMessagesPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Only scroll to bottom when user sends a message, not on every message update
+  // This allows users to scroll freely without being forced to the bottom
 
   // Cleanup polling on component unmount
   useEffect(() => {
@@ -394,6 +393,8 @@ const VendorMessagesPage = () => {
         await loadMessages(selectedChatId, true);
         // Update just this chat's last message without refreshing entire list
         updateChatLastMessage(selectedChatId, messageText);
+        // Scroll to bottom after sending a message
+        setTimeout(scrollToBottom, 100);
       } else {
         toast.error("Failed to send message");
       }
@@ -434,6 +435,8 @@ const VendorMessagesPage = () => {
         // Update just this chat's last message without refreshing entire list
         const quoteMessage = `I've prepared a quote for your project: ${quoteData.service}`;
         updateChatLastMessage(selectedChatId, quoteMessage);
+        // Scroll to bottom after sending a quote
+        setTimeout(scrollToBottom, 100);
       } else {
         toast.error("Failed to send quote");
       }

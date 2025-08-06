@@ -75,6 +75,7 @@ export const API_CONFIG = {
       LOGIN: '/api/marketplace/admin/auth/login',
       PROFILE: '/api/marketplace/admin/auth/profile',
       LOGIN_AS_CLIENT: '/api/marketplace/admin/auth/login-as-client',
+      RETURN_FROM_IMPERSONATION: '/api/marketplace/admin/auth/return-from-impersonation',
     },
     // Admin Stripe Integration
     ADMIN_STRIPE: {
@@ -177,6 +178,8 @@ export const API_CONFIG = {
     ADMIN_CLIENTS: {
       LIST: '/api/marketplace/admin/clients',
       UPDATE_STATUS: '/api/marketplace/admin/clients',
+      SUSPEND: '/api/marketplace/admin/clients',
+      TERMINATE: '/api/marketplace/admin/clients',
     },
     ADMIN_VENDORS: {
       LIST: '/api/marketplace/admin/vendors',

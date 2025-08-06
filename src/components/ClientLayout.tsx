@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,10 @@ import {
   DollarSign,
   Wallet,
   CheckSquare,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import ClientAPI from "@/services/ClientAPI";
 
 // Helper function to convert relative URLs to full URLs
 const getFullImageUrl = (url: string): string => {
@@ -55,9 +57,16 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(3);
   const { branding } = useBranding();
+  const [isAdminImpersonation, setIsAdminImpersonation] = useState(false);
+  const [isReturningToAdmin, setIsReturningToAdmin] = useState(false);
 
   const companyName = branding?.company_name || "Client Portal";
   const logoUrl = branding?.logo_url ? getFullImageUrl(branding.logo_url) : '';
+
+  // Check if this is an admin impersonation session
+  useEffect(() => {
+    setIsAdminImpersonation(ClientAPI.isAdminImpersonation());
+  }, []);
 
   const sidebarItems = [
     { name: "Overview", path: "/client-portal/overview", icon: LayoutDashboard, exact: false },
@@ -98,6 +107,22 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     }, 500);
   };
 
+  const handleReturnToAdmin = async () => {
+    if (!isAdminImpersonation) return;
+
+    setIsReturningToAdmin(true);
+    toast.info("Returning to admin portal...");
+
+    try {
+      await ClientAPI.returnToAdminPortal();
+      // The returnToAdminPortal method handles the redirect
+    } catch (error: any) {
+      console.error('Error returning to admin portal:', error);
+      toast.error(error.message || 'Failed to return to admin portal');
+      setIsReturningToAdmin(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Client Header */}
@@ -134,9 +159,16 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
             </Button>
 
             {/* Logo */}
-            <Link to="/client-portal" className="text-xl font-bold text-primary">
-              {companyName}
-            </Link>
+            <div className="flex items-center space-x-2">
+              <Link to="/client-portal" className="text-xl font-bold text-primary">
+                {companyName}
+              </Link>
+              {isAdminImpersonation && (
+                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                  Admin View
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Right Section */}
@@ -198,6 +230,19 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                   Help & Support
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                {isAdminImpersonation && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={handleReturnToAdmin}
+                      disabled={isReturningToAdmin}
+                      className="text-blue-600 focus:text-blue-600"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      {isReturningToAdmin ? 'Returning...' : 'Return to Admin Portal'}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout

@@ -23,11 +23,9 @@ import {
   Globe,
   Settings,
   MoreHorizontal,
-  Edit,
   Trash2,
   Plus,
   X,
-  SlidersHorizontal,
   LogIn,
   Loader2
 } from "lucide-react";
@@ -38,6 +36,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const mockClients = [
   { 
@@ -141,6 +149,12 @@ const AdminAllClientsPage = () => {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loginAsClientLoading, setLoginAsClientLoading] = useState<number | null>(null);
+  const [suspendLoading, setSuspendLoading] = useState<number | null>(null);
+  const [terminateLoading, setTerminateLoading] = useState<number | null>(null);
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [terminateModalOpen, setTerminateModalOpen] = useState(false);
+  const [selectedClientForAction, setSelectedClientForAction] = useState<any>(null);
+  const [actionReason, setActionReason] = useState('');
 
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -148,7 +162,6 @@ const AdminAllClientsPage = () => {
     total_count: 0,
     per_page: 20
   });
-  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
   const [clients, setClients] = useState([]);
 
   useEffect(() => {
@@ -215,18 +228,71 @@ const AdminAllClientsPage = () => {
 
   const handleViewClient = (client: any) => {
     setSelectedClient(client);
-    setModalMode('view');
     setIsViewEditModalOpen(true);
   };
 
-  const handleEditClient = (client: any) => {
-    setSelectedClient(client);
-    setModalMode('edit');
-    setIsViewEditModalOpen(true);
+
+
+  const handleSuspendClient = (client: any) => {
+    setSelectedClientForAction(client);
+    setActionReason('');
+    setSuspendModalOpen(true);
   };
 
-  const handleSuspendClient = (clientName: string) => {
-    toast.warning(`Suspending ${clientName}...`);
+  const handleTerminateClient = (client: any) => {
+    setSelectedClientForAction(client);
+    setActionReason('');
+    setTerminateModalOpen(true);
+  };
+
+  const confirmSuspendClient = async () => {
+    if (!selectedClientForAction) return;
+
+    try {
+      setSuspendLoading(selectedClientForAction.id);
+      const response = await AdminAPI.suspendClient(selectedClientForAction.id, actionReason);
+
+      if (response.error) {
+        showError(response.message || 'Failed to suspend client');
+        return;
+      }
+
+      showSuccess(`${selectedClientForAction.company_name} has been suspended successfully`);
+      setSuspendModalOpen(false);
+      setSelectedClientForAction(null);
+      setActionReason('');
+      fetchClients(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error suspending client:', error);
+      showError(error.response?.data?.message || 'Failed to suspend client');
+    } finally {
+      setSuspendLoading(null);
+    }
+  };
+
+  const confirmTerminateClient = async () => {
+    if (!selectedClientForAction) return;
+
+    try {
+      setTerminateLoading(selectedClientForAction.id);
+      const response = await AdminAPI.terminateClient(selectedClientForAction.id, actionReason);
+
+      if (response.error) {
+        showError(response.message || 'Failed to terminate client');
+        return;
+      }
+
+      showSuccess(`${selectedClientForAction.company_name} has been terminated successfully`);
+      setTerminateModalOpen(false);
+      setSelectedClientForAction(null);
+      setActionReason('');
+      fetchClients(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error terminating client:', error);
+      showError(error.response?.data?.message || 'Failed to terminate client');
+    } finally {
+      setTerminateLoading(null);
+    }
   };
 
   const handleLoginAsClient = async (client: any) => {
@@ -279,9 +345,7 @@ const AdminAllClientsPage = () => {
     ));
   };
 
-  const handleAdvancedFilters = () => {
-    setShowAdvancedFilters(!showAdvancedFilters);
-  };
+
 
   const handleExportData = async () => {
     try {
@@ -661,10 +725,6 @@ const AdminAllClientsPage = () => {
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditClient(client)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Client
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleLoginAsClient(client)}
                             disabled={loginAsClientLoading === client.id}
@@ -678,11 +738,20 @@ const AdminAllClientsPage = () => {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => handleSuspendClient(client.name)}
+                            onClick={() => handleSuspendClient(client)}
+                            className="text-orange-600 focus:text-orange-600"
+                            disabled={client.subscription_status === 2 || client.subscription_status === 4}
+                          >
+                            <X className="mr-2 h-4 w-4" />
+                            Suspend Client
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleTerminateClient(client)}
                             className="text-red-600 focus:text-red-600"
+                            disabled={client.subscription_status === 4}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Suspend Client
+                            Terminate Client
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -728,9 +797,97 @@ const AdminAllClientsPage = () => {
         isOpen={isViewEditModalOpen}
         onClose={() => setIsViewEditModalOpen(false)}
         client={selectedClient}
-        mode={modalMode}
+        mode="view"
         onUpdate={handleUpdateClient}
       />
+
+      {/* Suspend Client Modal */}
+      <Dialog open={suspendModalOpen} onOpenChange={setSuspendModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Suspend Client</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to suspend {selectedClientForAction?.company_name}?
+              This will temporarily block their access to the marketplace, vendors, and customers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="suspend-reason">Reason for suspension (optional)</Label>
+              <Textarea
+                id="suspend-reason"
+                placeholder="Enter reason for suspension..."
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSuspendModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmSuspendClient}
+              disabled={suspendLoading === selectedClientForAction?.id}
+            >
+              {suspendLoading === selectedClientForAction?.id ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Suspending...
+                </>
+              ) : (
+                'Suspend Client'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Terminate Client Modal */}
+      <Dialog open={terminateModalOpen} onOpenChange={setTerminateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Terminate Client</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to terminate {selectedClientForAction?.company_name}?
+              This will permanently block their access and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="terminate-reason">Reason for termination (optional)</Label>
+              <Textarea
+                id="terminate-reason"
+                placeholder="Enter reason for termination..."
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTerminateModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmTerminateClient}
+              disabled={terminateLoading === selectedClientForAction?.id}
+            >
+              {terminateLoading === selectedClientForAction?.id ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Terminating...
+                </>
+              ) : (
+                'Terminate Client'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

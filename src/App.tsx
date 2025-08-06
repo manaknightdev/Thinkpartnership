@@ -74,6 +74,7 @@ import VendorSignup from "./pages/vendor/VendorSignup";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientSignup from "./pages/client/ClientSignup";
 import AdminLogin from "./pages/admin/AdminLogin";
+import OAuthCallback from "./pages/customer/OAuthCallback";
 import ProtectedRoute, { VendorProtectedRoute, ClientProtectedRoute, AdminProtectedRoute } from "./components/ProtectedRoute";
 
 // Import new admin sub-pages
@@ -112,6 +113,7 @@ const App = () => (
           <Route path="/:clientSlug/marketplace/signup" element={<CustomerSignup />} />
           <Route path="/:clientSlug/marketplace/register" element={<CustomerSignup />} />
           <Route path="/:clientSlug/marketplace/invite/customer" element={<CustomerSignup />} />
+          <Route path="/:clientSlug/login/oauth" element={<OAuthCallback />} />
           <Route path="/:clientSlug/marketplace/invite/vendor" element={<VendorSignup />} />
           <Route path="/:clientSlug/marketplace/categories" element={<CategoriesPage />} />
           <Route path="/:clientSlug/marketplace/services" element={<AllServicesPage />} />
@@ -166,6 +168,7 @@ const App = () => (
           <Route path="/marketplace/login" element={<CustomerLogin />} />
           <Route path="/marketplace/signup" element={<CustomerSignup />} />
           <Route path="/marketplace/register" element={<CustomerSignup />} />
+          <Route path="/login/oauth" element={<OAuthCallback />} />
 
           {/* Register route for referral links */}
           <Route path="/register" element={<CustomerSignup />} />

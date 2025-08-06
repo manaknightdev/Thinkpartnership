@@ -160,9 +160,8 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Only scroll to bottom when user sends a message, not on every message update
+  // This allows users to scroll freely without being forced to the bottom
 
   const handleSendMessage = async () => {
     if (!message.trim() || !chatId || !currentChat) return;
@@ -202,6 +201,9 @@ const ChatPage = () => {
 
       // Update just this chat's last message without refreshing entire list
       updateChatLastMessage(chatId, messageText);
+
+      // Scroll to bottom after sending a message
+      setTimeout(scrollToBottom, 100);
 
     } catch (err: any) {
       console.error('Error sending message:', err);
@@ -504,7 +506,7 @@ const ChatPage = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-white text-white hover:bg-white hover:text-gray-900"
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                             >
                               Decline
                             </Button>

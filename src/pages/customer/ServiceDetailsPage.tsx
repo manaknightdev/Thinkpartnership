@@ -98,6 +98,44 @@ const ServiceDetailsPage = () => {
     }
   };
 
+  // Handle requesting a quote for custom services
+  const handleRequestQuote = async () => {
+    if (!isAuthenticated) {
+      navigate('/marketplace/login');
+      return;
+    }
+
+    if (!service || !service.vendor) {
+      setError("Service or vendor information not available");
+      return;
+    }
+
+    try {
+      setStartingChat(true);
+      setError("");
+
+      const response = await ChatAPI.startChat({
+        service_id: service.id,
+        vendor_id: service.vendor.id,
+        initial_message: `Hi! I would like to request a quote for your service "${service.title}". Please provide me with a detailed quote including pricing and any additional information.`
+      });
+
+      if (response.error) {
+        throw new Error(response.message || 'Failed to start chat');
+      }
+
+      setHasChattedWithSeller(true);
+      // Navigate to the chat page with the chat ID
+      navigate(`/marketplace/chat/${response.data.chat_id}`);
+
+    } catch (err: any) {
+      console.error('Error starting chat:', err);
+      setError(err.message || 'Failed to start chat');
+    } finally {
+      setStartingChat(false);
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -302,13 +340,32 @@ const ServiceDetailsPage = () => {
                 <Separator />
 
                 {isAuthenticated ? (
-                  <Button
-                    size="lg"
-                    className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                    onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
-                  >
-                    Request Service Now
-                  </Button>
+                  // Check if this is a custom service based on category
+                  service.category?.name === 'Custom Services' || service.category?.slug === 'custom-services' ? (
+                    <Button
+                      size="lg"
+                      className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                      onClick={handleRequestQuote}
+                      disabled={startingChat}
+                    >
+                      {startingChat ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Starting Chat...
+                        </>
+                      ) : (
+                        'Request Quote'
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                      onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
+                    >
+                      Request Service Now
+                    </Button>
+                  )
                 ) : (
                   <div className="space-y-3">
                     <p className="text-center text-gray-600 text-sm">

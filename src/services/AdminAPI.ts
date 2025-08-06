@@ -207,6 +207,12 @@ class AdminAPI {
     return response.data;
   }
 
+  // Return from client impersonation
+  async returnFromImpersonation(): Promise<AdminAuthResponse> {
+    const response = await adminApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_AUTH.RETURN_FROM_IMPERSONATION);
+    return response.data;
+  }
+
   // Profile Methods
   async getProfile(): Promise<AdminProfile> {
     const response = await adminApiClient.get(API_CONFIG.ENDPOINTS.ADMIN_AUTH.PROFILE);
@@ -259,6 +265,22 @@ class AdminAPI {
     message: string;
   }> {
     const response = await adminApiClient.put(`${API_CONFIG.ENDPOINTS.ADMIN_CLIENTS.UPDATE_STATUS}/${clientId}/status`, { status });
+    return response.data;
+  }
+
+  async suspendClient(clientId: number, reason?: string): Promise<{
+    error: boolean;
+    message: string;
+  }> {
+    const response = await adminApiClient.put(`${API_CONFIG.ENDPOINTS.ADMIN_CLIENTS.SUSPEND}/${clientId}/suspend`, { reason });
+    return response.data;
+  }
+
+  async terminateClient(clientId: number, reason?: string): Promise<{
+    error: boolean;
+    message: string;
+  }> {
+    const response = await adminApiClient.put(`${API_CONFIG.ENDPOINTS.ADMIN_CLIENTS.TERMINATE}/${clientId}/terminate`, { reason });
     return response.data;
   }
 
