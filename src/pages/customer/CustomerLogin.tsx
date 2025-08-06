@@ -94,80 +94,61 @@ const CustomerLogin = () => {
   const handleSocialLogin = (provider: string) => {
     // Get the current client context
     const currentClientSlug = clientSlug || clientParam;
-
-    // Construct the social login URL with proper parameters
-    // Based on backend code, the URL structure should include project ID
     const baseUrl = 'https://baas.mytechpassport.com';
+
+    // Construct the social login URL based on the backend API endpoints
     let socialLoginUrl = '';
 
     switch (provider) {
       case 'google':
-        // Construct Google OAuth URL
-        const googleClientId = '1007493621952-svk7dmqtl7cimkb5ecuc1jvvbesr1ofl.apps.googleusercontent.com';
-        const googleRedirectUri = encodeURIComponent('https://baas.mytechpassport.com/v1/api/thinkpartnership/customer/lambda/google/login');
-        const googleScope = encodeURIComponent('openid email profile');
-        const googleState = encodeURIComponent(JSON.stringify({
-          client: currentClientSlug || 'default',
-          return_url: window.location.origin + '/marketplace'
-        }));
+        // Use the customer Google login endpoint from the backend
+        socialLoginUrl = `${baseUrl}/v1/api/thinkpartnership/customer/lambda/google/login`;
 
-        socialLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-          `client_id=${googleClientId}&` +
-          `redirect_uri=${googleRedirectUri}&` +
-          `response_type=code&` +
-          `scope=${googleScope}&` +
-          `state=${googleState}`;
+        // Add client context if available
+        if (currentClientSlug) {
+          socialLoginUrl += `?client=${encodeURIComponent(currentClientSlug)}`;
+        }
         break;
 
       case 'facebook':
-        // Construct Facebook OAuth URL
-        const facebookAppId = '1234567890'; // You'll need to get this from Facebook Developer Console
-        const facebookRedirectUri = encodeURIComponent('https://baas.mytechpassport.com/v1/api/thinkpartnership/customer/lambda/facebook/login');
-        const facebookScope = encodeURIComponent('email,public_profile');
-        const facebookState = encodeURIComponent(JSON.stringify({
-          client: currentClientSlug || 'default',
-          return_url: window.location.origin + '/marketplace'
-        }));
+        // Use the customer Facebook login endpoint from the backend
+        socialLoginUrl = `${baseUrl}/v1/api/thinkpartnership/customer/lambda/facebook/login`;
 
-        socialLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
-          `client_id=${facebookAppId}&` +
-          `redirect_uri=${facebookRedirectUri}&` +
-          `scope=${facebookScope}&` +
-          `state=${facebookState}`;
+        // Add client context if available
+        if (currentClientSlug) {
+          socialLoginUrl += `?client=${encodeURIComponent(currentClientSlug)}`;
+        }
         break;
 
       case 'microsoft':
-        // Construct Microsoft OAuth URL
-        const microsoftClientId = 'your-microsoft-client-id'; // You'll need to get this from Azure
-        const microsoftRedirectUri = encodeURIComponent('https://baas.mytechpassport.com/v1/api/thinkpartnership/customer/lambda/microsoft/login');
-        const microsoftScope = encodeURIComponent('openid email profile');
-        const microsoftState = encodeURIComponent(JSON.stringify({
-          client: currentClientSlug || 'default',
-          return_url: window.location.origin + '/marketplace'
-        }));
+        // Use the customer Microsoft login endpoint from the backend
+        socialLoginUrl = `${baseUrl}/v1/api/thinkpartnership/customer/lambda/microsoft/login`;
 
-        socialLoginUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?` +
-          `client_id=${microsoftClientId}&` +
-          `redirect_uri=${microsoftRedirectUri}&` +
-          `response_type=code&` +
-          `scope=${microsoftScope}&` +
-          `state=${microsoftState}`;
+        // Add client context if available
+        if (currentClientSlug) {
+          socialLoginUrl += `?client=${encodeURIComponent(currentClientSlug)}`;
+        }
         break;
 
       case 'linkedin':
-        showError('LinkedIn login is not yet available. Please use email/password or try another social provider.');
-        return;
+        // Use the customer LinkedIn login endpoint from the backend
+        socialLoginUrl = `${baseUrl}/v1/api/thinkpartnership/customer/lambda/linkedin/login`;
+
+        // Add client context if available
+        if (currentClientSlug) {
+          socialLoginUrl += `?client=${encodeURIComponent(currentClientSlug)}`;
+        }
+        break;
+
       default:
         showError('Unsupported social login provider');
         return;
     }
 
-    // Add client context if available
-    if (currentClientSlug) {
-      socialLoginUrl += `&client=${currentClientSlug}`;
-    }
+    console.log(`🔗 Redirecting to ${provider} login:`, socialLoginUrl);
 
-    console.log(`🔗 Social login attempted for ${provider}`);
+    // Redirect to the backend social login endpoint
+    window.location.href = socialLoginUrl;
   };
 
   return (
