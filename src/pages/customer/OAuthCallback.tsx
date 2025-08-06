@@ -29,6 +29,21 @@ const OAuthCallback = () => {
         console.log('🔐 OAuth callback data:', authData);
 
         if (authData.error) {
+          // Check if this is a client selection scenario
+          if (authData.action === 'select_client' && authData.available_clients) {
+            console.log('🔄 Redirecting to client selection page');
+            navigate(`/marketplace/select-client?data=${encodeURIComponent(data)}`);
+            return;
+          }
+
+          // Check if this is a require invite scenario
+          if (authData.action === 'require_invite') {
+            setStatus('error');
+            setMessage(authData.message || 'You must register through a valid client referral link.');
+            showError(authData.message || 'Social login requires a client invitation');
+            return;
+          }
+
           throw new Error(authData.message || 'Social login failed');
         }
 

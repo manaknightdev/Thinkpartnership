@@ -69,6 +69,7 @@ import NotificationsPage from "./pages/customer/NotificationsPage";
 import PlaceholderPage from "./pages/customer/PlaceholderPage";
 import CustomerLogin from "./pages/customer/CustomerLogin";
 import CustomerSignup from "./pages/customer/CustomerSignup";
+import ClientSelection from "./pages/customer/ClientSelection";
 import VendorLogin from "./pages/vendor/VendorLogin";
 import VendorSignup from "./pages/vendor/VendorSignup";
 import ClientLogin from "./pages/client/ClientLogin";
@@ -168,6 +169,7 @@ const App = () => (
           <Route path="/marketplace/login" element={<CustomerLogin />} />
           <Route path="/marketplace/signup" element={<CustomerSignup />} />
           <Route path="/marketplace/register" element={<CustomerSignup />} />
+          <Route path="/marketplace/select-client" element={<ClientSelection />} />
           <Route path="/login/oauth" element={<OAuthCallback />} />
 
           {/* Register route for referral links */}
