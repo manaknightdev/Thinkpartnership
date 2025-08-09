@@ -27,7 +27,8 @@ import {
   Plus,
   X,
   LogIn,
-  Loader2
+  Loader2,
+  CheckCircle
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -124,9 +125,11 @@ const getStatusVariant = (status: string) => {
   switch (status) {
     case "Active":
       return "default";
-    case "Trial":
+    case "Pending":
       return "secondary";
     case "Suspended":
+      return "destructive";
+    case "Terminated":
       return "destructive";
     default:
       return "outline";
@@ -150,8 +153,10 @@ const AdminAllClientsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loginAsClientLoading, setLoginAsClientLoading] = useState<number | null>(null);
   const [suspendLoading, setSuspendLoading] = useState<number | null>(null);
+  const [unsuspendLoading, setUnsuspendLoading] = useState<number | null>(null);
   const [terminateLoading, setTerminateLoading] = useState<number | null>(null);
   const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [unsuspendModalOpen, setUnsuspendModalOpen] = useState(false);
   const [terminateModalOpen, setTerminateModalOpen] = useState(false);
   const [selectedClientForAction, setSelectedClientForAction] = useState<any>(null);
   const [actionReason, setActionReason] = useState('');
@@ -178,6 +183,7 @@ const AdminAllClientsPage = () => {
           case 'active': return 1;
           case 'pending': return 0;
           case 'suspended': return 2;
+          case 'terminated': return 4;
           default: return undefined;
         }
       };
@@ -201,7 +207,15 @@ const AdminAllClientsPage = () => {
           email: client.email,
           phone: client.phone || 'N/A',
           website: client.custom_domain || `${client.marketplace_subdomain}.marketplace.com` || 'N/A',
-          status: client.status === 1 ? 'Active' : 'Inactive',
+          status: (() => {
+            switch (client.status) {
+              case 1: return 'Active';
+              case 0: return 'Pending';
+              case 2: return 'Suspended';
+              case 4: return 'Terminated';
+              default: return 'Inactive';
+            }
+          })(),
           plan: 'Standard', // Remove plan references as requested
           vendors: client.total_vendors || 0,
           customers: client.total_customers || 0,
@@ -210,7 +224,8 @@ const AdminAllClientsPage = () => {
           businessType: client.business_type,
           city: client.city,
           province: client.province,
-          commissionRate: client.commission_rate
+          commissionRate: client.commission_rate,
+          subscription_status: client.status // Keep original status for backend operations
         }));
 
         setClients(transformedClients);
@@ -243,6 +258,11 @@ const AdminAllClientsPage = () => {
     setSelectedClientForAction(client);
     setActionReason('');
     setTerminateModalOpen(true);
+  };
+
+  const handleUnsuspendClient = (client: any) => {
+    setSelectedClientForAction(client);
+    setUnsuspendModalOpen(true);
   };
 
   const confirmSuspendClient = async () => {
@@ -292,6 +312,30 @@ const AdminAllClientsPage = () => {
       showError(error.response?.data?.message || 'Failed to terminate client');
     } finally {
       setTerminateLoading(null);
+    }
+  };
+
+  const confirmUnsuspendClient = async () => {
+    if (!selectedClientForAction) return;
+
+    try {
+      setUnsuspendLoading(selectedClientForAction.id);
+      const response = await AdminAPI.unsuspendClient(selectedClientForAction.id);
+
+      if (response.error) {
+        showError(response.message || 'Failed to unsuspend client');
+        return;
+      }
+
+      showSuccess(`${selectedClientForAction.company_name} has been unsuspended successfully`);
+      setUnsuspendModalOpen(false);
+      setSelectedClientForAction(null);
+      fetchClients(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error unsuspending client:', error);
+      showError(error.response?.data?.message || 'Failed to unsuspend client');
+    } finally {
+      setUnsuspendLoading(null);
     }
   };
 
@@ -424,8 +468,9 @@ const AdminAllClientsPage = () => {
   // Calculate summary stats based on filtered data
   const totalClients = filteredClients.length;
   const activeClients = filteredClients.filter(c => c.status === "Active").length;
-  const trialClients = filteredClients.filter(c => c.status === "Trial").length;
+  const pendingClients = filteredClients.filter(c => c.status === "Pending").length;
   const suspendedClients = filteredClients.filter(c => c.status === "Suspended").length;
+  const terminatedClients = filteredClients.filter(c => c.status === "Terminated").length;
 
   return (
     <div className="space-y-6">
@@ -454,7 +499,7 @@ const AdminAllClientsPage = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -487,8 +532,8 @@ const AdminAllClientsPage = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Trial Clients</p>
-                <p className="text-2xl font-bold text-gray-900">{trialClients}</p>
+                <p className="text-sm font-medium text-gray-600">Pending Clients</p>
+                <p className="text-2xl font-bold text-gray-900">{pendingClients}</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-lg">
                 <Calendar className="h-6 w-6 text-orange-600" />
@@ -510,6 +555,20 @@ const AdminAllClientsPage = () => {
             </div>
           </CardContent>
         </Card>
+        
+        {/* <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Terminated</p>
+                <p className="text-2xl font-bold text-gray-900">{terminatedClients}</p>
+              </div>
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <Trash2 className="h-6 w-6 text-gray-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card> */}
       </div>
 
       {/* Clients Table */}
@@ -547,6 +606,7 @@ const AdminAllClientsPage = () => {
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="terminated">Terminated</SelectItem>
                   </SelectContent>
                 </Select>
                 {(searchTerm || statusFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") && (
@@ -746,6 +806,14 @@ const AdminAllClientsPage = () => {
                             Suspend Client
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            onClick={() => handleUnsuspendClient(client)}
+                            className="text-green-600 focus:text-green-600"
+                            disabled={client.subscription_status !== 2}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Unsuspend Client
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             onClick={() => handleTerminateClient(client)}
                             className="text-red-600 focus:text-red-600"
                             disabled={client.subscription_status === 4}
@@ -839,6 +907,38 @@ const AdminAllClientsPage = () => {
                 </>
               ) : (
                 'Suspend Client'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unsuspend Client Modal */}
+      <Dialog open={unsuspendModalOpen} onOpenChange={setUnsuspendModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Unsuspend Client</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to unsuspend {selectedClientForAction?.company_name}?
+              This will restore their access to the marketplace, vendors, and customers.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUnsuspendModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={confirmUnsuspendClient}
+              disabled={unsuspendLoading === selectedClientForAction?.id}
+            >
+              {unsuspendLoading === selectedClientForAction?.id ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Unsuspending...
+                </>
+              ) : (
+                'Unsuspend Client'
               )}
             </Button>
           </DialogFooter>

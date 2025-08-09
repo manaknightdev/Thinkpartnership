@@ -48,6 +48,7 @@ import ClientRevenueRulesPage from "./pages/client/ClientRevenueRulesPage";
 import ClientBrandingPage from "./pages/client/ClientBrandingPage";
 import ClientMarketplaceOrdersPage from "./pages/client/ClientMarketplaceOrdersPage"; // New import
 import ClientTasksPage from "./pages/client/ClientTasksPage";
+import ClientCategoriesPage from "./pages/client/ClientCategoriesPage"; // New import
 
 // Import new customer sub-pages
 import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesPage";
@@ -69,7 +70,6 @@ import NotificationsPage from "./pages/customer/NotificationsPage";
 import PlaceholderPage from "./pages/customer/PlaceholderPage";
 import CustomerLogin from "./pages/customer/CustomerLogin";
 import CustomerSignup from "./pages/customer/CustomerSignup";
-import ClientSelection from "./pages/customer/ClientSelection";
 import VendorLogin from "./pages/vendor/VendorLogin";
 import VendorSignup from "./pages/vendor/VendorSignup";
 import ClientLogin from "./pages/client/ClientLogin";
@@ -169,7 +169,6 @@ const App = () => (
           <Route path="/marketplace/login" element={<CustomerLogin />} />
           <Route path="/marketplace/signup" element={<CustomerSignup />} />
           <Route path="/marketplace/register" element={<CustomerSignup />} />
-          <Route path="/marketplace/select-client" element={<ClientSelection />} />
           <Route path="/login/oauth" element={<OAuthCallback />} />
 
           {/* Register route for referral links */}
@@ -234,6 +233,7 @@ const App = () => (
             <Route path="help" element={<ClientHelpSupportPage />} />
             <Route path="rules" element={<ClientRevenueRulesPage />} />
             <Route path="branding" element={<ClientBrandingPage />} />
+            <Route path="categories" element={<ClientCategoriesPage />} /> {/* New route */}
             <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
           </Route>
 

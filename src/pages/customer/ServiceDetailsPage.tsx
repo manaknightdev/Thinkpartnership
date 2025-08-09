@@ -277,27 +277,7 @@ const ServiceDetailsPage = () => {
               </CardContent>
             </Card>
 
-            {/* Features Card */}
-            {service.features && service.features.length > 0 && (
-              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-2xl flex items-center gap-2">
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                    What's Included
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {service.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-green-50">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+
           </div>
 
           {/* Right Column - Pricing & Contact */}
@@ -327,16 +307,6 @@ const ServiceDetailsPage = () => {
                           <span className="text-xl font-bold text-green-600">${tier.price}</span>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{tier.description}</p>
-                        {tier.features && (
-                          <ul className="text-xs space-y-1">
-                            {tier.features.map((feature: string, featureIndex: number) => (
-                              <li key={featureIndex} className="flex items-center gap-2">
-                                <CheckCircle className="h-3 w-3 text-green-500" />
-                                {feature}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
                       </div>
                     ))}
                   </>
@@ -345,18 +315,15 @@ const ServiceDetailsPage = () => {
                   <div className="text-center p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                     <div className="text-4xl font-bold text-green-600 mb-2">
                       ${service.base_price}
-                      {(service as any).service_type === 'custom' && (service as any).unit_type && (
-                        <span className="text-lg text-gray-600">/{(service as any).unit_type}</span>
-                      )}
                     </div>
                     <p className="text-gray-600">
-                      {(service as any).service_type === 'custom' ? 'Price per unit' : 'Starting price'}
+                      Starting price
                     </p>
                     {(service as any).service_type === 'custom' && (
                       <div className="mt-2 text-sm text-gray-500">
                         {(service as any).min_quantity && (
                           <p>
-                            Minimum quantity: {(service as any).min_quantity} {(service as any).unit_type}
+                            Minimum quantity: {(service as any).min_quantity} unit(s)
                             {(service as any).max_quantity && ` • Maximum: ${(service as any).max_quantity}`}
                           </p>
                         )}

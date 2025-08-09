@@ -26,6 +26,8 @@ import {
   Wallet,
   CheckSquare,
   ArrowLeft,
+  Shield,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import ClientAPI from "@/services/ClientAPI";
@@ -76,6 +78,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users, exact: false },
     { name: "All Customers", path: "/client-portal/customers", icon: User, exact: false },
     { name: "Invite System", path: "/client-portal/invites", icon: UserPlus, exact: false },
+    { name: "Service Categories", path: "/client-portal/categories", icon: Tag, exact: false },
     // { name: "Platform Subscription", path: "/client-portal/subscription", icon: Crown, exact: false },
     // { name: "Pricing & Billing", path: "/client-portal/pricing", icon: DollarSign, exact: false },
     { name: "Wallet & Payments", path: "/client-portal/wallet", icon: Wallet, exact: false },
@@ -164,7 +167,8 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
                 {companyName}
               </Link>
               {isAdminImpersonation && (
-                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1">
+                  <Shield className="h-3 w-3" />
                   Admin View
                 </Badge>
               )}

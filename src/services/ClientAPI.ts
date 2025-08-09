@@ -165,6 +165,30 @@ export interface BrandingSettings {
   theme_settings: Record<string, any>;
 }
 
+export interface ClientCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string | null;
+  image: string | null;
+  sort_order: number;
+  status: number;
+  client_id: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCategoryData {
+  name: string;
+  description: string;
+}
+
+export interface UpdateCategoryData {
+  name?: string;
+  description?: string;
+}
+
 class ClientAPI {
   // Authentication Methods
   async register(data: ClientRegisterData): Promise<ClientAuthResponse> {
@@ -316,6 +340,56 @@ class ClientAPI {
     return response.data;
   }
 
+  // Category Management Methods
+  async getClientCategories(): Promise<{ error: boolean; categories: ClientCategory[]; message?: string }> {
+    try {
+      const response = await clientApiClient.get('/api/marketplace/client/categories');
+      return response.data;
+    } catch (error: any) {
+      return {
+        error: true,
+        categories: [],
+        message: error.response?.data?.message || 'Failed to load categories'
+      };
+    }
+  }
+
+  async createClientCategory(data: CreateCategoryData): Promise<{ error: boolean; message: string; category?: ClientCategory }> {
+    try {
+      const response = await clientApiClient.post('/api/marketplace/client/categories', data);
+      return response.data;
+    } catch (error: any) {
+      return {
+        error: true,
+        message: error.response?.data?.message || 'Failed to create category'
+      };
+    }
+  }
+
+  async updateClientCategory(categoryId: number, data: UpdateCategoryData): Promise<{ error: boolean; message: string }> {
+    try {
+      const response = await clientApiClient.put(`/api/marketplace/client/categories/${categoryId}`, data);
+      return response.data;
+    } catch (error: any) {
+      return {
+        error: true,
+        message: error.response?.data?.message || 'Failed to update category'
+      };
+    }
+  }
+
+  async deleteClientCategory(categoryId: number): Promise<{ error: boolean; message: string }> {
+    try {
+      const response = await clientApiClient.delete(`/api/marketplace/client/categories/${categoryId}`);
+      return response.data;
+    } catch (error: any) {
+      return {
+        error: true,
+        message: error.response?.data?.message || 'Failed to delete category'
+      };
+    }
+  }
+
   // Auth Helper Methods
   storeAuthData(authResponse: ClientAuthResponse) {
     if (authResponse.token) {
@@ -380,13 +454,14 @@ class ClientAPI {
   // Return to admin portal (for admin impersonation)
   async returnToAdminPortal(): Promise<void> {
     const adminId = this.getImpersonatingAdminId();
+    
     if (!adminId) {
       throw new Error('Not an admin impersonation session');
     }
 
     try {
       // Call the backend to get a fresh admin token using the client token
-      const response = await clientApiClient.post('/api/marketplace/admin/auth/return-from-impersonation');
+      const response = await clientApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_AUTH.RETURN_FROM_IMPERSONATION);
 
       if (response.data.error) {
         throw new Error(response.data.message || 'Failed to return to admin portal');
@@ -399,7 +474,7 @@ class ClientAPI {
       const AdminAPI = (await import('./AdminAPI')).default;
       AdminAPI.storeAuthData({
         error: false,
-        message: response.data.message,
+        message: response.data.message || 'Successfully returned to admin portal',
         token: response.data.token,
         refresh_token: response.data.refresh_token,
         role: response.data.role,
@@ -409,13 +484,24 @@ class ClientAPI {
         email: response.data.email
       });
 
-      // Redirect to admin portal
-      window.location.href = '/admin-portal';
+      // Redirect to admin portal clients page
+      window.location.href = '/admin-portal/clients';
     } catch (error: any) {
       console.error('Error returning to admin portal:', error);
-      // Fallback to admin login
+      
+      // Clear client auth data on error
       this.clearAuthData();
-      window.location.href = '/admin/login?return_from_impersonation=true';
+      
+      // Show specific error message based on error type
+      if (error.response?.status === 401) {
+        throw new Error('Your admin session has expired. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('You do not have permission to return to admin portal.');
+      } else if (error.response?.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      } else {
+        throw new Error(error.message || 'Failed to return to admin portal. Please log in again.');
+      }
     }
   }
 }

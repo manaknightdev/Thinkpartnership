@@ -179,6 +179,7 @@ export const API_CONFIG = {
       LIST: '/api/marketplace/admin/clients',
       UPDATE_STATUS: '/api/marketplace/admin/clients',
       SUSPEND: '/api/marketplace/admin/clients',
+      UNSUSPEND: '/api/marketplace/admin/clients',
       TERMINATE: '/api/marketplace/admin/clients',
     },
     ADMIN_VENDORS: {

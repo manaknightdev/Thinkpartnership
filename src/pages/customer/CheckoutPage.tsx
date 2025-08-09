@@ -99,7 +99,7 @@ const CheckoutPage = () => {
   const isCustomService = service && (service as any).service_type === 'custom';
   const minQuantity = isCustomService ? (service as any).min_quantity || 1 : 1;
   const maxQuantity = isCustomService ? (service as any).max_quantity : null;
-  const unitType = isCustomService ? (service as any).unit_type || 'unit' : 'service';
+  const unitType = isCustomService ? 'unit' : 'service';
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity < minQuantity) return;

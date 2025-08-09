@@ -276,6 +276,14 @@ class AdminAPI {
     return response.data;
   }
 
+  async unsuspendClient(clientId: number): Promise<{
+    error: boolean;
+    message: string;
+  }> {
+    const response = await adminApiClient.put(`${API_CONFIG.ENDPOINTS.ADMIN_CLIENTS.UNSUSPEND}/${clientId}/unsuspend`);
+    return response.data;
+  }
+
   async terminateClient(clientId: number, reason?: string): Promise<{
     error: boolean;
     message: string;

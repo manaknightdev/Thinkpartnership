@@ -29,12 +29,10 @@ interface ServiceTier {
   price: number;
   base_price: number;
   referral_percentage?: number;
-  unit_type: string;
   min_quantity: number;
   max_quantity?: number;
   description: string;
   tier_description?: string;
-  features: string[];
   is_popular?: boolean;
   images: string[];
   revisions_included?: number;
@@ -59,11 +57,9 @@ const VendorServiceTiersPage = () => {
     price: 0,
     base_price: 0,
     referral_percentage: 0,
-    unit_type: "service",
     min_quantity: 1,
     max_quantity: undefined,
     description: "",
-    features: [""],
     images: [],
     revisions_included: 0,
     is_popular: false
@@ -152,68 +148,64 @@ const VendorServiceTiersPage = () => {
   };
 
   const handleAddTier = async () => {
-    if (!newTier.tier_name || !newTier.description || (newTier.base_price || newTier.price) <= 0) {
-      toast.error("Please fill in service name, description, and base price");
+    // Validate required fields
+    if (!newTier.tier_name.trim()) {
+      toast.error('Service name is required');
       return;
     }
-
-    if (!newTier.unit_type) {
-      toast.error("Please specify the unit type (e.g., room, hour, service)");
+    if (!newTier.description.trim()) {
+      toast.error('Description is required');
       return;
     }
-
-    if (!newTier.images || newTier.images.length === 0) {
-      toast.error("Please upload at least one image for your service");
+    if (newTier.base_price <= 0) {
+      toast.error('Price must be greater than 0');
       return;
     }
 
     try {
       setIsCreating(true);
-      
       const tierData = {
         service_id: 0, // Custom service tier (not tied to specific service)
-        tier_name: newTier.tier_name,
-        tier_description: newTier.description,
-        description: newTier.description,
-        price: newTier.base_price || newTier.price,
-        base_price: newTier.base_price || newTier.price,
+        tier_name: newTier.tier_name.trim(),
+        description: newTier.description.trim(),
+        price: newTier.base_price,
+        base_price: newTier.base_price,
         referral_percentage: newTier.referral_percentage || 0,
-        unit_type: newTier.unit_type,
+        unit_type: "service", // Default value for compatibility
         min_quantity: newTier.min_quantity,
         max_quantity: newTier.max_quantity,
-        features: newTier.features.filter(f => f.trim() !== ""),
+        features: [], // Empty array for compatibility
+        images: newTier.images || [],
         revisions_included: newTier.revisions_included || 0,
-        is_popular: newTier.is_popular || false,
-        images: newTier.images || []
+        is_popular: newTier.is_popular || false
       };
 
       const response = await VendorServiceTiersAPI.createServiceTier(tierData);
       
       if (!response.error) {
-        toast.success("Custom service created successfully!");
+        toast.success('Service created successfully');
         setIsAddModalOpen(false);
+        // Reset form
         setNewTier({
           id: 0,
           tier_name: "",
           price: 0,
           base_price: 0,
           referral_percentage: 0,
-          unit_type: "service",
           min_quantity: 1,
           max_quantity: undefined,
           description: "",
-          features: [""],
           images: [],
           revisions_included: 0,
           is_popular: false
         });
-        loadServiceTiers(); // Reload the list
+        loadServiceTiers();
       } else {
-        toast.error(response.message || 'Failed to create service tier');
+        toast.error(response.message || 'Failed to create service');
       }
     } catch (error) {
       console.error('Error creating service tier:', error);
-      toast.error('Failed to create service tier');
+      toast.error('Failed to create service');
     } finally {
       setIsCreating(false);
     }
@@ -222,8 +214,6 @@ const VendorServiceTiersPage = () => {
   const handleEditTier = (tier: ServiceTier) => {
     setEditingTier({
       ...tier,
-      features: Array.isArray(tier.features) ? tier.features : 
-                typeof tier.features === 'string' ? JSON.parse(tier.features) : [""],
       images: Array.isArray(tier.images) ? tier.images :
               typeof tier.images === 'string' ? JSON.parse(tier.images) : []
     });
@@ -233,38 +223,51 @@ const VendorServiceTiersPage = () => {
   const handleUpdateTier = async () => {
     if (!editingTier) return;
 
+    // Validate required fields
+    if (!editingTier.tier_name.trim()) {
+      toast.error('Service name is required');
+      return;
+    }
+    if (!editingTier.description.trim()) {
+      toast.error('Description is required');
+      return;
+    }
+    if (editingTier.base_price <= 0) {
+      toast.error('Price must be greater than 0');
+      return;
+    }
+
     try {
       setIsUpdating(true);
-      
-      const updateData = {
-        service_id: 0,
-        tier_name: editingTier.tier_name,
-        tier_description: editingTier.description,
-        description: editingTier.description,
-        price: editingTier.base_price || editingTier.price,
-        base_price: editingTier.base_price || editingTier.price,
-        unit_type: editingTier.unit_type,
+      const tierData = {
+        service_id: 0, // Custom service tier (not tied to specific service)
+        tier_name: editingTier.tier_name.trim(),
+        description: editingTier.description.trim(),
+        price: editingTier.base_price,
+        base_price: editingTier.base_price,
+        referral_percentage: editingTier.referral_percentage || 0,
+        unit_type: "service", // Default value for compatibility
         min_quantity: editingTier.min_quantity,
         max_quantity: editingTier.max_quantity,
-        features: editingTier.features.filter(f => f.trim() !== ""),
+        features: [], // Empty array for compatibility
+        images: editingTier.images || [],
         revisions_included: editingTier.revisions_included || 0,
-        is_popular: editingTier.is_popular || false,
-        images: editingTier.images || []
+        is_popular: editingTier.is_popular || false
       };
 
-      const response = await VendorServiceTiersAPI.updateServiceTier(editingTier.id, updateData);
+      const response = await VendorServiceTiersAPI.updateServiceTier(editingTier.id, tierData);
       
       if (!response.error) {
-        toast.success("Custom service updated successfully!");
+        toast.success('Service updated successfully');
         setIsEditModalOpen(false);
         setEditingTier(null);
-        loadServiceTiers(); // Reload the list
+        loadServiceTiers();
       } else {
-        toast.error(response.message || 'Failed to update service tier');
+        toast.error(response.message || 'Failed to update service');
       }
     } catch (error) {
       console.error('Error updating service tier:', error);
-      toast.error('Failed to update service tier');
+      toast.error('Failed to update service');
     } finally {
       setIsUpdating(false);
     }
@@ -290,53 +293,7 @@ const VendorServiceTiersPage = () => {
     }
   };
 
-  const addFeature = (isEditing = false) => {
-    if (isEditing && editingTier) {
-      setEditingTier({
-        ...editingTier,
-        features: [...editingTier.features, ""]
-      });
-    } else {
-      setNewTier({
-        ...newTier,
-        features: [...newTier.features, ""]
-      });
-    }
-  };
 
-  const updateFeature = (index: number, value: string, isEditing = false) => {
-    if (isEditing && editingTier) {
-      const updatedFeatures = [...editingTier.features];
-      updatedFeatures[index] = value;
-      setEditingTier({
-        ...editingTier,
-        features: updatedFeatures
-      });
-    } else {
-      const updatedFeatures = [...newTier.features];
-      updatedFeatures[index] = value;
-      setNewTier({
-        ...newTier,
-        features: updatedFeatures
-      });
-    }
-  };
-
-  const removeFeature = (index: number, isEditing = false) => {
-    if (isEditing && editingTier) {
-      const updatedFeatures = editingTier.features.filter((_, i) => i !== index);
-      setEditingTier({
-        ...editingTier,
-        features: updatedFeatures.length > 0 ? updatedFeatures : [""]
-      });
-    } else {
-      const updatedFeatures = newTier.features.filter((_, i) => i !== index);
-      setNewTier({
-        ...newTier,
-        features: updatedFeatures.length > 0 ? updatedFeatures : [""]
-      });
-    }
-  };
 
   const removeImage = (index: number, isEditing = false) => {
     if (isEditing && editingTier) {
@@ -424,11 +381,8 @@ const VendorServiceTiersPage = () => {
                   tier_name: tier.tier_name || '',
                   description: tier.description || tier.tier_description || '',
                   base_price: tier.base_price || tier.price || 0,
-                  unit_type: tier.unit_type || 'service',
                   min_quantity: tier.min_quantity || 1,
                   max_quantity: tier.max_quantity,
-                  features: Array.isArray(tier.features) ? tier.features :
-                           typeof tier.features === 'string' ? JSON.parse(tier.features || '[]') : [],
                   images: Array.isArray(tier.images) ? tier.images :
                          typeof tier.images === 'string' ? JSON.parse(tier.images || '[]') : [],
                   is_popular: tier.is_popular || false
@@ -482,36 +436,20 @@ const VendorServiceTiersPage = () => {
                       </div>
                     </div>
 
-                    {/* Price and Unit Info */}
+                    {/* Price Info */}
                     <div className="mb-3">
                       <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-bold text-gray-900">${tierData.base_price}</span>
-                        <span className="text-gray-600">/{tierData.unit_type}</span>
                       </div>
                       {tierData.min_quantity && tierData.min_quantity > 1 && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Min: {tierData.min_quantity} {tierData.unit_type}(s)
+                          Min: {tierData.min_quantity} unit(s)
                           {tierData.max_quantity && ` • Max: ${tierData.max_quantity}`}
                         </p>
                       )}
                     </div>
 
-                    {/* Features (condensed) */}
-                    <div className="mb-3">
-                      <div className="flex flex-wrap gap-1">
-                        {tierData.features.slice(0, 3).map((feature: string, featureIndex: number) => (
-                          <span key={featureIndex} className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
-                            <Check className="h-3 w-3" />
-                            {feature}
-                          </span>
-                        ))}
-                        {tierData.features.length > 3 && (
-                          <span className="text-xs text-gray-500 px-2 py-1">
-                            +{tierData.features.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
+
 
                     {/* Status */}
                     <div className="flex items-center justify-between">
@@ -563,35 +501,6 @@ const VendorServiceTiersPage = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="unit-type">Unit Type</Label>
-                <Input
-                  id="unit-type"
-                  placeholder="e.g., room, hour, service"
-                  value={newTier.unit_type}
-                  onChange={(e) => setNewTier({...newTier, unit_type: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="referral-percentage">Referral Percentage (%)</Label>
-              <Input
-                id="referral-percentage"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                placeholder="0"
-                value={newTier.referral_percentage || ""}
-                onChange={(e) => setNewTier({...newTier, referral_percentage: parseFloat(e.target.value) || 0})}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Percentage of gross revenue you want to share for referrals. Platform takes 10% of this amount, remaining is split 50/50 between client and referring vendor.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
                 <Label htmlFor="min-quantity">Min Quantity</Label>
                 <Input
                   id="min-quantity"
@@ -601,60 +510,28 @@ const VendorServiceTiersPage = () => {
                   onChange={(e) => setNewTier({...newTier, min_quantity: parseInt(e.target.value) || 1})}
                 />
               </div>
-              <div>
-                <Label htmlFor="max-quantity">Max Quantity (Optional)</Label>
-                <Input
-                  id="max-quantity"
-                  type="number"
-                  placeholder="No limit"
-                  value={newTier.max_quantity || ""}
-                  onChange={(e) => setNewTier({...newTier, max_quantity: e.target.value ? parseInt(e.target.value) : undefined})}
-                />
-              </div>
             </div>
 
             <div>
-              <Label htmlFor="tier-description">Description</Label>
+              <Label htmlFor="max-quantity">Max Quantity (Optional)</Label>
+              <Input
+                id="max-quantity"
+                type="number"
+                placeholder="No limit"
+                value={newTier.max_quantity || ""}
+                onChange={(e) => setNewTier({...newTier, max_quantity: e.target.value ? parseInt(e.target.value) : undefined})}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="tier-description">Description *</Label>
               <Textarea
                 id="tier-description"
                 placeholder="Brief description of this service tier"
                 value={newTier.description}
                 onChange={(e) => setNewTier({...newTier, description: e.target.value})}
+                required
               />
-            </div>
-
-            <div>
-              <Label>Features</Label>
-              <div className="space-y-2">
-                {newTier.features.map((feature, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder="Feature description"
-                      value={feature}
-                      onChange={(e) => updateFeature(index, e.target.value)}
-                    />
-                    {newTier.features.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeFeature(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addFeature()}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Feature
-                </Button>
-              </div>
             </div>
 
             {/* Image Upload Section */}
@@ -773,33 +650,6 @@ const VendorServiceTiersPage = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-unit-type">Unit Type</Label>
-                  <Input
-                    id="edit-unit-type"
-                    value={editingTier.unit_type || 'service'}
-                    onChange={(e) => setEditingTier({...editingTier, unit_type: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="edit-referral-percentage">Referral Percentage (%)</Label>
-                <Input
-                  id="edit-referral-percentage"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={editingTier.referral_percentage || ""}
-                  onChange={(e) => setEditingTier({...editingTier, referral_percentage: parseFloat(e.target.value) || 0})}
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Percentage of gross revenue you want to share for referrals. Platform takes 10% of this amount, remaining is split 50/50 between client and referring vendor.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
                   <Label htmlFor="edit-min-quantity">Min Quantity</Label>
                   <Input
                     id="edit-min-quantity"
@@ -808,58 +658,26 @@ const VendorServiceTiersPage = () => {
                     onChange={(e) => setEditingTier({...editingTier, min_quantity: parseInt(e.target.value) || 1})}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="edit-max-quantity">Max Quantity (Optional)</Label>
-                  <Input
-                    id="edit-max-quantity"
-                    type="number"
-                    value={editingTier.max_quantity || ""}
-                    onChange={(e) => setEditingTier({...editingTier, max_quantity: e.target.value ? parseInt(e.target.value) : undefined})}
-                  />
-                </div>
               </div>
 
               <div>
-                <Label htmlFor="edit-tier-description">Description</Label>
-                <Textarea
-                  id="edit-tier-description"
-                  value={editingTier.description}
-                  onChange={(e) => setEditingTier({...editingTier, description: e.target.value})}
+                <Label htmlFor="edit-max-quantity">Max Quantity (Optional)</Label>
+                <Input
+                  id="edit-max-quantity"
+                  type="number"
+                  value={editingTier.max_quantity || ""}
+                  onChange={(e) => setEditingTier({...editingTier, max_quantity: e.target.value ? parseInt(e.target.value) : undefined})}
                 />
               </div>
 
               <div>
-                <Label>Features</Label>
-                <div className="space-y-2">
-                  {editingTier.features.map((feature, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        placeholder="Feature description"
-                        value={feature}
-                        onChange={(e) => updateFeature(index, e.target.value, true)}
-                      />
-                      {editingTier.features.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeFeature(index, true)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addFeature(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Feature
-                  </Button>
-                </div>
+                <Label htmlFor="edit-tier-description">Description *</Label>
+                <Textarea
+                  id="edit-tier-description"
+                  value={editingTier.description}
+                  onChange={(e) => setEditingTier({...editingTier, description: e.target.value})}
+                  required
+                />
               </div>
 
               {/* Image Upload Section for Edit */}
