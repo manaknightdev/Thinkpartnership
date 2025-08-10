@@ -47,6 +47,8 @@ export interface CreateServiceData {
   delivery_time?: string;
   service_areas?: string[];
   requirements?: string;
+  tax_inclusive?: boolean;
+  custom_tax_rate?: number;
 }
 
 export interface UpdateServiceData {
@@ -65,6 +67,8 @@ export interface UpdateServiceData {
   service_areas?: string[];
   requirements?: string;
   status?: number;
+  tax_inclusive?: boolean;
+  custom_tax_rate?: number;
 }
 
 export interface VendorServicesResponse {

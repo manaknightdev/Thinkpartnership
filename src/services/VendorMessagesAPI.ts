@@ -1,5 +1,6 @@
 import vendorApiClient from '@/config/vendorAxios';
 import API_CONFIG from '@/config/api';
+import TaxAPI, { TaxCalculation } from './TaxAPI';
 
 export interface VendorMessage {
   id: number;
@@ -80,17 +81,51 @@ class VendorMessagesAPI {
     description: string;
     validUntil?: string;
     estimatedDuration?: string;
-  }): Promise<{ error: boolean; message: string; data: any }> {
+    customerProvince?: string;
+    taxInclusive?: boolean;
+    customTaxRate?: number;
+  }): Promise<{ error: boolean; message: string; data: any; taxCalculation?: TaxCalculation }> {
     try {
+      // Calculate tax for this quote
+      let taxCalculation: TaxCalculation | null = null;
+      let finalQuoteAmount = quoteData.price;
+
+      if (quoteData.customerProvince) {
+        try {
+          taxCalculation = await TaxAPI.calculateQuoteTax(
+            quoteData.price,
+            quoteData.customerProvince,
+            quoteData.taxInclusive || false,
+            quoteData.customTaxRate
+          );
+          finalQuoteAmount = taxCalculation.total_amount;
+        } catch (error) {
+          console.warn('Could not calculate tax for quote, using fallback:', error);
+          // Use client-side fallback calculation
+          taxCalculation = TaxAPI.calculateClientTax(
+            quoteData.price,
+            quoteData.customerProvince,
+            quoteData.taxInclusive || false,
+            quoteData.customTaxRate
+          );
+          finalQuoteAmount = taxCalculation.total_amount;
+        }
+      }
+
       const messageData: SendVendorMessageRequest = {
         message: `I've prepared a quote for your project: ${quoteData.service}`,
         message_type: 3, // Quote message type
-        quote_amount: quoteData.price,
+        quote_amount: finalQuoteAmount,
         quote_details: {
           service: quoteData.service,
           description: quoteData.description,
           validUntil: quoteData.validUntil,
-          estimatedDuration: quoteData.estimatedDuration
+          estimatedDuration: quoteData.estimatedDuration,
+          basePrice: quoteData.price,
+          taxCalculation: taxCalculation,
+          customerProvince: quoteData.customerProvince,
+          taxInclusive: quoteData.taxInclusive,
+          customTaxRate: quoteData.customTaxRate
         }
       };
 
@@ -98,7 +133,11 @@ class VendorMessagesAPI {
         `${API_CONFIG.ENDPOINTS.VENDOR_MESSAGES.SEND}/${chatId}`,
         messageData
       );
-      return response.data;
+      
+      return { 
+        ...response.data, 
+        taxCalculation: taxCalculation || undefined 
+      };
     } catch (error: any) {
       console.error('Error sending quote:', error);
       throw error.response?.data || { error: true, message: 'Failed to send quote' };

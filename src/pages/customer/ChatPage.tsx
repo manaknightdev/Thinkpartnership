@@ -8,6 +8,7 @@ import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import ChatAPI, { Chat, ChatMessage } from "@/services/ChatAPI";
 import OrdersAPI from "@/services/OrdersAPI";
 import StripeAPI from "@/services/StripeAPI";
+import TaxAPI, { TaxCalculation } from "@/services/TaxAPI";
 import { toast } from "sonner";
 
 import {
@@ -258,9 +259,31 @@ const ChatPage = () => {
 
       toast.info("Processing payment...");
 
-      // Create a payment intent for the quote amount
+      // Get tax calculation from quote details, or calculate client-side if missing
+      let taxCalculation: TaxCalculation | null = null;
+      let totalAmount = quoteMessage.quote_amount;
+      let customerProvince = 'ON'; // Default fallback
+
+      if (quoteMessage.quote_details?.taxCalculation) {
+        // Use tax calculation from the quote
+        taxCalculation = quoteMessage.quote_details.taxCalculation;
+        totalAmount = taxCalculation.total_amount;
+        customerProvince = quoteMessage.quote_details.customerProvince || 'ON';
+      } else if (quoteMessage.quote_details?.basePrice && quoteMessage.quote_details?.customerProvince) {
+        // Calculate tax client-side if quote has the data but no calculation
+        taxCalculation = TaxAPI.calculateClientTax(
+          quoteMessage.quote_details.basePrice,
+          quoteMessage.quote_details.customerProvince,
+          quoteMessage.quote_details.taxInclusive || false,
+          quoteMessage.quote_details.customTaxRate
+        );
+        totalAmount = taxCalculation.total_amount;
+        customerProvince = quoteMessage.quote_details.customerProvince;
+      }
+
+      // Create a payment intent for the quote amount (including tax)
       const paymentResponse = await StripeAPI.createPayment({
-        amount: quoteMessage.quote_amount,
+        amount: totalAmount,
         currency: 'usd',
         service_id: currentChat.service.id,
         service_name: quoteMessage.quote_details.service || 'Custom Quote Service'
@@ -278,9 +301,12 @@ const ChatPage = () => {
         service_id: currentChat.service.id,
         service_name: quoteMessage.quote_details.service || 'Custom Quote Service',
         vendor_id: currentChat.vendor.id,
-        amount: quoteMessage.quote_amount,
+        amount: totalAmount,
         payment_intent_id: paymentResponse.payment_intent_id,
-        service_type: 'custom' // Mark as custom since it's from a quote
+        service_type: 'custom', // Mark as custom since it's from a quote
+        customer_province: customerProvince,
+        quantity: 1,
+        unit_type: 'fixed'
       });
 
       if (orderData.error) {
@@ -291,8 +317,15 @@ const ChatPage = () => {
       // Mark this quote as accepted
       setAcceptedQuotes(prev => new Set(prev).add(quoteMessage.id));
 
-      // Send acceptance message
-      const acceptMessage = `I've accepted your quote for $${quoteMessage.quote_amount}! Order has been created (Order ID: ${orderData.data?.order_id}). When can we schedule the work?`;
+      // Send acceptance message with tax breakdown if available
+      let acceptMessage = `I've accepted your quote for $${totalAmount.toFixed(2)}! Order has been created (Order ID: ${orderData.data?.order_id}).`;
+      
+      if (taxCalculation) {
+        acceptMessage += ` This includes $${taxCalculation.subtotal.toFixed(2)} base price + $${taxCalculation.tax_amount.toFixed(2)} tax.`;
+      }
+      
+      acceptMessage += " When can we schedule the work?";
+      
       setMessage(acceptMessage);
       await handleSendMessage();
 
@@ -490,7 +523,21 @@ const ChatPage = () => {
                         <div className="font-medium">Service Quote</div>
                         <div className="text-sm opacity-90">
                           <div>Service: {msg.quote_details?.service || 'Custom Service'}</div>
-                          <div>Price: ${msg.quote_amount}</div>
+                          
+                          {/* Tax breakdown if available */}
+                          {msg.quote_details?.taxCalculation ? (
+                            <div className="space-y-1">
+                              <div>Subtotal: ${msg.quote_details.taxCalculation.subtotal.toFixed(2)}</div>
+                              <div>Tax ({msg.quote_details.taxCalculation.tax_rate}%): ${msg.quote_details.taxCalculation.tax_amount.toFixed(2)}</div>
+                              <div className="font-medium">Total: ${msg.quote_details.taxCalculation.total_amount.toFixed(2)}</div>
+                              {msg.quote_details.customerProvince && (
+                                <div className="text-xs opacity-75">Tax calculated for {msg.quote_details.customerProvince}</div>
+                              )}
+                            </div>
+                          ) : (
+                            <div>Total: ${msg.quote_amount}</div>
+                          )}
+                          
                           <div>Description: {msg.quote_details?.description || 'No description provided'}</div>
                         </div>
                         {msg.sender_type === 'vendor' && !acceptedQuotes.has(msg.id) && (

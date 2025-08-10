@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, Clock, Shield, Loader2, Plus, Minus } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Shield, Loader2, Plus, Minus, Calculator } from "lucide-react";
 import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
+import TaxAPI, { TaxCalculation, Province } from "@/services/TaxAPI";
 
 const CheckoutPage = () => {
   const { serviceName } = useParams<{ serviceName: string }>();
@@ -18,6 +20,46 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
+  
+  // Tax-related state  
+  const [taxCalculation, setTaxCalculation] = useState<TaxCalculation | null>(null);
+
+  // Load service and calculate tax automatically based on vendor's location
+
+  // Calculate tax when service or quantity changes
+  useEffect(() => {
+    if (service) {
+      calculateTax();
+    }
+  }, [service, quantity]);
+
+  const calculateTax = async () => {
+    if (!service) return;
+
+    try {
+      const subtotal = isCustomService ? service.base_price * quantity : service.base_price;
+      
+      const response = await TaxAPI.calculateTax({
+        amount: subtotal,
+        service_id: service.id,
+        service_type: isCustomService ? 'custom' : 'flat_fee'
+      });
+
+      if (!response.error && response.tax_calculation) {
+        setTaxCalculation(response.tax_calculation);
+      } else {
+        // Fallback to client-side calculation using Ontario as default
+        const calculation = TaxAPI.calculateClientTax(subtotal, 'ON');
+        setTaxCalculation(calculation);
+      }
+    } catch (error) {
+      console.error('Error calculating tax:', error);
+      // Fallback to client-side calculation using Ontario as default
+      const subtotal = isCustomService ? service.base_price * quantity : service.base_price;
+      const calculation = TaxAPI.calculateClientTax(subtotal, 'ON');
+      setTaxCalculation(calculation);
+    }
+  };
 
   // Fetch service details by name
   useEffect(() => {
@@ -119,9 +161,10 @@ const CheckoutPage = () => {
     }
   };
 
-  // Calculate total amount
+  // Calculate total amount with tax
   const basePrice = typeof service?.base_price === 'number' ? service.base_price : parseFloat(service?.base_price || '0');
-  const totalAmount = isCustomService ? basePrice * quantity : basePrice;
+  const subtotalAmount = isCustomService ? basePrice * quantity : basePrice;
+  const totalAmount = taxCalculation ? taxCalculation.total_amount : subtotalAmount;
 
   // Loading state
   if (loading) {
@@ -271,6 +314,7 @@ const CheckoutPage = () => {
                       </div>
 
                       <div className="border-t pt-4 space-y-4">
+
                         {/* Quantity Selector for Custom Services */}
                         {isCustomService && (
                           <div className="space-y-3">
@@ -333,19 +377,44 @@ const CheckoutPage = () => {
                           </div>
 
                           {isCustomService && quantity > 1 && (
-                            <div className="flex items-center justify-between text-sm text-gray-600">
-                              <span>Quantity</span>
-                              <span>{quantity} {unitType}s</span>
-                            </div>
+                            <>
+                              <div className="flex items-center justify-between text-sm text-gray-600">
+                                <span>Quantity</span>
+                                <span>{quantity} {unitType}s</span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm text-gray-600">
+                                <span>Subtotal</span>
+                                <span>${subtotalAmount.toFixed(2)}</span>
+                              </div>
+                            </>
                           )}
 
-                          {isCustomService && (
-                            <div className="flex items-center justify-between pt-2 border-t">
-                              <span className="font-semibold text-gray-900">Total Amount</span>
-                              <span className="text-xl font-bold text-green-600">
-                                ${totalAmount.toFixed(2)}
-                              </span>
-                            </div>
+                          {taxCalculation && (
+                            <>
+                              {!isCustomService && (
+                                <div className="flex items-center justify-between text-sm text-gray-600">
+                                  <span>Subtotal</span>
+                                  <span>${taxCalculation.subtotal.toFixed(2)}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center justify-between text-sm text-gray-600">
+                                <span>{TaxAPI.formatTaxBreakdown(taxCalculation)}</span>
+                                <span>${taxCalculation.tax_amount.toFixed(2)}</span>
+                              </div>
+                            </>
+                          )}
+
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <span className="font-semibold text-gray-900">Total Amount</span>
+                            <span className="text-xl font-bold text-green-600">
+                              ${totalAmount.toFixed(2)}
+                            </span>
+                          </div>
+                          
+                          {taxCalculation && (
+                            <p className="text-xs text-gray-500">
+                              Includes ${taxCalculation.tax_amount.toFixed(2)} tax (based on vendor's business location: {taxCalculation.tax_breakdown.province})
+                            </p>
                           )}
                         </div>
                       </div>
@@ -364,6 +433,7 @@ const CheckoutPage = () => {
                   serviceType={isCustomService ? "custom" : "fixed"}
                   quantity={isCustomService ? quantity : 1}
                   unitType={isCustomService ? unitType : undefined}
+                  taxCalculation={taxCalculation}
                   onPaymentComplete={handlePaymentComplete}
                 />
               </div>

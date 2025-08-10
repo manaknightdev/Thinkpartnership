@@ -20,6 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VendorServicesAPI, { VendorService, CreateServiceData, UpdateServiceData } from "@/services/VendorServicesAPI";
 import { showSuccess, showError } from "@/utils/toast";
 import API_CONFIG from "@/config/api";
+import { TaxSettings } from "@/components/TaxSettings";
+import TaxAPI, { TaxCalculation } from "@/services/TaxAPI";
 
 const VendorServicesPage = () => {
   const [services, setServices] = useState<VendorService[]>([]);
@@ -37,6 +39,11 @@ const VendorServicesPage = () => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Tax-related state
+  const [taxInclusive, setTaxInclusive] = useState(false);
+  const [customTaxRate, setCustomTaxRate] = useState<number | null>(null);
+  const [currentTaxCalculation, setCurrentTaxCalculation] = useState<TaxCalculation | null>(null);
 
   // Utility function to get full image URL
   const getImageUrl = (imagePath: string) => {
@@ -58,6 +65,8 @@ const VendorServicesPage = () => {
     response_time: "",
     service_areas: [],
     requirements: "",
+    tax_inclusive: false,
+    custom_tax_rate: undefined,
   });
 
   // Load services and categories on component mount
@@ -115,7 +124,14 @@ const VendorServicesPage = () => {
         return;
       }
 
-      const response = await VendorServicesAPI.createService(newService);
+      // Update newService with current tax settings before creating
+      const serviceWithTax = {
+        ...newService,
+        tax_inclusive: taxInclusive,
+        custom_tax_rate: customTaxRate,
+      };
+
+      const response = await VendorServicesAPI.createService(serviceWithTax);
 
       if (response.error) {
         setError(response.message);
@@ -177,6 +193,8 @@ const VendorServicesPage = () => {
         response_time: newService.response_time,
         service_areas: newService.service_areas,
         requirements: newService.requirements,
+        tax_inclusive: taxInclusive,
+        custom_tax_rate: customTaxRate,
       };
 
       const response = await VendorServicesAPI.updateService(editingService.id, updateData);
@@ -281,6 +299,8 @@ const VendorServicesPage = () => {
       response_time: "",
       service_areas: [],
       requirements: "",
+      tax_inclusive: false,
+      custom_tax_rate: undefined,
     });
 
     // Clean up image states
@@ -289,6 +309,11 @@ const VendorServicesPage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+
+    // Reset tax states
+    setTaxInclusive(false);
+    setCustomTaxRate(null);
+    setCurrentTaxCalculation(null);
   };
 
   const openEditDialog = (service: VendorService) => {
@@ -307,6 +332,8 @@ const VendorServicesPage = () => {
       response_time: service.response_time || "",
       service_areas: service.service_areas || [],
       requirements: service.requirements || "",
+      tax_inclusive: service.tax_inclusive || false,
+      custom_tax_rate: service.custom_tax_rate || undefined,
     });
 
     // Reset image upload states for editing
@@ -315,6 +342,10 @@ const VendorServicesPage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+
+    // Set tax states for editing
+    setTaxInclusive(service.tax_inclusive || false);
+    setCustomTaxRate(service.custom_tax_rate || null);
 
     setShowEditDialog(true);
   };
@@ -546,6 +577,16 @@ const VendorServicesPage = () => {
                   )}
                 </div>
 
+                {/* Tax Settings */}
+                <TaxSettings
+                  taxInclusive={taxInclusive}
+                  setTaxInclusive={setTaxInclusive}
+                  customTaxRate={customTaxRate}
+                  setCustomTaxRate={setCustomTaxRate}
+                  basePrice={newService.base_price}
+                  onTaxChange={setCurrentTaxCalculation}
+                  className="mt-4"
+                />
 
               </div>
 
@@ -875,6 +916,17 @@ const VendorServicesPage = () => {
                 </div>
               )}
             </div>
+
+            {/* Tax Settings */}
+            <TaxSettings
+              taxInclusive={taxInclusive}
+              setTaxInclusive={setTaxInclusive}
+              customTaxRate={customTaxRate}
+              setCustomTaxRate={setCustomTaxRate}
+              basePrice={newService.base_price}
+              onTaxChange={setCurrentTaxCalculation}
+              className="mt-4"
+            />
           </div>
 
           {/* Fixed button at bottom */}

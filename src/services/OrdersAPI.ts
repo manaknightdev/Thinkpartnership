@@ -50,6 +50,9 @@ export interface CreateOrderData {
   amount: number;
   payment_intent_id: string;
   service_type?: 'fixed' | 'custom';
+  quantity?: number;
+  unit_type?: string;
+  customer_province?: string;
 }
 
 export interface CreateOrderResponse {

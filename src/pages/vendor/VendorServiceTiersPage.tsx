@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import VendorServiceTiersAPI from "@/services/VendorServiceTiersAPI";
 import API_CONFIG from "@/config/api";
 import vendorApiClient from "@/config/vendorAxios";
+import { TaxSettings } from "@/components/TaxSettings";
+import TaxAPI, { TaxCalculation } from "@/services/TaxAPI";
 
 interface ServiceTier {
   id: number;
@@ -38,6 +40,8 @@ interface ServiceTier {
   revisions_included?: number;
   sort_order?: number;
   status?: number;
+  tax_inclusive?: boolean;
+  custom_tax_rate?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -62,8 +66,15 @@ const VendorServiceTiersPage = () => {
     description: "",
     images: [],
     revisions_included: 0,
-    is_popular: false
+    is_popular: false,
+    tax_inclusive: false,
+    custom_tax_rate: null
   });
+
+  // Tax-related state
+  const [taxInclusive, setTaxInclusive] = useState(false);
+  const [customTaxRate, setCustomTaxRate] = useState<number | null>(null);
+  const [currentTaxCalculation, setCurrentTaxCalculation] = useState<TaxCalculation | null>(null);
 
   // Utility function to get full image URL
   const getImageUrl = (imagePath: string) => {
@@ -171,6 +182,8 @@ const VendorServiceTiersPage = () => {
         price: newTier.base_price,
         base_price: newTier.base_price,
         referral_percentage: newTier.referral_percentage || 0,
+        tax_inclusive: taxInclusive,
+        custom_tax_rate: customTaxRate,
         unit_type: "service", // Default value for compatibility
         min_quantity: newTier.min_quantity,
         max_quantity: newTier.max_quantity,
@@ -197,8 +210,13 @@ const VendorServiceTiersPage = () => {
           description: "",
           images: [],
           revisions_included: 0,
-          is_popular: false
+          is_popular: false,
+          tax_inclusive: false,
+          custom_tax_rate: null
         });
+        setTaxInclusive(false);
+        setCustomTaxRate(null);
+        setCurrentTaxCalculation(null);
         loadServiceTiers();
       } else {
         toast.error(response.message || 'Failed to create service');
@@ -217,6 +235,11 @@ const VendorServiceTiersPage = () => {
       images: Array.isArray(tier.images) ? tier.images :
               typeof tier.images === 'string' ? JSON.parse(tier.images) : []
     });
+    
+    // Set tax-related state for editing
+    setTaxInclusive(tier.tax_inclusive || false);
+    setCustomTaxRate(tier.custom_tax_rate || null);
+    
     setIsEditModalOpen(true);
   };
 
@@ -246,6 +269,8 @@ const VendorServiceTiersPage = () => {
         price: editingTier.base_price,
         base_price: editingTier.base_price,
         referral_percentage: editingTier.referral_percentage || 0,
+        tax_inclusive: taxInclusive,
+        custom_tax_rate: customTaxRate,
         unit_type: "service", // Default value for compatibility
         min_quantity: editingTier.min_quantity,
         max_quantity: editingTier.max_quantity,
@@ -591,6 +616,17 @@ const VendorServiceTiersPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Tax Settings */}
+            <TaxSettings
+              taxInclusive={taxInclusive}
+              setTaxInclusive={setTaxInclusive}
+              customTaxRate={customTaxRate}
+              setCustomTaxRate={setCustomTaxRate}
+              basePrice={newTier.base_price}
+              onTaxChange={setCurrentTaxCalculation}
+              className="mt-4"
+            />
           </div>
           
           {/* Fixed button at bottom */}
@@ -740,6 +776,17 @@ const VendorServiceTiersPage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Tax Settings for Edit */}
+              <TaxSettings
+                taxInclusive={taxInclusive}
+                setTaxInclusive={setTaxInclusive}
+                customTaxRate={customTaxRate}
+                setCustomTaxRate={setCustomTaxRate}
+                basePrice={editingTier.base_price || 0}
+                onTaxChange={setCurrentTaxCalculation}
+                className="mt-4"
+              />
             </div>
           )}
           

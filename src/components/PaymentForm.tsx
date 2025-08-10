@@ -15,6 +15,8 @@ import {
   Loader2
 } from "lucide-react";
 
+import { TaxCalculation } from "@/services/TaxAPI";
+
 interface PaymentFormProps {
   amount: number | string;
   serviceName: string;
@@ -23,10 +25,11 @@ interface PaymentFormProps {
   serviceType?: 'fixed' | 'custom';
   quantity?: number;
   unitType?: string;
+  taxCalculation?: TaxCalculation | null;
   onPaymentComplete?: (paymentData: any) => void;
 }
 
-export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceType = 'fixed', quantity = 1, unitType, onPaymentComplete }: PaymentFormProps) => {
+export const PaymentForm = ({ amount, serviceName, serviceId, vendorId, serviceType = 'fixed', quantity = 1, unitType, taxCalculation, onPaymentComplete }: PaymentFormProps) => {
   const [processing, setProcessing] = useState(false);
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
   const [checkingStripe, setCheckingStripe] = useState(true);
