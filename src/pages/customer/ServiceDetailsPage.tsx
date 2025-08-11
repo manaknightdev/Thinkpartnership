@@ -374,7 +374,9 @@ const ServiceDetailsPage = () => {
                       ${service.base_price}
                     </div>
                     <p className="text-gray-600">
-                      Starting price
+                      {((service as any).service_type === 'flat_fee' || !(service as any).service_type)
+                        ? 'Fixed price'
+                        : 'Starting price'}
                     </p>
                     {(service as any).service_type === 'custom' && (
                       <div className="mt-2 text-sm text-gray-500">
