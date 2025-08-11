@@ -10,6 +10,7 @@ import UserAPI, { UserProfile } from "@/services/UserAPI";
 import NotificationsAPI from "@/services/NotificationsAPI";
 import { useAuth } from "@/hooks/useAuth";
 import { useClient } from "@/contexts/ClientContext";
+import { useCart } from "@/contexts/CartContext";
 import MarketplaceAuthAPI from "@/services/MarketplaceAuthAPI";
 import {
   Search,
@@ -26,7 +27,8 @@ import {
   ChevronDown,
   MessageCircle,
   UserPlus,
-  LogIn
+  LogIn,
+  ShoppingCart
 } from "lucide-react";
 
 interface MarketplaceLayoutProps {
@@ -44,6 +46,9 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
 
   // Use the auth hook
   const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
+
+  // Use cart hook for cart count
+  const { itemCount, loading: cartLoading } = useCart();
 
   // Use client context to get client name
   const { client } = useClient();
@@ -128,6 +133,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const authenticatedSidebarItems = [
     { name: "Browse", path: "/marketplace", icon: Home, exact: true },
     { name: "All Services", path: "/marketplace/services", icon: List },
+    { name: "Shopping Cart", path: "/marketplace/cart", icon: ShoppingCart },
     { name: "My Orders", path: "/marketplace/orders", icon: FileText },
     { name: "Messages", path: "/marketplace/messages", icon: MessageCircle },
     { name: "Account", path: "/marketplace/account", icon: Settings },
@@ -254,6 +260,22 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                   {notificationCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center p-0">
                       {notificationCount}
+                    </Badge>
+                  )}
+                </Button>
+
+                {/* Cart Icon - Only show when authenticated */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative"
+                  onClick={() => navigate('/marketplace/cart')}
+                  title="View cart"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {!cartLoading && itemCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
+                      {itemCount}
                     </Badge>
                   )}
                 </Button>

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ClientProvider } from "./contexts/ClientContext";
+import { CartProvider } from "./contexts/CartContext";
 
 import NotFound from "./pages/NotFound";
 import SignUp from "./pages/SignUp";
@@ -68,6 +69,9 @@ import ChatPage from "./pages/customer/ChatPage";
 import MessagesPage from "./pages/customer/MessagesPage";
 import NotificationsPage from "./pages/customer/NotificationsPage";
 import PlaceholderPage from "./pages/customer/PlaceholderPage";
+import CartPage from "./pages/customer/CartPage";
+import CartCheckoutPage from "./pages/customer/CartCheckoutPage";
+import CartPaymentSuccessPage from "./pages/customer/CartPaymentSuccessPage";
 import CustomerLogin from "./pages/customer/CustomerLogin";
 import CustomerSignup from "./pages/customer/CustomerSignup";
 import VendorLogin from "./pages/vendor/VendorLogin";
@@ -106,7 +110,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ClientProvider>
-          <Routes>
+          <CartProvider>
+            <Routes>
           {/* Multi-Client Routes - Support /clientname/marketplace pattern */}
           {/* Client-specific marketplace routes - INVITE-ONLY REGISTRATION */}
           <Route path="/:clientSlug/marketplace" element={<CustomerBrowseServicesPage />} />
@@ -198,6 +203,9 @@ const App = () => (
           {/* Protected Marketplace Routes - Authentication required for actions */}
           <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
           <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+          <Route path="/marketplace/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+          <Route path="/marketplace/cart/checkout" element={<ProtectedRoute><CartCheckoutPage /></ProtectedRoute>} />
+          <Route path="/marketplace/cart/payment-success" element={<ProtectedRoute><CartPaymentSuccessPage /></ProtectedRoute>} />
           <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
           <Route path="/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
@@ -281,7 +289,8 @@ const App = () => (
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
+            </Routes>
+          </CartProvider>
         </ClientProvider>
       </BrowserRouter>
     </TooltipProvider>

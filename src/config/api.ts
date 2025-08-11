@@ -102,6 +102,18 @@ export const API_CONFIG = {
       SEND_MESSAGE: '/api/marketplace/chats/:chatId/messages',
       START_CHAT: '/api/marketplace/chats/start',
     },
+    // Shopping Cart
+    CART: {
+      LIST: '/api/marketplace/auth/cart',
+      ADD: '/api/marketplace/auth/cart/add',
+      UPDATE: '/api/marketplace/auth/cart/items',
+      REMOVE: '/api/marketplace/auth/cart/items',
+      CLEAR: '/api/marketplace/auth/cart/clear',
+      COUNT: '/api/marketplace/auth/cart/count',
+      CREATE_PAYMENT_INTENT: '/api/marketplace/auth/cart/create-payment-intent',
+      CHECKOUT: '/api/marketplace/auth/cart/checkout',
+      VALIDATE: '/api/marketplace/auth/cart/validate',
+    },
     // Vendor Services
     VENDOR_SERVICES: {
       LIST: '/api/marketplace/vendor/services',
@@ -228,7 +240,7 @@ export const API_CONFIG = {
       EXPORT: '/api/marketplace/admin/wallet/export',
     },
   },
-  TIMEOUT: 10000,
+  TIMEOUT: 30000, // 30 seconds for cart operations
 };
 
 export default API_CONFIG;

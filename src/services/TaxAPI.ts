@@ -241,4 +241,5 @@ class TaxAPI {
   }
 }
 
-export default TaxAPI;
+export default new TaxAPI();
+export { TaxAPI };

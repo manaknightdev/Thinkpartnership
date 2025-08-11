@@ -11,7 +11,7 @@ import { PaymentForm } from "@/components/PaymentForm";
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle, Clock, Shield, Loader2, Plus, Minus, Calculator } from "lucide-react";
 import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
-import TaxAPI, { TaxCalculation, Province } from "@/services/TaxAPI";
+import TaxAPIInstance, { TaxCalculation, Province, TaxAPI } from "@/services/TaxAPI";
 
 const CheckoutPage = () => {
   const { serviceName } = useParams<{ serviceName: string }>();
@@ -39,7 +39,7 @@ const CheckoutPage = () => {
     try {
       const subtotal = isCustomService ? service.base_price * quantity : service.base_price;
       
-      const response = await TaxAPI.calculateTax({
+      const response = await TaxAPIInstance.calculateTax({
         amount: subtotal,
         service_id: service.id,
         service_type: isCustomService ? 'custom' : 'flat_fee'

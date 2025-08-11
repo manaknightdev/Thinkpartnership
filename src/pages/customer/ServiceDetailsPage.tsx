@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ServicesAPI, { ServiceDetails } from "@/services/ServicesAPI";
 import ChatAPI from "@/services/ChatAPI";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/contexts/CartContext";
 import {
   ArrowLeft,
   Phone,
@@ -17,18 +18,21 @@ import {
   Award,
   Loader2,
   LogIn,
-  UserPlus
+  UserPlus,
+  ShoppingCart
 } from "lucide-react";
 
 const ServiceDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addToCart, loading: cartLoading } = useCart();
   const [service, setService] = useState<ServiceDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [hasChattedWithSeller, setHasChattedWithSeller] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   // Fetch service details on component mount
   useEffect(() => {
@@ -103,6 +107,59 @@ const ServiceDetailsPage = () => {
       setError(err.message || 'Failed to start chat');
     } finally {
       setStartingChat(false);
+    }
+  };
+
+  // Handle adding service to cart (only for flat fee services)
+  const handleAddToCart = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent any default form submission behavior
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    if (!isAuthenticated) {
+      navigate('/marketplace/login');
+      return;
+    }
+
+    if (!service) {
+      setError("Service information not available");
+      return;
+    }
+
+    // Debug logging
+    console.log('Service data for cart:', {
+      id: service.id,
+      title: service.title,
+      service_type: (service as any).service_type,
+      full_service: service
+    });
+
+    // Only allow flat fee services to be added to cart
+    // If service_type is undefined, assume it's a flat fee service (from marketplace_service table)
+    const serviceType = (service as any).service_type;
+    if (serviceType && serviceType !== 'flat_fee') {
+      setError("Only flat fee services can be added to cart");
+      return;
+    }
+
+    try {
+      setAddingToCart(true);
+      setError("");
+
+      const success = await addToCart(service.id, 1);
+      
+      if (!success) {
+        // Error is already shown by the cart context
+        return;
+      }
+
+    } catch (err: any) {
+      console.error('Error adding to cart:', err);
+      setError(err.message || 'Failed to add to cart');
+    } finally {
+      setAddingToCart(false);
     }
   };
 
@@ -353,13 +410,37 @@ const ServiceDetailsPage = () => {
                       )}
                     </Button>
                   ) : (
-                    <Button
-                      size="lg"
-                      className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                      onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
-                    >
-                      Request Service Now
-                    </Button>
+                    // Flat fee service - show both Request Service Now and Add to Cart
+                    <div className="space-y-3">
+                      <Button
+                        size="lg"
+                        className="w-full text-lg py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                        onClick={() => navigate(`/marketplace/checkout/${encodeURIComponent(service.title)}`)}
+                      >
+                        Request Service Now
+                      </Button>
+                      
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full text-lg py-6 border-2 border-green-600 text-green-600 hover:bg-green-50"
+                        onClick={handleAddToCart}
+                        disabled={addingToCart}
+                        type="button"
+                      >
+                        {addingToCart ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="mr-2 h-5 w-5" />
+                            Add to Cart
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   )
                 ) : (
                   <div className="space-y-3">
