@@ -1,17 +1,17 @@
 /**
- * VendorFeaturedPlacementPage - Allows vendors to purchase featured placement packages
+ * VendorSubscriptionPage - Manage vendor subscription plans and service limits
  *
  * Features:
- * - 3-day, 7-day, and 30-day featured placement packages
- * - Daily rate pricing model ($1/day base rate with volume discounts)
- * - Service selection for featuring specific services
- * - Active placement tracking with analytics
- * - Performance metrics (views, click-through rates, ROI)
+ * - Three subscription tiers: Basic ($10), Professional ($20), Premium ($30)
+ * - Service limits: 3, 7, and 15 services respectively
+ * - Combined limit for both flat fee and custom services
+ * - Different commission rates per tier
+ * - Subscription management (upgrade, downgrade, cancel)
  *
  * Revenue Model:
- * - Vendors pay daily rates for featured placement
- * - Platform earns revenue from featured placement fees
- * - Tiered pricing encourages longer commitments
+ * - Monthly recurring revenue for clients
+ * - Lower commission rates for higher tiers incentivize upgrades
+ * - Simple, predictable pricing structure
  */
 
 import React, { useState, useEffect } from "react";
@@ -20,44 +20,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
   Crown,
   Star,
-  TrendingUp,
+  Package,
   Calendar,
   DollarSign,
   Zap,
   CheckCircle,
   Clock,
   Target,
-  Eye,
+  Users,
   ArrowUp,
   CreditCard,
-  Info
+  Info,
+  Loader2
 } from "lucide-react";
-import VendorFeaturedPlacementAPI, {
-  FeaturedPackage,
-  ActivePlacement,
-  FeaturedAnalytics
-} from "@/services/VendorFeaturedPlacementAPI";
-import VendorServicesAPI from "@/services/VendorServicesAPI";
+import VendorSubscriptionAPI, {
+  SubscriptionPlan,
+  VendorSubscription,
+  SubscriptionUsage
+} from "@/services/VendorSubscriptionAPI";
 
 
 
-const VendorFeaturedPlacementPage = () => {
-  const [selectedPackage, setSelectedPackage] = useState<string>("");
-  const [selectedService, setSelectedService] = useState<string>("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [featuredPackages, setFeaturedPackages] = useState<FeaturedPackage[]>([]);
-  const [activePlacements, setActivePlacements] = useState<ActivePlacement[]>([]);
-  const [vendorServices, setVendorServices] = useState<any[]>([]);
-  const [analytics, setAnalytics] = useState<FeaturedAnalytics | null>(null);
+const VendorSubscriptionPage = () => {
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
+  const [currentSubscription, setCurrentSubscription] = useState<VendorSubscription | null>(null);
+  const [subscriptionUsage, setSubscriptionUsage] = useState<SubscriptionUsage | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+  const [changingPlan, setChangingPlan] = useState(false);
 
   // Load data on component mount
   useEffect(() => {
@@ -67,83 +65,141 @@ const VendorFeaturedPlacementPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load packages, active placements, services, and analytics in parallel
-      const [packagesRes, placementsRes, servicesRes, analyticsRes] = await Promise.all([
-        VendorFeaturedPlacementAPI.getPackages(),
-        VendorFeaturedPlacementAPI.getActivePlacements(),
-        VendorServicesAPI.getServices(),
-        VendorFeaturedPlacementAPI.getAnalytics()
+      // Load subscription plans, current subscription, and usage in parallel
+      const [plansRes, currentRes, usageRes] = await Promise.all([
+        VendorSubscriptionAPI.getPlans(),
+        VendorSubscriptionAPI.getCurrentSubscription(),
+        VendorSubscriptionAPI.getSubscriptionUsage()
       ]);
 
-      if (!packagesRes.error && packagesRes.packages) {
-        setFeaturedPackages(packagesRes.packages);
+      if (!plansRes.error && plansRes.data?.plans) {
+        setSubscriptionPlans(plansRes.data.plans);
       }
 
-      if (!placementsRes.error && placementsRes.placements) {
-        setActivePlacements(placementsRes.placements);
+      if (!currentRes.error && currentRes.data?.subscription) {
+        setCurrentSubscription(currentRes.data.subscription);
       }
 
-      if (!servicesRes.error && servicesRes.data?.services) {
-        setVendorServices(servicesRes.data.services);
-      }
-
-      if (!analyticsRes.error && analyticsRes.analytics) {
-        setAnalytics(analyticsRes.analytics);
+      if (!usageRes.error && usageRes.data?.usage) {
+        setSubscriptionUsage(usageRes.data.usage);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Failed to load data');
+      console.error('Error loading subscription data:', error);
+      toast.error('Failed to load subscription data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePurchasePackage = async () => {
-    if (!selectedPackage || !selectedService) {
-      toast.error("Please select both a package and service");
-      return;
-    }
-
-    setPurchasing(true);
+  const handleSubscribeToPlan = async (planId: number) => {
+    setSubscribing(true);
     try {
-      const response = await VendorFeaturedPlacementAPI.purchasePlacement({
-        package_id: selectedPackage,
-        service_id: selectedService
-      });
+      const response = await VendorSubscriptionAPI.subscribeToPlan(planId);
 
       if (response.error) {
-        toast.error(response.message || 'Failed to purchase featured placement');
+        toast.error(response.message || 'Failed to subscribe to plan');
         return;
       }
 
-      const packageData = featuredPackages.find(p => p.id === selectedPackage);
-      const serviceData = vendorServices.find(s => s.id === selectedService);
+      const plan = subscriptionPlans.find(p => p.id === planId);
+      toast.success(`Successfully subscribed to ${plan?.name} plan!`);
 
-      toast.success(`Successfully purchased ${packageData?.name} for ${serviceData?.title || serviceData?.name}! Your featured placement will begin within 24 hours.`);
-      setIsDialogOpen(false);
-      setSelectedPackage("");
-      setSelectedService("");
-
-      // Reload active placements
-      const placementsRes = await VendorFeaturedPlacementAPI.getActivePlacements();
-      if (!placementsRes.error && placementsRes.placements) {
-        setActivePlacements(placementsRes.placements);
-      }
+      // Reload subscription data
+      await loadData();
     } catch (error) {
-      console.error('Error purchasing placement:', error);
-      toast.error('Failed to purchase featured placement');
+      console.error('Error subscribing to plan:', error);
+      toast.error('Failed to subscribe to plan');
     } finally {
-      setPurchasing(false);
+      setSubscribing(false);
+    }
+  };
+
+  const handleChangePlan = async () => {
+    if (!selectedPlan) {
+      toast.error("Please select a plan");
+      return;
+    }
+
+    setChangingPlan(true);
+    try {
+      const response = await VendorSubscriptionAPI.changePlan(selectedPlan);
+
+      if (response.error) {
+        toast.error(response.message || 'Failed to change plan');
+        return;
+      }
+
+      const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+      toast.success(`Successfully changed to ${plan?.name} plan!`);
+      setIsUpgradeDialogOpen(false);
+      setSelectedPlan(null);
+
+      // Reload subscription data
+      await loadData();
+    } catch (error) {
+      console.error('Error changing plan:', error);
+      toast.error('Failed to change plan');
+    } finally {
+      setChangingPlan(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!confirm("Are you sure you want to cancel your subscription? Your services will be deactivated at the end of your current billing period.")) {
+      return;
+    }
+
+    try {
+      const response = await VendorSubscriptionAPI.cancelSubscription();
+
+      if (response.error) {
+        toast.error(response.message || 'Failed to cancel subscription');
+        return;
+      }
+
+      toast.success('Subscription cancelled successfully');
+      await loadData();
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast.error('Failed to cancel subscription');
+    }
+  };
+
+  const getPlanIcon = (planName: string) => {
+    switch (planName.toLowerCase()) {
+      case 'basic': return <Package className="h-6 w-6 text-blue-600" />;
+      case 'professional': return <Star className="h-6 w-6 text-purple-600" />;
+      case 'premium': return <Crown className="h-6 w-6 text-yellow-600" />;
+      default: return <Package className="h-6 w-6 text-gray-600" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-500';
-      case 'expired': return 'bg-gray-500';
-      case 'pending': return 'bg-yellow-500';
+      case 'cancelled': return 'bg-red-500';
+      case 'past_due': return 'bg-yellow-500';
+      case 'paused': return 'bg-gray-500';
       default: return 'bg-gray-500';
     }
+  };
+
+  const isCurrentPlan = (planId: number) => {
+    return currentSubscription?.plan_id === planId;
+  };
+
+  const canUpgrade = (planId: number) => {
+    if (!currentSubscription) return true;
+    const currentPlan = subscriptionPlans.find(p => p.id === currentSubscription.plan_id);
+    const targetPlan = subscriptionPlans.find(p => p.id === planId);
+    return targetPlan && currentPlan && targetPlan.service_limit > currentPlan.service_limit;
+  };
+
+  const canDowngrade = (planId: number) => {
+    if (!currentSubscription) return false;
+    const currentPlan = subscriptionPlans.find(p => p.id === currentSubscription.plan_id);
+    const targetPlan = subscriptionPlans.find(p => p.id === planId);
+    return targetPlan && currentPlan && targetPlan.service_limit < currentPlan.service_limit;
   };
 
   if (loading) {
@@ -165,137 +221,239 @@ const VendorFeaturedPlacementPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Crown className="h-8 w-8 text-yellow-500" />
-            Featured Placement
+            <Users className="h-8 w-8 text-blue-600" />
+            Subscription Plans
           </h1>
           <p className="text-gray-600 mt-2">
-            Boost your visibility and get more customers with featured placement packages
+            Choose the perfect plan for your business needs and manage your service limits
           </p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Star className="h-4 w-4 mr-2" />
-              Purchase Featured Placement
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Purchase Featured Placement</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="service-select">Select Service to Feature</Label>
-                <Select value={selectedService} onValueChange={setSelectedService}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vendorServices.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.title || service.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="package-select">Select Package</Label>
-                <Select value={selectedPackage} onValueChange={setSelectedPackage}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a package" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {featuredPackages.map((pkg) => (
-                      <SelectItem key={pkg.id} value={pkg.id}>
-                        {pkg.name} - ${pkg.totalPrice} ({pkg.duration} days)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button
-                onClick={handlePurchasePackage}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={!selectedPackage || !selectedService || purchasing}
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                {purchasing ? 'Processing...' : 'Purchase Now'}
+        {currentSubscription && (
+          <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <ArrowUp className="h-4 w-4 mr-2" />
+                Change Plan
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Change Subscription Plan</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="plan-select">Select New Plan</Label>
+                  <select 
+                    className="w-full p-2 border rounded-md"
+                    value={selectedPlan || ''}
+                    onChange={(e) => setSelectedPlan(parseInt(e.target.value))}
+                  >
+                    <option value="">Choose a plan</option>
+                    {subscriptionPlans.map((plan) => (
+                      <option 
+                        key={plan.id} 
+                        value={plan.id}
+                        disabled={isCurrentPlan(plan.id)}
+                      >
+                        {plan.name} - ${plan.monthly_price}/month ({plan.service_limit} services)
+                        {isCurrentPlan(plan.id) ? ' (Current)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <Button
+                  onClick={handleChangePlan}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={!selectedPlan || changingPlan}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {changingPlan ? 'Processing...' : 'Change Plan'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
-      <Tabs defaultValue="packages" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="packages">Available Packages</TabsTrigger>
-          <TabsTrigger value="active">Active Placements</TabsTrigger>
-          <TabsTrigger value="analytics">Performance</TabsTrigger>
+      {/* Current Subscription Status */}
+      {currentSubscription && subscriptionUsage && (
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {getPlanIcon(currentSubscription.plan.name)}
+              Current Plan: {currentSubscription.plan.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <div className="text-sm text-gray-600">Monthly Cost</div>
+                <div className="text-2xl font-bold text-blue-600">${currentSubscription.plan.monthly_price}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Services Used</div>
+                <div className="text-2xl font-bold text-purple-600">
+                  {subscriptionUsage.current_services} / {subscriptionUsage.service_limit}
+                </div>
+                <Progress 
+                  value={(subscriptionUsage.current_services / subscriptionUsage.service_limit) * 100} 
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Commission Rate</div>
+                <div className="text-2xl font-bold text-green-600">{currentSubscription.plan.commission_rate}%</div>
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex items-center justify-between text-sm">
+                <div>
+                  <span className="text-gray-600">Flat Fee Services:</span>
+                  <span className="ml-2 font-semibold">{subscriptionUsage.flat_fee_services}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Custom Services:</span>
+                  <span className="ml-2 font-semibold">{subscriptionUsage.custom_services}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Days Remaining:</span>
+                  <span className="ml-2 font-semibold">{subscriptionUsage.days_remaining}</span>
+                </div>
+              </div>
+            </div>
+
+            {!subscriptionUsage.can_add_service && (
+              <Alert className="mt-4">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  You've reached your service limit. Upgrade your plan to add more services.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs defaultValue="plans" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+          <TabsTrigger value="usage">Usage & Analytics</TabsTrigger>
         </TabsList>
 
-        {/* Available Packages Tab */}
-        <TabsContent value="packages" className="space-y-6">
+        {/* Subscription Plans Tab */}
+        <TabsContent value="plans" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredPackages.map((pkg) => (
+            {subscriptionPlans.map((plan) => (
               <Card
-                key={pkg.id}
+                key={plan.id}
                 className={`relative transition-all duration-200 hover:shadow-lg ${
-                  pkg.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''
-                }`}
+                  isCurrentPlan(plan.id) ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                } ${plan.name.toLowerCase() === 'professional' ? 'ring-2 ring-purple-500 shadow-lg' : ''}`}
               >
-                {pkg.popular && (
+                {plan.name.toLowerCase() === 'professional' && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-blue-500 text-white px-3 py-1">
+                    <Badge className="bg-purple-500 text-white px-3 py-1">
                       Most Popular
+                    </Badge>
+                  </div>
+                )}
+
+                {isCurrentPlan(plan.id) && (
+                  <div className="absolute -top-3 right-4">
+                    <Badge className="bg-green-500 text-white px-3 py-1">
+                      Current Plan
                     </Badge>
                   </div>
                 )}
 
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
-                    <Star className="h-5 w-5 text-yellow-500" />
-                    {pkg.name}
+                    {getPlanIcon(plan.name)}
+                    {plan.name}
                   </CardTitle>
-                  <CardDescription>{pkg.description}</CardDescription>
+                  <CardDescription>{plan.description}</CardDescription>
 
                   <div className="space-y-2">
                     <div className="text-3xl font-bold text-blue-600">
-                      ${pkg.totalPrice}
+                      ${plan.monthly_price}
+                      <span className="text-lg text-gray-500">/month</span>
                     </div>
                     <div className="text-sm text-gray-500">
-                      ${pkg.dailyRate}/day for {pkg.duration} days
+                      Up to {plan.service_limit} services
                     </div>
-                    {pkg.savings && (
-                      <Badge variant="secondary" className="text-green-600">
-                        {pkg.savings}
-                      </Badge>
-                    )}
+                    <Badge variant="secondary" className="text-purple-600">
+                      {plan.commission_rate}% commission rate
+                    </Badge>
                   </div>
                 </CardHeader>
 
                 <CardContent>
-                  <ul className="space-y-2">
-                    {pkg.benefits.map((benefit, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      {plan.service_limit} total services (flat fee + custom)
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      {plan.features.analytics} analytics
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      {plan.features.support} support
+                    </li>
+                    {plan.features.featured_placement && (
+                      <li className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        {benefit}
+                        {typeof plan.features.featured_placement === 'string' 
+                          ? plan.features.featured_placement 
+                          : 'Featured placement'} in search results
                       </li>
-                    ))}
+                    )}
+                    {plan.features.custom_branding && (
+                      <li className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        Custom branding options
+                      </li>
+                    )}
                   </ul>
 
-                  <Button
-                    className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
-                    onClick={() => {
-                      setSelectedPackage(pkg.id);
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    Select Package
-                  </Button>
+                  {isCurrentPlan(plan.id) ? (
+                    <Button className="w-full" variant="outline" disabled>
+                      Current Plan
+                    </Button>
+                  ) : currentSubscription ? (
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      onClick={() => {
+                        setSelectedPlan(plan.id);
+                        setIsUpgradeDialogOpen(true);
+                      }}
+                      disabled={subscribing}
+                    >
+                      {canUpgrade(plan.id) ? 'Upgrade' : canDowngrade(plan.id) ? 'Downgrade' : 'Switch'} to {plan.name}
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      onClick={() => handleSubscribeToPlan(plan.id)}
+                      disabled={subscribing}
+                    >
+                      {subscribing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Subscribing...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Subscribe Now
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -307,13 +465,13 @@ const VendorFeaturedPlacementPage = () => {
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-blue-900 mb-2">How Featured Placement Works</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">How Subscription Plans Work</h3>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Your services appear at the top of search results and category pages</li>
-                    <li>• Featured badge increases customer trust and click-through rates</li>
-                    <li>• Placement begins within 24 hours of purchase</li>
-                    <li>• Track performance with detailed analytics</li>
-                    <li>• No long-term commitments - purchase as needed</li>
+                    <li>• Service limits apply to both flat fee and custom services combined</li>
+                    <li>• Lower commission rates mean you keep more of your earnings</li>
+                    <li>• Higher tiers get priority support and additional features</li>
+                    <li>• Plans auto-renew monthly - cancel anytime</li>
+                    <li>• Upgrade or downgrade your plan at any time</li>
                   </ul>
                 </div>
               </div>
@@ -321,151 +479,168 @@ const VendorFeaturedPlacementPage = () => {
           </Card>
         </TabsContent>
 
-        {/* Active Placements Tab */}
-        <TabsContent value="active" className="space-y-6">
-          {activePlacements.length > 0 ? (
-            <div className="space-y-4">
-              {activePlacements.map((placement) => (
-                <Card key={placement.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${getStatusColor(placement.status)}`} />
-                        {placement.packageName}
-                      </CardTitle>
-                      <Badge variant={placement.status === 'active' ? 'default' : 'secondary'}>
-                        {placement.status.charAt(0).toUpperCase() + placement.status.slice(1)}
-                      </Badge>
-                    </div>
+        {/* Usage & Analytics Tab */}
+        <TabsContent value="usage" className="space-y-6">
+          {currentSubscription && subscriptionUsage ? (
+            <div className="space-y-6">
+              {/* Usage Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Services</CardTitle>
+                    <Package className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Days Remaining</div>
-                        <div className="text-2xl font-bold text-blue-600">{placement.daysRemaining}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Total Views</div>
-                        <div className="text-2xl font-bold text-green-600">{placement.totalViews}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Click-Through</div>
-                        <div className="text-2xl font-bold text-purple-600">{placement.clickThrough}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">End Date</div>
-                        <div className="text-lg font-semibold">{new Date(placement.endDate).toLocaleDateString()}</div>
-                      </div>
+                    <div className="text-2xl font-bold">
+                      {subscriptionUsage.current_services} / {subscriptionUsage.service_limit}
                     </div>
+                    <Progress 
+                      value={(subscriptionUsage.current_services / subscriptionUsage.service_limit) * 100} 
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {subscriptionUsage.service_limit - subscriptionUsage.current_services} services remaining
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Flat Fee Services</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {subscriptionUsage.flat_fee_services}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Fixed-price services
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Custom Services</CardTitle>
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {subscriptionUsage.custom_services}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Quantity-based pricing
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Subscription Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Subscription Details</CardTitle>
+                  <CardDescription>
+                    Current plan information and billing cycle
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-sm text-gray-500">Current Plan</div>
+                          <div className="font-semibold flex items-center gap-2">
+                            {getPlanIcon(currentSubscription.plan.name)}
+                            {currentSubscription.plan.name}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500">Monthly Cost</div>
+                          <div className="font-semibold">${currentSubscription.plan.monthly_price}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500">Commission Rate</div>
+                          <div className="font-semibold">{currentSubscription.plan.commission_rate}%</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-sm text-gray-500">Status</div>
+                          <Badge variant={currentSubscription.status === 'active' ? 'default' : 'secondary'}>
+                            {currentSubscription.status.charAt(0).toUpperCase() + currentSubscription.status.slice(1)}
+                          </Badge>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500">Days Remaining</div>
+                          <div className="font-semibold">{subscriptionUsage.days_remaining} days</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500">Next Billing</div>
+                          <div className="font-semibold">
+                            {new Date(currentSubscription.current_period_end).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-6 border-t">
+                    <div className="flex gap-3">
+                      {currentSubscription.status === 'active' && (
+                        <Button 
+                          variant="destructive" 
+                          onClick={handleCancelSubscription}
+                        >
+                          Cancel Subscription
+                        </Button>
+                      )}
+                      {currentSubscription.status === 'cancelled' && (
+                        <Button 
+                          onClick={async () => {
+                            try {
+                              await VendorSubscriptionAPI.reactivateSubscription();
+                              toast.success('Subscription reactivated successfully');
+                              await loadData();
+                            } catch (error) {
+                              toast.error('Failed to reactivate subscription');
+                            }
+                          }}
+                        >
+                          Reactivate Subscription
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           ) : (
             <Card>
               <CardContent className="text-center py-12">
-                <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Placements</h3>
-                <p className="text-gray-600 mb-4">Purchase a featured placement package to boost your visibility</p>
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Subscription</h3>
+                <p className="text-gray-600 mb-4">Subscribe to a plan to start offering services and track your usage</p>
                 <Button
-                  onClick={() => setIsDialogOpen(true)}
+                  onClick={() => {
+                    // Focus on the plans tab
+                    const plansTab = document.querySelector('[value="plans"]') as HTMLElement;
+                    plansTab?.click();
+                  }}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  Get Started
+                  View Plans
                 </Button>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Featured Views</CardTitle>
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {analytics?.total_featured_views?.toLocaleString() || '0'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Total featured views
-                </p>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Click-Through Rate</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {analytics?.click_through_rate ? `${analytics.click_through_rate}%` : '0%'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Average click-through rate
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ROI</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {analytics?.roi_percentage ? `${analytics.roi_percentage}%` : '0%'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Return on investment
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Insights</CardTitle>
-              <CardDescription>
-                How your featured placements are performing
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {analytics?.performance_insights?.map((insight, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {insight.type === 'visibility' ? (
-                        <ArrowUp className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <Target className="h-5 w-5 text-blue-600" />
-                      )}
-                      <div>
-                        <div className={`font-semibold ${insight.type === 'visibility' ? 'text-green-900' : 'text-blue-900'}`}>
-                          {insight.title}
-                        </div>
-                        <div className={`text-sm ${insight.type === 'visibility' ? 'text-green-700' : 'text-blue-700'}`}>
-                          {insight.description}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )) || (
-                  <div className="text-center py-8 text-gray-500">
-                    No performance insights available yet
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default VendorFeaturedPlacementPage;
+export default VendorSubscriptionPage;

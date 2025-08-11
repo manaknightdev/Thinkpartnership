@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import VendorServiceTiersAPI from "@/services/VendorServiceTiersAPI";
+import VendorSubscriptionAPI from "@/services/VendorSubscriptionAPI";
 import API_CONFIG from "@/config/api";
 import vendorApiClient from "@/config/vendorAxios";
 import { TaxSettings } from "@/components/TaxSettings";
@@ -159,6 +160,19 @@ const VendorServiceTiersPage = () => {
   };
 
   const handleAddTier = async () => {
+    // Check subscription limit first
+    const limitCheck = await VendorSubscriptionAPI.checkServiceLimit();
+    if (limitCheck.error || !limitCheck.data?.can_add) {
+      const errorMessage = limitCheck.message || "You've reached your service limit. Please upgrade your subscription plan.";
+      toast.error(errorMessage, { 
+        duration: 8000,
+        description: "Please visit the Subscription Plans page to upgrade your plan.",
+        position: "top-center"
+      });
+      setIsAddModalOpen(false); // Close the modal
+      return;
+    }
+
     // Validate required fields
     if (!newTier.tier_name.trim()) {
       toast.error('Service name is required');
