@@ -198,10 +198,10 @@ const CustomerSignup = () => {
       MarketplaceAuthAPI.storeAuthData(response);
 
       const clientName = client?.company_name || 'the marketplace';
-      showSuccess(`Welcome to ${clientName}! Your account has been created successfully. Please login to continue.`);
+      showSuccess(`Welcome to ${clientName}! Your account has been created successfully.`);
 
-      // Redirect to login page (no client parameter needed - auto-detection will work)
-      navigate('/marketplace/login');
+      // Redirect directly to marketplace since we already stored the token
+      navigate('/marketplace');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
