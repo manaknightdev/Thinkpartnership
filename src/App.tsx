@@ -45,7 +45,7 @@ import ClientPricingBillingPage from "./pages/client/ClientPricingBillingPage";
 import ClientWalletPage from "./pages/client/ClientWalletPage";
 import ClientNotificationsPage from "./pages/client/ClientNotificationsPage";
 import ClientHelpSupportPage from "./pages/client/ClientHelpSupportPage";
-import ClientRevenueRulesPage from "./pages/client/ClientRevenueRulesPage";
+import ClientCommissionRulesPage from "./pages/client/ClientCommissionRulesPage";
 import ClientBrandingPage from "./pages/client/ClientBrandingPage";
 import ClientMarketplaceOrdersPage from "./pages/client/ClientMarketplaceOrdersPage"; // New import
 import ClientTasksPage from "./pages/client/ClientTasksPage";
@@ -239,7 +239,7 @@ const App = () => (
             <Route path="wallet" element={<ClientWalletPage />} />
             <Route path="notifications" element={<ClientNotificationsPage />} />
             <Route path="help" element={<ClientHelpSupportPage />} />
-            <Route path="rules" element={<ClientRevenueRulesPage />} />
+            <Route path="rules" element={<ClientCommissionRulesPage />} />
             <Route path="branding" element={<ClientBrandingPage />} />
             <Route path="categories" element={<ClientCategoriesPage />} /> {/* New route */}
             <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
