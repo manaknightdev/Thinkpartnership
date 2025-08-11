@@ -10,6 +10,8 @@ export interface VendorService {
   base_price: number;
   referral_percentage?: number;
   service_type?: string;
+  tax_inclusive?: boolean;
+  custom_tax_rate?: number | null;
   pricing_tiers: PricingTier[];
   features: string[];
   tags: string[];

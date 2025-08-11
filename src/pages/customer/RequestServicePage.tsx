@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import {
 
 const RequestServicePage = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // API state
@@ -57,7 +58,8 @@ const RequestServicePage = () => {
         setLoading(true);
         setError('');
 
-        const response = await ServicesAPI.getServiceDetails(parseInt(id));
+        const serviceTypeParam = searchParams.get('service_type') as 'flat_fee' | 'custom' | null;
+        const response = await ServicesAPI.getServiceDetails(parseInt(id), serviceTypeParam || undefined);
         if (response.error) {
           throw new Error('Service not found');
         }
@@ -71,7 +73,7 @@ const RequestServicePage = () => {
     };
 
     fetchServiceDetails();
-  }, [id]);
+  }, [id, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

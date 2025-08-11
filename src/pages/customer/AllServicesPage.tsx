@@ -134,8 +134,9 @@ const AllServicesPage = () => {
   // };
 
   // Handle service click
-  const handleServiceClick = (serviceId: number) => {
-    navigate(`/marketplace/services/${serviceId}`);
+  const handleServiceClick = (serviceId: number, serviceType?: string) => {
+    const typeQuery = serviceType ? `?service_type=${serviceType}` : '';
+    navigate(`/marketplace/services/${serviceId}${typeQuery}`);
   };
 
   // Calculate pagination
@@ -485,7 +486,7 @@ const AllServicesPage = () => {
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => handleServiceClick(service.id)}
+                        onClick={() => handleServiceClick(service.id, (service as any).service_type)}
                         className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
                         View Details

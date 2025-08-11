@@ -93,9 +93,10 @@ const CustomerBrowseServicesPage = () => {
     navigate(`/marketplace/services?${params.toString()}`);
   };
 
-  const handleViewDetails = (serviceId: number) => {
-    // Navigate to the marketplace service details page
-    navigate(`/marketplace/services/${serviceId}`);
+  const handleViewDetails = (serviceId: number, serviceType?: string) => {
+    // Navigate to the marketplace service details page with type to avoid ID collisions
+    const typeQuery = serviceType ? `?service_type=${serviceType}` : '';
+    navigate(`/marketplace/services/${serviceId}${typeQuery}`);
   };
 
   const handleCategoryClick = (categorySlug: string) => {
@@ -367,7 +368,7 @@ const CustomerBrowseServicesPage = () => {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => handleViewDetails(service.id)}
+                      onClick={() => handleViewDetails(service.id, (service as any).service_type)}
                       className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       View Details

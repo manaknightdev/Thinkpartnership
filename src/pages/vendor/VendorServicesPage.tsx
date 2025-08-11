@@ -348,8 +348,8 @@ const VendorServicesPage = () => {
       response_time: service.response_time || "",
       service_areas: service.service_areas || [],
       requirements: service.requirements || "",
-      tax_inclusive: service.tax_inclusive || false,
-      custom_tax_rate: service.custom_tax_rate || undefined,
+      tax_inclusive: (service as any).tax_inclusive || false,
+      custom_tax_rate: (service as any).custom_tax_rate || undefined,
     });
 
     // Reset image upload states for editing
@@ -360,8 +360,8 @@ const VendorServicesPage = () => {
     }
 
     // Set tax states for editing
-    setTaxInclusive(service.tax_inclusive || false);
-    setCustomTaxRate(service.custom_tax_rate || null);
+    setTaxInclusive((service as any).tax_inclusive || false);
+    setCustomTaxRate((service as any).custom_tax_rate || null);
 
     setShowEditDialog(true);
   };

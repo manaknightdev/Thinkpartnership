@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +24,7 @@ import {
 
 const ServiceDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { addToCart, loading: cartLoading } = useCart();
@@ -46,7 +47,9 @@ const ServiceDetailsPage = () => {
       try {
         setLoading(true);
         setError("");
-        const response = await ServicesAPI.getServiceDetails(id);
+        const serviceTypeParam = searchParams.get('service_type') as 'flat_fee' | 'custom' | null;
+        // If type provided, pass it to avoid table collision; backend will fallback otherwise
+        const response = await ServicesAPI.getServiceDetails(id, serviceTypeParam || undefined);
 
         if (response.error) {
           setError("Service not found");
@@ -62,7 +65,7 @@ const ServiceDetailsPage = () => {
     };
 
     fetchServiceDetails();
-  }, [id]);
+  }, [id, searchParams]);
 
   // Handle starting a chat with the vendor
   const handleStartChat = async () => {

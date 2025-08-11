@@ -95,7 +95,7 @@ const CheckoutPage = () => {
         }
 
         // Get detailed service information
-        const detailsResponse = await ServicesAPI.getServiceDetails(matchedService.id);
+        const detailsResponse = await ServicesAPI.getServiceDetails(matchedService.id, (matchedService as any).service_type as 'flat_fee' | 'custom' | undefined);
 
         if (detailsResponse.error) {
           setError('Failed to load service details');
@@ -217,7 +217,7 @@ const CheckoutPage = () => {
             <Button
               variant="outline"
               className="mb-6 flex items-center gap-2"
-              onClick={() => navigate(`/marketplace/services/${service.id}`)}
+              onClick={() => navigate(`/marketplace/services/${service.id}${(service as any).service_type ? `?service_type=${(service as any).service_type}` : ''}`)}
             >
               <ArrowLeft className="w-4 h-4" /> Back to Service Details
             </Button>

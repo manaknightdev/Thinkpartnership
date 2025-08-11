@@ -128,10 +128,11 @@ class ServicesAPI {
     return response.data;
   }
 
-  // Get service details by ID
-  async getServiceDetails(serviceId: string | number): Promise<ServiceDetailsResponse> {
+  // Get service details by ID (supports service_type to avoid ID collisions)
+  async getServiceDetails(serviceId: string | number, serviceType?: 'flat_fee' | 'custom'): Promise<ServiceDetailsResponse> {
+    const query = serviceType ? `?service_type=${serviceType}` : '';
     const response = await apiClient.get(
-      `${API_CONFIG.ENDPOINTS.SERVICES.DETAILS}/${serviceId}`
+      `${API_CONFIG.ENDPOINTS.SERVICES.DETAILS}/${serviceId}${query}`
     );
     return response.data;
   }
