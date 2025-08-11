@@ -9,8 +9,10 @@ import { showSuccess, showError } from '@/utils/toast';
 const OAuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'choose-client'>('loading');
   const [message, setMessage] = useState('Processing your login...');
+  const [clients, setClients] = useState<Array<{ id: number; company_name: string; subdomain?: string; logo_url?: string }>>([]);
+  const [attaching, setAttaching] = useState(false);
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -45,14 +47,28 @@ const OAuthCallback = () => {
 
           MarketplaceAuthAPI.storeAuthData(authResponse);
 
-          setStatus('success');
-          setMessage('Login successful! Redirecting to marketplace...');
-          showSuccess('Welcome! You have been successfully logged in.');
+          // Fetch profile to see if user is already attached to a client
+          const profile = await MarketplaceAuthAPI.getProfile();
+          const hasClient = !!profile.user?.client_id || !!profile.user?.customer_id;
 
-          // Redirect to marketplace after a short delay
-          setTimeout(() => {
-            navigate('/marketplace');
-          }, 2000);
+          if (hasClient) {
+            setStatus('success');
+            setMessage('Login successful! Redirecting to marketplace...');
+            showSuccess('Welcome! You have been successfully logged in.');
+            setTimeout(() => navigate('/marketplace'), 1200);
+          } else {
+            // No client association; prompt to choose a client
+            const res = await MarketplaceAuthAPI.listClients();
+            if (!res.error && res.clients?.length) {
+              setClients(res.clients);
+              setStatus('choose-client');
+              setMessage('Select a client to join');
+            } else {
+              setStatus('success');
+              setMessage('Login successful! Redirecting to marketplace...');
+              setTimeout(() => navigate('/marketplace'), 1200);
+            }
+          }
         } else {
           throw new Error('Invalid authentication response');
         }
@@ -70,6 +86,23 @@ const OAuthCallback = () => {
 
   const handleRetry = () => {
     navigate('/marketplace/login');
+  };
+
+  const handleAttach = async (clientId: number) => {
+    try {
+      setAttaching(true);
+      const result = await MarketplaceAuthAPI.attachToClient(clientId);
+      if (result.error) {
+        showError(result.message || 'Failed to attach to client');
+        setAttaching(false);
+        return;
+      }
+      showSuccess('Client selected successfully');
+      navigate('/marketplace');
+    } catch (e: any) {
+      showError(e?.message || 'Failed to attach to client');
+      setAttaching(false);
+    }
   };
 
   return (
@@ -97,6 +130,28 @@ const OAuthCallback = () => {
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <p className="text-gray-600">{message}</p>
+            </div>
+          )}
+
+          {status === 'choose-client' && (
+            <div className="space-y-4">
+              <p className="text-gray-700">{message}</p>
+              <div className="grid grid-cols-1 gap-3">
+                {clients.map((c) => (
+                  <Button
+                    key={c.id}
+                    variant="outline"
+                    className="justify-start"
+                    disabled={attaching}
+                    onClick={() => handleAttach(c.id)}
+                  >
+                    {c.logo_url ? (
+                      <img src={c.logo_url} alt={c.company_name} className="w-6 h-6 mr-2 rounded" />
+                    ) : null}
+                    {c.company_name}
+                  </Button>
+                ))}
+              </div>
             </div>
           )}
 

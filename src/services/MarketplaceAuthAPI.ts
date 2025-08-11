@@ -117,6 +117,23 @@ class MarketplaceAuthAPI {
     return response.data;
   }
 
+  // Attach current user to a client as marketplace customer
+  async attachToClient(clientId: number, details?: { first_name?: string; last_name?: string; phone?: string }): Promise<{ error: boolean; message: string }> {
+    const client = this.getClientAwareApiClient();
+    const response = await client.post('/api/marketplace/customers/attach-to-client', {
+      client_id: clientId,
+      ...details,
+    });
+    return response.data;
+  }
+
+  // List clients
+  async listClients(): Promise<{ error: boolean; clients: Array<{ id: number; company_name: string; subdomain?: string; logo_url?: string }> }> {
+    const client = this.getClientAwareApiClient();
+    const response = await client.get('/api/marketplace/clients');
+    return response.data;
+  }
+
   // Store auth data in localStorage
   storeAuthData(authResponse: MarketplaceAuthResponse) {
     const token = authResponse.token || authResponse.access_token;
