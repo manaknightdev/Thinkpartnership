@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon, Calculator } from 'lucide-react';
-import TaxAPI, { TaxCalculation } from '@/services/TaxAPI';
+import { TaxAPI, TaxCalculation } from '@/services/TaxAPI';
 
 interface TaxSettingsProps {
   taxInclusive: boolean;

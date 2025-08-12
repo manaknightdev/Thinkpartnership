@@ -24,7 +24,7 @@ import VendorSubscriptionAPI from "@/services/VendorSubscriptionAPI";
 import API_CONFIG from "@/config/api";
 import vendorApiClient from "@/config/vendorAxios";
 import { TaxSettings } from "@/components/TaxSettings";
-import TaxAPI, { TaxCalculation } from "@/services/TaxAPI";
+import { TaxAPI, TaxCalculation } from "@/services/TaxAPI";
 
 interface ServiceTier {
   id: number;

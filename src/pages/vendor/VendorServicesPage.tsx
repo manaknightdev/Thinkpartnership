@@ -23,7 +23,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { toast } from "sonner";
 import API_CONFIG from "@/config/api";
 import { TaxSettings } from "@/components/TaxSettings";
-import TaxAPI, { TaxCalculation } from "@/services/TaxAPI";
+import { TaxAPI, TaxCalculation } from "@/services/TaxAPI";
 
 const VendorServicesPage = () => {
   const [services, setServices] = useState<VendorService[]>([]);
