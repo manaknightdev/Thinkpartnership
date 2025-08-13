@@ -175,8 +175,9 @@ const CustomerSignup = () => {
         ...(referralInfo.inviteCode && { invite_code: referralInfo.inviteCode }),
       };
 
-      // Use client ID directly instead of clientSlug
-      const clientIdentifier = client?.id?.toString() || clientSlug;
+      // Use client ID directly instead of clientSlug; fallback to referral/client URL param
+      const urlClientParam = new URLSearchParams(window.location.search).get('client') || undefined;
+      const clientIdentifier = client?.id?.toString() || clientSlug || referralInfo.clientId || urlClientParam;
 
       console.log('🚀 Registering customer with client context:', {
         client: client?.company_name,
