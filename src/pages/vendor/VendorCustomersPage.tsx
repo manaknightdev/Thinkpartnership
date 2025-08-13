@@ -45,6 +45,7 @@ const VendorCustomersPage = () => {
   const [customers, setCustomers] = useState<VendorCustomer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -111,6 +112,67 @@ const VendorCustomersPage = () => {
     setSelectedCustomer(customer);
   };
 
+  const handleExport = () => {
+    try {
+      setIsExporting(true);
+
+      if (!filteredCustomers || filteredCustomers.length === 0) {
+        toast.info('No customers to export');
+        return;
+      }
+
+      const headers = [
+        'Customer ID',
+        'Name',
+        'Email',
+        'Phone',
+        'Total Spent',
+        'Orders Count',
+        'Status',
+        'Joined',
+        'Last Order',
+        'Relationship Type',
+        'Invite Code',
+        'Referral Date',
+      ];
+
+      const csvContent = [
+        headers.join(','),
+        ...filteredCustomers.map(c => [
+          `"${c.id}"`,
+          `"${(c.customer_name || '').replace(/"/g, '""')}"`,
+          `"${(c.customer_email || '').replace(/"/g, '""')}"`,
+          `"${(c.customer_phone || '').replace(/"/g, '""')}"`,
+          `"${Number(c.total_spent || 0).toFixed(2)}"`,
+          `"${c.orders_count ?? 0}"`,
+          `"${c.status === 1 ? 'Active' : 'Inactive'}"`,
+          `"${c.created_at ? new Date(c.created_at).toISOString() : ''}"`,
+          `"${c.last_order_date ? new Date(c.last_order_date).toISOString() : ''}"`,
+          `"${(c.relationship_type || '').replace(/"/g, '""')}"`,
+          `"${(c.invite_code || '').replace(/"/g, '""')}"`,
+          `"${c.referral_date ? new Date(c.referral_date).toISOString() : ''}"`,
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `vendor-customers-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Customers exported successfully');
+    } catch (error) {
+      console.error('Error exporting customers:', error);
+      showError('Failed to export customers');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const shareCustomer = (customer: VendorCustomer) => {
     const shareText = `Check out ${customer.customer_name} - one of my valued customers on ThinkPartnership!`;
     if (navigator.share) {
@@ -169,9 +231,18 @@ const VendorCustomersPage = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </>
+            )}
           </Button>
           <Button onClick={handleInviteCustomers} className="bg-blue-600 hover:bg-blue-700">
             <UserPlus className="h-4 w-4 mr-2" />
