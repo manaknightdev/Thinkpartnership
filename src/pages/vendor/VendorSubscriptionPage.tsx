@@ -1,12 +1,12 @@
 /**
- * VendorSubscriptionPage - Manage vendor subscription plans and service limits
+ * VendorSubscriptionPage - Manage vendor featured plans and durations
  *
  * Features:
- * - Three subscription tiers: Basic ($10), Professional ($20), Premium ($30)
- * - Service limits: 3, 7, and 15 services respectively
- * - Combined limit for both flat fee and custom services
- * - Different commission rates per tier
- * - Subscription management (upgrade, downgrade, cancel)
+ * - Three tiers: Basic ($10), Professional ($20), Premium ($30)
+ * - Featured durations: 3, 7, and 30 days respectively
+ * - Unlimited services during active featured period
+ * - Different commission rates per tier (unchanged)
+ * - Plan changes and reactivation supported
  *
  * Revenue Model:
  * - Monthly recurring revenue for clients
@@ -57,6 +57,14 @@ const VendorSubscriptionPage = () => {
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
   const [changingPlan, setChangingPlan] = useState(false);
+
+  // Helper: derive featured days from plan
+  const getPlanDays = (plan?: SubscriptionPlan | null) => {
+    if (!plan) return 0;
+    const nameLower = (plan.name || '').toLowerCase();
+    const defaultDays = nameLower.includes('basic') ? 3 : (nameLower.includes('professional') ? 7 : (nameLower.includes('premium') ? 30 : 30));
+    return plan.features?.featured_duration_days || defaultDays;
+  };
 
   // Load data on component mount
   useEffect(() => {
@@ -193,14 +201,14 @@ const VendorSubscriptionPage = () => {
     if (!currentSubscription) return true;
     const currentPlan = subscriptionPlans.find(p => p.id === currentSubscription.plan_id);
     const targetPlan = subscriptionPlans.find(p => p.id === planId);
-    return targetPlan && currentPlan && targetPlan.service_limit > currentPlan.service_limit;
+    return !!(targetPlan && currentPlan && getPlanDays(targetPlan) > getPlanDays(currentPlan));
   };
 
   const canDowngrade = (planId: number) => {
     if (!currentSubscription) return false;
     const currentPlan = subscriptionPlans.find(p => p.id === currentSubscription.plan_id);
     const targetPlan = subscriptionPlans.find(p => p.id === planId);
-    return targetPlan && currentPlan && targetPlan.service_limit < currentPlan.service_limit;
+    return !!(targetPlan && currentPlan && getPlanDays(targetPlan) < getPlanDays(currentPlan));
   };
 
   if (loading) {
@@ -223,10 +231,10 @@ const VendorSubscriptionPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Users className="h-8 w-8 text-blue-600" />
-            Subscription Plans
+            Featured Plans
           </h1>
           <p className="text-gray-600 mt-2">
-            Choose the perfect plan for your business needs and manage your service limits
+            Get featured in the marketplace for a set number of days. Services are unlimited while featured
           </p>
         </div>
 
@@ -240,7 +248,7 @@ const VendorSubscriptionPage = () => {
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Change Subscription Plan</DialogTitle>
+                 <DialogTitle>Change Featured Plan</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -257,7 +265,7 @@ const VendorSubscriptionPage = () => {
                         value={plan.id}
                         disabled={isCurrentPlan(plan.id)}
                       >
-                        {plan.name} - ${plan.monthly_price}/month ({plan.service_limit} services)
+                        {plan.name} - ${plan.monthly_price} for {getPlanDays(plan)} days (unlimited services)
                         {isCurrentPlan(plan.id) ? ' (Current)' : ''}
                       </option>
                     ))}
@@ -270,7 +278,7 @@ const VendorSubscriptionPage = () => {
                   disabled={!selectedPlan || changingPlan}
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  {changingPlan ? 'Processing...' : 'Change Plan'}
+                   {changingPlan ? 'Processing...' : 'Change Plan'}
                 </Button>
               </div>
             </DialogContent>
@@ -290,18 +298,14 @@ const VendorSubscriptionPage = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <div className="text-sm text-gray-600">Monthly Cost</div>
+                <div className="text-sm text-gray-600">Cost</div>
                 <div className="text-2xl font-bold text-blue-600">${currentSubscription.plan.monthly_price}</div>
               </div>
               <div>
-                <div className="text-sm text-gray-600">Services Used</div>
+                <div className="text-sm text-gray-600">Services Active</div>
                 <div className="text-2xl font-bold text-purple-600">
-                  {subscriptionUsage.current_services} / {subscriptionUsage.service_limit}
+                  {subscriptionUsage.current_services} (unlimited allowed)
                 </div>
-                <Progress 
-                  value={(subscriptionUsage.current_services / subscriptionUsage.service_limit) * 100} 
-                  className="mt-2"
-                />
               </div>
               <div>
                 <div className="text-sm text-gray-600">Plan Status</div>
@@ -325,22 +329,13 @@ const VendorSubscriptionPage = () => {
                 </div>
               </div>
             </div>
-
-            {!subscriptionUsage.can_add_service && (
-              <Alert className="mt-4">
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  You've reached your service limit. Upgrade your plan to add more services.
-                </AlertDescription>
-              </Alert>
-            )}
           </CardContent>
         </Card>
       )}
 
       <Tabs defaultValue="plans" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="plans">Featured Plans</TabsTrigger>
           <TabsTrigger value="usage">Usage & Analytics</TabsTrigger>
         </TabsList>
 
@@ -380,10 +375,10 @@ const VendorSubscriptionPage = () => {
                   <div className="space-y-2">
                     <div className="text-3xl font-bold text-blue-600">
                       ${plan.monthly_price}
-                      <span className="text-lg text-gray-500">/month</span>
+                      <span className="text-lg text-gray-500"> / {getPlanDays(plan)} days</span>
                     </div>
                     <div className="text-sm text-gray-500">
-                      Up to {plan.service_limit} services
+                      Unlimited services while featured
                     </div>
                   </div>
                 </CardHeader>
@@ -392,11 +387,11 @@ const VendorSubscriptionPage = () => {
                   <ul className="space-y-2 mb-6">
                     <li className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      {plan.service_limit} total services (flat fee + custom)
+                      Featured in marketplace for {getPlanDays(plan)} days
                     </li>
                     <li className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      Create and manage your services
+                      Unlimited services while featured
                     </li>
                     <li className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -453,12 +448,12 @@ const VendorSubscriptionPage = () => {
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-blue-900 mb-2">How Subscription Plans Work</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">How Featured Plans Work</h3>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Service limits apply to both flat fee and custom services combined</li>
-                    <li>• Create and manage your services within your plan limits</li>
+                    <li>• Your services are featured for a set number of days</li>
+                    <li>• Unlimited services while your plan is active</li>
                     <li>• Receive payments directly from customers</li>
-                    <li>• Plans auto-renew monthly - cancel anytime</li>
+                    <li>• Plans do not auto-renew; pay again to extend</li>
                     <li>• Upgrade or downgrade your plan at any time</li>
                   </ul>
                 </div>
@@ -480,14 +475,11 @@ const VendorSubscriptionPage = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {subscriptionUsage.current_services} / {subscriptionUsage.service_limit}
+                      {subscriptionUsage.current_services}
                     </div>
-                    <Progress 
-                      value={(subscriptionUsage.current_services / subscriptionUsage.service_limit) * 100} 
-                      className="mt-2"
-                    />
+                    <p className="text-xs text-muted-foreground mt-2">Unlimited services while featured</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {subscriptionUsage.service_limit - subscriptionUsage.current_services} services remaining
+                      {subscriptionUsage.days_remaining} days remaining in current plan
                     </p>
                   </CardContent>
                 </Card>
@@ -543,12 +535,16 @@ const VendorSubscriptionPage = () => {
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm text-gray-500">Monthly Cost</div>
+                          <div className="text-sm text-gray-500">Cost</div>
                           <div className="font-semibold">${currentSubscription.plan.monthly_price}</div>
                         </div>
                         <div>
-                          <div className="text-sm text-gray-500">Service Limit</div>
-                          <div className="font-semibold">{currentSubscription.plan.service_limit} services</div>
+                          <div className="text-sm text-gray-500">Featured Duration</div>
+                          <div className="font-semibold">{getPlanDays(currentSubscription.plan)} days</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500">Services</div>
+                          <div className="font-semibold">Unlimited while active</div>
                         </div>
                       </div>
                     </div>

@@ -13,6 +13,8 @@ export interface SubscriptionPlan {
     support: string;
     featured_placement: boolean | string;
     custom_branding?: boolean;
+    featured_duration_days?: number;
+    unlimited_services?: boolean;
   };
   is_active: boolean;
   sort_order: number;
