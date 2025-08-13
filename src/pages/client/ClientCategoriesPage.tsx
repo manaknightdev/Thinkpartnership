@@ -318,7 +318,6 @@ const ClientCategoriesPage = () => {
               <CardContent>
                 <div className="space-y-2">
                   <div className="text-sm text-gray-500">
-                    <p>Slug: {category.slug}</p>
                     <p>Created: {new Date(category.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
