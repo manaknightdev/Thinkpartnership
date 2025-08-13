@@ -481,24 +481,28 @@ const ServiceDetailsPage = () => {
                   </div>
                 )}
 
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full text-lg py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
-                  onClick={handleStartChat}
-                  disabled={startingChat}
-                >
-                  {startingChat ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <MessageCircle className="mr-2 h-5 w-5" />
-                  )}
-                  {startingChat ? 'Starting Chat...' : 'Chat with Provider'}
-                </Button>
+                {(service as any).service_type !== 'custom' && (
+                  <>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full text-lg py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                      onClick={handleStartChat}
+                      disabled={startingChat}
+                    >
+                      {startingChat ? (
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      ) : (
+                        <MessageCircle className="mr-2 h-5 w-5" />
+                      )}
+                      {startingChat ? 'Starting Chat...' : 'Chat with Provider'}
+                    </Button>
 
-                <p className="text-xs text-center text-muted-foreground">
-                  Free consultation • No commitment required
-                </p>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Free consultation • No commitment required
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
 
