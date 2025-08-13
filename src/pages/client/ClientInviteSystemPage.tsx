@@ -29,6 +29,22 @@ import ClientAPI, { ClientInvite } from "@/services/ClientAPI";
 import ClientReferralAPI from "@/services/ClientReferralAPI";
 
 const ClientInviteSystemPage = () => {
+  // Public site base for referral links shown to users (QA wants Netlify domain)
+  const PUBLIC_SITE_BASE = (import.meta as any).env?.VITE_PUBLIC_SITE_URL ||
+    "https://think-partnership.netlify.app";
+
+  // Rewrite any incoming referral link to the public site base while preserving path and query
+  const rewriteReferralLink = (link: string): string => {
+    try {
+      // Support absolute and relative links
+      const parsed = new URL(link, PUBLIC_SITE_BASE);
+      const rewritten = new URL(`${parsed.pathname}${parsed.search}${parsed.hash}`, PUBLIC_SITE_BASE);
+      return rewritten.toString();
+    } catch {
+      return link;
+    }
+  };
+
   const [activeTab, setActiveTab] = useState("customers");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [inviteType, setInviteType] = useState<"customer" | "vendor">("customer");
@@ -83,11 +99,14 @@ const ClientInviteSystemPage = () => {
   const customerInvites = (invites || []).filter(invite => invite?.type === "customer");
   const vendorInvites = (invites || []).filter(invite => invite?.type === "vendor");
 
-  // Get referral links
-  const customerReferralLink = referralLinks.find(link => link.referral_type === 'customer')?.url ||
-    "https://think-partnership.netlify.app/marketplace/register?ref=client-customer";
-  const vendorReferralLink = referralLinks.find(link => link.referral_type === 'vendor')?.url ||
-    "https://think-partnership.netlify.app/vendor/register?ref=client-vendor";
+  // Get referral links (always display with public site base, preserving query params)
+  const rawCustomerLink = referralLinks.find((link) => link.referral_type === 'customer')?.url ||
+    `${PUBLIC_SITE_BASE}/marketplace/register?ref=client-customer`;
+  const rawVendorLink = referralLinks.find((link) => link.referral_type === 'vendor')?.url ||
+    `${PUBLIC_SITE_BASE}/vendor/register?ref=client-vendor`;
+
+  const customerReferralLink = rewriteReferralLink(rawCustomerLink);
+  const vendorReferralLink = rewriteReferralLink(rawVendorLink);
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
