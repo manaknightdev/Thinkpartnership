@@ -14,7 +14,8 @@
     "preview": "vite preview",
     "preview:dev": "vite preview --mode development",
     "preview:prod": "vite preview --mode production",
-    "build:netlify": "vite build --mode production && echo 'Build completed! Deploy the dist/ folder to Netlify.'"
+    "build:netlify": "vite build --mode production && echo 'Build completed! Deploy the dist/ folder to Netlify.'",
+    "migrate:vendor-images": "node ./scripts/migrate_vendor_service_images_to_s3.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -47,6 +48,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@tanstack/react-query": "^5.56.2",
     "axios": "^1.10.0",
+    "form-data": "^4.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
