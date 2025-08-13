@@ -131,3 +131,11 @@
     animation-delay: 0.6s;
   }
 }
+
+/* Sonner toaster positioning - force top-right with a gap from the header */
+[data-sonner-toaster] {
+  right: 24px !important;
+  left: auto !important;
+  top: 72px !important;
+  z-index: 9999 !important;
+}
