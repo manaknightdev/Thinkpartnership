@@ -62,11 +62,21 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
   const extractClientFromUrl = (): string | null => {
     const hostname = window.location.hostname;
     const pathname = location.pathname;
+    const urlParams = new URLSearchParams(location.search);
 
-    // Method 1: Check for subdomain (e.g., client1.thinkpartnership.com)
+    // Method 1: Strong signal - explicit client param (from invite/referral links)
+    const clientParam = urlParams.get('client');
+    if (clientParam) {
+      console.log(`🎫 Found client parameter in URL: ${clientParam}`);
+      return clientParam; // Prefer explicit client id
+    }
+
+    // Method 2: Subdomain-based detection, but ignore platform subdomains (e.g., *.netlify.app)
     if (hostname.includes('.') && !hostname.startsWith('www.')) {
       const parts = hostname.split('.');
-      if (parts.length >= 3) {
+      const tld = parts.slice(-2).join('.');
+      const isPlatformDomain = ['netlify.app', 'vercel.app'].includes(tld);
+      if (!isPlatformDomain && parts.length >= 3) {
         const subdomain = parts[0];
         if (subdomain !== 'www' && subdomain !== 'localhost') {
           return subdomain;
@@ -74,7 +84,7 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
       }
     }
 
-    // Method 2: Check for path-based client (e.g., /client/clientname/marketplace)
+    // Method 3: Path-based client (e.g., /client/clientname/marketplace)
     const pathPatterns = [
       /^\/client\/([^\/]+)/,  // /client/clientname
       /^\/([^\/]+)\/marketplace/, // /clientname/marketplace
@@ -89,29 +99,17 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
       }
     }
 
-    // Method 3: Check for client parameter in invite links
-    const urlParams = new URLSearchParams(location.search);
-    const clientParam = urlParams.get('client');
-    if (clientParam) {
-      console.log(`🎫 Found client parameter in URL: ${clientParam}`);
-      // For invite links, we'll use the client ID directly to fetch the correct client
-      // The backend will handle the client lookup by ID
-      return clientParam; // Return the client ID as the identifier
-    }
-
-    // Method 4: Check for referral code that indicates client (legacy invite links)
+    // Method 4: Referral code hint (legacy)
     const ref = urlParams.get('ref');
     if (ref) {
-      // Map referral codes to client identifiers
       if (ref.includes('CLIENT-CUST') || ref.includes('CLIENT-VEND') || ref.includes('client-')) {
-        return 'acme'; // Default to acme client for legacy links
+        return 'acme';
       }
     }
 
-    // Method 5: Check for custom domain
-    // For custom domains, we'll need to make an API call to determine the client
+    // Method 5: Custom domain
     if (!hostname.includes('localhost') && !hostname.includes('thinkpartnership')) {
-      return hostname; // Use full hostname as identifier for custom domains
+      return hostname;
     }
 
     return null;
