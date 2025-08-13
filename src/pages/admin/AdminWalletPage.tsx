@@ -401,9 +401,9 @@ const AdminWalletPage = () => {
                   <div className="flex items-start space-x-3">
                     <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
                     <div>
-                      <h4 className="font-medium text-yellow-800">Action Required</h4>
+                      <h4 className="font-medium text-yellow-800">Action Required on stripe</h4>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Complete the following requirements to enable full account functionality:
+                        Complete the following requirements on stripe to enable full account functionality:
                       </p>
                       <ul className="list-disc list-inside text-sm text-yellow-700 mt-2">
                         {stripeAccount.requirements.currently_due.map((requirement, index) => (
