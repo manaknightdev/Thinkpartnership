@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, UserPlus, Search, Eye, Edit, CheckCircle, XCircle, Download, Filter, Mail, Phone, MapPin, Calendar, DollarSign, TrendingUp, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 import ClientAPI, { ClientVendor } from '@/services/ClientAPI';
 import { showSuccess, showError } from '@/utils/toast';
@@ -73,6 +72,18 @@ const ClientVendorManagementPage = () => {
     });
   };
 
+  // Normalize backend status values to UI values (active | suspended)
+  const getUiStatus = (status?: string | number) => {
+    const s = (status ?? '').toString().toLowerCase();
+    if (s === '1' || s === 'active') return 'active';
+    if (s === '2' || s === 'suspended' || s === 'inactive') return 'suspended';
+    return 'active';
+  };
+
+  const getBadgeVariant = (status?: string | number) => {
+    return getUiStatus(status) === 'active' ? 'default' : 'destructive';
+  };
+
 
 
 
@@ -86,7 +97,7 @@ const ClientVendorManagementPage = () => {
 
   const handleEditVendor = (vendor: ClientVendor) => {
     setSelectedVendor(vendor);
-    setEditForm(vendor);
+    setEditForm({ status: getUiStatus(vendor.status) });
     setIsEditVendorOpen(true);
   };
 
@@ -97,15 +108,18 @@ const ClientVendorManagementPage = () => {
   };
 
   const handleSaveVendor = async () => {
-    if (!selectedVendor || !editForm) return;
-
+    if (!selectedVendor) return;
     try {
-      await ClientAPI.updateVendor(selectedVendor.id, editForm);
-      showSuccess("Vendor updated successfully!");
+      const selectedStatus = (editForm.status as string) || selectedVendor.status || '';
+      const normalized = selectedStatus.toLowerCase();
+      // Map UI values to backend expected integer strings
+      const statusValue = normalized === 'active' ? '1' : normalized === 'suspended' ? '2' : '1';
+      await ClientAPI.updateVendorStatus(selectedVendor.id, statusValue);
+      showSuccess("Vendor status updated successfully!");
       setIsEditVendorOpen(false);
-      fetchVendors(); // Refresh the list
+      fetchVendors();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to update vendor';
+      const errorMessage = err.response?.data?.message || 'Failed to update vendor status';
       showError(errorMessage);
     }
   };
@@ -193,7 +207,7 @@ const ClientVendorManagementPage = () => {
                     <TableCell className="text-gray-600">{vendor.email}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                        {vendor.business_type || 'Service Provider'}
+                        {(vendor.services_count || 0) + ' services'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-green-600 font-semibold">
@@ -204,9 +218,11 @@ const ClientVendorManagementPage = () => {
                     </TableCell>
 
                     <TableCell>
-                      <Badge variant={vendor.status === "active" ? "default" : ""}
-                             className={ "bg-primary/10 text-primary hover:bg-primary/10" }>
-                       Active
+                      <Badge
+                        variant={getBadgeVariant(vendor.status)}
+                        className={getUiStatus(vendor.status) === 'suspended' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-primary/10 text-primary hover:bg-primary/10'}
+                      >
+                        {getUiStatus(vendor.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -242,7 +258,7 @@ const ClientVendorManagementPage = () => {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Vendor Name</Label>
-                    <p className="text-lg font-semibold">{selectedVendor.name}</p>
+                     <p className="text-lg font-semibold">{selectedVendor.company_name || selectedVendor.contact_name}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Email</Label>
@@ -262,26 +278,26 @@ const ClientVendorManagementPage = () => {
                     <Label className="text-sm font-medium text-gray-500">Address</Label>
                     <p className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gray-400" />
-                      {selectedVendor.address}
+                      N/A
                     </p>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Services</Label>
-                    <Badge className="bg-green-100 text-green-800">{selectedVendor.services}</Badge>
+                     <Badge className="bg-green-100 text-green-800">{(selectedVendor.services_count || 0) + ' services'}</Badge>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Status</Label>
-                    <Badge variant={selectedVendor.status === "Active" ? "default" : "destructive"}>
-                      {selectedVendor.status}
-                    </Badge>
+                     <Badge variant={getBadgeVariant(selectedVendor.status)}>
+                       {getUiStatus(selectedVendor.status)}
+                     </Badge>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Join Date</Label>
                     <p className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-gray-400" />
-                      {new Date(selectedVendor.joinDate).toLocaleDateString()}
+                       {selectedVendor.join_date ? new Date(selectedVendor.join_date).toLocaleDateString() : (selectedVendor.created_at ? new Date(selectedVendor.created_at).toLocaleDateString() : 'N/A')}
                     </p>
                   </div>
 
@@ -293,23 +309,23 @@ const ClientVendorManagementPage = () => {
                   <CardContent className="p-4 text-center">
                     <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Total Revenue</p>
-                    <p className="text-xl font-bold text-primary">${selectedVendor.totalRevenue.toLocaleString()}</p>
+                     <p className="text-xl font-bold text-primary">{typeof selectedVendor.total_revenue === 'number' ? selectedVendor.total_revenue.toLocaleString() : '0'}</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-blue-50 border-blue-200">
                   <CardContent className="p-4 text-center">
                     <CheckCircle className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Completed Jobs</p>
-                    <p className="text-xl font-bold text-blue-600">{selectedVendor.completedJobs}</p>
+                     <p className="text-xl font-bold text-blue-600">{selectedVendor.completed_jobs || 0}</p>
                   </CardContent>
                 </Card>
 
               </div>
 
-              {selectedVendor.description && (
+              {false && selectedVendor && (selectedVendor as any).description && (
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Description</Label>
-                  <p className="text-gray-700 mt-1">{selectedVendor.description}</p>
+                  <p className="text-gray-700 mt-1">{(selectedVendor as any).description}</p>
                 </div>
               )}
             </div>
@@ -327,79 +343,40 @@ const ClientVendorManagementPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-name">Vendor Name</Label>
-                <Input
-                  id="edit-name"
-                  value={editForm.name || ""}
-                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                />
+                <Label htmlFor="edit-name">Vendor</Label>
+                <Input id="edit-name" value={selectedVendor?.company_name || selectedVendor?.contact_name || ''} disabled />
               </div>
               <div>
                 <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={editForm.email || ""}
-                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                />
+                <Input id="edit-email" type="email" value={selectedVendor?.email || ''} disabled />
               </div>
               <div>
                 <Label htmlFor="edit-phone">Phone</Label>
-                <Input
-                  id="edit-phone"
-                  value={editForm.phone || ""}
-                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                />
+                <Input id="edit-phone" value={selectedVendor?.phone || ''} disabled />
               </div>
               <div>
                 <Label htmlFor="edit-services">Services</Label>
-                <Select value={editForm.services || ""} onValueChange={(value) => setEditForm({...editForm, services: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select service category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Plumbing">Plumbing</SelectItem>
-                    <SelectItem value="Painting">Painting</SelectItem>
-                    <SelectItem value="Electrical">Electrical</SelectItem>
-                    <SelectItem value="Landscaping">Landscaping</SelectItem>
-                    <SelectItem value="Cleaning">Cleaning</SelectItem>
-                    <SelectItem value="Moving">Moving</SelectItem>
-                    <SelectItem value="Inspections">Inspections</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input id="edit-services" value={`${selectedVendor?.services_count || 0} services`} disabled />
               </div>
             </div>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-address">Address</Label>
-                <Textarea
-                  id="edit-address"
-                  value={editForm.address || ""}
-                  onChange={(e) => setEditForm({...editForm, address: e.target.value})}
-                />
+                <Label htmlFor="edit-address">City</Label>
+                <Input id="edit-address" value={'N/A'} disabled />
               </div>
               <div>
                 <Label htmlFor="edit-status">Status</Label>
-                <Select value={editForm.status || ""} onValueChange={(value) => setEditForm({...editForm, status: value as "Active" | "Suspended" | "Inactive"})}>
+                <Select value={editForm.status || ''} onValueChange={(value) => setEditForm({...editForm, status: value})}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Suspended">Suspended</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="active">active</SelectItem>
+                    <SelectItem value="suspended">suspended</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea
-                  id="edit-description"
-                  value={editForm.description || ""}
-                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                  placeholder="Brief description of services..."
-                />
-              </div>
+              {/* Notes removed per requirement */}
             </div>
           </div>
           <DialogFooter>
@@ -478,8 +455,8 @@ const ClientVendorManagementPage = () => {
                       </TableCell>
 
                       <TableCell>
-                        <Badge variant={vendor?.status === "active" ? "default" : "destructive"}>
-                          {vendor?.status || 'unknown'}
+                        <Badge variant={getBadgeVariant(vendor?.status)}>
+                          {getUiStatus(vendor?.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>{vendor?.created_at ? new Date(vendor.created_at).toLocaleDateString() : 'N/A'}</TableCell>
