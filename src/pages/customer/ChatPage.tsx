@@ -10,6 +10,16 @@ import OrdersAPI from "@/services/OrdersAPI";
 import StripeAPI from "@/services/StripeAPI";
 import TaxAPI, { TaxCalculation } from "@/services/TaxAPI";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   ArrowLeft,
@@ -39,6 +49,8 @@ const ChatPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [allChats, setAllChats] = useState<Chat[]>([]);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<ChatMessage | null>(null);
 
   // Update specific chat's last message without refreshing entire list
   const updateChatLastMessage = (chatId: string, lastMessage: string) => {
@@ -261,7 +273,7 @@ const ChatPage = () => {
 
       // Get tax calculation from quote details, or calculate client-side if missing
       let taxCalculation: TaxCalculation | null = null;
-      let totalAmount = quoteMessage.quote_amount;
+      let totalAmount = Number(quoteMessage.quote_amount);
       let customerProvince = 'ON'; // Default fallback
 
       if (quoteMessage.quote_details?.taxCalculation) {
@@ -318,10 +330,10 @@ const ChatPage = () => {
       setAcceptedQuotes(prev => new Set(prev).add(quoteMessage.id));
 
       // Send acceptance message with tax breakdown if available
-      let acceptMessage = `I've accepted your quote for $${totalAmount.toFixed(2)}! Order has been created (Order ID: ${orderData.data?.order_id}).`;
+      let acceptMessage = `I've accepted your quote for $${Number(totalAmount).toFixed(2)}! Order has been created (Order ID: ${orderData.data?.order_id}).`;
       
       if (taxCalculation) {
-        acceptMessage += ` This includes $${taxCalculation.subtotal.toFixed(2)} base price + $${taxCalculation.tax_amount.toFixed(2)} tax.`;
+        acceptMessage += ` This includes $${Number(taxCalculation.subtotal).toFixed(2)} base price + $${Number(taxCalculation.tax_amount).toFixed(2)} tax.`;
       }
       
       acceptMessage += " When can we schedule the work?";
@@ -337,6 +349,18 @@ const ChatPage = () => {
     } finally {
       setAcceptingQuote(false);
     }
+  };
+
+  const openConfirmModal = (quoteMessage: ChatMessage) => {
+    setSelectedQuote(quoteMessage);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmAcceptQuote = async () => {
+    if (!selectedQuote) return;
+    await handleAcceptQuote(selectedQuote);
+    setShowConfirmModal(false);
+    setSelectedQuote(null);
   };
 
   const handleSearch = (searchTerm: string) => {
@@ -544,7 +568,7 @@ const ChatPage = () => {
                           <div className="flex space-x-2 mt-2">
                             <Button
                               size="sm"
-                              onClick={() => handleAcceptQuote(msg)}
+                              onClick={() => openConfirmModal(msg)}
                               disabled={acceptingQuote}
                               className="bg-green-600 hover:bg-green-700 text-white"
                             >
@@ -611,6 +635,105 @@ const ChatPage = () => {
           </div>
         </div>
       </div>
+      {/* Accept Quote Confirmation Modal */}
+      <AlertDialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Purchase</AlertDialogTitle>
+            <AlertDialogDescription>
+              Review the details below before confirming your purchase.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {(() => {
+            if (!selectedQuote || !currentChat) return null;
+
+            const serviceName = selectedQuote.quote_details?.service || currentChat.service.title;
+            const description = selectedQuote.quote_details?.description || 'No description provided';
+            const province = selectedQuote.quote_details?.customerProvince || 'ON';
+            const taxInclusive = selectedQuote.quote_details?.taxInclusive || false;
+            const customTaxRate = selectedQuote.quote_details?.customTaxRate;
+
+            let taxCalc: TaxCalculation | null = null;
+            let subtotal = Number(selectedQuote.quote_details?.basePrice ?? selectedQuote.quote_amount);
+            let taxAmount = 0;
+            let totalAmount = Number(selectedQuote.quote_amount);
+
+            if (selectedQuote.quote_details?.taxCalculation) {
+              taxCalc = selectedQuote.quote_details.taxCalculation;
+              subtotal = taxCalc.subtotal;
+              taxAmount = taxCalc.tax_amount;
+              totalAmount = taxCalc.total_amount;
+            } else if (
+              selectedQuote.quote_details?.basePrice &&
+              selectedQuote.quote_details?.customerProvince
+            ) {
+              taxCalc = TaxAPI.calculateClientTax(
+                selectedQuote.quote_details.basePrice,
+                province,
+                { tax_inclusive: taxInclusive, custom_tax_rate: customTaxRate }
+              );
+              subtotal = taxCalc.subtotal;
+              taxAmount = taxCalc.tax_amount;
+              totalAmount = taxCalc.total_amount;
+            }
+
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Vendor</span>
+                    <span className="font-medium text-gray-900">{currentChat.vendor.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Service</span>
+                    <span className="font-medium text-gray-900">{serviceName}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Province</span>
+                    <span className="font-medium text-gray-900">{province}</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4 space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Subtotal</span>
+                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Tax{taxCalc ? ` (${Number(taxCalc.tax_rate * 100).toFixed(2)}%)` : ''}</span>
+                    <span className="font-medium">${taxAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-base">
+                    <span className="font-semibold">Total</span>
+                    <span className="font-semibold">${totalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-gray-500">
+                  {taxCalc
+                    ? `Tax calculated for ${taxCalc.tax_breakdown.province} (${taxCalc.tax_breakdown.province_code}).`
+                    : `Tax will be calculated at checkout if applicable.`}
+                </div>
+
+                {description && (
+                  <div className="mt-2 text-sm text-gray-700">
+                    <span className="block font-medium mb-1">Description</span>
+                    <span className="block whitespace-pre-wrap">{description}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowConfirmModal(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAcceptQuote} className="bg-green-600 hover:bg-green-700 text-white">
+              {acceptingQuote ? 'Processing...' : 'Confirm & Pay'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MarketplaceLayout>
   );
 };
