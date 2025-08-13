@@ -17,7 +17,6 @@ import {
 import {
   MessageCircle,
   Send,
-  MoreVertical,
   Search,
   Clock,
   DollarSign,
@@ -257,8 +256,8 @@ const VendorMessagesPage = () => {
       lastMessage: chat.last_message || "No messages yet",
       timestamp: chat.last_message_time ? formatTime(chat.last_message_time) : "",
       unreadCount: chat.unread_count,
-      status: "offline" as const,
-      location: "Unknown",
+      status: (chat.status === 1 ? "online" : "offline") as "online" | "offline",
+      location: "",
       totalSpent: "$0"
     };
   };
@@ -538,10 +537,11 @@ const VendorMessagesPage = () => {
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 truncate mt-1">{customer.lastMessage}</p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-xs text-gray-500">{customer.location}</span>
-
-                  </div>
+                  {customer.location && (
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs text-gray-500">{customer.location}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -582,17 +582,17 @@ const VendorMessagesPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">{selectedCustomer.name}</h3>
                     <p className="text-sm text-gray-600">
-                      {selectedCustomer.status === "online" ? "Active now" : "Last seen recently"}  {selectedCustomer.location}
+                      {selectedCustomer.status === "online"
+                        ? "Active now"
+                        : selectedCustomer.timestamp
+                          ? `Last seen ${selectedCustomer.timestamp}`
+                          : "Last seen"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm">
-                  <MoreVertical className="h-5 w-5" />
-                </Button>
-              </div>
+              
             </div>
 
             {/* Customer Info Bar */}
