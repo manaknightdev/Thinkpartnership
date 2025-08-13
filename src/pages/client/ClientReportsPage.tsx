@@ -103,7 +103,43 @@ const ClientReportsPage = () => {
   };
 
   const handleGenerateReport = () => {
-    toast.info("Generating custom report...");
+    try {
+      const allVendorsReport = getAllVendorsForReport();
+      if (!allVendorsReport || allVendorsReport.length === 0) {
+        toast.info('No data available to export');
+        return;
+      }
+
+      const headers = ['Vendor', 'Services', 'Revenue', 'Jobs', 'Referrals', 'Rating', 'Status', 'Join Date'];
+      const csvContent = [
+        headers.join(','),
+        ...allVendorsReport.map(v => [
+          `"${v.name}"`,
+          `"${v.services}"`,
+          `"$${(v.totalRevenue || 0).toLocaleString()}"`,
+          `${v.completedJobs || 0}`,
+          `${v.referrals || 0}`,
+          `${v.rating || 0}`,
+          `"${v.status}"`,
+          `"${v.joinDate ? new Date(v.joinDate).toLocaleDateString() : 'N/A'}"`
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `custom-vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Custom report exported successfully');
+    } catch (error) {
+      console.error('Error exporting custom report:', error);
+      toast.error('Failed to export custom report');
+    }
   };
 
   const [isAllVendorsReportOpen, setIsAllVendorsReportOpen] = useState(false);
@@ -337,7 +373,47 @@ const ClientReportsPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => toast.info("Exporting vendor report...")}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                try {
+                  const report = getAllVendorsForReport();
+                  if (!report || report.length === 0) {
+                    toast.info('No data available to export');
+                    return;
+                  }
+                  const headers = ['Vendor', 'Services', 'Revenue', 'Jobs', 'Referrals', 'Rating', 'Status', 'Join Date'];
+                  const csvContent = [
+                    headers.join(','),
+                    ...report.map(v => [
+                      `"${v.name}"`,
+                      `"${v.services}"`,
+                      `"$${(v.totalRevenue || 0).toLocaleString()}"`,
+                      `${v.completedJobs || 0}`,
+                      `${v.referrals || 0}`,
+                      `${v.rating || 0}`,
+                      `"${v.status}"`,
+                      `"${v.joinDate ? new Date(v.joinDate).toLocaleDateString() : 'N/A'}"`
+                    ].join(','))
+                  ].join('\n');
+
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  const url = URL.createObjectURL(blob);
+                  link.setAttribute('href', url);
+                  link.setAttribute('download', `vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
+                  link.style.visibility = 'hidden';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+
+                  toast.success('Vendor report exported successfully');
+                } catch (error) {
+                  console.error('Error exporting vendors report:', error);
+                  toast.error('Failed to export vendors report');
+                }
+              }}
+            >
               <Download className="mr-2 h-4 w-4" />
               Export Report
             </Button>

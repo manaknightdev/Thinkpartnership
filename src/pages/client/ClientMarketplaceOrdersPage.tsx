@@ -84,7 +84,42 @@ const ClientMarketplaceOrdersPage = () => {
   };
 
   const handleExportOrders = () => {
-    toast.info("Exporting marketplace orders data...");
+    try {
+      if (!orders || orders.length === 0) {
+        toast.info('No orders to export');
+        return;
+      }
+
+      const headers = ['Order ID', 'Customer', 'Vendor', 'Service', 'Date', 'Amount', 'Status', 'Notes'];
+      const csvContent = [
+        headers.join(','),
+        ...orders.map(o => [
+          `"${o.id}"`,
+          `"${o.customer}"`,
+          `"${o.vendor}"`,
+          `"${o.service}"`,
+          `"${formatDate(o.date)}"`,
+          `"${o.amount}"`,
+          `"${o.status}"`,
+          `"${(o.notes || '').replace(/"/g, '""')}"`
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `orders-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Orders exported successfully');
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      toast.error('Failed to export orders');
+    }
   };
 
   const handleViewOrderDetails = (order: MarketplaceOrder) => {

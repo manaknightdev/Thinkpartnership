@@ -453,7 +453,45 @@ const ClientWalletPage = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Recent Transactions</h3>
-              <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    try {
+                      if (!transactions || transactions.length === 0) {
+                        toast.info('No transactions to export');
+                        return;
+                      }
+
+                      const headers = ['Type', 'Description', 'Amount', 'Date', 'Status'];
+                      const csvContent = [
+                        headers.join(','),
+                        ...transactions.map(t => [
+                          `"${t.type}"`,
+                          `"${(t.description || '').replace(/"/g, '""')}"`,
+                          `${(parseFloat(t.amount?.toString()) || 0).toFixed(2)}`,
+                          `"${formatDate(t.created_at)}"`,
+                          `"${t.status}"`
+                        ].join(','))
+                      ].join('\n');
+
+                      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                      const link = document.createElement('a');
+                      const url = URL.createObjectURL(blob);
+                      link.setAttribute('href', url);
+                      link.setAttribute('download', `wallet-transactions-${new Date().toISOString().split('T')[0]}.csv`);
+                      link.style.visibility = 'hidden';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+
+                      toast.success('Transactions exported successfully');
+                    } catch (error) {
+                      console.error('Error exporting transactions:', error);
+                      toast.error('Failed to export transactions');
+                    }
+                  }}
+                >
                 <Download className="mr-2 h-4 w-4" />
                 Export
               </Button>
