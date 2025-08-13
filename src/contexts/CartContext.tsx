@@ -197,7 +197,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Also refresh when auth token changes
+  // Also refresh when auth changes
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'auth_token') {
@@ -211,8 +211,24 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       }
     };
 
+    // Same-tab auth change event (emitted by AuthAPI on login/logout)
+    const handleAuthChanged = (e: Event) => {
+      const detail = (e as CustomEvent<{ isAuthenticated: boolean }>).detail;
+      if (detail?.isAuthenticated) {
+        refreshCart();
+      } else {
+        setItems([]);
+        setSummary(null);
+        setItemCount(0);
+      }
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('auth:changed', handleAuthChanged as EventListener);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:changed', handleAuthChanged as EventListener);
+    };
   }, []);
 
   const value: CartContextType = {

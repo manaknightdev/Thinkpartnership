@@ -124,6 +124,38 @@ const ClientVendorManagementPage = () => {
     }
   };
 
+  const handleExportReport = () => {
+    try {
+      const headers = ['Vendor', 'Services', 'Revenue', 'Jobs', 'Status', 'Join Date'];
+      const csvContent = [
+        headers.join(','),
+        ...(vendors || []).map((v) => [
+          `"${v?.company_name || v?.contact_name || ''}"`,
+          `"${(v?.services_count || 0)} services"`,
+          `"${formatCurrency(v?.total_revenue || 0)}"`,
+          `${v?.completed_jobs || 0}`,
+          `"${getUiStatus(v?.status)}"`,
+          `"${v?.created_at ? new Date(v.created_at).toLocaleDateString() : 'N/A'}"`
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Vendor report exported successfully');
+    } catch (error) {
+      console.error('Export report error:', error);
+      showError('Failed to export vendor report');
+    }
+  };
+
   const filteredVendors = (vendors || []).filter(vendor =>
     vendor?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vendor?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -420,7 +452,7 @@ const ClientVendorManagementPage = () => {
                   <CheckCircle className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Jobs</p>
                   <p className="text-2xl font-bold text-purple-600">
-                    {(vendors || []).reduce((sum, v) => sum + (v?.services_count || 0), 0)}
+                    {(vendors || []).reduce((sum, v) => sum + (v?.completed_jobs || 0), 0)}
                   </p>
                 </CardContent>
               </Card>
@@ -435,7 +467,7 @@ const ClientVendorManagementPage = () => {
                     <TableHead>Services</TableHead>
                     <TableHead>Revenue</TableHead>
                     <TableHead>Jobs</TableHead>
-                    <TableHead>Rating</TableHead>
+                    {/* <TableHead>Rating</TableHead> */}
                     <TableHead>Status</TableHead>
                     <TableHead>Join Date</TableHead>
                   </TableRow>
@@ -451,7 +483,7 @@ const ClientVendorManagementPage = () => {
                         ${(vendor?.total_revenue || 0).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-blue-600 font-semibold">
-                        {vendor?.services_count || 0}
+                        {vendor?.completed_jobs || 0}
                       </TableCell>
 
                       <TableCell>
@@ -467,7 +499,7 @@ const ClientVendorManagementPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportReport}>
               <Download className="mr-2 h-4 w-4" />
               Export Report
             </Button>

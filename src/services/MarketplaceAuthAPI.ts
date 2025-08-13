@@ -54,6 +54,15 @@ export interface MarketplaceUserProfile {
 }
 
 class MarketplaceAuthAPI {
+  private emitAuthChanged(isAuthenticated: boolean) {
+    try {
+      window.dispatchEvent(
+        new CustomEvent('auth:changed', { detail: { isAuthenticated } })
+      );
+    } catch (_) {
+      // noop
+    }
+  }
   private getClientAwareApiClient(clientSlug?: string) {
     const baseURL = API_CONFIG.BASE_URL;
     
@@ -155,6 +164,9 @@ class MarketplaceAuthAPI {
       role: authResponse.role,
     };
     localStorage.setItem('user_data', JSON.stringify(userData));
+
+    // Emit in-tab auth change event so dependent contexts can refresh immediately
+    this.emitAuthChanged(true);
   }
 
   // Clear auth data
@@ -162,6 +174,9 @@ class MarketplaceAuthAPI {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_data');
+
+    // Emit in-tab auth change event
+    this.emitAuthChanged(false);
   }
 
   // Check if user is authenticated

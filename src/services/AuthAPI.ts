@@ -47,6 +47,17 @@ export interface UserProfile {
 }
 
 class AuthAPI {
+  // Notify app of auth state changes within the same tab
+  private emitAuthChanged(isAuthenticated: boolean) {
+    try {
+      window.dispatchEvent(
+        new CustomEvent('auth:changed', { detail: { isAuthenticated } })
+      );
+    } catch (e) {
+      // noop: window might not exist in some environments
+    }
+  }
+
   // Register new customer
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await apiClient.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, data);
@@ -82,6 +93,9 @@ class AuthAPI {
       role: authResponse.role,
     };
     localStorage.setItem('user_data', JSON.stringify(userData));
+
+    // Emit in-tab auth change event so dependent contexts (e.g., cart) can refresh immediately
+    this.emitAuthChanged(true);
   }
 
   // Clear auth data
@@ -89,6 +103,9 @@ class AuthAPI {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_data');
+
+    // Emit in-tab auth change event
+    this.emitAuthChanged(false);
   }
 
   // Check if user is authenticated
