@@ -36,7 +36,6 @@ const VendorServicesPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<string>("all");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -398,14 +397,6 @@ const VendorServicesPage = () => {
 
 
 
-  // Filter services based on service type
-  const filteredServices = services.filter(service => {
-    if (serviceTypeFilter === 'all') return true;
-    if (serviceTypeFilter === 'flat_fee') return !service.service_type || service.service_type === 'flat_fee';
-    if (serviceTypeFilter === 'custom') return service.service_type === 'custom';
-    return true;
-  });
-
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -418,18 +409,6 @@ const VendorServicesPage = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Service Type Filter */}
-          <Select value={serviceTypeFilter} onValueChange={setServiceTypeFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Service Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Services</SelectItem>
-              <SelectItem value="flat_fee">Flat Fee</SelectItem>
-              <SelectItem value="custom">Custom Pricing</SelectItem>
-            </SelectContent>
-          </Select>
-
           {/* View Toggle */}
           <div className="flex items-center border rounded-lg p-1">
             <Button
@@ -641,10 +620,10 @@ const VendorServicesPage = () => {
       )}
 
       {/* Services Display */}
-      {filteredServices.length > 0 ? (
+      {services.length > 0 ? (
         viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredServices.map((service) => (
+            {services.map((service) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video relative overflow-hidden">
                   {service.images && service.images.length > 0 ? (
@@ -698,7 +677,7 @@ const VendorServicesPage = () => {
         ) : (
           // List View
           <div className="space-y-3">
-            {filteredServices.map((service) => (
+            {services.map((service) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
@@ -762,7 +741,7 @@ const VendorServicesPage = () => {
             ))}
           </div>
         )
-      ) : services.length === 0 ? (
+        ) : (
         <Card className="text-center py-12">
           <CardContent>
             <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -774,18 +753,7 @@ const VendorServicesPage = () => {
             </Button>
           </CardContent>
         </Card>
-      ) : (
-        <Card className="text-center py-12">
-          <CardContent>
-            <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No services match your filter</h3>
-            <p className="text-gray-600 mb-4">Try selecting a different service type or clear the filter.</p>
-            <Button variant="outline" onClick={() => setServiceTypeFilter('all')}>
-              Clear Filter
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+        )}
 
       {/* Edit Service Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
