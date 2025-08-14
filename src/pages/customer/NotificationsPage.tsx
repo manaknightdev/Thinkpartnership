@@ -393,26 +393,7 @@ const NotificationsPage = () => {
           )}
         </div>
 
-        {/* Notification Settings */}
-        {notifications.length > 0 && (
-          <section className="bg-white border-t border-gray-200 py-8">
-            <div className="max-w-4xl mx-auto px-4 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Notification Preferences
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Manage payment and messaging notification preferences
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => navigate('/marketplace/account')}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Notification Settings
-              </Button>
-            </div>
-          </section>
-        )}
+        {/* Notification Settings removed per scope */}
       </div>
     </MarketplaceLayout>
   );

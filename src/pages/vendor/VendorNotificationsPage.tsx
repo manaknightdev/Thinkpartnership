@@ -2,11 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+ 
 import {
   Bell,
   CheckCircle,
@@ -14,7 +12,7 @@ import {
   DollarSign,
   MessageCircle,
   Trash2,
-  Mail,
+  
   Search,
   Settings,
   Loader2,
@@ -22,11 +20,11 @@ import {
   Check,
   Filter,
   BellRing,
-  Smartphone,
+  
   MessageSquare,
   Eye,
   EyeOff,
-  TestTube,
+  
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -35,23 +33,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import VendorNotificationsAPI, {
   Notification,
-  NotificationSettings,
   NotificationStats
 } from "@/services/VendorNotificationsAPI";
 import { showSuccess, showError } from "@/utils/toast";
 
 const VendorNotificationsPage = () => {
-  const [activeTab, setActiveTab] = useState("notifications");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationStats, setNotificationStats] = useState<NotificationStats | null>(null);
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
 
   const [pagination, setPagination] = useState({
@@ -81,10 +75,9 @@ const VendorNotificationsPage = () => {
       if (filterStatus === "unread") filters.is_read = false;
 
       // Load notifications data in parallel
-      const [notificationsRes, statsRes, settingsRes] = await Promise.all([
+      const [notificationsRes, statsRes] = await Promise.all([
         VendorNotificationsAPI.getNotifications(filters),
         VendorNotificationsAPI.getNotificationStats(),
-        VendorNotificationsAPI.getNotificationSettings(),
       ]);
 
       if (notificationsRes.error) {
@@ -97,7 +90,6 @@ const VendorNotificationsPage = () => {
         if (notificationsRes.pagination) setPagination(notificationsRes.pagination);
       }
       if (statsRes.data) setNotificationStats(statsRes.data);
-      if (settingsRes.data) setNotificationSettings(settingsRes.data);
 
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load notification data");
@@ -164,52 +156,7 @@ const VendorNotificationsPage = () => {
     }
   };
 
-  const handleUpdateSettings = async (settingKey: keyof NotificationSettings, value: any) => {
-    if (!notificationSettings) return;
-
-    try {
-      setIsUpdating(true);
-      setError("");
-
-      const updatedSettings = { ...notificationSettings, [settingKey]: value };
-      setNotificationSettings(updatedSettings);
-
-      const response = await VendorNotificationsAPI.updateNotificationSettings({ [settingKey]: value });
-
-      if (response.error) {
-        setError(response.message);
-        showError(response.message);
-        // Revert local state
-        setNotificationSettings(notificationSettings);
-        return;
-      }
-
-      showSuccess("Settings updated successfully!");
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Failed to update settings";
-      setError(errorMessage);
-      showError(errorMessage);
-      // Revert local state
-      setNotificationSettings(notificationSettings);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleTestNotification = async (type: string, channel: 'email' | 'push' | 'sms') => {
-    try {
-      const response = await VendorNotificationsAPI.testNotification(type, channel);
-
-      if (response.error) {
-        showError(response.message);
-        return;
-      }
-
-      showSuccess(`Test ${channel} notification sent!`);
-    } catch (err: any) {
-      showError(err.response?.data?.message || "Failed to send test notification");
-    }
-  };
+  
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "new_request": return <Bell className="h-5 w-5 text-blue-600" />;
@@ -314,9 +261,7 @@ const VendorNotificationsPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-          <p className="text-gray-600 mt-1">
-            Manage your notifications and preferences.
-          </p>
+           <p className="text-gray-600 mt-1">View recent notifications.</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -378,29 +323,11 @@ const VendorNotificationsPage = () => {
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Priority</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{notificationStats?.high_priority_count || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Urgent: {notificationStats?.urgent_count || 0}
-            </p>
-          </CardContent>
-        </Card>
+        {/* High Priority card removed per scope */}
       </div>
 
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-6">
+      {/* Filters and Notifications */}
+      <div className="space-y-6">
           {/* Filters */}
           <Card>
             <CardContent className="p-4">
@@ -423,11 +350,10 @@ const VendorNotificationsPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="new_request">New Requests</SelectItem>
+                    {/* Removed New Requests per scope */}
                     <SelectItem value="payment_received">Payments</SelectItem>
                     <SelectItem value="message_received">Messages</SelectItem>
-                    <SelectItem value="review_received">Reviews</SelectItem>
-                    <SelectItem value="system_update">System Updates</SelectItem>
+                    {/* Removed Reviews and System Updates per scope */}
                   </SelectContent>
                 </Select>
 
@@ -563,131 +489,7 @@ const VendorNotificationsPage = () => {
               ))
             )}
           </div>
-        </TabsContent>
-
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-6">
-          {notificationSettings && (
-            <>
-              {/* Email Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mail className="h-5 w-5" />
-                    Email Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>New Service Requests</Label>
-                      <p className="text-sm text-gray-600">Get notified when customers request your services</p>
-                    </div>
-                    <Switch
-                      checked={notificationSettings.email_new_requests}
-                      onCheckedChange={(checked) => handleUpdateSettings("email_new_requests", checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Payment Notifications</Label>
-                      <p className="text-sm text-gray-600">Payment confirmations and updates</p>
-                    </div>
-                    <Switch
-                      checked={notificationSettings.email_payments}
-                      onCheckedChange={(checked) => handleUpdateSettings("email_payments", checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Review Notifications</Label>
-                      <p className="text-sm text-gray-600">New reviews and ratings from customers</p>
-                    </div>
-                    <Switch
-                      checked={notificationSettings.email_reviews}
-                      onCheckedChange={(checked) => handleUpdateSettings("email_reviews", checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Message Notifications</Label>
-                      <p className="text-sm text-gray-600">New messages from customers</p>
-                    </div>
-                    <Switch
-                      checked={notificationSettings.email_messages}
-                      onCheckedChange={(checked) => handleUpdateSettings("email_messages", checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Push Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Smartphone className="h-5 w-5" />
-                    Push Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>New Service Requests</Label>
-                      <p className="text-sm text-gray-600">Real-time push notifications for new requests</p>
-                    </div>
-                    <Switch
-                      checked={notificationSettings.push_new_requests}
-                      onCheckedChange={(checked) => handleUpdateSettings("push_new_requests", checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Payment Updates</Label>
-                      <p className="text-sm text-gray-600">Instant payment notifications</p>
-                    </div>
-                    <Switch
-                      checked={notificationSettings.push_payments}
-                      onCheckedChange={(checked) => handleUpdateSettings("push_payments", checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Test Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TestTube className="h-5 w-5" />
-                    Test Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleTestNotification("new_request", "email")}
-                    >
-                      Test Email
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleTestNotification("new_request", "push")}
-                    >
-                      Test Push
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          )}
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 };

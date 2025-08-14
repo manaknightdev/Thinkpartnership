@@ -72,7 +72,31 @@ const ChatPage = () => {
     try {
       const messagesResponse = await ChatAPI.getChatMessages(parseInt(chatIdToLoad));
       if (!messagesResponse.error) {
-        setMessages(messagesResponse.messages || []);
+        const apiMessages = messagesResponse.messages || [];
+        setMessages(apiMessages);
+        // Determine which vendor quotes have been accepted by scanning messages chronologically
+        try {
+          const acceptedQuoteIds = new Set<number>();
+          let lastVendorQuoteId: number | null = null;
+          apiMessages.forEach((m: any) => {
+            if (m.sender_type === 'vendor' || m.sender_type === 1) {
+              if (m.message_type === 3) {
+                lastVendorQuoteId = m.id;
+                if (m.quote_accepted) {
+                  acceptedQuoteIds.add(m.id);
+                }
+              }
+            } else {
+              // Customer messages: detect acceptance text
+              const content = (m.message || '').toString().toLowerCase();
+              const isAcceptance = content.includes('accepted your quote') || content.includes("i've accepted your quote") || m.message_type === 4;
+              if (isAcceptance && lastVendorQuoteId !== null) {
+                acceptedQuoteIds.add(lastVendorQuoteId);
+              }
+            }
+          });
+          setAcceptedQuotes(acceptedQuoteIds);
+        } catch {}
 
         // Also refresh the chat list to update last message and unread counts (only during polling)
         if (silent) {
@@ -318,7 +342,9 @@ const ChatPage = () => {
         service_type: 'custom', // Mark as custom since it's from a quote
         customer_province: customerProvince,
         quantity: 1,
-        unit_type: 'fixed'
+        unit_type: 'fixed',
+        quote_message_id: quoteMessage.id,
+        chat_id: Number(chatId)
       });
 
       if (orderData.error) {

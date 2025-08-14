@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
 import VendorAuthAPI, { VendorProfile } from "@/services/VendorAuthAPI";
+import VendorNotificationsAPI from "@/services/VendorNotificationsAPI";
 import {
   Menu,
   Bell,
@@ -34,7 +35,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const [notificationCount, setNotificationCount] = useState(2);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [vendorProfile, setVendorProfile] = useState<VendorProfile['vendor'] | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
@@ -62,6 +63,25 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
 
     loadVendorProfile();
   }, [navigate]);
+
+  // Load vendor unread notifications count
+  useEffect(() => {
+    let timer: number | undefined;
+    const loadUnread = async () => {
+      try {
+        const stats = await VendorNotificationsAPI.getNotificationStats();
+        if (!stats.error && stats.data) {
+          setNotificationCount(stats.data.unread_count || 0);
+        }
+      } catch {}
+    };
+    loadUnread();
+    // poll every 30s
+    timer = window.setInterval(loadUnread, 30000);
+    return () => {
+      if (timer) window.clearInterval(timer);
+    };
+  }, []);
 
   const sidebarItems = [
     { name: "Profile Setup", path: "/vendor-portal/profile", icon: Building, exact: false },
@@ -140,7 +160,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
           {/* Right Section */}
           <div className="flex items-center space-x-3">
             {/* Notifications */}
-            {/* <Button
+            <Button
               variant="ghost"
               size="sm"
               className="relative"
@@ -153,7 +173,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
                   {notificationCount}
                 </Badge>
               )}
-            </Button> */}
+            </Button>
 
             {/* Profile Dropdown */}
             <DropdownMenu>
@@ -189,10 +209,10 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
                   <Crown className="mr-2 h-4 w-4" />
                   Subscription
                 </DropdownMenuItem> */}
-                {/* <DropdownMenuItem onClick={() => navigate('/vendor-portal/notifications')}>
+                <DropdownMenuItem onClick={() => navigate('/vendor-portal/notifications')}>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/vendor-portal/help')}>
                   <HelpCircle className="mr-2 h-4 w-4" />

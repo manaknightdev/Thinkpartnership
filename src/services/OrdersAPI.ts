@@ -53,6 +53,9 @@ export interface CreateOrderData {
   quantity?: number;
   unit_type?: string;
   customer_province?: string;
+  // Optional linkage to a quote message in chat
+  quote_message_id?: number;
+  chat_id?: number;
 }
 
 export interface CreateOrderResponse {

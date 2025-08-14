@@ -575,7 +575,7 @@ const AccountPage = () => {
               Stripe Account Connection
             </CardTitle>
             <p className="text-sm text-gray-600">
-              Connect your Stripe account to receive payments and manage withdrawals securely.
+              Connect your Stripe account to place orders and manage your payments.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -603,8 +603,8 @@ const AccountPage = () => {
                         {stripeAccount.connected && stripeAccount.details_submitted
                           ? 'Your account is fully set up and ready to receive payments'
                           : stripeAccount.connected
-                            ? 'Complete your account setup to start receiving payments'
-                            : 'Connect your Stripe account to receive payments'
+                            ? 'Complete your account setup to start placing orders'
+                            : 'Connect your Stripe account to place orders'
                         }
                       </div>
                       {stripeAccount.individual && (
