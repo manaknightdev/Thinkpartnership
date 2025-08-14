@@ -230,20 +230,7 @@ const NotificationsPage = () => {
     );
   }
 
-  const getNotificationAction = (notification: Notification) => {
-    switch (notification.type) {
-      case "payment":
-        return () => navigate('/marketplace/orders');
-      case "message":
-        return () => navigate('/marketplace/chat');
-      case "service_request":
-        return () => navigate('/marketplace/requests');
-      case "order_update":
-        return () => navigate('/marketplace/orders');
-      default:
-        return () => {};
-    }
-  };
+  
 
   return (
     <MarketplaceLayout>
@@ -317,10 +304,9 @@ const NotificationsPage = () => {
                 return (
                   <Card
                     key={notification.id}
-                    className={`border transition-all duration-200 hover:shadow-md cursor-pointer ${
+                    className={`border transition-all duration-200 hover:shadow-md ${
                       !notification.read ? 'border-blue-200 bg-blue-50/50' : 'border-gray-200 bg-white'
                     }`}
-                    onClick={getNotificationAction(notification)}
                   >
                     <CardContent className="p-6">
                       <div className="flex gap-4">

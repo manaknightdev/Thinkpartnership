@@ -444,10 +444,8 @@ const VendorNotificationsPage = () => {
 
                           <div className="flex items-center gap-2">
                             {notification.action_url && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={notification.action_url}>
-                                  {notification.action_text || "View"}
-                                </a>
+                              <Button size="sm" variant="outline" disabled title="Link disabled">
+                                {notification.action_text || "View"}
                               </Button>
                             )}
 
