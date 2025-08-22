@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Building, Mail, Phone, Eye, EyeOff } from "lucide-react";
 import ClientAPI, { ClientRegisterData } from "@/services/ClientAPI";
+import adminApiClient from '@/config/adminAxios';
 import { showError, showSuccess } from "@/utils/toast";
 
 interface AddClientModalProps {
@@ -71,14 +72,16 @@ export const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose,
         is_refresh: true,
       };
 
-      const response = await ClientAPI.register(registerData);
-      if (response.error) {
-        showError(response.message || 'Failed to create client');
+      // Use admin client creation endpoint instead of regular client registration
+      const response = await adminApiClient.post('/api/marketplace/admin/client/register', registerData);
+      const result = response.data;
+      if (result.error) {
+        showError(result.message || 'Failed to create client');
         return;
       }
 
-      showSuccess('Client account created. An email will be sent for confirmation.');
-      onAdd(response.user || { email: data.email, company_name: data.company_name });
+      showSuccess('Client account created successfully! The client will receive an invitation email to activate their account. They will remain in "Pending" status until they accept the invitation.');
+      onAdd(result.user || { email: data.email, company_name: data.company_name });
       reset();
       onClose();
     } catch (error: any) {
