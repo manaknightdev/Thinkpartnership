@@ -33,6 +33,7 @@ import VendorReferralsPage from "./pages/vendor/VendorReferralsPage";
 import VendorInvitePage from "./pages/vendor/VendorInvitePage";
 import VendorFullReferralReportPage from "./pages/vendor/VendorFullReferralReportPage";
 import VendorSubscriptionPage from "./pages/vendor/VendorSubscriptionPage";
+import VendorSubscriptionServicesPage from "./pages/vendor/VendorSubscriptionServicesPage";
 
 // Import new client sub-pages
 import ClientOverviewPage from "./pages/client/ClientOverviewPage";
@@ -251,6 +252,7 @@ const App = () => (
             <Route path="profile" element={<VendorProfilePage />} />
             <Route path="services" element={<VendorServicesPage />} />
             <Route path="service-tiers" element={<VendorServiceTiersPage />} />
+            <Route path="subscription-services" element={<VendorSubscriptionServicesPage />} />
             <Route path="requests" element={<VendorRequestsPage />} />
             <Route path="orders" element={<VendorOrdersPage />} />
             <Route path="messages" element={<VendorMessagesPage />} />

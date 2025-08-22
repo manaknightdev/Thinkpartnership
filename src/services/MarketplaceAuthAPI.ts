@@ -34,6 +34,8 @@ export interface MarketplaceAuthResponse {
   first_name?: string;
   last_name?: string;
   email?: string;
+  is_client_access?: boolean;
+  is_admin_impersonation?: boolean;
 }
 
 export interface MarketplaceUserProfile {
@@ -162,6 +164,8 @@ class MarketplaceAuthAPI {
       first_name: authResponse.first_name,
       last_name: authResponse.last_name,
       role: authResponse.role,
+      is_client_access: authResponse.is_client_access,
+      is_admin_impersonation: authResponse.is_admin_impersonation,
     };
     localStorage.setItem('user_data', JSON.stringify(userData));
 

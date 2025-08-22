@@ -123,6 +123,14 @@ export const API_CONFIG = {
       // Use S3-backed upload; role can be overridden via VITE_UPLOAD_ROLE (vendor | member)
       UPLOAD_IMAGE: `/v1/api/thinkpartnership/${(import.meta.env.VITE_UPLOAD_ROLE || 'vendor')}/lambda/s3/upload`,
     },
+    // Vendor Subscription Services
+    VENDOR_SUBSCRIPTION_SERVICES: {
+      LIST: '/api/marketplace/vendor/subscription-services',
+      CREATE: '/api/marketplace/vendor/subscription-services',
+      UPDATE: '/api/marketplace/vendor/subscription-services',
+      DELETE: '/api/marketplace/vendor/subscription-services',
+      DETAILS: '/api/marketplace/vendor/subscription-services',
+    },
     // Vendor Requests
     VENDOR_REQUESTS: {
       LIST: '/api/marketplace/vendor/requests',

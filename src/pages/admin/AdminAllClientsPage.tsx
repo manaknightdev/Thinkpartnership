@@ -379,8 +379,10 @@ const AdminAllClientsPage = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleAddClient = (newClient: any) => {
-    setClients(prev => [...prev, newClient]);
+  const handleAddClient = async (_newClient: any) => {
+    // After admin creates a client, refresh from server so status reflects 'Pending'
+    await fetchClients();
+    setIsAddModalOpen(false);
   };
 
   const handleUpdateClient = (updatedClient: any) => {

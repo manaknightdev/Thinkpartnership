@@ -55,7 +55,7 @@ const VendorSubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [subscribing, setSubscribing] = useState(false);
+  const [subscribing, setSubscribing] = useState<number | null>(null);
   const [changingPlan, setChangingPlan] = useState(false);
 
   // Helper: derive featured days from plan
@@ -101,7 +101,7 @@ const VendorSubscriptionPage = () => {
   };
 
   const handleSubscribeToPlan = async (planId: number) => {
-    setSubscribing(true);
+    setSubscribing(planId);
     try {
       const response = await VendorSubscriptionAPI.subscribeToPlan(planId);
 
@@ -119,7 +119,7 @@ const VendorSubscriptionPage = () => {
       console.error('Error subscribing to plan:', error);
       toast.error('Failed to subscribe to plan');
     } finally {
-      setSubscribing(false);
+      setSubscribing(null);
     }
   };
 
@@ -231,7 +231,7 @@ const VendorSubscriptionPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Users className="h-8 w-8 text-blue-600" />
-            Featured Plans
+            Paid Promotion
           </h1>
           <p className="text-gray-600 mt-2">
             Get featured in the marketplace for a set number of days. Services are unlimited while featured
@@ -335,7 +335,7 @@ const VendorSubscriptionPage = () => {
 
       <Tabs defaultValue="plans" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="plans">Featured Plans</TabsTrigger>
+            <TabsTrigger value="plans">Paid Promotion</TabsTrigger>
           <TabsTrigger value="usage">Usage & Analytics</TabsTrigger>
         </TabsList>
 
@@ -414,7 +414,7 @@ const VendorSubscriptionPage = () => {
                         setSelectedPlan(plan.id);
                         setIsUpgradeDialogOpen(true);
                       }}
-                      disabled={subscribing}
+                      disabled={!!subscribing}
                     >
                       {canUpgrade(plan.id) ? 'Upgrade' : canDowngrade(plan.id) ? 'Downgrade' : 'Switch'} to {plan.name}
                     </Button>
@@ -422,9 +422,9 @@ const VendorSubscriptionPage = () => {
                     <Button
                       className="w-full bg-blue-600 hover:bg-blue-700"
                       onClick={() => handleSubscribeToPlan(plan.id)}
-                      disabled={subscribing}
+                      disabled={subscribing === plan.id}
                     >
-                      {subscribing ? (
+                      {subscribing === plan.id ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Subscribing...
@@ -448,7 +448,7 @@ const VendorSubscriptionPage = () => {
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-blue-900 mb-2">How Featured Plans Work</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">How Paid Promotion Work</h3>
                   <ul className="text-sm text-blue-800 space-y-1">
                     <li>• Your services are featured for a set number of days</li>
                     <li>• Unlimited services while your plan is active</li>

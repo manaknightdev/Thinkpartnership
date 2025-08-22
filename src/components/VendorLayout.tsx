@@ -23,6 +23,7 @@ import {
   HelpCircle,
   Wallet,
   Package,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -87,10 +88,11 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
     { name: "Profile Setup", path: "/vendor-portal/profile", icon: Building, exact: false },
     { name: "Flat fee Services", path: "/vendor-portal/services", icon: List, exact: false },
     { name: "Custom Services", path: "/vendor-portal/service-tiers", icon: Package, exact: false },
+    { name: "Subscription Services", path: "/vendor-portal/subscription-services", icon: RefreshCw, exact: false },
     { name: "Orders", path: "/vendor-portal/orders", icon: FileText, exact: false },
     { name: "Messages", path: "/vendor-portal/messages", icon: MessageCircle, exact: false },
     { name: "My Customers", path: "/vendor-portal/customers", icon: User, exact: false },
-    { name: "Subscription Plans", path: "/vendor-portal/subscription", icon: Crown, exact: false },
+    { name: "Paid Promotion", path: "/vendor-portal/subscription", icon: Crown, exact: false },
     { name: "Wallet", path: "/vendor-portal/wallet", icon: Wallet, exact: false },
     { name: "Referral Dashboard", path: "/vendor-portal/referrals", icon: DollarSign, exact: false },
     { name: "Invite System", path: "/vendor-portal/invite", icon: Mail, exact: false },
@@ -100,7 +102,18 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
     if (exact) {
       return location.pathname === path;
     }
-    return location.pathname.startsWith(path);
+    
+    // For non-exact matches, ensure we don't match partial paths
+    // e.g., /subscription should not match /subscription-services
+    const currentPath = location.pathname;
+    
+    if (currentPath === path) {
+      return true;
+    }
+    
+    // Only match if the current path starts with the menu path followed by a slash
+    // This prevents /subscription from matching /subscription-services
+    return currentPath.startsWith(path + '/');
   };
 
   const handleNotificationClick = () => {

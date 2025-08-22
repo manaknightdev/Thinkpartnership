@@ -26,7 +26,18 @@ export interface ClientAuthResponse {
   error: boolean;
   message: string;
   token?: string;
-  client_id?: string;
+  access_token?: string;
+  refresh_token?: string;
+  expire_at?: number;
+  user_id?: number;
+  client_id?: string | number;
+  client_name?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  role?: string;
+  is_client_access?: boolean;
+  is_admin_impersonation?: boolean;
   user?: ClientProfile;
 }
 
@@ -204,6 +215,12 @@ class ClientAPI {
   // Profile Methods
   async getProfile(): Promise<ClientProfile> {
     const response = await clientApiClient.get('/api/marketplace/client/auth/profile');
+    return response.data;
+  }
+
+  // Marketplace Access
+  async getMarketplaceAccess(): Promise<ClientAuthResponse> {
+    const response = await clientApiClient.post('/api/marketplace/client/auth/marketplace-login');
     return response.data;
   }
 
@@ -396,7 +413,7 @@ class ClientAPI {
       localStorage.setItem('client_token', authResponse.token);
     }
     if (authResponse.client_id) {
-      localStorage.setItem('client_id', authResponse.client_id);
+      localStorage.setItem('client_id', String(authResponse.client_id));
     }
     if (authResponse.user) {
       localStorage.setItem('client_user', JSON.stringify(authResponse.user));

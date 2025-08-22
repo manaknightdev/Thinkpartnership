@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake, CheckSquare, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake, CheckSquare, Clock, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
 
 import ClientAPI, { DashboardStats } from '@/services/ClientAPI';
-import { showError } from '@/utils/toast';
+import MarketplaceAuthAPI from '@/services/MarketplaceAuthAPI';
+import { showError, showSuccess } from '@/utils/toast';
 
 const ClientOverviewPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isAccessingMarketplace, setIsAccessingMarketplace] = useState(false);
 
   useEffect(() => {
     fetchDashboardStats();
@@ -48,6 +50,53 @@ const ClientOverviewPage = () => {
     return `${sign}${growth.toFixed(1)}%`;
   };
 
+  const handleViewMarketplace = async () => {
+    if (isAccessingMarketplace) return;
+
+    setIsAccessingMarketplace(true);
+
+    try {
+      // Get marketplace access token from backend
+      const marketplaceAuth = await ClientAPI.getMarketplaceAccess();
+      
+      if (marketplaceAuth.error) {
+        throw new Error(marketplaceAuth.message);
+      }
+
+      // Convert client auth response to marketplace auth format
+      const marketplaceAuthData = {
+        error: marketplaceAuth.error,
+        message: marketplaceAuth.message,
+        role: marketplaceAuth.role || 'user',
+        token: marketplaceAuth.token || marketplaceAuth.access_token,
+        access_token: marketplaceAuth.access_token || marketplaceAuth.token,
+        refresh_token: marketplaceAuth.refresh_token,
+        expire_at: marketplaceAuth.expire_at,
+        user_id: marketplaceAuth.user_id,
+        client_id: typeof marketplaceAuth.client_id === 'string' ? parseInt(marketplaceAuth.client_id) : marketplaceAuth.client_id,
+        client_name: marketplaceAuth.client_name,
+        first_name: marketplaceAuth.first_name,
+        last_name: marketplaceAuth.last_name,
+        email: marketplaceAuth.email,
+        is_client_access: marketplaceAuth.is_client_access || true,
+        is_admin_impersonation: marketplaceAuth.is_admin_impersonation
+      };
+
+      // Store marketplace auth data
+      MarketplaceAuthAPI.storeAuthData(marketplaceAuthData);
+      
+      showSuccess(`Accessing ${marketplaceAuth.client_name || 'your marketplace'}...`);
+      
+      // Navigate to marketplace
+      window.location.href = "/marketplace";
+      
+    } catch (error: any) {
+      console.error('Error accessing marketplace:', error);
+      showError(error.message || 'Failed to access marketplace');
+      setIsAccessingMarketplace(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -67,7 +116,15 @@ const ClientOverviewPage = () => {
           Welcome to your client portal! Here you can manage your branded sub-marketplace, onboard vendors, and monitor transactions.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button className="bg-primary hover:bg-primary/90" asChild>
+          <Button 
+            onClick={handleViewMarketplace}
+            disabled={isAccessingMarketplace}
+            className="bg-primary hover:bg-primary/90 flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {isAccessingMarketplace ? 'Accessing...' : 'View Marketplace'}
+          </Button>
+          <Button variant="outline" asChild>
             <Link to="/client-portal/invites">Invite Users</Link>
           </Button>
           <Button variant="outline" asChild>

@@ -28,9 +28,11 @@ import {
   ArrowLeft,
   Shield,
   Tag,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import ClientAPI from "@/services/ClientAPI";
+import MarketplaceAuthAPI from "@/services/MarketplaceAuthAPI";
 
 // Helper function to convert relative URLs to full URLs
 const getFullImageUrl = (url: string): string => {
@@ -61,6 +63,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
   const { branding } = useBranding();
   const [isAdminImpersonation, setIsAdminImpersonation] = useState(false);
   const [isReturningToAdmin, setIsReturningToAdmin] = useState(false);
+  const [isAccessingMarketplace, setIsAccessingMarketplace] = useState(false);
 
   const companyName = branding?.company_name || "Client Portal";
   const logoUrl = branding?.logo_url ? getFullImageUrl(branding.logo_url) : '';
@@ -127,6 +130,54 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     }
   };
 
+  const handleViewMarketplace = async () => {
+    if (isAccessingMarketplace) return;
+
+    setIsAccessingMarketplace(true);
+    toast.info("Accessing your marketplace...");
+
+    try {
+      // Get marketplace access token from backend
+      const marketplaceAuth = await ClientAPI.getMarketplaceAccess();
+      
+      if (marketplaceAuth.error) {
+        throw new Error(marketplaceAuth.message);
+      }
+
+      // Convert client auth response to marketplace auth format
+      const marketplaceAuthData = {
+        error: marketplaceAuth.error,
+        message: marketplaceAuth.message,
+        role: marketplaceAuth.role || 'user',
+        token: marketplaceAuth.token || marketplaceAuth.access_token,
+        access_token: marketplaceAuth.access_token || marketplaceAuth.token,
+        refresh_token: marketplaceAuth.refresh_token,
+        expire_at: marketplaceAuth.expire_at,
+        user_id: marketplaceAuth.user_id,
+        client_id: typeof marketplaceAuth.client_id === 'string' ? parseInt(marketplaceAuth.client_id) : marketplaceAuth.client_id,
+        client_name: marketplaceAuth.client_name,
+        first_name: marketplaceAuth.first_name,
+        last_name: marketplaceAuth.last_name,
+        email: marketplaceAuth.email,
+        is_client_access: marketplaceAuth.is_client_access || true,
+        is_admin_impersonation: marketplaceAuth.is_admin_impersonation
+      };
+
+      // Store marketplace auth data
+      MarketplaceAuthAPI.storeAuthData(marketplaceAuthData);
+      
+      toast.success(`Welcome to ${marketplaceAuth.client_name || 'your marketplace'}!`);
+      
+      // Navigate to marketplace
+      window.location.href = "/marketplace";
+      
+    } catch (error: any) {
+      console.error('Error accessing marketplace:', error);
+      toast.error(error.message || 'Failed to access marketplace');
+      setIsAccessingMarketplace(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Client Header */}
@@ -178,6 +229,19 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-3">
+            {/* View Marketplace Button */}
+            <Button
+              onClick={handleViewMarketplace}
+              disabled={isAccessingMarketplace}
+              className="bg-primary hover:bg-primary/90 text-white font-medium flex items-center gap-2 px-4 py-2"
+              title="View your marketplace as a customer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isAccessingMarketplace ? 'Accessing...' : 'View Marketplace'}
+              </span>
+            </Button>
+
             {/* Notifications */}
             {/* <Button
               variant="ghost"
