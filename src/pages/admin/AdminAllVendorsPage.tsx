@@ -500,6 +500,7 @@ const AdminAllVendorsPage = () => {
                   <TableRow>
                     <TableHead className="font-semibold text-gray-900">Vendor Name</TableHead>
                     <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
+                    <TableHead className="font-semibold text-gray-900">Client</TableHead>
                     <TableHead className="font-semibold text-gray-900">Services</TableHead>
                     <TableHead className="font-semibold text-gray-900">Jobs</TableHead>
                     <TableHead className="font-semibold text-gray-900">Revenue</TableHead>
@@ -510,7 +511,7 @@ const AdminAllVendorsPage = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         <div className="flex items-center justify-center space-x-2">
                           <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
                           <span className="text-gray-500">Loading vendors...</span>
@@ -519,7 +520,7 @@ const AdminAllVendorsPage = () => {
                     </TableRow>
                   ) : filteredVendors.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         <div className="text-gray-500">
                           {searchTerm || statusFilter !== 'all' || locationFilter !== 'all' || serviceFilter !== 'all'
                             ? 'No vendors found matching your filters.'
@@ -557,6 +558,24 @@ const AdminAllVendorsPage = () => {
                           </div>
                         </div>
                       </TableCell>
+
+                      {/* Client Column */}
+                      <TableCell>
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">
+                            {vendor.client_name}
+                          </p>
+                          {vendor.client_email && (
+                            <p className="text-xs text-gray-500">{vendor.client_email}</p>
+                          )}
+                          {!vendor.client_id && (
+                            <Badge variant="outline" className="mt-1 text-xs">
+                              Independent
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+
                       <TableCell>
                         <p className="text-sm text-gray-700 max-w-xs truncate" title={vendor.services}>
                           {vendor.services}

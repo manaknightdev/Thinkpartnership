@@ -74,14 +74,26 @@ export interface AdminClient {
 
 export interface AdminVendor {
   id: number;
-  email: string;
+  name: string;
   business_name: string;
-  status: number;
-  verification_status: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  status: string;
+  services?: string;
   total_services: number;
-  total_revenue: number;
   rating: number;
-  created_at: string;
+  total_reviews?: number;
+  totalJobs: number;
+  revenue: string;
+  joinDate: string;
+  lastActive: string;
+  verified?: boolean;
+  client_id?: number;
+  client_name: string;
+  client_email?: string;
+  client_marketplace: string;
+  client: string;
 }
 
 export interface AdminCustomer {
