@@ -26,13 +26,28 @@ export interface VendorAuthResponse {
   message: string;
   role?: string;
   token?: string;
+  access_token?: string;
   refresh_token?: string;
   expire_at?: number;
   user_id?: number;
   vendor_id?: number;
+  client_id?: number;
+  client_name?: string;
   business_name?: string;
   contact_name?: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
+  is_vendor_access?: boolean;
+}
+
+export interface MarketplaceVendorAuthResponse extends VendorAuthResponse {
+  access_token: string;
+  client_id: number;
+  client_name: string;
+  first_name: string;
+  last_name: string;
+  is_vendor_access: boolean;
 }
 
 export interface VendorProfile {
@@ -106,6 +121,12 @@ class VendorAuthAPI {
   // Update vendor profile
   async updateProfile(data: UpdateVendorProfileData): Promise<{ error: boolean; message: string }> {
     const response = await vendorApiClient.put(API_CONFIG.ENDPOINTS.VENDOR_AUTH.PROFILE, data);
+    return response.data;
+  }
+
+  // Get marketplace access for vendor
+  async getMarketplaceAccess(): Promise<MarketplaceVendorAuthResponse> {
+    const response = await vendorApiClient.post('/api/marketplace/vendor/auth/marketplace-login');
     return response.data;
   }
 

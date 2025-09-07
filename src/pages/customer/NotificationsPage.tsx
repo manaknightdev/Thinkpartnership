@@ -18,7 +18,9 @@ import {
   FileText,
   ShoppingCart,
   Settings,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 const NotificationsPage = () => {
@@ -47,7 +49,7 @@ const NotificationsPage = () => {
       setLoading(true);
       setError('');
 
-      const response = await NotificationsAPI.getNotifications(page, 20);
+      const response = await NotificationsAPI.getNotifications(page, 50); // Increased from 20 to 50
       if (response.error) {
         throw new Error(response.message || 'Failed to fetch notifications');
       }
@@ -298,7 +300,9 @@ const NotificationsPage = () => {
           ) : (
             /* Notifications List */
             <div className="space-y-4">
-              {notifications.map((notification) => {
+              {notifications
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) // Ensure most recent first
+                .map((notification) => {
                 const style = getNotificationStyle(notification.type);
                 const IconComponent = style.icon;
                 return (
@@ -375,6 +379,38 @@ const NotificationsPage = () => {
                   </Card>
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {notifications.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+              <div className="text-sm text-gray-700">
+                Showing page {page} of {totalPages} ({notifications.length} notifications)
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
         </div>

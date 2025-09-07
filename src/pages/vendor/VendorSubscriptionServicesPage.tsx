@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Loader2, Upload, X, RefreshCw, Clock, Calendar } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Loader2, Upload, X, RefreshCw, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -36,6 +36,12 @@ const VendorSubscriptionServicesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50, // Increased from default 10
+    total: 0,
+    pages: 0
+  });
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editingService, setEditingService] = useState<SubscriptionService | null>(null);
@@ -57,6 +63,20 @@ const VendorSubscriptionServicesPage = () => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath; // Already a full URL
     return `${API_CONFIG.BASE_URL}${imagePath}`; // Convert relative path to full URL
+  };
+
+  // Get status badge for service approval status
+  const getStatusBadge = (status: number) => {
+    switch (status) {
+      case 1:
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">✅ Approved</Badge>;
+      case 0:
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">⏳ Pending Review</Badge>;
+      case -1:
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">❌ Rejected</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Unknown</Badge>;
+    }
   };
 
   const [newService, setNewService] = useState<CreateSubscriptionServiceData>({
@@ -82,12 +102,15 @@ const VendorSubscriptionServicesPage = () => {
     loadCategories();
   }, []);
 
-  const loadServices = async () => {
+  const loadServices = async (page: number = 1) => {
     try {
       setIsLoading(true);
       setError("");
 
-      const response = await VendorSubscriptionServicesAPI.getServices();
+      const response = await VendorSubscriptionServicesAPI.getServices({
+        page: page,
+        limit: pagination.limit
+      });
 
       if (response.error) {
         setError(response.message || "Failed to load subscription services");
@@ -95,6 +118,7 @@ const VendorSubscriptionServicesPage = () => {
       }
 
       setServices(response.services);
+      setPagination(response.pagination || pagination);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load subscription services");
     } finally {
@@ -180,7 +204,7 @@ const VendorSubscriptionServicesPage = () => {
         }
       }
 
-      showSuccess("Subscription service created successfully!");
+      showSuccess("Subscription service created successfully! It will be reviewed by your client before going live.");
       setShowCreateDialog(false);
       resetNewService();
       await loadServices();
@@ -669,10 +693,13 @@ const VendorSubscriptionServicesPage = () => {
                       <RefreshCw className="h-12 w-12 text-gray-400" />
                     </div>
                   )}
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 flex gap-2">
                     <Badge className={`${getBillingCycleBadgeColor(service.billing_cycle)} text-xs`}>
                       {VendorSubscriptionServicesAPIClass.getBillingCycleText(service.billing_cycle)}
                     </Badge>
+                  </div>
+                  <div className="absolute top-3 left-3">
+                    {getStatusBadge(service.status)}
                   </div>
                 </div>
                 <CardHeader className="pb-3">
@@ -686,7 +713,7 @@ const VendorSubscriptionServicesPage = () => {
                         ${service.base_price}{VendorSubscriptionServicesAPIClass.getBillingCycleSuffix(service.billing_cycle)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        ~${VendorSubscriptionServicesAPIClass.getEffectiveMonthlyPrice(service.base_price, service.billing_cycle).toFixed(0)}/mo
+                        ~${(VendorSubscriptionServicesAPIClass.getEffectiveMonthlyPrice(service.base_price, service.billing_cycle) || 0).toFixed(0)}/mo
                       </p>
                     </div>
                   </div>
@@ -749,6 +776,7 @@ const VendorSubscriptionServicesPage = () => {
                           <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{service.title}</h3>
                           <p className="text-sm text-gray-600">{service.short_description}</p>
                           <div className="flex items-center gap-2 mt-1">
+                            {getStatusBadge(service.status)}
                             <Badge className={`${getBillingCycleBadgeColor(service.billing_cycle)} text-xs`}>
                               {VendorSubscriptionServicesAPIClass.getBillingCycleText(service.billing_cycle)}
                             </Badge>
@@ -770,7 +798,7 @@ const VendorSubscriptionServicesPage = () => {
                             ${service.base_price}{VendorSubscriptionServicesAPIClass.getBillingCycleSuffix(service.billing_cycle)}
                           </span>
                           <span className="text-sm text-gray-500">
-                            (~${VendorSubscriptionServicesAPIClass.getEffectiveMonthlyPrice(service.base_price, service.billing_cycle).toFixed(0)}/mo)
+                            (~${(VendorSubscriptionServicesAPIClass.getEffectiveMonthlyPrice(service.base_price, service.billing_cycle) || 0).toFixed(0)}/mo)
                           </span>
                         </div>
 
@@ -814,6 +842,38 @@ const VendorSubscriptionServicesPage = () => {
           </CardContent>
         </Card>
         )}
+
+      {/* Pagination Controls */}
+      {services.length > 0 && pagination.pages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-700">
+            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} subscription services
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadServices(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadServices(pagination.page + 1)}
+              disabled={pagination.page >= pagination.pages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Service Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>

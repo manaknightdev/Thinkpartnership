@@ -174,6 +174,15 @@ export interface BrandingSettings {
   tagline?: string;
   custom_domain?: string;
   theme_settings: Record<string, any>;
+  // Marketplace content text fields
+  hero_heading?: string;
+  hero_subheading?: string;
+  hero_search_placeholder?: string;
+  featured_section_title?: string;
+  featured_section_subtitle?: string;
+  cta_heading?: string;
+  cta_subheading?: string;
+  cta_button_text?: string;
 }
 
 export interface ClientCategory {
@@ -520,6 +529,17 @@ class ClientAPI {
         throw new Error(error.message || 'Failed to return to admin portal. Please log in again.');
       }
     }
+  }
+
+  // Service Approval Methods
+  async getPendingServices(params?: { type?: string; page?: number; limit?: number }): Promise<any> {
+    const response = await clientApiClient.get('/api/marketplace/client/pending-services', { params });
+    return response.data;
+  }
+
+  async reviewService(serviceId: number, data: { action: 'approve' | 'reject'; service_type: string; comments?: string }): Promise<any> {
+    const response = await clientApiClient.post(`/api/marketplace/client/services/${serviceId}/review`, data);
+    return response.data;
   }
 }
 

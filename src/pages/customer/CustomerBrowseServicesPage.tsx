@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
 import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
 import API_CONFIG from "@/config/api";
+import { useMarketplaceBranding } from "@/hooks/useMarketplaceBranding";
 import {
   Search,
   Home,
@@ -29,6 +30,7 @@ const CustomerBrowseServicesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const { branding, loading: brandingLoading } = useMarketplaceBranding();
 
   // Utility function to get full image URL
   const getImageUrl = (imagePath: string) => {
@@ -189,14 +191,10 @@ const CustomerBrowseServicesPage = () => {
         <div className="max-w-7xl mx-auto px-4 py-20">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 text-gray-900 leading-tight">
-              Find the perfect
-              <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                {" "}service{" "}
-              </span>
-              for your home
+              {branding?.hero_heading || "Find the perfect service for your home"}
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Connect with trusted professionals. Quality guaranteed, satisfaction promised.
+              {branding?.hero_subheading || "Connect with trusted professionals. Quality guaranteed, satisfaction promised."}
             </p>
 
             {/* Enhanced Search Bar */}
@@ -207,7 +205,7 @@ const CustomerBrowseServicesPage = () => {
                 </div>
                 <Input
                   type="search"
-                  placeholder="What service do you need? Try 'home cleaning', 'plumbing repair', 'painting'..."
+                  placeholder={branding?.hero_search_placeholder || "What service do you need? Try 'home cleaning', 'plumbing repair', 'painting'..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -283,10 +281,10 @@ const CustomerBrowseServicesPage = () => {
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Featured Services
+              {branding?.featured_section_title || "Featured Services"}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Top-rated services from trusted professionals in your area.
+              {branding?.featured_section_subtitle || "Top-rated services from trusted professionals in your area."}
             </p>
           </div>
 
@@ -457,10 +455,10 @@ const CustomerBrowseServicesPage = () => {
                 </div>
               </div>
               <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Ready to Get Started?
+                {branding?.cta_heading || "Ready to Get Started?"}
               </h3>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Connect with service providers in your area. Quality work from trusted professionals.
+                {branding?.cta_subheading || "Connect with service providers in your area. Quality work from trusted professionals."}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
@@ -468,7 +466,7 @@ const CustomerBrowseServicesPage = () => {
                   className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                   onClick={() => navigate('/marketplace/services')}
                 >
-                  Browse All Services
+                  {branding?.cta_button_text || "Browse All Services"}
                 </Button>
               </div>
             </div>

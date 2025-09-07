@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PortalQuickNavFooter } from "@/components/PortalQuickNavFooter";
-import VendorAuthAPI, { VendorProfile } from "@/services/VendorAuthAPI";
+import VendorAuthAPI, { VendorProfile, MarketplaceVendorAuthResponse } from "@/services/VendorAuthAPI";
 import VendorNotificationsAPI from "@/services/VendorNotificationsAPI";
+import MarketplaceAuthAPI from "@/services/MarketplaceAuthAPI";
 import {
   Menu,
   Bell,
@@ -24,6 +25,7 @@ import {
   Wallet,
   Package,
   RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +41,7 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [vendorProfile, setVendorProfile] = useState<VendorProfile['vendor'] | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isAccessingMarketplace, setIsAccessingMarketplace] = useState(false);
 
   // Load vendor profile on component mount
   useEffect(() => {
@@ -127,6 +130,55 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
     }, 500);
   };
 
+  const handleViewMarketplace = async () => {
+    if (isAccessingMarketplace) return;
+
+    setIsAccessingMarketplace(true);
+    toast.info("Accessing marketplace...");
+
+    try {
+      // Get marketplace access token from backend
+      const marketplaceAuth = await VendorAuthAPI.getMarketplaceAccess();
+      
+      if (marketplaceAuth.error) {
+        throw new Error(marketplaceAuth.message);
+      }
+
+      // Convert vendor auth response to marketplace auth format
+      const marketplaceAuthData = {
+        error: marketplaceAuth.error,
+        message: marketplaceAuth.message,
+        role: marketplaceAuth.role || 'user',
+        token: marketplaceAuth.token || marketplaceAuth.access_token,
+        access_token: marketplaceAuth.access_token || marketplaceAuth.token,
+        refresh_token: marketplaceAuth.refresh_token,
+        expire_at: marketplaceAuth.expire_at,
+        user_id: marketplaceAuth.user_id,
+        vendor_id: marketplaceAuth.vendor_id,
+        client_id: marketplaceAuth.client_id,
+        client_name: marketplaceAuth.client_name,
+        first_name: marketplaceAuth.first_name,
+        last_name: marketplaceAuth.last_name,
+        email: marketplaceAuth.email,
+        business_name: marketplaceAuth.business_name,
+        is_vendor_access: marketplaceAuth.is_vendor_access || true
+      };
+
+      // Store marketplace auth data
+      MarketplaceAuthAPI.storeAuthData(marketplaceAuthData);
+      
+      toast.success(`Welcome to ${marketplaceAuth.client_name || 'the marketplace'}!`);
+      
+      // Navigate to marketplace
+      window.location.href = "/marketplace";
+      
+    } catch (error: any) {
+      console.error('Error accessing marketplace:', error);
+      toast.error(error.message || 'Failed to access marketplace');
+      setIsAccessingMarketplace(false);
+    }
+  };
+
   // Don't show full-screen loading - let header and sidebar render
 
   return (
@@ -172,6 +224,19 @@ export const VendorLayout = ({ children }: VendorLayoutProps) => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-3">
+            {/* View Marketplace Button */}
+            <Button
+              onClick={handleViewMarketplace}
+              disabled={isAccessingMarketplace}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center gap-2 px-4 py-2"
+              title="View marketplace as a customer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isAccessingMarketplace ? 'Accessing...' : 'View Marketplace'}
+              </span>
+            </Button>
+
             {/* Notifications */}
             <Button
               variant="ghost"

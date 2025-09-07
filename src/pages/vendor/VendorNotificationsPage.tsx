@@ -24,6 +24,8 @@ import {
   MessageSquare,
   Eye,
   EyeOff,
+  ChevronLeft,
+  ChevronRight,
   
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,7 +52,7 @@ const VendorNotificationsPage = () => {
 
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20,
+    limit: 50, // Increased from 20 to 50
     total: 0,
     pages: 0,
   });
@@ -217,7 +219,7 @@ const VendorNotificationsPage = () => {
                          (filterStatus === "unread" && !notification.is_read);
 
     return matchesSearch && matchesType && matchesStatus;
-  });
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); // Ensure most recent first
 
   // Show loading skeleton while data is being fetched
   if (isLoading) {
@@ -487,6 +489,38 @@ const VendorNotificationsPage = () => {
               ))
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {filteredNotifications.length > 0 && pagination.pages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+              <div className="text-sm text-gray-700">
+                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} notifications
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPagination({...pagination, page: pagination.page - 1})}
+                  disabled={pagination.page <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPagination({...pagination, page: pagination.page + 1})}
+                  disabled={pagination.page >= pagination.pages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
       </div>
     </div>
   );

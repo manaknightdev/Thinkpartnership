@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import {
   Check,
   Star,
@@ -16,7 +17,9 @@ import {
   Crown,
   Upload,
   X,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import VendorServiceTiersAPI from "@/services/VendorServiceTiersAPI";
@@ -53,6 +56,12 @@ const VendorServiceTiersPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<ServiceTier | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50, // Increased from default 10
+    total: 0,
+    pages: 0
+  });
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -89,14 +98,32 @@ const VendorServiceTiersPage = () => {
     return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgNzVIMTc1VjEyNUgxMjVWNzVaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgo8Y2lyY2xlIGN4PSIxNDAiIGN5PSI5MCIgcj0iNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTMwIDExMEwxNDAgMTAwTDE2MCA5MFYxMjBIMTMwVjExMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
   };
 
+  // Get status badge for service approval status
+  const getStatusBadge = (status: number) => {
+    switch (status) {
+      case 1:
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">✅ Approved</Badge>;
+      case 0:
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">⏳ Pending Review</Badge>;
+      case -1:
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">❌ Rejected</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Unknown</Badge>;
+    }
+  };
+
   // Load service tiers from API
-  const loadServiceTiers = async () => {
+  const loadServiceTiers = async (page: number = 1) => {
     try {
       setLoading(true);
-      const response = await VendorServiceTiersAPI.getServiceTiers();
+      const response = await VendorServiceTiersAPI.getServiceTiers({
+        page: page,
+        limit: pagination.limit
+      });
       
       if (!response.error && (response as any).service_tiers) {
         setServiceTiers((response as any).service_tiers);
+        setPagination((response as any).pagination || pagination);
       } else {
         toast.error(response.message || 'Failed to load service tiers');
       }
@@ -210,7 +237,7 @@ const VendorServiceTiersPage = () => {
       const response = await VendorServiceTiersAPI.createServiceTier(tierData);
       
       if (!response.error) {
-        toast.success('Service created successfully');
+        toast.success('Service created successfully! It will be reviewed by your client before going live.');
         setIsAddModalOpen(false);
         // Reset form
         setNewTier({
@@ -424,7 +451,8 @@ const VendorServiceTiersPage = () => {
                   max_quantity: tier.max_quantity,
                   images: Array.isArray(tier.images) ? tier.images :
                          typeof tier.images === 'string' ? JSON.parse(tier.images || '[]') : [],
-                  is_popular: tier.is_popular || false
+                  is_popular: tier.is_popular || false,
+                  status: tier.status || 0
                 };
 
                 return (
@@ -492,16 +520,44 @@ const VendorServiceTiersPage = () => {
 
                     {/* Status */}
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        Active
-                      </span>
-
+                      {getStatusBadge(tierData.status || 0)}
                     </div>
                   </CardContent>
                 </Card>
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {serviceTiers.length > 0 && pagination.pages > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <div className="text-sm text-gray-700">
+                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} custom services
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadServiceTiers(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadServiceTiers(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.pages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
         </div>

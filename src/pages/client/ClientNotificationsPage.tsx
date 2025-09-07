@@ -13,7 +13,9 @@ import {
   Clock,
   Eye,
   EyeOff,
-  Trash2
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,6 +30,13 @@ interface Notification {
 }
 
 const ClientNotificationsPage = () => {
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50, // Increased from default
+    total: 0,
+    pages: 0
+  });
+
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: "n002",
@@ -237,7 +246,21 @@ const ClientNotificationsPage = () => {
                     <p className="text-gray-600">You're all caught up! New notifications will appear here.</p>
                   </div>
                 ) : (
-                  notifications.map((notification) => (
+                  (() => {
+                    const sorted = notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                    const total = sorted.length;
+                    const pages = Math.ceil(total / pagination.limit);
+                    const start = (pagination.page - 1) * pagination.limit;
+                    const end = start + pagination.limit;
+                    const paginatedNotifications = sorted.slice(start, end);
+                    
+                    // Update pagination state if needed
+                    if (pagination.total !== total || pagination.pages !== pages) {
+                      setTimeout(() => setPagination(prev => ({ ...prev, total, pages })), 0);
+                    }
+                    
+                    return paginatedNotifications;
+                  })().map((notification) => (
                     <Card 
                       key={notification.id} 
                       className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
@@ -284,6 +307,38 @@ const ClientNotificationsPage = () => {
                       </CardContent>
                     </Card>
                   ))
+                )}
+
+                {/* Pagination Controls */}
+                {notifications.length > pagination.limit && (
+                  <div className="flex items-center justify-between mt-6 pt-6 border-t">
+                    <div className="text-sm text-gray-700">
+                      Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} notifications
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPagination({...pagination, page: pagination.page - 1})}
+                        disabled={pagination.page <= 1}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                      </Button>
+                      <span className="text-sm text-gray-600">
+                        Page {pagination.page} of {pagination.pages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPagination({...pagination, page: pagination.page + 1})}
+                        disabled={pagination.page >= pagination.pages}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             </TabsContent>

@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Loader2, Upload, X } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Loader2, Upload, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -30,6 +31,12 @@ const VendorServicesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50, // Increased from default 10
+    total: 0,
+    pages: 0
+  });
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editingService, setEditingService] = useState<VendorService | null>(null);
@@ -51,6 +58,20 @@ const VendorServicesPage = () => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath; // Already a full URL
     return `${API_CONFIG.BASE_URL}${imagePath}`; // Convert relative path to full URL
+  };
+
+  // Get status badge for service approval status
+  const getStatusBadge = (status: number) => {
+    switch (status) {
+      case 1:
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">✅ Approved</Badge>;
+      case 0:
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">⏳ Pending Review</Badge>;
+      case -1:
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">❌ Rejected</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Unknown</Badge>;
+    }
   };
   const [newService, setNewService] = useState<CreateServiceData>({
     title: "",
@@ -76,12 +97,15 @@ const VendorServicesPage = () => {
     loadCategories();
   }, []);
 
-  const loadServices = async () => {
+  const loadServices = async (page: number = 1) => {
     try {
       setIsLoading(true);
       setError("");
 
-      const response = await VendorServicesAPI.getServices();
+      const response = await VendorServicesAPI.getServices({
+        page: page,
+        limit: pagination.limit
+      });
 
       if (response.error) {
         setError(response.message || "Failed to load services");
@@ -89,6 +113,7 @@ const VendorServicesPage = () => {
       }
 
       setServices(response.services);
+      setPagination(response.pagination || pagination);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load services");
     } finally {
@@ -174,7 +199,7 @@ const VendorServicesPage = () => {
         }
       }
 
-      showSuccess("Service created successfully!");
+      showSuccess("Service created successfully! It will be reviewed by your client before going live.");
       setShowCreateDialog(false);
       resetNewService();
       await loadServices();
@@ -643,6 +668,9 @@ const VendorServicesPage = () => {
                     <div className="flex-1">
                       <CardTitle className="text-lg line-clamp-1">{service.title}</CardTitle>
                       <p className="text-sm text-gray-600 mt-1">{service.short_description}</p>
+                      <div className="mt-2">
+                        {getStatusBadge(service.status)}
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-blue-600">${service.base_price}</p>
@@ -702,6 +730,9 @@ const VendorServicesPage = () => {
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{service.title}</h3>
                           <p className="text-sm text-gray-600">{service.short_description}</p>
+                          <div className="mt-2">
+                            {getStatusBadge(service.status)}
+                          </div>
                         </div>
                       </div>
 
@@ -754,6 +785,38 @@ const VendorServicesPage = () => {
           </CardContent>
         </Card>
         )}
+
+      {/* Pagination Controls */}
+      {services.length > 0 && pagination.pages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-700">
+            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} services
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadServices(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadServices(pagination.page + 1)}
+              disabled={pagination.page >= pagination.pages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Service Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>

@@ -29,12 +29,15 @@ export interface MarketplaceAuthResponse {
   expire_at?: number;
   user_id?: number;
   customer_id?: number;
+  vendor_id?: number;
   client_id?: number;
   client_name?: string;
   first_name?: string;
   last_name?: string;
   email?: string;
+  business_name?: string;
   is_client_access?: boolean;
+  is_vendor_access?: boolean;
   is_admin_impersonation?: boolean;
 }
 
@@ -158,13 +161,16 @@ class MarketplaceAuthAPI {
     const userData = {
       user_id: authResponse.user_id,
       customer_id: authResponse.customer_id,
+      vendor_id: authResponse.vendor_id,
       client_id: authResponse.client_id,
       client_name: authResponse.client_name,
       email: authResponse.email,
       first_name: authResponse.first_name,
       last_name: authResponse.last_name,
+      business_name: authResponse.business_name,
       role: authResponse.role,
       is_client_access: authResponse.is_client_access,
+      is_vendor_access: authResponse.is_vendor_access,
       is_admin_impersonation: authResponse.is_admin_impersonation,
     };
     localStorage.setItem('user_data', JSON.stringify(userData));

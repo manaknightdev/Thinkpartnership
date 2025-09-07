@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClient } from "@/contexts/ClientContext";
 import { useCart } from "@/contexts/CartContext";
 import MarketplaceAuthAPI from "@/services/MarketplaceAuthAPI";
+import { useMarketplaceBranding } from "@/hooks/useMarketplaceBranding";
+import MarketplaceBrandingAPI from "@/services/MarketplaceBrandingAPI";
 import { toast } from "sonner";
 import {
   Search,
@@ -46,7 +48,9 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
   const [orderCount, setOrderCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isClientAccess, setIsClientAccess] = useState(false);
+  const [isVendorAccess, setIsVendorAccess] = useState(false);
   const [isAdminImpersonation, setIsAdminImpersonation] = useState(false);
+  const { branding } = useMarketplaceBranding();
 
 
   // Use the auth hook
@@ -94,18 +98,20 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     fetchUserData();
   }, [isAuthenticated]);
 
-  // Check if user accessed marketplace from client portal
+  // Check if user accessed marketplace from client portal or vendor portal
   useEffect(() => {
-    const checkClientAccess = () => {
+    const checkPortalAccess = () => {
       const marketplaceUserData = MarketplaceAuthAPI.getUserData();
-      // Check if the stored auth data has the client access flag
+      // Check if the stored auth data has the access flags
       const isFromClient = marketplaceUserData?.is_client_access === true;
+      const isFromVendor = marketplaceUserData?.is_vendor_access === true;
       const isFromAdmin = marketplaceUserData?.is_admin_impersonation === true;
       setIsClientAccess(isFromClient);
+      setIsVendorAccess(isFromVendor);
       setIsAdminImpersonation(isFromAdmin);
     };
 
-    checkClientAccess();
+    checkPortalAccess();
   }, [isAuthenticated]);
 
   // Get display name
@@ -196,6 +202,15 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
     }, 500);
   };
 
+  const handleBackToVendor = () => {
+    toast.info("Returning to Vendor Portal...");
+    // Clear marketplace auth and redirect to vendor portal
+    MarketplaceAuthAPI.clearAuthData();
+    setTimeout(() => {
+      window.location.href = '/vendor-portal';
+    }, 500);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Marketplace Header */}
@@ -231,10 +246,29 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Logo - Show client name when authenticated */}
+            {/* Logo - Show client logo when available, otherwise company name */}
             <div className="flex items-center gap-3">
-              <Link to="/marketplace" className="text-xl font-bold text-green-600">
-                {getMarketplaceName()}
+              <Link to="/marketplace" className="flex items-center gap-2">
+                {branding?.logo_url ? (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={MarketplaceBrandingAPI.getFullImageUrl(branding.logo_url)}
+                      alt={branding.company_name || getMarketplaceName()}
+                      className="h-8 w-auto"
+                      onError={(e) => {
+                        // Hide image on error and show text fallback
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <span className="text-xl font-bold text-green-600">
+                      {branding.company_name || getMarketplaceName()}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xl font-bold text-green-600">
+                    {branding?.company_name || getMarketplaceName()}
+                  </span>
+                )}
               </Link>
               
               {/* Admin View Badge - Only show during admin impersonation */}
@@ -257,6 +291,20 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Back to Client Portal</span>
+              </Button>
+            )}
+
+            {/* Back to Vendor Portal - Only show when accessed from vendor */}
+            {isVendorAccess && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBackToVendor}
+                className="ml-4 flex items-center gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                title="Return to Vendor Portal"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Vendor Portal</span>
               </Button>
             )}
           </div>

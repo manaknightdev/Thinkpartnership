@@ -202,15 +202,18 @@ class VendorSubscriptionServicesAPI {
 
   // Calculate effective monthly price for comparison
   static getEffectiveMonthlyPrice(price: number, cycle: string): number {
-    switch (cycle) {
+    const validPrice = Number(price) || 0;
+    const validCycle = cycle || 'monthly';
+    
+    switch (validCycle) {
       case 'monthly':
-        return price;
+        return validPrice;
       case 'quarterly':
-        return price / 3;
+        return validPrice / 3;
       case 'annually':
-        return price / 12;
+        return validPrice / 12;
       default:
-        return price;
+        return validPrice;
     }
   }
 }
