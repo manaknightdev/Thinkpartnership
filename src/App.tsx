@@ -80,6 +80,7 @@ import VendorLogin from "./pages/vendor/VendorLogin";
 import VendorSignup from "./pages/vendor/VendorSignup";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientSignup from "./pages/client/ClientSignup";
+import ClientRegistrationPage from "./pages/ClientRegistrationPage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import OAuthCallback from "./pages/customer/OAuthCallback";
 import ProtectedRoute, { VendorProtectedRoute, ClientProtectedRoute, AdminProtectedRoute } from "./components/ProtectedRoute";
@@ -189,6 +190,7 @@ const App = () => (
           {/* Client Authentication Routes */}
           <Route path="/client/login" element={<ClientLogin />} />
           <Route path="/client/signup" element={<ClientSignup />} />
+          <Route path="/client-registration" element={<ClientRegistrationPage />} />
 
           {/* Admin Authentication Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

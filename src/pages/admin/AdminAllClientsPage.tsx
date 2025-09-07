@@ -127,6 +127,8 @@ const getStatusVariant = (status: string) => {
       return "default";
     case "Pending":
       return "secondary";
+    case "Invited":
+      return "secondary";
     case "Suspended":
       return "destructive";
     case "Terminated":
@@ -184,6 +186,7 @@ const AdminAllClientsPage = () => {
           case 'pending': return 0;
           case 'suspended': return 2;
           case 'terminated': return 4;
+          case 'invited': return 'invited'; // Special case for invitations
           default: return undefined;
         }
       };
@@ -208,6 +211,7 @@ const AdminAllClientsPage = () => {
           phone: client.phone || 'N/A',
           website: client.custom_domain || `${client.marketplace_subdomain}.marketplace.com` || 'N/A',
           status: (() => {
+            if (client.status === 99) return 'Invited'; // Special status for invitations
             switch (client.status) {
               case 1: return 'Active';
               case 0: return 'Pending';
@@ -225,7 +229,10 @@ const AdminAllClientsPage = () => {
           city: client.city,
           province: client.province,
           commissionRate: client.commission_rate,
-          subscription_status: client.status // Keep original status for backend operations
+          subscription_status: client.status, // Keep original status for backend operations
+          record_type: client.record_type, // Track whether it's registered or invitation
+          invitation_id: client.invitation_id,
+          expires_at: client.expires_at
         }));
 
         setClients(transformedClients);
@@ -471,6 +478,7 @@ const AdminAllClientsPage = () => {
   const totalClients = filteredClients.length;
   const activeClients = filteredClients.filter(c => c.status === "Active").length;
   const pendingClients = filteredClients.filter(c => c.status === "Pending").length;
+  const invitedClients = filteredClients.filter(c => c.status === "Invited").length;
   const suspendedClients = filteredClients.filter(c => c.status === "Suspended").length;
   const terminatedClients = filteredClients.filter(c => c.status === "Terminated").length;
 
@@ -495,7 +503,7 @@ const AdminAllClientsPage = () => {
           </Button>
           <Button onClick={handleAddNewClient} className="bg-purple-600 hover:bg-purple-700" size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            Add New Client
+            Invite Client
           </Button>
         </div>
       </div>
@@ -534,8 +542,8 @@ const AdminAllClientsPage = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Clients</p>
-                <p className="text-2xl font-bold text-gray-900">{pendingClients}</p>
+                <p className="text-sm font-medium text-gray-600">Invited Clients</p>
+                <p className="text-2xl font-bold text-gray-900">{invitedClients}</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-lg">
                 <Calendar className="h-6 w-6 text-orange-600" />
@@ -607,6 +615,7 @@ const AdminAllClientsPage = () => {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="invited">Invited</SelectItem>
                     <SelectItem value="suspended">Suspended</SelectItem>
                     <SelectItem value="terminated">Terminated</SelectItem>
                   </SelectContent>
@@ -768,6 +777,8 @@ const AdminAllClientsPage = () => {
                         variant={getStatusVariant(client.status)}
                         className={`${
                           client.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                          client.status === 'Invited' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' :
+                          client.status === 'Pending' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
                           client.status === 'Trial' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
                           'bg-red-100 text-red-800 hover:bg-red-100'
                         }`}
@@ -783,46 +794,56 @@ const AdminAllClientsPage = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewClient(client)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleLoginAsClient(client)}
-                            disabled={loginAsClientLoading === client.id}
-                          >
-                            {loginAsClientLoading === client.id ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <LogIn className="mr-2 h-4 w-4" />
-                            )}
-                            {loginAsClientLoading === client.id ? 'Logging in...' : 'Login as Client'}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleSuspendClient(client)}
-                            className="text-orange-600 focus:text-orange-600"
-                            disabled={client.subscription_status === 2 || client.subscription_status === 4}
-                          >
-                            <X className="mr-2 h-4 w-4" />
-                            Suspend Client
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleUnsuspendClient(client)}
-                            className="text-green-600 focus:text-green-600"
-                            disabled={client.subscription_status !== 2}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Unsuspend Client
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleTerminateClient(client)}
-                            className="text-red-600 focus:text-red-600"
-                            disabled={client.subscription_status === 4}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Terminate Client
-                          </DropdownMenuItem>
+                          {client.record_type !== 'invitation' && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleViewClient(client)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleLoginAsClient(client)}
+                                disabled={loginAsClientLoading === client.id}
+                              >
+                                {loginAsClientLoading === client.id ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <LogIn className="mr-2 h-4 w-4" />
+                                )}
+                                {loginAsClientLoading === client.id ? 'Logging in...' : 'Login as Client'}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleSuspendClient(client)}
+                                className="text-orange-600 focus:text-orange-600"
+                                disabled={client.subscription_status === 2 || client.subscription_status === 4}
+                              >
+                                <X className="mr-2 h-4 w-4" />
+                                Suspend Client
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleUnsuspendClient(client)}
+                                className="text-green-600 focus:text-green-600"
+                                disabled={client.subscription_status !== 2}
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Unsuspend Client
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleTerminateClient(client)}
+                                className="text-red-600 focus:text-red-600"
+                                disabled={client.subscription_status === 4}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Terminate Client
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          {client.record_type === 'invitation' && (
+                            <DropdownMenuItem className="text-gray-400" disabled>
+                              <Mail className="mr-2 h-4 w-4" />
+                              Pending Registration
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
