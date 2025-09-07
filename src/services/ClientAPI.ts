@@ -360,6 +360,48 @@ class ClientAPI {
     return response.data;
   }
 
+  // S3 Upload for Branding (uses the same S3 backend as vendor services)
+  async uploadBrandingFile(file: File): Promise<{ error: boolean; url?: string; message?: string }> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // First try the dedicated S3 upload endpoint
+      try {
+        const response = await clientApiClient.post('/v1/api/thinkpartnership/client/lambda/s3/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        return {
+          error: false,
+          url: response.data.url || response.data.file_url
+        };
+      } catch (s3Error) {
+        // Fallback to the regular upload endpoint (which may also use S3 internally)
+        console.warn('S3 endpoint not available, falling back to regular upload:', s3Error);
+        
+        const fallbackResponse = await clientApiClient.post('/v1/api/thinkpartnership/client/lambda/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        return {
+          error: false,
+          url: fallbackResponse.data.url || fallbackResponse.data.file_url
+        };
+      }
+    } catch (error: any) {
+      console.error('Error uploading branding file:', error);
+      return {
+        error: true,
+        message: error.response?.data?.message || 'Failed to upload file'
+      };
+    }
+  }
+
   // Reports Methods
   async getReportsVendors(): Promise<{ vendors: ReportsVendorData[], summary: ReportsSummary }> {
     const response = await clientApiClient.get('/api/marketplace/client/reports/vendors');

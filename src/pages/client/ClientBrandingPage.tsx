@@ -92,8 +92,11 @@ const ClientBrandingPage = () => {
   };
 
   const uploadLogo = async (file: File): Promise<string> => {
-    const result = await ClientAPI.uploadFile(file, 'Client Logo');
-    return result.url;
+    const result = await ClientAPI.uploadBrandingFile(file);
+    if (result.error) {
+      throw new Error(result.message || 'Failed to upload logo');
+    }
+    return result.url || '';
   };
 
   const handleSaveBranding = async () => {
