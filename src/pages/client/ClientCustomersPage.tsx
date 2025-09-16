@@ -117,7 +117,43 @@ const ClientCustomersPage = () => {
   };
 
   const handleExportCustomers = () => {
-    toast.info("Exporting customer data...");
+    try {
+      if (!customers || customers.length === 0) {
+        toast.info('No customer data available to export');
+        return;
+      }
+
+      const headers = ['Name', 'Email', 'Phone', 'Status', 'Total Spent', 'Orders', 'Join Date', 'Last Order', 'Vendors Used'];
+      const csvContent = [
+        headers.join(','),
+        ...customers.map(customer => [
+          `"${`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown User'}"`,
+          `"${customer.email}"`,
+          `"${customer.phone || 'N/A'}"`,
+          `"${customer.status}"`,
+          `"${formatCurrency(customer.total_spent)}"`,
+          `${customer.completed_orders || 0}`,
+          `"${formatDate(customer.join_date)}"`,
+          `"${formatDate(customer.last_order_date)}"`,
+          `${customer.vendors_used || 0}`
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `customers-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Customer data exported successfully');
+    } catch (error) {
+      console.error('Error exporting customer data:', error);
+      toast.error('Failed to export customer data');
+    }
   };
 
   const handleInviteCustomer = () => {

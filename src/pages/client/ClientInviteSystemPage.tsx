@@ -459,11 +459,11 @@ const ClientInviteSystemPage = () => {
                               <Button variant="ghost" size="sm" onClick={() => handleViewInvite(invite)}>
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              {invite.status !== "accepted" && (
+                              {/* {invite.status !== "accepted" && (
                                 <Button variant="ghost" size="sm" onClick={() => handleResendInvite(invite)}>
                                   <Send className="h-4 w-4" />
                                 </Button>
-                              )}
+                              )} */}
                             </div>
                           </TableCell>
                         </TableRow>
