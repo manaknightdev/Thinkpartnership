@@ -309,6 +309,14 @@ class AdminAPI {
     return response.data;
   }
 
+  async deleteClientInvitation(invitationId: number): Promise<{
+    error: boolean;
+    message: string;
+  }> {
+    const response = await adminApiClient.delete(`/api/marketplace/admin/client/invitation/${invitationId}`);
+    return response.data;
+  }
+
   // Vendor Management Methods
   async getAllVendors(params?: {
     page?: number;

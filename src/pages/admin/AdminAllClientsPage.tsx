@@ -157,9 +157,11 @@ const AdminAllClientsPage = () => {
   const [suspendLoading, setSuspendLoading] = useState<number | null>(null);
   const [unsuspendLoading, setUnsuspendLoading] = useState<number | null>(null);
   const [terminateLoading, setTerminateLoading] = useState<number | null>(null);
+  const [deleteInvitationLoading, setDeleteInvitationLoading] = useState<number | null>(null);
   const [suspendModalOpen, setSuspendModalOpen] = useState(false);
   const [unsuspendModalOpen, setUnsuspendModalOpen] = useState(false);
   const [terminateModalOpen, setTerminateModalOpen] = useState(false);
+  const [deleteInvitationModalOpen, setDeleteInvitationModalOpen] = useState(false);
   const [selectedClientForAction, setSelectedClientForAction] = useState<any>(null);
   const [actionReason, setActionReason] = useState('');
 
@@ -272,6 +274,11 @@ const AdminAllClientsPage = () => {
     setUnsuspendModalOpen(true);
   };
 
+  const handleDeleteInvitation = (client: any) => {
+    setSelectedClientForAction(client);
+    setDeleteInvitationModalOpen(true);
+  };
+
   const confirmSuspendClient = async () => {
     if (!selectedClientForAction) return;
 
@@ -343,6 +350,30 @@ const AdminAllClientsPage = () => {
       showError(error.response?.data?.message || 'Failed to unsuspend client');
     } finally {
       setUnsuspendLoading(null);
+    }
+  };
+
+  const confirmDeleteInvitation = async () => {
+    if (!selectedClientForAction) return;
+
+    try {
+      setDeleteInvitationLoading(selectedClientForAction.invitation_id);
+      const response = await AdminAPI.deleteClientInvitation(selectedClientForAction.invitation_id);
+
+      if (response.error) {
+        showError(response.message || 'Failed to delete invitation');
+        return;
+      }
+
+      showSuccess(`Invitation for ${selectedClientForAction.email} has been deleted successfully`);
+      setDeleteInvitationModalOpen(false);
+      setSelectedClientForAction(null);
+      fetchClients(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error deleting invitation:', error);
+      showError(error.response?.data?.message || 'Failed to delete invitation');
+    } finally {
+      setDeleteInvitationLoading(null);
     }
   };
 
@@ -839,10 +870,25 @@ const AdminAllClientsPage = () => {
                             </>
                           )}
                           {client.record_type === 'invitation' && (
-                            <DropdownMenuItem className="text-gray-400" disabled>
-                              <Mail className="mr-2 h-4 w-4" />
-                              Pending Registration
-                            </DropdownMenuItem>
+                            <>
+                              <DropdownMenuItem className="text-gray-400" disabled>
+                                <Mail className="mr-2 h-4 w-4" />
+                                Pending Registration
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteInvitation(client)}
+                                className="text-red-600 focus:text-red-600"
+                                disabled={deleteInvitationLoading === client.invitation_id}
+                              >
+                                {deleteInvitationLoading === client.invitation_id ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                )}
+                                {deleteInvitationLoading === client.invitation_id ? 'Deleting...' : 'Delete Invitation'}
+                              </DropdownMenuItem>
+                            </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -1006,6 +1052,38 @@ const AdminAllClientsPage = () => {
                 </>
               ) : (
                 'Terminate Client'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Invitation Modal */}
+      <Dialog open={deleteInvitationModalOpen} onOpenChange={setDeleteInvitationModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Invitation</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the invitation for {selectedClientForAction?.email}?
+              This action cannot be undone and the recipient will no longer be able to register using this invitation.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteInvitationModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteInvitation}
+              disabled={deleteInvitationLoading === selectedClientForAction?.invitation_id}
+            >
+              {deleteInvitationLoading === selectedClientForAction?.invitation_id ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Invitation'
               )}
             </Button>
           </DialogFooter>
