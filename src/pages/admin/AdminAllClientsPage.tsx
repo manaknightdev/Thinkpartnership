@@ -175,7 +175,7 @@ const AdminAllClientsPage = () => {
 
   useEffect(() => {
     fetchClients();
-  }, [searchTerm, statusFilter, locationFilter, joinDateFilter, clientSizeFilter, pagination.current_page]);
+  }, [searchTerm, statusFilter, locationFilter, joinDateFilter, clientSizeFilter, pagination.current_page, pagination.per_page]);
 
   const fetchClients = async () => {
     try {
@@ -903,20 +903,71 @@ const AdminAllClientsPage = () => {
 
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
-            <p className="text-sm text-gray-600">
-              Showing {filteredClients.length} of {pagination.total_count || filteredClients.length} clients
-              {(searchTerm || statusFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") &&
-                <span className="text-purple-600 font-medium"> (filtered)</span>
-              }
-            </p>
+            <div className="flex items-center space-x-4">
+              <p className="text-sm text-gray-600">
+                Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total_count)} of {pagination.total_count} clients
+                {(searchTerm || statusFilter !== "all" || revenueFilter !== "all" || locationFilter !== "all" || joinDateFilter !== "all" || clientSizeFilter !== "all") &&
+                  <span className="text-purple-600 font-medium"> (filtered)</span>
+                }
+              </p>
+              <Select
+                value={pagination.per_page.toString()}
+                onValueChange={(value) => setPagination(prev => ({ ...prev, per_page: parseInt(value), current_page: 1 }))}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-gray-600">per page</span>
+            </div>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm" disabled>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page <= 1}
+                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page - 1 }))}
+              >
                 Previous
               </Button>
-              <Button variant="outline" size="sm" className="bg-purple-600 text-white hover:bg-purple-700">
-                1
-              </Button>
-              <Button variant="outline" size="sm" disabled>
+              {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <Button
+                    key={pageNum}
+                    variant="outline"
+                    size="sm"
+                    className={pagination.current_page === pageNum ? "bg-purple-600 text-white hover:bg-purple-700" : ""}
+                    onClick={() => setPagination(prev => ({ ...prev, current_page: pageNum }))}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+              {pagination.total_pages > 5 && (
+                <>
+                  <span className="px-2 text-gray-400">...</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={pagination.current_page === pagination.total_pages ? "bg-purple-600 text-white hover:bg-purple-700" : ""}
+                    onClick={() => setPagination(prev => ({ ...prev, current_page: pagination.total_pages }))}
+                  >
+                    {pagination.total_pages}
+                  </Button>
+                </>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page >= pagination.total_pages}
+                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page + 1 }))}
+              >
                 Next
               </Button>
             </div>
