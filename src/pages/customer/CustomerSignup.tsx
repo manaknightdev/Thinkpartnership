@@ -21,7 +21,13 @@ const signupSchema = z.object({
   first_name: z.string().min(2, 'First name must be at least 2 characters'),
   last_name: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  phone: z.string().optional(),
+  phone: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true; // Optional field
+    // Remove all non-digit characters for validation
+    const digitsOnly = val.replace(/\D/g, '');
+    // Must be 10-15 digits (international phone numbers)
+    return digitsOnly.length >= 10 && digitsOnly.length <= 15;
+  }, 'Please enter a valid phone number (10-15 digits)'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirm_password: z.string(),
   terms: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
@@ -55,10 +61,39 @@ const CustomerSignup = () => {
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      terms: false,
+      newsletter: false,
+    },
   });
+
+  // Format phone number as user types
+  const formatPhoneNumber = (value: string) => {
+    if (!value) return value;
+
+    // Remove all non-digit characters
+    const phoneNumber = value.replace(/\D/g, '');
+
+    // Limit to 15 digits (international standard)
+    const limitedPhoneNumber = phoneNumber.slice(0, 15);
+
+    // Format based on length
+    if (limitedPhoneNumber.length <= 3) {
+      return limitedPhoneNumber;
+    } else if (limitedPhoneNumber.length <= 6) {
+      return `(${limitedPhoneNumber.slice(0, 3)}) ${limitedPhoneNumber.slice(3)}`;
+    } else if (limitedPhoneNumber.length <= 10) {
+      return `(${limitedPhoneNumber.slice(0, 3)}) ${limitedPhoneNumber.slice(3, 6)}-${limitedPhoneNumber.slice(6)}`;
+    } else {
+      // International format
+      return `+${limitedPhoneNumber.slice(0, -10)} (${limitedPhoneNumber.slice(-10, -7)}) ${limitedPhoneNumber.slice(-7, -4)}-${limitedPhoneNumber.slice(-4)}`;
+    }
+  };
 
   // Handle referral codes and invite codes from URL parameters and client context
   useEffect(() => {
@@ -384,14 +419,27 @@ const CustomerSignup = () => {
                 <Label htmlFor="phone">Phone Number (Optional)</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    className="pl-10"
-                    {...register('phone')}
+                  <Controller
+                    name="phone"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="(555) 123-4567"
+                        className="pl-10"
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const formatted = formatPhoneNumber(e.target.value);
+                          field.onChange(formatted);
+                        }}
+                      />
+                    )}
                   />
                 </div>
+                {errors.phone && (
+                  <p className="text-sm text-red-600">{errors.phone.message}</p>
+                )}
               </div>
 
               {/* Password Field */}
@@ -450,12 +498,13 @@ const CustomerSignup = () => {
                   <Controller
                     name="terms"
                     control={control}
-                    defaultValue={false}
                     render={({ field }) => (
                       <Checkbox
                         id="terms"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                        checked={field.value || false}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked === true);
+                        }}
                         className="mt-1"
                       />
                     )}
@@ -479,12 +528,13 @@ const CustomerSignup = () => {
                   <Controller
                     name="newsletter"
                     control={control}
-                    defaultValue={false}
                     render={({ field }) => (
                       <Checkbox
                         id="newsletter"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                        checked={field.value || false}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked === true);
+                        }}
                       />
                     )}
                   />

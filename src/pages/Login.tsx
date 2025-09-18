@@ -45,23 +45,23 @@ const Login = () => {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4 pt-20">
         <div className="w-full max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
             {/* Left Side - Marketing Content */}
-            <div className="text-center lg:text-left space-y-8">
+            <div className="text-center lg:text-left space-y-6 lg:space-y-8">
               <div>
-                <span className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-800 text-sm font-medium mb-6">
+                <span className="inline-flex items-center px-3 py-2 sm:px-4 rounded-full bg-green-100 text-green-800 text-sm font-medium mb-4 sm:mb-6">
                   <Shield className="w-4 h-4 mr-2" />
                   Welcome Back
                 </span>
-                <h1 className="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent leading-tight">
                   Continue Building Your
                   <br />
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     Success Story
                   </span>
                 </h1>
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                   Access your marketplace dashboard, manage your vendors,
                   track your earnings, and grow your business empire.
                 </p>
@@ -105,30 +105,30 @@ const Login = () => {
 
             {/* Right Side - Login Form */}
             <div className="flex justify-center lg:justify-end">
-              <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
-                <CardHeader className="text-center pb-6">
-                  <CardTitle className="text-3xl font-bold text-gray-900">Welcome Back</CardTitle>
-                  <CardDescription className="text-gray-600">
+              <Card className="w-full max-w-md lg:max-w-lg bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+                <CardHeader className="text-center pb-6 px-6 sm:px-8">
+                  <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome Back</CardTitle>
+                  <CardDescription className="text-gray-600 text-sm sm:text-base">
                     Sign in to your marketplace dashboard
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 px-6 sm:px-8 pb-6 sm:pb-8">
                   <form className="space-y-5">
                     <div>
-                      <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
+                      <Label htmlFor="email" className="text-gray-700 font-medium text-sm sm:text-base">Email Address</Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="john@example.com"
-                        className="mt-1 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                        className="mt-1 border-gray-200 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-12 text-sm sm:text-base"
                         required
                       />
                     </div>
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
-                        <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+                        <Label htmlFor="password" className="text-gray-700 font-medium text-sm sm:text-base">Password</Label>
+                        <Link to="/forgot-password" className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 transition-colors">
                           Forgot password?
                         </Link>
                       </div>
@@ -137,7 +137,7 @@ const Login = () => {
                           id="password"
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
-                          className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                          className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10 h-11 sm:h-12 text-sm sm:text-base"
                           required
                         />
                         <Button
@@ -147,7 +147,7 @@ const Login = () => {
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
+                          {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />}
                         </Button>
                       </div>
                     </div>
@@ -155,10 +155,10 @@ const Login = () => {
                     <Button
                       type="button"
                       onClick={handleLogin}
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
                     >
                       Access Dashboard
-                      <ArrowRight className="ml-2 w-5 h-5" />
+                      <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                   </form>
 

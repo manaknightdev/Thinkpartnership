@@ -7,7 +7,7 @@ import {
   Calculator, 
   TrendingUp, 
   Shield, 
-  ArrowRight,
+
   CheckCircle
 } from "lucide-react";
 
@@ -21,16 +21,24 @@ const ClientCommissionRulesPage = () => {
     const referrerShare = remainingAmount * 0.50; // 50% to referrer
 
     return {
-      servicePrice,
-      vendorFee,
-      platformFee,
-      remainingAmount,
-      clientShare,
-      referrerShare
+      servicePrice: Number(servicePrice) || 0,
+      vendorFee: Number(vendorFee) || 0,
+      platformFee: Number(platformFee) || 0,
+      remainingAmount: Number(remainingAmount) || 0,
+      clientShare: Number(clientShare) || 0,
+      referrerShare: Number(referrerShare) || 0
     };
   };
 
   const exampleCalculation = calculateCommissionExample(1000, 20);
+
+  // Helper function to format currency values safely
+  const formatCurrency = (value: number) => {
+    if (typeof value !== 'number' || isNaN(value)) {
+      return '$0';
+    }
+    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -114,12 +122,12 @@ const ClientCommissionRulesPage = () => {
                   1
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">John Doe purchases Service #1 from Vendor B for <span className="text-green-600 font-bold">${exampleCalculation.servicePrice.toLocaleString()}</span></p>
+                  <p className="font-medium">John Doe purchases Service #1 from Vendor B for <span className="text-green-600 font-bold">{formatCurrency(exampleCalculation.servicePrice)}</span></p>
                   <p className="text-sm text-gray-600">Vendor B pays 20% referral fee on gross</p>
                 </div>
               </div>
 
-              <ArrowRight className="h-5 w-5 text-gray-400 mx-auto" />
+
 
               {/* Step 2 */}
               <div className="flex items-center gap-4">
@@ -127,12 +135,12 @@ const ClientCommissionRulesPage = () => {
                   2
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">Vendor B pays referral fee: <span className="text-blue-600 font-bold">${exampleCalculation.vendorFee.toLocaleString()}</span></p>
-                  <p className="text-sm text-gray-600">(${exampleCalculation.servicePrice.toLocaleString()} × 20%)</p>
+                  <p className="font-medium">Vendor B pays referral fee: <span className="text-blue-600 font-bold">{formatCurrency(exampleCalculation.vendorFee)}</span></p>
+                  <p className="text-sm text-gray-600">({formatCurrency(exampleCalculation.servicePrice)} × 20%)</p>
                 </div>
               </div>
 
-              <ArrowRight className="h-5 w-5 text-gray-400 mx-auto" />
+
 
               {/* Step 3 */}
               <div className="flex items-center gap-4">
@@ -140,12 +148,12 @@ const ClientCommissionRulesPage = () => {
                   3
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">Platform takes 10%: <span className="text-red-600 font-bold">${exampleCalculation.platformFee.toLocaleString()}</span></p>
-                  <p className="text-sm text-gray-600">Remaining: <span className="text-green-600 font-bold">${exampleCalculation.remainingAmount.toLocaleString()}</span></p>
+                  <p className="font-medium">Platform takes 10%: <span className="text-red-600 font-bold">{formatCurrency(exampleCalculation.platformFee)}</span></p>
+                  <p className="text-sm text-gray-600">Remaining: <span className="text-green-600 font-bold">{formatCurrency(exampleCalculation.remainingAmount)}</span></p>
                 </div>
               </div>
 
-              <ArrowRight className="h-5 w-5 text-gray-400 mx-auto" />
+
 
               {/* Step 4 */}
               <div className="flex items-center gap-4">
@@ -156,12 +164,12 @@ const ClientCommissionRulesPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
                       <p className="font-medium text-purple-900">You (Client) get:</p>
-                      <p className="text-xl font-bold text-purple-600">${exampleCalculation.clientShare.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-purple-600">{formatCurrency(exampleCalculation.clientShare)}</p>
                       <p className="text-sm text-purple-700">50% of remaining</p>
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg border border-green-200">
                       <p className="font-medium text-green-900">Vendor A (Referrer) gets:</p>
-                      <p className="text-xl font-bold text-green-600">${exampleCalculation.referrerShare.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-green-600">{formatCurrency(exampleCalculation.referrerShare)}</p>
                       <p className="text-sm text-green-700">50% of remaining</p>
                     </div>
                   </div>

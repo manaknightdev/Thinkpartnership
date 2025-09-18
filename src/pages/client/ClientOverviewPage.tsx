@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { DollarSign, Users, TrendingUp, BarChart, Settings, Handshake, CheckSquare, Clock, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
 
-import ClientAPI, { DashboardStats } from '@/services/ClientAPI';
+import ClientAPI, { DashboardStats, ClientOrder } from '@/services/ClientAPI';
 import MarketplaceAuthAPI from '@/services/MarketplaceAuthAPI';
 import { showError, showSuccess } from '@/utils/toast';
 
 const ClientOverviewPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentOrders, setRecentOrders] = useState<ClientOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAccessingMarketplace, setIsAccessingMarketplace] = useState(false);
@@ -21,8 +22,18 @@ const ClientOverviewPage = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const data = await ClientAPI.getDashboardStats();
-      setStats(data);
+      // Fetch dashboard stats and recent orders in parallel
+      const [statsData, ordersData] = await Promise.all([
+        ClientAPI.getDashboardStats(),
+        ClientAPI.getOrders()
+      ]);
+
+      setStats(statsData);
+      // Get the 3 most recent orders
+      const sortedOrders = ordersData.sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setRecentOrders(sortedOrders.slice(0, 3));
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to load dashboard statistics';
       setError(errorMessage);
@@ -48,6 +59,24 @@ const ClientOverviewPage = () => {
     }
     const sign = growth >= 0 ? '+' : '';
     return `${sign}${growth.toFixed(1)}%`;
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
   };
 
   const handleViewMarketplace = async () => {
@@ -115,23 +144,31 @@ const ClientOverviewPage = () => {
         <p className="text-lg text-gray-700 mb-4">
           Welcome to your client portal! Here you can manage your branded sub-marketplace, onboard vendors, and monitor transactions.
         </p>
-        <div className="flex flex-wrap gap-3">
-          <Button 
+        <div className="flex flex-wrap gap-3 items-center">
+          <Button
             onClick={handleViewMarketplace}
             disabled={isAccessingMarketplace}
-            className="bg-primary hover:bg-primary/90 flex items-center gap-2"
+            className="bg-primary hover:bg-primary/90 flex items-center gap-2 h-10 px-4"
           >
             <ExternalLink className="h-4 w-4" />
-            {isAccessingMarketplace ? 'Accessing...' : 'View Marketplace'}
+            <span className="whitespace-nowrap">
+              {isAccessingMarketplace ? 'Accessing...' : 'View Marketplace'}
+            </span>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/client-portal/invites">Invite Users</Link>
+          <Button variant="outline" asChild className="h-10 px-4">
+            <Link to="/client-portal/invites" className="flex items-center whitespace-nowrap">
+              Invite Users
+            </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/client-portal/vendors">Manage Vendors</Link>
+          <Button variant="outline" asChild className="h-10 px-4">
+            <Link to="/client-portal/vendors" className="flex items-center whitespace-nowrap">
+              Manage Vendors
+            </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/client-portal/branding">Customize Branding</Link>
+          <Button variant="outline" asChild className="h-10 px-4">
+            <Link to="/client-portal/branding" className="flex items-center whitespace-nowrap">
+              Customize Branding
+            </Link>
           </Button>
         </div>
       </div>
@@ -205,7 +242,7 @@ const ClientOverviewPage = () => {
       </div>
 
       {/* Main Navigation Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -261,7 +298,7 @@ const ClientOverviewPage = () => {
               Set up and adjust the commission structure for different services and vendors.
             </p>
             <Button className="w-full bg-purple-600 hover:bg-purple-700" asChild>
-              <Link to="/client-portal/rules">Set Rules</Link>
+              <Link to="/client-portal/rules">View Rules</Link>
             </Button>
           </CardContent>
         </Card>
@@ -306,27 +343,48 @@ const ClientOverviewPage = () => {
               <div className="p-2 bg-teal-100 rounded-lg">
                 <Clock className="h-5 w-5 text-teal-600" />
               </div>
-              Recent Activity
+              Recent Orders
             </CardTitle>
-            <CardDescription>Latest updates and actions on your account.</CardDescription>
+            <CardDescription>Latest orders from your marketplace customers.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 mb-4">
-              <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
-                <span className="text-sm text-gray-700">Payment Setup Completed</span>
-                <span className="text-xs text-gray-500">2 hours ago</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <span className="text-sm text-gray-700">Branding Review Started</span>
-                <span className="text-xs text-gray-500">1 day ago</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                <span className="text-sm text-gray-700">Onboarding Task Assigned</span>
-                <span className="text-xs text-gray-500">2 days ago</span>
-              </div>
+              {recentOrders.length > 0 ? (
+                recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900 truncate">
+                        Order #{order.id} - {order.service_title || 'Service Order'}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        {order.customer_name} • ${parseFloat(order.total_amount?.toString() || '0').toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-xs px-2 py-1 rounded-full ${
+                        order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status?.replace('_', ' ').toUpperCase()}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {formatTimeAgo(order.created_at)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Clock className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm">No recent orders</p>
+                  <p className="text-xs text-gray-400 mt-1">Orders will appear here once customers start placing them</p>
+                </div>
+              )}
             </div>
             <Button variant="outline" className="w-full" asChild>
-              <Link to="/client-portal/tasks">View Task History</Link>
+              <Link to="/client-portal/orders">View All Orders</Link>
             </Button>
           </CardContent>
         </Card>

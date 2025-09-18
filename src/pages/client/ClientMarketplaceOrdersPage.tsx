@@ -14,9 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/utils/dateFormat";
 import { ORDER_STATUSES, getOrderStatusVariant, type OrderStatus } from "@/utils/orderStatus";
 import ClientAPI, { type ClientOrder } from "@/services/ClientAPI";
@@ -36,22 +34,34 @@ interface MarketplaceOrder {
 
 const ClientMarketplaceOrdersPage = () => {
   const [orders, setOrders] = useState<MarketplaceOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<MarketplaceOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<MarketplaceOrder | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState<MarketplaceOrder["status"] | "">("");
-  const [editedNotes, setEditedNotes] = useState<string>(""); // State for edited notes
+
+  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
 
   useEffect(() => {
     loadOrders();
   }, []);
 
+
+
+  // Filter orders based on search query
   useEffect(() => {
-    if (selectedOrder) {
-      setNewStatus(selectedOrder.status);
-      setEditedNotes(selectedOrder.notes || "");
+    if (!searchQuery.trim()) {
+      setFilteredOrders(orders);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = orders.filter(order =>
+        order.id.toLowerCase().includes(query) ||
+        order.customer.toLowerCase().includes(query) ||
+        order.vendor.toLowerCase().includes(query) ||
+        order.service.toLowerCase().includes(query)
+      );
+      setFilteredOrders(filtered);
     }
-  }, [selectedOrder]);
+  }, [orders, searchQuery]);
 
   const loadOrders = async () => {
     try {
@@ -73,11 +83,13 @@ const ClientMarketplaceOrdersPage = () => {
         : [];
 
       setOrders(formattedOrders);
+      setFilteredOrders(formattedOrders); // Initialize filtered orders
     } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
       // Set empty array instead of mock data to show real data only
       setOrders([]);
+      setFilteredOrders([]);
     } finally {
       setLoading(false);
     }
@@ -85,15 +97,16 @@ const ClientMarketplaceOrdersPage = () => {
 
   const handleExportOrders = () => {
     try {
-      if (!orders || orders.length === 0) {
-        toast.info('No orders to export');
+      const ordersToExport = searchQuery ? filteredOrders : orders;
+      if (!ordersToExport || ordersToExport.length === 0) {
+        toast.info(searchQuery ? 'No matching orders to export' : 'No orders to export');
         return;
       }
 
       const headers = ['Order ID', 'Customer', 'Vendor', 'Service', 'Date', 'Amount', 'Status', 'Notes'];
       const csvContent = [
         headers.join(','),
-        ...orders.map(o => [
+        ...ordersToExport.map(o => [
           `"${o.id}"`,
           `"${o.customer}"`,
           `"${o.vendor}"`,
@@ -109,7 +122,10 @@ const ClientMarketplaceOrdersPage = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `orders-export-${new Date().toISOString().split('T')[0]}.csv`);
+      const filename = searchQuery
+        ? `orders-filtered-export-${new Date().toISOString().split('T')[0]}.csv`
+        : `orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+      link.setAttribute('download', filename);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -127,45 +143,12 @@ const ClientMarketplaceOrdersPage = () => {
     setIsDetailModalOpen(true);
   };
   
-  const handleSaveChangesAndCloseModal = async () => {
-    if (selectedOrder) {
-      const statusChanged = newStatus && newStatus !== selectedOrder.status;
-      const notesChanged = editedNotes !== (selectedOrder.notes || "");
-
-      if (statusChanged || notesChanged) {
-        try {
-          if (statusChanged) {
-            await ClientAPI.updateOrderStatus(selectedOrder.id, newStatus, editedNotes);
-          }
-
-          setOrders(prevOrders =>
-            (prevOrders || []).map(order =>
-              order.id === selectedOrder.id ? {
-                ...order,
-                status: statusChanged ? (newStatus as MarketplaceOrder["status"]) : order.status,
-                notes: notesChanged ? editedNotes : order.notes
-              } : order
-            )
-          );
-
-          let toastMessage = "Order details updated: ";
-          if (statusChanged) toastMessage += `Status set to ${newStatus}. `;
-          if (notesChanged) toastMessage += `Notes updated.`;
-          toast.success(toastMessage.trim());
-        } catch (error) {
-          console.error('Error updating order:', error);
-          toast.error('Failed to update order');
-          return; // Don't close modal if update failed
-        }
-      } else {
-        toast.info("No changes were made.");
-      }
-    }
-    setIsDetailModalOpen(false);
-    setSelectedOrder(null);
-    setNewStatus("");
-    setEditedNotes("");
+  const handleSearch = () => {
+    // Search is handled by useEffect, this function can be used for additional search logic if needed
+    // For now, the search is real-time as user types
   };
+
+
 
 
   return (
@@ -183,8 +166,14 @@ const ClientMarketplaceOrdersPage = () => {
         <CardContent>
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-4">
             <div className="flex w-full sm:w-auto space-x-2">
-              <Input placeholder="Search by Order ID, Customer, or Vendor..." className="flex-grow" />
-              <Button variant="outline" size="icon">
+              <Input
+                placeholder="Search by Order ID, Customer, or Vendor..."
+                className="flex-grow"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <Button variant="outline" size="icon" onClick={handleSearch}>
                 <Search className="h-4 w-4" />
               </Button>
             </div>
@@ -213,13 +202,13 @@ const ClientMarketplaceOrdersPage = () => {
                       Loading orders...
                     </TableCell>
                   </TableRow>
-                ) : !orders || orders.length === 0 ? (
+                ) : !filteredOrders || filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                      No orders found
+                      {searchQuery ? `No orders found matching "${searchQuery}"` : "No orders found"}
                     </TableCell>
                   </TableRow>
-                ) : orders?.map((order) => (
+                ) : filteredOrders?.map((order) => (
                   <TableRow
                     key={order.id}
                     onClick={() => handleViewOrderDetails(order)}
@@ -256,8 +245,6 @@ const ClientMarketplaceOrdersPage = () => {
         <Dialog open={isDetailModalOpen} onOpenChange={(isOpen) => {
           if (!isOpen) {
             setSelectedOrder(null);
-            // setNewStatus(""); // Keep these for potential re-open without saving
-            // setEditedNotes("");
           }
           setIsDetailModalOpen(isOpen);
         }}>
@@ -287,37 +274,20 @@ const ClientMarketplaceOrdersPage = () => {
                 </p>
               </div>
               
-              <div className="space-y-2 mt-2">
-                <Label htmlFor="order-notes" className="font-semibold">Notes:</Label>
-                <Textarea
-                  id="order-notes"
-                  placeholder="Add or edit notes for this order..."
-                  value={editedNotes}
-                  onChange={(e) => setEditedNotes(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2 mt-2">
-                <Label htmlFor="order-status" className="font-semibold">Change Status:</Label>
-                <Select value={newStatus} onValueChange={(value) => setNewStatus(value as MarketplaceOrder["status"])}>
-                  <SelectTrigger id="order-status">
-                    <SelectValue placeholder="Select new status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ORDER_STATUSES.map(status => (
-                      <SelectItem key={status} value={status} className="capitalize">{status}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {selectedOrder.notes && (
+                <div className="space-y-2 mt-2">
+                  <Label className="font-semibold">Notes:</Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <p className="text-sm text-gray-700">{selectedOrder.notes}</p>
+                  </div>
+                </div>
+              )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => {
+              <Button onClick={() => {
                 setIsDetailModalOpen(false);
-                setSelectedOrder(null); // Clear selected order on cancel
-              }}>Cancel</Button>
-              <Button onClick={handleSaveChangesAndCloseModal}>Save Changes</Button>
+                setSelectedOrder(null);
+              }}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

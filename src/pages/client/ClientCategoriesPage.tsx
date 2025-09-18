@@ -197,53 +197,56 @@ const ClientCategoriesPage = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Service Categories</h1>
-            <p className="text-gray-600 mt-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Service Categories</h1>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">
               Manage the service categories available in your marketplace. These categories will be used by vendors when creating services.
             </p>
           </div>
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Category
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+          <div className="flex-shrink-0">
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2 w-full sm:w-auto">
+                  <Plus className="h-4 w-4" />
+                  Add Category
+                </Button>
+              </DialogTrigger>
+            <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create New Category</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-lg sm:text-xl">Create New Category</DialogTitle>
+                <DialogDescription className="text-sm">
                   Add a new service category to your marketplace.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 py-2">
                 <div>
-                  <Label htmlFor="name">Category Name *</Label>
+                  <Label htmlFor="name" className="text-sm font-medium">Category Name *</Label>
                   <Input
                     id="name"
                     value={newCategory.name}
                     onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                     placeholder="e.g., Painting, Cleaning, Plumbing"
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-sm font-medium">Description</Label>
                   <Textarea
                     id="description"
                     value={newCategory.description}
                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                     placeholder="Brief description of this category"
                     rows={3}
+                    className="mt-1 resize-none"
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+                <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="w-full sm:w-auto order-2 sm:order-1">
                   Cancel
                 </Button>
-                <Button onClick={handleCreateCategory} disabled={saving}>
+                <Button onClick={handleCreateCategory} disabled={saving} className="w-full sm:w-auto order-1 sm:order-2">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {saving ? "Creating..." : "Create Category"}
                 </Button>
@@ -269,43 +272,46 @@ const ClientCategoriesPage = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
             <Card key={category.id} className="relative">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{category.name}</CardTitle>
-                    <CardDescription className="mt-1">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base sm:text-lg truncate">{category.name}</CardTitle>
+                    <CardDescription className="mt-1 text-sm line-clamp-2">
                       {category.description || "No description"}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-shrink-0">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openEditDialog(category)}
+                      className="h-8 w-8 p-0"
                     >
                       <Edit className="h-4 w-4" />
+                      <span className="sr-only">Edit category</span>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete category</span>
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="w-[95vw] max-w-[400px]">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Category</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-lg">Delete Category</AlertDialogTitle>
+                          <AlertDialogDescription className="text-sm">
                             Are you sure you want to delete "{category.name}"? This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDeleteCategory(category.id)}
-                            className="bg-red-600 hover:bg-red-700"
+                            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                           >
                             Delete
                           </AlertDialogAction>
@@ -330,41 +336,44 @@ const ClientCategoriesPage = () => {
       {/* Edit Category Dialog */}
       {editingCategory && (
         <Dialog open={!!editingCategory} onOpenChange={closeEditDialog}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Category</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-lg sm:text-xl">Edit Category</DialogTitle>
+              <DialogDescription className="text-sm">
                 Update the category details.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 py-2">
               <div>
-                <Label htmlFor="edit-name">Category Name *</Label>
+                <Label htmlFor="edit-name" className="text-sm font-medium">Category Name *</Label>
                 <Input
                   id="edit-name"
                   value={editingCategory.name}
                   onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
                   placeholder="e.g., Painting, Cleaning, Plumbing"
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label htmlFor="edit-description">Description</Label>
+                <Label htmlFor="edit-description" className="text-sm font-medium">Description</Label>
                 <Textarea
                   id="edit-description"
                   value={editingCategory.description}
                   onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
                   placeholder="Brief description of this category"
                   rows={3}
+                  className="mt-1 resize-none"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={closeEditDialog}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={closeEditDialog} className="w-full sm:w-auto order-2 sm:order-1">
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={() => handleUpdateCategory(editingCategory.id, editingCategory)}
                 disabled={saving}
+                className="w-full sm:w-auto order-1 sm:order-2"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {saving ? "Saving..." : "Save Changes"}
@@ -373,6 +382,7 @@ const ClientCategoriesPage = () => {
           </DialogContent>
         </Dialog>
       )}
+    </div>
     </div>
   );
 };

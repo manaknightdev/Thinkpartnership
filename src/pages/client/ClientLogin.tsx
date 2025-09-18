@@ -76,12 +76,12 @@ const ClientLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         {/* Back to Home */}
         <div className="mb-6">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -89,12 +89,12 @@ const ClientLogin = () => {
           </Link>
         </div>
 
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-xl flex items-center justify-center mb-4">
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
               <Building2 className="h-6 w-6 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold text-gray-900">
               Client Portal
             </CardTitle>
             <CardDescription className="text-gray-600">
@@ -116,13 +116,13 @@ const ClientLogin = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your business email"
                   {...register('email')}
-                  className="h-11"
+                  className="h-11 sm:h-12 lg:h-14 text-sm sm:text-base"
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600">{errors.email.message}</p>
@@ -130,21 +130,21 @@ const ClientLogin = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm sm:text-base font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     {...register('password')}
-                    className="h-11 pr-10"
+                    className="h-11 sm:h-12 lg:h-14 pr-10 text-sm sm:text-base"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </button>
                 </div>
                 {errors.password && (
@@ -164,14 +164,14 @@ const ClientLogin = () => {
                     />
                   )}
                 />
-                <Label htmlFor="remember" className="text-sm text-gray-600">
+                <Label htmlFor="remember" className="text-sm sm:text-base text-gray-600">
                   Keep me signed in
                 </Label>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-medium"
+                className="w-full h-11 sm:h-12 lg:h-14 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-medium text-sm sm:text-base lg:text-lg"
                 disabled={isLoading}
                 onClick={() => console.log('🔘 Button clicked!')}
               >
@@ -180,7 +180,7 @@ const ClientLogin = () => {
             </form>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Don't have a client account?{' '}
                 <Link to="/client/signup" className="text-blue-600 hover:text-blue-700 font-medium">
                   Sign up here
@@ -190,17 +190,17 @@ const ClientLogin = () => {
 
             {/* Other Portal Links */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-xs text-gray-500 text-center mb-3">
+              <p className="text-xs sm:text-sm text-gray-500 text-center mb-3">
                 Looking for a different portal?
               </p>
-              <div className="flex justify-center space-x-4 text-xs">
-                <Link to="/marketplace/login" className="text-blue-600 hover:underline">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                <Link to="/marketplace/login" className="text-blue-600 hover:underline px-2 py-1">
                   Customer Portal
                 </Link>
-                <Link to="/vendor/login" className="text-blue-600 hover:underline">
+                <Link to="/vendor/login" className="text-blue-600 hover:underline px-2 py-1">
                   Vendor Portal
                 </Link>
-                <Link to="/admin/login" className="text-blue-600 hover:underline">
+                <Link to="/admin/login" className="text-blue-600 hover:underline px-2 py-1">
                   Admin Portal
                 </Link>
               </div>

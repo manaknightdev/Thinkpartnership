@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import AdminAPI from '@/services/AdminAPI';
 import { 
   UserCheck, 
   Mail, 
@@ -113,8 +114,19 @@ export const ViewEditCustomerModal: React.FC<ViewEditCustomerModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await AdminAPI.updateCustomer(customer.id, {
+        first_name: formData.name.split(' ')[0],
+        last_name: formData.name.split(' ').slice(1).join(' ') || '',
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+        client_id: formData.client
+      });
+
+      if (response.error) {
+        toast.error(response.message || "Failed to update customer");
+        return;
+      }
 
       const updatedCustomer = {
         ...customer,
@@ -124,11 +136,13 @@ export const ViewEditCustomerModal: React.FC<ViewEditCustomerModalProps> = ({
       if (onUpdate) {
         onUpdate(updatedCustomer);
       }
-      
+
       toast.success(`Customer "${formData.name}" has been updated successfully!`);
       setIsEditing(false);
-    } catch (error) {
-      toast.error("Failed to update customer. Please try again.");
+      onClose();
+    } catch (error: any) {
+      console.error('Error updating customer:', error);
+      toast.error(error.response?.data?.message || "Failed to update customer. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

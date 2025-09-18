@@ -49,6 +49,18 @@ const AdminProfilePage = () => {
     bio: "",
   });
 
+  const [originalProfileData, setOriginalProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    title: "Platform Administrator",
+    department: "System Operations",
+    location: "",
+    joinDate: "",
+    bio: "",
+  });
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -59,7 +71,7 @@ const AdminProfilePage = () => {
           showError(response.message || 'Failed to fetch profile data');
         } else {
           const userData = response.user;
-          setProfileData({
+          const profileInfo = {
             firstName: userData.first_name || '',
             lastName: userData.last_name || '',
             email: userData.email || '',
@@ -69,7 +81,9 @@ const AdminProfilePage = () => {
             location: userData.location || '',
             joinDate: userData.created_at ? new Date(userData.created_at).toISOString().split('T')[0] : '',
             bio: userData.bio || '',
-          });
+          };
+          setProfileData(profileInfo);
+          setOriginalProfileData(profileInfo); // Store original data for cancel functionality
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -81,6 +95,11 @@ const AdminProfilePage = () => {
 
     fetchProfile();
   }, []);
+
+  const handleCancel = () => {
+    setProfileData(originalProfileData); // Reset to original data
+    setIsEditing(false);
+  };
 
   const [systemSettings, setSystemSettings] = useState({
     twoFactorEnabled: true,
@@ -202,7 +221,7 @@ const AdminProfilePage = () => {
               )}
             </div>
             <Button
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={isEditing ? handleCancel : () => setIsEditing(true)}
               variant={isEditing ? "outline" : "default"}
               className="bg-purple-600 hover:bg-purple-700"
             >

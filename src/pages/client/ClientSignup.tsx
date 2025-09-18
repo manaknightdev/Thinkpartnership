@@ -98,8 +98,8 @@ const ClientSignup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md">
         {/* Back to Home */}
         <div className="mb-6">
           <Link 
@@ -111,12 +111,12 @@ const ClientSignup = () => {
           </Link>
         </div>
 
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-xl flex items-center justify-center mb-4">
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
               <Building2 className="h-6 w-6 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold text-gray-900">
               Create Client Account
             </CardTitle>
             <CardDescription className="text-gray-600">

@@ -101,10 +101,15 @@ export interface AdminCustomer {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string;
   status: number;
-  total_orders: number;
+  join_date: string;
+  total_requests: number;
+  completed_orders: number;
   total_spent: number;
-  created_at: string;
+  last_order_date?: string;
+  vendors_used: number;
+  marketplaces_used: number;
 }
 
 export interface AdminTransaction {
@@ -329,18 +334,66 @@ class AdminAPI {
     page?: number;
     limit?: number;
     search?: string;
-    status?: number;
+    status?: string;
+    vendor?: string;
+    location?: string;
+    spending?: string;
   }): Promise<{
     error: boolean;
     customers: AdminCustomer[];
     pagination: {
-      current_page: number;
-      total_pages: number;
-      total_count: number;
-      per_page: number;
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
     };
   }> {
     const response = await adminApiClient.get(API_CONFIG.ENDPOINTS.ADMIN_CUSTOMERS.LIST, { params });
+    return response.data;
+  }
+
+  async createCustomer(data: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    client_id: number;
+    vendor_id?: number;
+  }): Promise<{
+    error: boolean;
+    message: string;
+    customer?: any;
+  }> {
+    const response = await adminApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_CUSTOMERS.LIST, data);
+    return response.data;
+  }
+
+  async getAvailableClients(): Promise<{
+    error: boolean;
+    clients: Array<{
+      id: number;
+      company_name: string;
+      marketplace_subdomain: string;
+      logo_url?: string;
+    }>;
+  }> {
+    const response = await adminApiClient.get('/api/marketplace/admin/clients/available');
+    return response.data;
+  }
+
+  async getAvailableVendors(client_id?: number): Promise<{
+    error: boolean;
+    vendors: Array<{
+      id: number;
+      business_name: string;
+      email: string;
+      phone?: string;
+      location?: string;
+    }>;
+  }> {
+    const params = client_id ? { client_id } : {};
+    const response = await adminApiClient.get('/api/marketplace/admin/vendors/available', { params });
     return response.data;
   }
 
@@ -649,6 +702,37 @@ class AdminAPI {
     vendor_b_share_no_referrer: number;
   }): Promise<ApiResponse> {
     const response = await adminApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_REVENUE.RULES, ruleData);
+    return response.data;
+  }
+
+  // Vendor Management Methods
+  async suspendVendor(vendorId: number, reason?: string): Promise<ApiResponse> {
+    const response = await adminApiClient.put(`/api/marketplace/admin/vendors/${vendorId}/suspend`, { reason });
+    return response.data;
+  }
+
+  async unsuspendVendor(vendorId: number): Promise<ApiResponse> {
+    const response = await adminApiClient.put(`/api/marketplace/admin/vendors/${vendorId}/unsuspend`);
+    return response.data;
+  }
+
+  async suspendCustomer(customerId: number, reason?: string): Promise<ApiResponse> {
+    const response = await adminApiClient.put(`/api/marketplace/admin/customers/${customerId}/suspend`, { reason });
+    return response.data;
+  }
+
+  async unsuspendCustomer(customerId: number): Promise<ApiResponse> {
+    const response = await adminApiClient.put(`/api/marketplace/admin/customers/${customerId}/unsuspend`);
+    return response.data;
+  }
+
+  async updateVendor(vendorId: number, vendorData: any): Promise<ApiResponse> {
+    const response = await adminApiClient.put(`/api/marketplace/admin/vendors/${vendorId}`, vendorData);
+    return response.data;
+  }
+
+  async updateCustomer(customerId: number, customerData: any): Promise<ApiResponse> {
+    const response = await adminApiClient.put(`/api/marketplace/admin/customers/${customerId}`, customerData);
     return response.data;
   }
 }

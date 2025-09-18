@@ -19,10 +19,11 @@ const ClientReportsPage = () => {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
 
   useEffect(() => {
     fetchReportData();
-  }, []);
+  }, [selectedPeriod]);
 
   const fetchReportData = async () => {
     try {
@@ -30,7 +31,7 @@ const ClientReportsPage = () => {
 
       // Fetch reports data and dashboard stats in parallel
       const [reportsData, statsData] = await Promise.all([
-        ClientAPI.getReportsVendors(),
+        ClientAPI.getReportsVendors(selectedPeriod),
         ClientAPI.getDashboardStats()
       ]);
 
@@ -129,13 +130,13 @@ const ClientReportsPage = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `custom-vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `${selectedPeriod}-vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      toast.success('Custom report exported successfully');
+      toast.success(`${selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)} report exported successfully`);
     } catch (error) {
       console.error('Error exporting custom report:', error);
       toast.error('Failed to export custom report');
@@ -178,16 +179,16 @@ const ClientReportsPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-2 xs:p-4 sm:p-6 space-y-4 xs:space-y-6 sm:space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
-        <p className="text-lg text-gray-700 mb-4">
+      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-3 xs:p-4 sm:p-6 border border-primary/20">
+        <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
+        <p className="text-sm xs:text-base sm:text-lg text-gray-700 mb-3 xs:mb-4">
           Access detailed reports and analytics for your marketplace performance.
         </p>
-        <div className="flex flex-wrap gap-3 items-center">
-          <Select defaultValue="monthly">
-            <SelectTrigger className="w-[180px]">
+        <div className="flex flex-col xs:flex-row xs:flex-wrap gap-2 xs:gap-3 items-stretch xs:items-center">
+          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+            <SelectTrigger className="w-full xs:w-[160px] sm:w-[180px] text-xs xs:text-sm">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
             <SelectContent>
@@ -196,78 +197,91 @@ const ClientReportsPage = () => {
               <SelectItem value="monthly">Monthly</SelectItem>
               <SelectItem value="quarterly">Quarterly</SelectItem>
               <SelectItem value="yearly">Yearly</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="bg-primary hover:bg-primary/90" onClick={handleGenerateReport}>
-            Generate Custom Report
+          <Button className="bg-primary hover:bg-primary/90 text-xs xs:text-sm px-3 xs:px-4" onClick={handleGenerateReport}>
+            <span className="hidden xs:inline">Generate {selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)} Report</span>
+            <span className="xs:hidden">Generate Report</span>
           </Button>
         </div>
       </div>
 
       <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-primary">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <LineChartIcon className="h-5 w-5 text-primary" />
+        <CardHeader className="p-3 xs:p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-sm xs:text-base sm:text-lg">
+            <div className="p-1 xs:p-2 bg-primary/10 rounded-lg">
+              <LineChartIcon className="h-4 w-4 xs:h-5 xs:w-5 text-primary" />
             </div>
-            Marketplace Performance Overview
+            <span className="truncate">Marketplace Performance</span>
           </CardTitle>
-          <CardDescription>Revenue and transaction trends over time.</CardDescription>
+          <CardDescription className="text-xs xs:text-sm">Revenue and transaction trends over time.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-3 xs:p-4 sm:p-6">
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart
               data={revenueData}
               margin={{
                 top: 5,
-                right: 30,
-                left: 20,
+                right: 10,
+                left: 10,
                 bottom: 5,
               }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#16a34a" activeDot={{ r: 8 }} />
+              <Line type="monotone" dataKey="revenue" stroke="#16a34a" activeDot={{ r: 6 }} strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-blue-500">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Users className="h-5 w-5 text-blue-600" />
+        <CardHeader className="p-3 xs:p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-sm xs:text-base sm:text-lg">
+            <div className="p-1 xs:p-2 bg-blue-100 rounded-lg">
+              <Users className="h-4 w-4 xs:h-5 xs:w-5 text-blue-600" />
             </div>
-            Top Performing Vendors
+            <span className="truncate">Top Performing Vendors</span>
           </CardTitle>
-          <CardDescription>Vendors with the highest revenue and referrals.</CardDescription>
+          <CardDescription className="text-xs xs:text-sm">Vendors with the highest revenue and referrals.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
+        <CardContent className="p-3 xs:p-4 sm:p-6">
+          <div className="overflow-x-auto -mx-1 xs:mx-0">
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Vendor Name</TableHead>
-                  <TableHead>Total Revenue</TableHead>
-                  <TableHead>Total Referrals</TableHead>
+                  <TableHead className="text-xs xs:text-sm px-2 xs:px-4 min-w-[100px]">Vendor Name</TableHead>
+                  <TableHead className="text-xs xs:text-sm px-2 xs:px-4 min-w-[80px]">Revenue</TableHead>
+                  <TableHead className="text-xs xs:text-sm px-2 xs:px-4 min-w-[70px] hidden xs:table-cell">Referrals</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {topVendors.length > 0 ? (
                   topVendors.map((vendor, index) => (
                     <TableRow key={index} className="hover:bg-gray-50">
-                      <TableCell className="font-medium">{vendor.name}</TableCell>
-                      <TableCell className="text-green-600 font-semibold">{vendor.revenue}</TableCell>
-                      <TableCell className="text-blue-600 font-semibold">{vendor.referrals}</TableCell>
+                      <TableCell className="font-medium text-xs xs:text-sm px-2 xs:px-4">
+                        <div className="truncate max-w-[120px] xs:max-w-none">{vendor.name}</div>
+                      </TableCell>
+                      <TableCell className="text-green-600 font-semibold text-xs xs:text-sm px-2 xs:px-4">
+                        <div className="min-w-0">
+                          <div className="truncate">{vendor.revenue}</div>
+                          <div className="xs:hidden text-xs text-blue-600 mt-1">
+                            {vendor.referrals} referrals
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden xs:table-cell text-blue-600 font-semibold text-xs xs:text-sm px-2 xs:px-4">
+                        {vendor.referrals}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={3} className="text-center py-6 xs:py-8 text-gray-500 text-xs xs:text-sm">
                       No vendor data available yet
                     </TableCell>
                   </TableRow>
@@ -275,40 +289,42 @@ const ClientReportsPage = () => {
               </TableBody>
             </Table>
           </div>
-          <Button onClick={handleViewAllVendorsReport} className="mt-4 bg-blue-600 hover:bg-blue-700">View All Vendors Report</Button>
+          <Button onClick={handleViewAllVendorsReport} className="mt-3 xs:mt-4 bg-blue-600 hover:bg-blue-700 w-full xs:w-full sm:w-auto text-xs xs:text-sm">
+            View All Vendors Report
+          </Button>
         </CardContent>
       </Card>
 
       {/* All Vendors Report Dialog */}
       <Dialog open={isAllVendorsReportOpen} onOpenChange={setIsAllVendorsReportOpen}>
-        <DialogContent className="sm:max-w-6xl">
-          <DialogHeader>
-            <DialogTitle>All Vendors Report</DialogTitle>
-            <DialogDescription>Comprehensive report of all vendors in your marketplace.</DialogDescription>
+        <DialogContent className="w-[98vw] xs:w-[95vw] max-w-6xl max-h-[95vh] xs:max-h-[90vh] overflow-y-auto p-3 xs:p-4 sm:p-6">
+          <DialogHeader className="space-y-1 xs:space-y-2">
+            <DialogTitle className="text-base xs:text-lg sm:text-xl">All Vendors Report</DialogTitle>
+            <DialogDescription className="text-xs xs:text-sm">Comprehensive report of all vendors in your marketplace.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-3 xs:space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 sm:gap-4">
               <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4 text-center">
-                  <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Total Vendors</p>
-                  <p className="text-2xl font-bold text-blue-600">{allVendorsReport.length}</p>
+                <CardContent className="p-2 xs:p-3 sm:p-4 text-center">
+                  <Users className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-1 xs:mb-2" />
+                  <p className="text-xs sm:text-sm text-gray-600">Total Vendors</p>
+                  <p className="text-base xs:text-lg sm:text-2xl font-bold text-blue-600">{allVendorsReport.length}</p>
                 </CardContent>
               </Card>
               <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-primary">
+                <CardContent className="p-2 xs:p-3 sm:p-4 text-center">
+                  <DollarSign className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-1 xs:mb-2" />
+                  <p className="text-xs sm:text-sm text-gray-600">Total Revenue</p>
+                  <p className="text-base xs:text-lg sm:text-2xl font-bold text-primary">
                     {formatCurrency(allVendorsReport.reduce((sum, v) => sum + v.totalRevenue, 0))}
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-purple-50 border-purple-200">
-                <CardContent className="p-4 text-center">
-                  <CheckCircle className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Total Jobs</p>
-                  <p className="text-2xl font-bold text-purple-600">
+              <Card className="bg-purple-50 border-purple-200 xs:col-span-1 sm:col-span-2 lg:col-span-1">
+                <CardContent className="p-2 xs:p-3 sm:p-4 text-center">
+                  <CheckCircle className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-1 xs:mb-2" />
+                  <p className="text-xs sm:text-sm text-gray-600">Total Jobs</p>
+                  <p className="text-base xs:text-lg sm:text-2xl font-bold text-purple-600">
                     {allVendorsReport.reduce((sum, v) => sum + v.completedJobs, 0)}
                   </p>
                 </CardContent>
@@ -316,54 +332,77 @@ const ClientReportsPage = () => {
 
             </div>
 
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="overflow-x-auto -mx-3 xs:-mx-2 sm:mx-0">
+              <Table className="min-w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Services</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Jobs</TableHead>
-                    <TableHead>Referrals</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Join Date</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 min-w-[80px]">Vendor</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 hidden xs:table-cell min-w-[60px]">Services</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 min-w-[70px]">Revenue</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 hidden sm:table-cell min-w-[50px]">Jobs</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 hidden md:table-cell min-w-[60px]">Referrals</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 hidden sm:table-cell min-w-[50px]">Rating</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 min-w-[60px]">Status</TableHead>
+                    <TableHead className="text-xs sm:text-sm px-1 xs:px-2 sm:px-4 hidden lg:table-cell min-w-[80px]">Join Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {allVendorsReport.length > 0 ? (
                     allVendorsReport.map((vendor) => (
                       <TableRow key={vendor.id}>
-                        <TableCell className="font-medium">{vendor.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{vendor.services}</Badge>
-                        </TableCell>
-                        <TableCell className="text-green-600 font-semibold">
-                          {formatCurrency(vendor.totalRevenue)}
-                        </TableCell>
-                        <TableCell className="text-blue-600 font-semibold">
-                          {vendor.completedJobs}
-                        </TableCell>
-                        <TableCell className="text-purple-600 font-semibold">
-                          {vendor.referrals}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                            <span>{vendor.rating}</span>
+                        <TableCell className="font-medium text-xs sm:text-sm px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          <div className="min-w-0">
+                            <div className="truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">{vendor.name}</div>
+                            <div className="xs:hidden text-xs text-gray-500 mt-1">
+                              <Badge variant="outline" className="text-xs px-1">{vendor.services}</Badge>
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={vendor.status === "Active" ? "default" : "destructive"}>
-                            {vendor.status}
-                          </Badge>
+                        <TableCell className="hidden xs:table-cell px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          <Badge variant="outline" className="text-xs px-1 xs:px-2">{vendor.services}</Badge>
                         </TableCell>
-                        <TableCell>{new Date(vendor.joinDate).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-green-600 font-semibold text-xs sm:text-sm px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          <div className="min-w-0">
+                            <div className="truncate max-w-[70px] xs:max-w-none">{formatCurrency(vendor.totalRevenue)}</div>
+                            <div className="sm:hidden text-xs text-blue-600 mt-1">
+                              {vendor.completedJobs} jobs
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-blue-600 font-semibold text-xs sm:text-sm px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          {vendor.completedJobs}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell text-purple-600 font-semibold text-xs sm:text-sm px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          {vendor.referrals}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" />
+                            <span className="text-xs sm:text-sm">{vendor.rating}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          <div className="min-w-0">
+                            <Badge variant={vendor.status === "Active" ? "default" : "destructive"} className="text-xs px-1 xs:px-2">
+                              {vendor.status}
+                            </Badge>
+                            <div className="lg:hidden text-xs text-gray-500 mt-1 truncate">
+                              {new Date(vendor.joinDate).toLocaleDateString()}
+                            </div>
+                            <div className="sm:hidden text-xs text-gray-500 mt-1 flex items-center gap-1">
+                              <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                              <span>{vendor.rating}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell text-xs sm:text-sm px-1 xs:px-2 sm:px-4 py-2 xs:py-3">
+                          {new Date(vendor.joinDate).toLocaleDateString()}
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={8} className="text-center py-8 text-gray-500 text-sm">
                         No vendor data available
                       </TableCell>
                     </TableRow>
@@ -372,9 +411,10 @@ const ClientReportsPage = () => {
               </Table>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col xs:flex-row gap-2 xs:gap-2 sm:gap-0 pt-3 xs:pt-4">
             <Button
               variant="outline"
+              className="w-full xs:w-full sm:w-auto order-2 xs:order-2 sm:order-1 text-xs xs:text-sm"
               onClick={() => {
                 try {
                   const report = getAllVendorsForReport();
@@ -401,13 +441,13 @@ const ClientReportsPage = () => {
                   const link = document.createElement('a');
                   const url = URL.createObjectURL(blob);
                   link.setAttribute('href', url);
-                  link.setAttribute('download', `vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
+                  link.setAttribute('download', `${selectedPeriod}-vendors-report-${new Date().toISOString().split('T')[0]}.csv`);
                   link.style.visibility = 'hidden';
                   document.body.appendChild(link);
                   link.click();
                   document.body.removeChild(link);
 
-                  toast.success('Vendor report exported successfully');
+                  toast.success(`${selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)} vendor report exported successfully`);
                 } catch (error) {
                   console.error('Error exporting vendors report:', error);
                   toast.error('Failed to export vendors report');

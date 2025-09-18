@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import AdminAPI from '@/services/AdminAPI';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -91,8 +92,19 @@ export const ViewEditVendorModal: React.FC<ViewEditVendorModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await AdminAPI.updateVendor(vendor.id, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+        client_id: formData.client,
+        services: formData.services
+      });
+
+      if (response.error) {
+        toast.error(response.message || "Failed to update vendor");
+        return;
+      }
 
       const updatedVendor = {
         ...vendor,
@@ -102,11 +114,13 @@ export const ViewEditVendorModal: React.FC<ViewEditVendorModalProps> = ({
       if (onUpdate) {
         onUpdate(updatedVendor);
       }
-      
+
       toast.success(`Vendor "${formData.name}" has been updated successfully!`);
       setIsEditing(false);
-    } catch (error) {
-      toast.error("Failed to update vendor. Please try again.");
+      onClose();
+    } catch (error: any) {
+      console.error('Error updating vendor:', error);
+      toast.error(error.response?.data?.message || "Failed to update vendor. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

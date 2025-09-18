@@ -403,8 +403,10 @@ class ClientAPI {
   }
 
   // Reports Methods
-  async getReportsVendors(): Promise<{ vendors: ReportsVendorData[], summary: ReportsSummary }> {
-    const response = await clientApiClient.get('/api/marketplace/client/reports/vendors');
+  async getReportsVendors(period: string = 'all'): Promise<{ vendors: ReportsVendorData[], summary: ReportsSummary }> {
+    const response = await clientApiClient.get('/api/marketplace/client/reports/vendors', {
+      params: { period }
+    });
     return response.data;
   }
 

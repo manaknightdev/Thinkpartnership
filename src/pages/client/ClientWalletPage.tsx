@@ -180,11 +180,11 @@ const ClientWalletPage = () => {
 
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-2 xs:p-4 sm:p-6 space-y-4 xs:space-y-6 sm:space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Wallet & Payments</h1>
-        <p className="text-lg text-gray-700 mb-4">
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 xs:p-4 sm:p-6 border border-green-100">
+        <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Wallet & Payments</h1>
+        <p className="text-sm xs:text-base sm:text-lg text-gray-700">
           Manage your marketplace earnings and purchase history.
         </p>
       </div>
@@ -204,46 +204,46 @@ const ClientWalletPage = () => {
           {stripeAccount ? (
             <div className="space-y-4">
               {/* Account Status */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 xs:p-4 border border-gray-200 rounded-lg space-y-3 xs:space-y-4 sm:space-y-0">
+                <div className="flex items-start xs:items-center space-x-3 xs:space-x-4">
+                  <div className={`w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                     stripeAccount.connected && stripeAccount.details_submitted
                       ? 'bg-green-100 text-green-600'
                       : 'bg-yellow-100 text-yellow-600'
                   }`}>
                     {stripeAccount.connected && stripeAccount.details_submitted ? (
-                      <CheckCircle className="w-6 h-6" />
+                      <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
                     ) : (
-                      <AlertCircle className="w-6 h-6" />
+                      <AlertCircle className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
                     )}
                   </div>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {stripeAccount.connected ? 'Stripe Account Connected' : 'Stripe Account Not Connected'}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 text-xs xs:text-sm sm:text-base break-words">
+                      {stripeAccount.connected ? 'Stripe Connected' : 'Stripe Not Connected'}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-xs sm:text-sm text-gray-600 break-words">
                       {stripeAccount.connected && stripeAccount.details_submitted
-                        ? 'Your account is fully set up and ready to receive payments'
+                        ? 'Ready to receive payments'
                         : stripeAccount.connected
-                          ? 'Complete your account setup to start receiving payments'
-                          : 'Connect your Stripe account to receive payments'
+                          ? 'Complete setup to receive payments'
+                          : 'Connect to receive payments'
                       }
                     </div>
                     {stripeAccount.company && (
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 mt-1 break-words">
                         {stripeAccount.company.name}
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                   {stripeAccount.connected ? (
                     <>
                       {!stripeAccount.details_submitted && (
                         <Button
                           onClick={handleConnectStripe}
                           disabled={stripeLoading}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-sm"
                         >
                           {stripeLoading ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -257,7 +257,7 @@ const ClientWalletPage = () => {
                         variant="outline"
                         onClick={handleStripeDisconnect}
                         disabled={stripeLoading}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 w-full sm:w-auto text-sm"
                       >
                         {stripeLoading ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -271,7 +271,7 @@ const ClientWalletPage = () => {
                     <Button
                       onClick={handleConnectStripe}
                       disabled={stripeLoading}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700 w-full sm:w-auto text-sm"
                     >
                       {stripeLoading ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -286,26 +286,26 @@ const ClientWalletPage = () => {
 
               {/* Account Capabilities */}
               {stripeAccount.connected && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 border border-gray-200 rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-3 sm:p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <div className={`w-3 h-3 rounded-full ${
                         stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
                       }`}></div>
-                      <span className="font-medium text-gray-900">Accept Payments</span>
+                      <span className="font-medium text-gray-900 text-sm sm:text-base">Accept Payments</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                       {stripeAccount.charges_enabled ? 'Enabled' : 'Disabled'}
                     </p>
                   </div>
-                  <div className="p-4 border border-gray-200 rounded-lg">
+                  <div className="p-3 sm:p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <div className={`w-3 h-3 rounded-full ${
                         stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
                       }`}></div>
-                      <span className="font-medium text-gray-900">Receive Payouts</span>
+                      <span className="font-medium text-gray-900 text-sm sm:text-base">Receive Payouts</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                       {stripeAccount.payouts_enabled ? 'Enabled' : 'Disabled'}
                     </p>
                   </div>
@@ -356,84 +356,85 @@ const ClientWalletPage = () => {
 
 
       {/* Balance Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-6">
         <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-green-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 xs:p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Available Balance</p>
-                <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600">Available Balance</p>
+                <div className="flex items-center gap-1 xs:gap-2 mt-1">
                   {loading ? (
                     <div className="flex items-center gap-2">
-                      <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                      <p className="text-3xl font-bold text-gray-400">Loading...</p>
+                      <Loader2 className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 animate-spin text-gray-400" />
+                      <p className="text-lg xs:text-xl sm:text-3xl font-bold text-gray-400">Loading...</p>
                     </div>
                   ) : isBalanceVisible ? (
-                    <p className="text-3xl font-bold text-green-600">
+                    <p className="text-lg xs:text-xl sm:text-3xl font-bold text-green-600 truncate">
                       ${(parseFloat(walletBalance?.balance?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   ) : (
-                    <p className="text-3xl font-bold text-gray-400">••••••</p>
+                    <p className="text-lg xs:text-xl sm:text-3xl font-bold text-gray-400">••••••</p>
                   )}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+                    className="flex-shrink-0 p-1 xs:p-2"
                   >
-                    {isBalanceVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {isBalanceVisible ? <EyeOff className="h-3 w-3 xs:h-4 xs:w-4" /> : <Eye className="h-3 w-3 xs:h-4 xs:w-4" />}
                   </Button>
                 </div>
               </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Wallet className="h-8 w-8 text-green-600" />
+              <div className="p-2 xs:p-2 sm:p-3 bg-green-100 rounded-lg flex-shrink-0 ml-1 xs:ml-2">
+                <Wallet className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 xs:p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Pending Balance</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600">Pending Balance</p>
                 {loading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                    <p className="text-xl font-bold text-gray-400">Loading...</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Loader2 className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 animate-spin text-gray-400" />
+                    <p className="text-lg xs:text-xl sm:text-3xl font-bold text-gray-400">Loading...</p>
                   </div>
                 ) : (
-                  <p className="text-3xl font-bold text-orange-600">
+                  <p className="text-lg xs:text-xl sm:text-3xl font-bold text-orange-600 mt-1 truncate">
                     ${(parseFloat(walletBalance?.pending_balance?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 )}
-                <p className="text-xs text-gray-500">Processing in 2-3 days</p>
+                <p className="text-xs text-gray-500 mt-1">Processing in 2-3 days</p>
               </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <Clock className="h-8 w-8 text-orange-600" />
+              <div className="p-2 xs:p-2 sm:p-3 bg-orange-100 rounded-lg flex-shrink-0 ml-1 xs:ml-2">
+                <Clock className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-orange-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-blue-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 xs:p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">This Month</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600">This Month</p>
                 {loading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                    <p className="text-3xl font-bold text-gray-400">Loading...</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Loader2 className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 animate-spin text-gray-400" />
+                    <p className="text-lg xs:text-xl sm:text-3xl font-bold text-gray-400">Loading...</p>
                   </div>
                 ) : (
-                  <p className="text-3xl font-bold text-blue-600">
+                  <p className="text-lg xs:text-xl sm:text-3xl font-bold text-blue-600 mt-1 truncate">
                     ${thisMonthEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 )}
-                <p className="text-xs text-green-600 font-medium">+12.5% from last month</p>
+                <p className="text-xs text-green-600 font-medium mt-1 break-words">+12.5% from last month</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <TrendingUp className="h-8 w-8 text-blue-600" />
+              <div className="p-2 xs:p-2 sm:p-3 bg-blue-100 rounded-lg flex-shrink-0 ml-1 xs:ml-2">
+                <TrendingUp className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -451,11 +452,12 @@ const ClientWalletPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Recent Transactions</h3>
+            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between space-y-2 xs:space-y-0 gap-2">
+              <h3 className="text-sm xs:text-base sm:text-lg font-semibold">Recent Transactions</h3>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="w-full xs:w-auto text-xs xs:text-sm"
                   onClick={() => {
                     try {
                       if (!transactions || transactions.length === 0) {
@@ -497,30 +499,30 @@ const ClientWalletPage = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 mb-4 xs:mb-6">
               <Card className="bg-primary/5 border-primary/20">
-                <CardContent className="p-4 text-center">
-                  <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Total Income</p>
-                  <p className="text-xl font-bold text-primary">
+                <CardContent className="p-3 xs:p-3 sm:p-4 text-center">
+                  <TrendingUp className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
+                  <p className="text-xs sm:text-sm text-gray-600">Total Income</p>
+                  <p className="text-base xs:text-lg sm:text-xl font-bold text-primary">
                     ${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4 text-center">
-                  <TrendingDown className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Total Withdrawals</p>
-                  <p className="text-xl font-bold text-blue-600">
+                <CardContent className="p-3 xs:p-3 sm:p-4 text-center">
+                  <TrendingDown className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-2" />
+                  <p className="text-xs sm:text-sm text-gray-600">Total Withdrawals</p>
+                  <p className="text-base xs:text-lg sm:text-xl font-bold text-blue-600">
                     ${totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-purple-50 border-purple-200">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Net Earnings</p>
-                  <p className="text-xl font-bold text-purple-600">
+              <Card className="bg-purple-50 border-purple-200 xs:col-span-1 sm:col-span-2 lg:col-span-1">
+                <CardContent className="p-3 xs:p-3 sm:p-4 text-center">
+                  <DollarSign className="h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-2" />
+                  <p className="text-xs sm:text-sm text-gray-600">Net Earnings</p>
+                  <p className="text-base xs:text-lg sm:text-xl font-bold text-purple-600">
                     ${isNaN(netEarnings) ? '0.00' : netEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </CardContent>
@@ -531,11 +533,11 @@ const ClientWalletPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="min-w-[100px]">Type</TableHead>
+                    <TableHead className="hidden xs:table-cell min-w-[120px]">Description</TableHead>
+                    <TableHead className="min-w-[80px]">Amount</TableHead>
+                    <TableHead className="hidden sm:table-cell min-w-[100px]">Date</TableHead>
+                    <TableHead className="hidden sm:table-cell min-w-[80px]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -555,22 +557,41 @@ const ClientWalletPage = () => {
                   ) : (
                     transactions.map((transaction) => (
                     <TableRow key={transaction.id} className="hover:bg-gray-50">
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getTransactionIcon(transaction.type)}
-                          <span className="capitalize">{transaction.type}</span>
+                      <TableCell className="py-3">
+                        <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
+                          <div className="flex items-center gap-2">
+                            {getTransactionIcon(transaction.type)}
+                            <span className="capitalize text-xs xs:text-sm">{transaction.type}</span>
+                          </div>
+                          {/* Show description on mobile when hidden column */}
+                          <div className="xs:hidden text-xs text-gray-500 truncate max-w-[120px]">
+                            {transaction.description}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">{transaction.description}</TableCell>
-                      <TableCell>
-                        <span className={`font-semibold ${
-                          transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {transaction.amount > 0 ? '+' : ''}${Math.abs(parseFloat(transaction.amount?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
+                      <TableCell className="hidden xs:table-cell max-w-[120px] xs:max-w-xs truncate text-xs xs:text-sm">
+                        {transaction.description}
                       </TableCell>
-                      <TableCell>{formatDate(transaction.created_at)}</TableCell>
-                      <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                      <TableCell className="py-3">
+                        <div className="flex flex-col">
+                          <span className={`font-semibold text-xs xs:text-sm ${
+                            transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.amount > 0 ? '+' : ''}${Math.abs(parseFloat(transaction.amount?.toString()) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          {/* Show date and status on mobile when hidden columns */}
+                          <div className="sm:hidden text-xs text-gray-500 mt-1">
+                            <div>{formatDate(transaction.created_at)}</div>
+                            <div className="mt-1">{getStatusBadge(transaction.status)}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs xs:text-sm">
+                        {formatDate(transaction.created_at)}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {getStatusBadge(transaction.status)}
+                      </TableCell>
                     </TableRow>
                     ))
                   )}

@@ -74,23 +74,23 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-4">
-            <Shield className="h-8 w-8 text-white" />
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-4">
+            <Shield className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
-          <p className="text-gray-600">Secure access to platform administration</p>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Admin Portal</h1>
+          <p className="text-gray-600 text-sm">Secure access to platform administration</p>
         </div>
 
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-bold text-center">Administrator Sign In</CardTitle>
-            <CardDescription className="text-center text-gray-600">
+        <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-1 pb-4 text-center">
+            <CardTitle className="text-xl font-semibold">Administrator Sign In</CardTitle>
+            <CardDescription className="text-gray-600 text-sm">
               Enter your admin credentials to access the control panel
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="space-y-4">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {error && (
                 <Alert variant="destructive">
@@ -100,14 +100,14 @@ const AdminLogin = () => {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Admin Email Address</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your admin email"
-                    className="pl-10"
+                    placeholder="admin@example.com"
+                    className="pl-10 h-11"
                     {...register('email')}
                   />
                 </div>
@@ -118,14 +118,14 @@ const AdminLogin = () => {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 h-11"
                     {...register('password')}
                   />
                   <button
@@ -163,7 +163,7 @@ const AdminLogin = () => {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                className="w-full h-11 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -181,7 +181,7 @@ const AdminLogin = () => {
             </form>
 
             {/* Security Notice */}
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-start space-x-2">
                 <Shield className="h-4 w-4 text-amber-600 mt-0.5" />
                 <div className="text-xs text-amber-800">
@@ -192,18 +192,18 @@ const AdminLogin = () => {
             </div>
 
             {/* Other Portal Links */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-xs text-gray-500 text-center mb-3">
                 Looking for a different portal?
               </p>
-              <div className="flex justify-center space-x-4 text-xs">
-                <Link to="/marketplace/login" className="text-purple-600 hover:underline">
+              <div className="flex flex-wrap justify-center gap-3 text-xs">
+                <Link to="/marketplace/login" className="text-purple-600 hover:underline px-2 py-1">
                   Customer Portal
                 </Link>
-                <Link to="/vendor/login" className="text-purple-600 hover:underline">
+                <Link to="/vendor/login" className="text-purple-600 hover:underline px-2 py-1">
                   Vendor Portal
                 </Link>
-                <Link to="/client/login" className="text-purple-600 hover:underline">
+                <Link to="/client/login" className="text-purple-600 hover:underline px-2 py-1">
                   Client Portal
                 </Link>
               </div>

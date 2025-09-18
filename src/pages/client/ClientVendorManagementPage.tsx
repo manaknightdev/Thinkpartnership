@@ -178,13 +178,13 @@ const ClientVendorManagementPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage Vendors</h1>
         <p className="text-lg text-gray-700 mb-4">
           Review and manage the service providers in your marketplace.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button className="bg-green-600 hover:bg-green-700" onClick={() => navigate("/client-portal/invites")}>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => navigate("/client-portal/invites")}>
             <UserPlus className="mr-2 h-4 w-4" />
             Invite Vendors
           </Button>
@@ -242,7 +242,7 @@ const ClientVendorManagementPage = () => {
                         {(vendor.services_count || 0) + ' services'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-green-600 font-semibold">
+                    <TableCell className="text-emerald-700 font-semibold">
                       {formatCurrency(vendor.total_revenue || 0)}
                     </TableCell>
                     <TableCell className="text-blue-600 font-semibold">
@@ -252,7 +252,7 @@ const ClientVendorManagementPage = () => {
                     <TableCell>
                       <Badge
                         variant={getBadgeVariant(vendor.status)}
-                        className={getUiStatus(vendor.status) === 'suspended' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-primary/10 text-primary hover:bg-primary/10'}
+                        className={getUiStatus(vendor.status) === 'suspended' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100'}
                       >
                         {getUiStatus(vendor.status)}
                       </Badge>
@@ -337,11 +337,11 @@ const ClientVendorManagementPage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-primary/5 border-primary/20">
+                <Card className="bg-emerald-50 border-emerald-200">
                   <CardContent className="p-4 text-center">
-                    <DollarSign className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <DollarSign className="h-8 w-8 text-emerald-700 mx-auto mb-2" />
                     <p className="text-sm text-gray-600">Total Revenue</p>
-                     <p className="text-xl font-bold text-primary">{typeof selectedVendor.total_revenue === 'number' ? selectedVendor.total_revenue.toLocaleString() : '0'}</p>
+                     <p className="text-xl font-bold text-emerald-700">{typeof selectedVendor.total_revenue === 'number' ? selectedVendor.total_revenue.toLocaleString() : '0'}</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-blue-50 border-blue-200">
@@ -438,20 +438,20 @@ const ClientVendorManagementPage = () => {
                   <p className="text-2xl font-bold text-blue-600">{(vendors || []).length}</p>
                 </CardContent>
               </Card>
-              <Card className="bg-green-50 border-green-200">
+              <Card className="bg-emerald-50 border-emerald-200">
                 <CardContent className="p-4 text-center">
-                  <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <DollarSign className="h-8 w-8 text-emerald-700 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-emerald-700">
                     ${(vendors || []).reduce((sum, v) => sum + (v?.total_revenue || 0), 0).toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-purple-50 border-purple-200">
+              <Card className="bg-indigo-50 border-indigo-200">
                 <CardContent className="p-4 text-center">
-                  <CheckCircle className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                  <CheckCircle className="h-8 w-8 text-indigo-700 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Total Jobs</p>
-                  <p className="text-2xl font-bold text-purple-600">
+                  <p className="text-2xl font-bold text-indigo-700">
                     {(vendors || []).reduce((sum, v) => sum + (v?.completed_jobs || 0), 0)}
                   </p>
                 </CardContent>
@@ -479,7 +479,7 @@ const ClientVendorManagementPage = () => {
                       <TableCell>
                         <Badge variant="outline">{vendor?.services_count || 0} services</Badge>
                       </TableCell>
-                      <TableCell className="text-green-600 font-semibold">
+                      <TableCell className="text-emerald-700 font-semibold">
                         ${(vendor?.total_revenue || 0).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-blue-600 font-semibold">

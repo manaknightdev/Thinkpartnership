@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { UserCheck, Mail, Phone, MapPin, Building, Users } from "lucide-react";
+import { UserCheck, Mail, Phone, MapPin, Building, Users, Loader2 } from "lucide-react";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 
 interface AddCustomerModalProps {
   isOpen: boolean;
@@ -21,41 +23,74 @@ interface AddCustomerModalProps {
   onAdd: (customer: any) => void;
 }
 
-// Mock data for vendors by client (same as in AdminAllCustomersPage)
-const mockVendorsByClient = {
-  "TechCorp Solutions": ["Rapid Plumbers", "Certified Inspectors Inc.", "Climate Control Experts"],
-  "HomeServices Pro": ["Brush Strokes Pro", "Green Thumb Landscaping"],
-  "Local Connect": ["Green Thumb Landscaping", "Quick Fix Handyman"],
-  "ServiceHub Inc": ["Sparky Electric", "Climate Control Experts"],
-  "QuickFix Network": ["Climate Control Experts", "Move It Right"]
-};
-
 export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     location: '',
-    client: '',
-    vendor: '',
-    preferredServices: '',
+    client_id: '',
+    vendor_id: '',
     notes: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [isLoadingVendors, setIsLoadingVendors] = useState(false);
+  const [availableClients, setAvailableClients] = useState<any[]>([]);
+  const [availableVendors, setAvailableVendors] = useState<any[]>([]);
 
-  // Get available vendors based on selected client
-  const availableVendors = useMemo(() => {
-    if (!formData.client) return [];
-    return mockVendorsByClient[formData.client as keyof typeof mockVendorsByClient] || [];
-  }, [formData.client]);
-
-  // Reset vendor when client changes
-  React.useEffect(() => {
-    if (formData.client && !availableVendors.includes(formData.vendor)) {
-      setFormData(prev => ({ ...prev, vendor: '' }));
+  // Load available clients when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchAvailableClients();
     }
-  }, [formData.client, availableVendors, formData.vendor]);
+  }, [isOpen]);
+
+  // Load vendors when client changes
+  useEffect(() => {
+    if (formData.client_id) {
+      fetchAvailableVendors(parseInt(formData.client_id));
+    } else {
+      setAvailableVendors([]);
+      setFormData(prev => ({ ...prev, vendor_id: '' }));
+    }
+  }, [formData.client_id]);
+
+  const fetchAvailableClients = async () => {
+    try {
+      setIsLoadingClients(true);
+      const response = await AdminAPI.getAvailableClients();
+      if (response.error) {
+        showError(response.message || 'Failed to fetch clients');
+      } else {
+        setAvailableClients(response.clients || []);
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      showError('Failed to load clients');
+    } finally {
+      setIsLoadingClients(false);
+    }
+  };
+
+  const fetchAvailableVendors = async (clientId: number) => {
+    try {
+      setIsLoadingVendors(true);
+      const response = await AdminAPI.getAvailableVendors(clientId);
+      if (response.error) {
+        showError(response.message || 'Failed to fetch vendors');
+      } else {
+        setAvailableVendors(response.vendors || []);
+      }
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+      showError('Failed to load vendors');
+    } finally {
+      setIsLoadingVendors(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -66,8 +101,8 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.client || !formData.vendor) {
+
+    if (!formData.first_name || !formData.last_name || !formData.email || !formData.client_id) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -75,45 +110,43 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const newCustomer = {
-        id: `cu${Date.now()}`,
-        name: formData.name,
+      const customerData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         email: formData.email,
-        phone: formData.phone || 'Not provided',
-        location: formData.location || 'Not specified',
-        client: formData.client,
-        vendor: formData.vendor,
-        status: 'Active',
-        totalOrders: 0,
-        totalSpent: '$0',
-        avgRating: 0,
-        joinDate: new Date().toISOString().split('T')[0],
-        lastOrder: 'Never',
-        preferredServices: formData.preferredServices || 'Not specified',
-        notes: formData.notes
+        phone: formData.phone,
+        location: formData.location,
+        client_id: parseInt(formData.client_id),
+        vendor_id: formData.vendor_id && formData.vendor_id !== 'none' ? parseInt(formData.vendor_id) : undefined
       };
 
-      onAdd(newCustomer);
-      toast.success(`Customer "${formData.name}" has been added successfully!`);
-      
+      const response = await AdminAPI.createCustomer(customerData);
+
+      if (response.error) {
+        showError(response.message || 'Failed to create customer');
+        return;
+      }
+
+      showSuccess(`Customer "${formData.first_name} ${formData.last_name}" has been added successfully!`);
+
       // Reset form
       setFormData({
-        name: '',
+        first_name: '',
+        last_name: '',
         email: '',
         phone: '',
         location: '',
-        client: '',
-        vendor: '',
-        preferredServices: '',
+        client_id: '',
+        vendor_id: '',
         notes: ''
       });
-      
+
+      // Notify parent component to refresh data
+      onAdd(response.customer);
       onClose();
     } catch (error) {
-      toast.error("Failed to add customer. Please try again.");
+      console.error('Error creating customer:', error);
+      showError("Failed to add customer. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -122,13 +155,13 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
   const handleClose = () => {
     if (!isSubmitting) {
       setFormData({
-        name: '',
+        first_name: '',
+        last_name: '',
         email: '',
         phone: '',
         location: '',
-        client: '',
-        vendor: '',
-        preferredServices: '',
+        client_id: '',
+        vendor_id: '',
         notes: ''
       });
       onClose();
@@ -150,23 +183,38 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Customer Name */}
+            {/* First Name */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                Customer Name *
+              <Label htmlFor="first_name" className="text-sm font-medium text-gray-700">
+                First Name *
               </Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter customer full name"
+                id="first_name"
+                value={formData.first_name}
+                onChange={(e) => handleInputChange('first_name', e.target.value)}
+                placeholder="Enter first name"
+                className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                required
+              />
+            </div>
+
+            {/* Last Name */}
+            <div className="space-y-2">
+              <Label htmlFor="last_name" className="text-sm font-medium text-gray-700">
+                Last Name *
+              </Label>
+              <Input
+                id="last_name"
+                value={formData.last_name}
+                onChange={(e) => handleInputChange('last_name', e.target.value)}
+                placeholder="Enter last name"
                 className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
                 required
               />
             </div>
 
             {/* Email */}
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                 Email Address *
               </Label>
@@ -220,66 +268,63 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
 
             {/* Client Assignment */}
             <div className="space-y-2">
-              <Label htmlFor="client" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="client_id" className="text-sm font-medium text-gray-700">
                 Client Marketplace *
               </Label>
-              <Select value={formData.client} onValueChange={(value) => handleInputChange('client', value)}>
+              <Select value={formData.client_id} onValueChange={(value) => handleInputChange('client_id', value)}>
                 <SelectTrigger className="border-gray-200 focus:border-purple-500 focus:ring-purple-500">
                   <div className="flex items-center gap-2">
                     <Building className="h-4 w-4 text-gray-400" />
-                    <SelectValue placeholder="Select client" />
+                    {isLoadingClients ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <SelectValue placeholder="Select client" />
+                    )}
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="TechCorp Solutions">TechCorp Solutions</SelectItem>
-                  <SelectItem value="HomeServices Pro">HomeServices Pro</SelectItem>
-                  <SelectItem value="Local Connect">Local Connect</SelectItem>
-                  <SelectItem value="ServiceHub Inc">ServiceHub Inc</SelectItem>
-                  <SelectItem value="QuickFix Network">QuickFix Network</SelectItem>
+                  {availableClients.map(client => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.company_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             {/* Vendor Assignment */}
             <div className="space-y-2">
-              <Label htmlFor="vendor" className="text-sm font-medium text-gray-700">
-                Assign to Vendor *
+              <Label htmlFor="vendor_id" className="text-sm font-medium text-gray-700">
+                Assign to Vendor (Optional)
               </Label>
-              <Select 
-                value={formData.vendor} 
-                onValueChange={(value) => handleInputChange('vendor', value)}
-                disabled={!formData.client}
+              <Select
+                value={formData.vendor_id}
+                onValueChange={(value) => handleInputChange('vendor_id', value)}
+                disabled={!formData.client_id}
               >
                 <SelectTrigger className="border-gray-200 focus:border-purple-500 focus:ring-purple-500">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-gray-400" />
-                    <SelectValue placeholder={formData.client ? "Select vendor" : "Select client first"} />
+                    {isLoadingVendors ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <SelectValue placeholder={formData.client_id ? "Select vendor (optional)" : "Select client first"} />
+                    )}
                   </div>
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">No vendor assignment</SelectItem>
                   {availableVendors.map(vendor => (
-                    <SelectItem key={vendor} value={vendor}>{vendor}</SelectItem>
+                    <SelectItem key={vendor.id} value={vendor.id.toString()}>
+                      {vendor.business_name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {!formData.client && (
+              {!formData.client_id && (
                 <p className="text-xs text-gray-500">Please select a client first to see available vendors</p>
               )}
             </div>
-          </div>
-
-          {/* Preferred Services */}
-          <div className="space-y-2">
-            <Label htmlFor="preferredServices" className="text-sm font-medium text-gray-700">
-              Preferred Services
-            </Label>
-            <Input
-              id="preferredServices"
-              value={formData.preferredServices}
-              onChange={(e) => handleInputChange('preferredServices', e.target.value)}
-              placeholder="e.g., Plumbing, HVAC, Electrical"
-              className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
-            />
           </div>
 
           {/* Notes */}
@@ -309,9 +354,17 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
-              {isSubmitting ? "Adding Customer..." : "Add Customer"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding Customer...
+                </>
+              ) : (
+                "Add Customer"
+              )}
             </Button>
           </DialogFooter>
         </form>

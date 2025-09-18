@@ -203,9 +203,19 @@ const AdminAllVendorsPage = () => {
     setIsViewEditModalOpen(true);
   };
 
-  const handleSuspendVendor = (vendorName: string) => {
-    toast.warning(`Suspending ${vendorName}...`);
-    // In a real app, this would make an API call to suspend the vendor
+  const handleSuspendVendor = async (vendor: any) => {
+    try {
+      const response = await AdminAPI.suspendVendor(vendor.id, 'Suspended by admin');
+      if (response.error) {
+        showError(response.message || 'Failed to suspend vendor');
+      } else {
+        showSuccess(`${vendor.name} has been suspended successfully`);
+        fetchVendors(); // Refresh the list
+      }
+    } catch (error: any) {
+      console.error('Error suspending vendor:', error);
+      showError(error.response?.data?.message || 'Failed to suspend vendor');
+    }
   };
 
   const handleApproveVendor = (vendorName: string) => {
@@ -619,7 +629,7 @@ const AdminAllVendorsPage = () => {
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleSuspendVendor(vendor.name)}
+                              onClick={() => handleSuspendVendor(vendor)}
                               className="text-red-600 focus:text-red-600"
                             >
                               <Ban className="mr-2 h-4 w-4" />

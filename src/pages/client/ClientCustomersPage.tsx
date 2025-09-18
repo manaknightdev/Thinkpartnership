@@ -176,13 +176,13 @@ const ClientCustomersPage = () => {
   return (
     <div className="p-6 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-primary/5 to-blue-50 rounded-lg p-6 border border-primary/20">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">All Customers</h1>
         <p className="text-lg text-gray-700 mb-4">
           Manage and track all customers in your marketplace ecosystem.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button className="bg-primary hover:bg-primary/90" onClick={handleInviteCustomer}>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleInviteCustomer}>
             <UserPlus className="mr-2 h-4 w-4" />
             Invite Customer
           </Button>
@@ -195,31 +195,31 @@ const ClientCustomersPage = () => {
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-purple-500">
+        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-indigo-500">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Users className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-indigo-100 rounded-lg">
+                <Users className="h-6 w-6 text-indigo-700" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Customers</p>
-                <p className="text-2xl font-bold text-purple-600">{totalCustomers}</p>
-                <p className="text-xs text-purple-600">{activeCustomers} active</p>
+                <p className="text-2xl font-bold text-indigo-700">{totalCustomers}</p>
+                <p className="text-xs text-indigo-700">{activeCustomers} active</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-green-500">
+        <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-emerald-500">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <DollarSign className="h-6 w-6 text-primary" />
+              <div className="p-3 bg-emerald-100 rounded-lg">
+                <DollarSign className="h-6 w-6 text-emerald-700" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-primary">${totalRevenue.toLocaleString()}</p>
-                <p className="text-xs text-primary">${avgSpendPerCustomer.toFixed(0)} avg per customer</p>
+                <p className="text-2xl font-bold text-emerald-700">${totalRevenue.toLocaleString()}</p>
+                <p className="text-xs text-emerald-700">${avgSpendPerCustomer.toFixed(0)} avg per customer</p>
               </div>
             </div>
           </CardContent>
@@ -346,13 +346,13 @@ const ClientCustomersPage = () => {
               </div>
             ) : (
               sortedCustomers.map((customer) => (
-                <Card key={customer.id} className="hover:shadow-md transition-shadow border-l-4 border-l-purple-200">
+                <Card key={customer.id} className="hover:shadow-md transition-shadow border-l-4 border-l-blue-200">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
                       {/* Avatar */}
                       <div className="w-16 h-16 flex-shrink-0">
-                        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Users className="h-8 w-8 text-purple-600" />
+                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Users className="h-8 w-8 text-blue-600" />
                         </div>
                       </div>
 
@@ -363,7 +363,7 @@ const ClientCustomersPage = () => {
                             {`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown User'}
                           </h3>
                           <Badge variant={customer.status === "active" ? "default" : "secondary"}
-                                 className={customer.status === "active" ? "bg-primary/10 text-primary" : ""}>
+                                 className={customer.status === "active" ? "bg-blue-100 text-blue-700 border-blue-200" : ""}>
                             {customer.status}
                           </Badge>
                         </div>
@@ -378,7 +378,7 @@ const ClientCustomersPage = () => {
                           </div>
                           <div>
                             <p className="text-gray-500">Total Spent</p>
-                            <p className="font-semibold text-primary">{formatCurrency(customer.total_spent)}</p>
+                            <p className="font-semibold text-emerald-700">{formatCurrency(customer.total_spent)}</p>
                           </div>
                           <div>
                             <p className="text-gray-500">Orders</p>
@@ -386,7 +386,7 @@ const ClientCustomersPage = () => {
                           </div>
                           <div>
                             <p className="text-gray-500">Phone</p>
-                            <p className="font-semibold text-purple-600">{customer.phone || "N/A"}</p>
+                            <p className="font-semibold text-indigo-700">{customer.phone || "N/A"}</p>
                           </div>
                         </div>
 
@@ -484,7 +484,7 @@ const ClientCustomersPage = () => {
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Referral Information</Label>
                     <div className="mt-2">
-                      <Badge className="bg-purple-100 text-purple-800">
+                      <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200">
                         Direct Customer
                       </Badge>
                     </div>
