@@ -220,7 +220,9 @@ const CustomerSignup = () => {
         clientSlug: clientSlug,
         clientIdentifier: clientIdentifier,
         hasInviteCode: !!referralInfo.inviteCode,
-        hasReferralCode: !!referralInfo.referralCode
+        hasReferralCode: !!referralInfo.referralCode,
+        urlClientParam: urlClientParam,
+        referralClientId: referralInfo.clientId
       });
 
       const response = await MarketplaceAuthAPI.register(registerData, clientIdentifier);

@@ -71,6 +71,16 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
       return clientParam; // Prefer explicit client id
     }
 
+    // Method 1.5: Check for referral codes that might contain client information
+    const refParam = urlParams.get('ref');
+    const vendor = urlParams.get('vendor');
+    if (refParam || vendor) {
+      console.log(`🎫 Found referral parameters - ref: ${refParam}, vendor: ${vendor}`);
+      // For now, let the backend handle client detection from referral codes
+      // We'll return null here and let the backend API resolve the client context
+      return null;
+    }
+
     // Method 2: Subdomain-based detection, but ignore platform subdomains (e.g., *.netlify.app)
     if (hostname.includes('.') && !hostname.startsWith('www.')) {
       const parts = hostname.split('.');

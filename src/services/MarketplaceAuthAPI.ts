@@ -97,6 +97,30 @@ class MarketplaceAuthAPI {
         }
       }
 
+      // Also add any referral parameters to help with client detection
+      const urlParams = new URLSearchParams(window.location.search);
+      const ref = urlParams.get('ref');
+      const vendor = urlParams.get('vendor');
+      const clientParam = urlParams.get('client');
+
+      if (ref && !config.params?.ref) {
+        if (!config.params) config.params = {};
+        config.params.ref = ref;
+        console.log(`🎫 Adding referral code parameter: ${ref}`);
+      }
+
+      if (vendor && !config.params?.vendor) {
+        if (!config.params) config.params = {};
+        config.params.vendor = vendor;
+        console.log(`🏪 Adding vendor parameter: ${vendor}`);
+      }
+
+      if (clientParam && !config.params?.client) {
+        if (!config.params) config.params = {};
+        config.params.client = clientParam;
+        console.log(`🏢 Adding client parameter from URL: ${clientParam}`);
+      }
+
       // Add auth token if available
       const token = localStorage.getItem('auth_token');
       if (token) {

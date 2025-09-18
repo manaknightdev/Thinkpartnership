@@ -8,8 +8,12 @@ import { Copy, Mail, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import VendorInviteAPI from "@/services/VendorInviteAPI";
 import VendorReferralAPI from "@/services/VendorReferralAPI";
+import { useClient } from "@/contexts/ClientContext";
 
 const VendorInvitePage = () => {
+  // Get client context
+  const { client } = useClient();
+
   // State for API data
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -39,9 +43,9 @@ const VendorInvitePage = () => {
       // Update sent invites
       if (!invitesRes.error && invitesRes.data?.invitations) {
         setSentInvites(invitesRes.data.invitations);
-      } else if (!invitesRes.error && invitesRes.invitations) {
+      } else if (!invitesRes.error && (invitesRes as any).invitations) {
         // Handle direct response format
-        setSentInvites(invitesRes.invitations);
+        setSentInvites((invitesRes as any).invitations);
       }
 
     } catch (error) {
@@ -52,10 +56,38 @@ const VendorInvitePage = () => {
     }
   };
 
-  // Get the primary referral link
+  // Get the primary referral link with proper production URL and client context
+  const getProperReferralLink = (originalUrl: string) => {
+    try {
+      const url = new URL(originalUrl);
+      // Always use production URL
+      const productionUrl = new URL(url.pathname + url.search, 'https://think-partnership.netlify.app');
+
+      // Add client context if available and not already present
+      if (client?.id && !productionUrl.searchParams.has('client')) {
+        productionUrl.searchParams.set('client', client.id.toString());
+      }
+
+      return productionUrl.toString();
+    } catch (error) {
+      // Fallback for invalid URLs
+      const fallbackUrl = new URL('/register', 'https://think-partnership.netlify.app');
+      if (client?.id) {
+        fallbackUrl.searchParams.set('client', client.id.toString());
+      }
+      return fallbackUrl.toString();
+    }
+  };
+
   const referralLink = referralLinks.length > 0
-    ? referralLinks[0].url
-    : "https://realpartneros.com/invite/yourcompanyid";
+    ? getProperReferralLink(referralLinks[0].url)
+    : (() => {
+        const fallbackUrl = new URL('/register', 'https://think-partnership.netlify.app');
+        if (client?.id) {
+          fallbackUrl.searchParams.set('client', client.id.toString());
+        }
+        return fallbackUrl.toString();
+      })();
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
