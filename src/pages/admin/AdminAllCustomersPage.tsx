@@ -185,7 +185,7 @@ const AdminAllCustomersPage = () => {
     page: 1,
     pages: 1,
     total: 0,
-    limit: 20
+    limit: 50 // Increased from 20 to 50
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewEditModalOpen, setIsViewEditModalOpen] = useState(false);
@@ -216,18 +216,28 @@ const AdminAllCustomersPage = () => {
         // Transform API response to match frontend format
         const transformedCustomers = (response.customers || []).map((customer: any) => ({
           id: customer.id,
-          name: `${customer.first_name} ${customer.last_name}`.trim() || 'N/A',
+          name: `${customer.first_name} ${customer.last_name}`.trim() || 'Unknown User',
+          first_name: customer.first_name,
+          last_name: customer.last_name,
           email: customer.email,
           phone: customer.phone || 'Not provided',
           location: 'Not specified', // API doesn't return location yet
           client: `${customer.marketplaces_used || 0} marketplace${customer.marketplaces_used !== 1 ? 's' : ''}`,
           vendor: `${customer.vendors_used || 0} vendor${customer.vendors_used !== 1 ? 's' : ''}`,
-          status: customer.status === 0 ? 'Active' : customer.status === 1 ? 'Inactive' : 'Suspended',
+          vendors_used: customer.vendors_used || 0,
+          marketplaces_used: customer.marketplaces_used || 0,
+          status: customer.status, // Keep original numeric status
+          statusText: customer.status === 0 ? 'Active' : customer.status === 1 ? 'Inactive' : 'Suspended',
           totalOrders: customer.completed_orders || 0,
-          totalSpent: `$${parseFloat(customer.total_spent || 0).toFixed(2)}`,
+          completed_orders: customer.completed_orders || 0,
+          total_requests: customer.total_requests || 0,
+          totalSpent: `$${parseFloat(customer.total_spent || 0).toLocaleString()}`,
+          total_spent: customer.total_spent || '0.00',
           avgRating: 4.5, // Placeholder until we have ratings
-          joinDate: new Date(customer.join_date).toISOString().split('T')[0],
-          lastOrder: customer.last_order_date ? new Date(customer.last_order_date).toISOString().split('T')[0] : 'Never',
+          joinDate: customer.join_date ? new Date(customer.join_date).toLocaleDateString() : 'N/A',
+          join_date: customer.join_date,
+          lastOrder: customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : 'Never',
+          last_order_date: customer.last_order_date,
           preferredServices: 'Not specified',
           notes: ''
         }));
@@ -573,7 +583,7 @@ const AdminAllCustomersPage = () => {
                     <TableCell>
                       <div>
                         <p className="font-medium text-gray-900">
-                          {`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown User'}
+                          {customer.name}
                         </p>
                         <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin className="h-3 w-3 mr-1" />
@@ -583,9 +593,14 @@ const AdminAllCustomersPage = () => {
                     </TableCell>
 
                     <TableCell>
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className="text-gray-700">Platform Customer</span>
+                      <div className="text-sm text-gray-700">
+                        <div className="flex items-center mb-1">
+                          <Users className="h-3 w-3 mr-1 text-gray-400" />
+                          <span>{customer.vendors_used} vendor{customer.vendors_used !== 1 ? 's' : ''} used</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {customer.marketplaces_used} marketplace{customer.marketplaces_used !== 1 ? 's' : ''}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -603,13 +618,16 @@ const AdminAllCustomersPage = () => {
                     <TableCell>
                       <div className="flex items-center">
                         <ShoppingBag className="h-4 w-4 mr-1 text-gray-400" />
-                        <span className="font-medium text-gray-900">{customer.completed_orders || 0}</span>
+                        <span className="font-medium text-gray-900">{customer.completed_orders}</span>
                       </div>
+                      {customer.total_requests > customer.completed_orders && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {customer.total_requests} total requests
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-gray-900 font-semibold">
-                      ${typeof customer.total_spent === 'string'
-                        ? parseFloat(customer.total_spent || '0').toLocaleString()
-                        : (customer.total_spent || 0).toLocaleString()}
+                      ${parseFloat(customer.total_spent || '0').toLocaleString()}
                     </TableCell>
 
                     <TableCell className="text-gray-600">
@@ -623,7 +641,7 @@ const AdminAllCustomersPage = () => {
                           'bg-orange-100 text-orange-800 hover:bg-orange-100'
                         }`}
                       >
-                        {customer.status === 0 ? 'Active' : 'Inactive'}
+                        {customer.statusText}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Users, Mail, Phone, MapPin, Building, Star } from "lucide-react";
+import { Users, Mail, Phone, MapPin, Building, Loader2 } from "lucide-react";
+import AdminAPI from '@/services/AdminAPI';
+import { showError, showSuccess } from '@/utils/toast';
 
 interface AddVendorModalProps {
   isOpen: boolean;
@@ -27,14 +29,37 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
     email: '',
     phone: '',
     location: '',
-    client: '',
-    services: '',
-    description: '',
-    businessType: '',
-    experience: ''
+    client_id: '',
+    description: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [availableClients, setAvailableClients] = useState<any[]>([]);
+
+  // Load available clients when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchAvailableClients();
+    }
+  }, [isOpen]);
+
+  const fetchAvailableClients = async () => {
+    try {
+      setIsLoadingClients(true);
+      const response = await AdminAPI.getAvailableClients();
+      if (response.error) {
+        showError(response.message || 'Failed to fetch clients');
+      } else {
+        setAvailableClients(response.clients || []);
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      showError('Failed to load clients');
+    } finally {
+      setIsLoadingClients(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -45,8 +70,8 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.client || !formData.services) {
+
+    if (!formData.name || !formData.email || !formData.client_id) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -54,47 +79,40 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const newVendor = {
-        id: `v${Date.now()}`,
-        name: formData.name,
+      const vendorData = {
+        business_name: formData.name,
         email: formData.email,
-        phone: formData.phone || 'Not provided',
-        location: formData.location || 'Not specified',
-        client: formData.client,
-        status: 'Pending',
-        services: formData.services,
-
-        totalJobs: 0,
-        revenue: '$0',
-        joinDate: new Date().toISOString().split('T')[0],
-        lastActive: new Date().toISOString().split('T')[0],
-        description: formData.description,
-        businessType: formData.businessType,
-        experience: formData.experience
+        phone: formData.phone,
+        location: formData.location,
+        client_id: parseInt(formData.client_id),
+        description: formData.description
       };
 
-      onAdd(newVendor);
-      toast.success(`Vendor "${formData.name}" has been added successfully!`);
-      
+      const response = await AdminAPI.createVendor(vendorData);
+
+      if (response.error) {
+        showError(response.message || 'Failed to create vendor');
+        return;
+      }
+
+      showSuccess(`Vendor "${formData.name}" has been added successfully!`);
+
       // Reset form
       setFormData({
         name: '',
         email: '',
         phone: '',
         location: '',
-        client: '',
-        services: '',
-        description: '',
-        businessType: '',
-        experience: ''
+        client_id: '',
+        description: ''
       });
-      
+
+      // Notify parent component to refresh data
+      onAdd(response.vendor);
       onClose();
     } catch (error) {
-      toast.error("Failed to add vendor. Please try again.");
+      console.error('Error creating vendor:', error);
+      showError("Failed to add vendor. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -107,11 +125,8 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
         email: '',
         phone: '',
         location: '',
-        client: '',
-        services: '',
-        description: '',
-        businessType: '',
-        experience: ''
+        client_id: '',
+        description: ''
       });
       onClose();
     }
@@ -149,22 +164,26 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
 
             {/* Client Assignment */}
             <div className="space-y-2">
-              <Label htmlFor="client" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="client_id" className="text-sm font-medium text-gray-700">
                 Assign to Client *
               </Label>
-              <Select value={formData.client} onValueChange={(value) => handleInputChange('client', value)}>
+              <Select value={formData.client_id} onValueChange={(value) => handleInputChange('client_id', value)}>
                 <SelectTrigger className="border-gray-200 focus:border-purple-500 focus:ring-purple-500">
                   <div className="flex items-center gap-2">
                     <Building className="h-4 w-4 text-gray-400" />
-                    <SelectValue placeholder="Select client" />
+                    {isLoadingClients ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <SelectValue placeholder="Select client" />
+                    )}
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="TechCorp Solutions">TechCorp Solutions</SelectItem>
-                  <SelectItem value="HomeServices Pro">HomeServices Pro</SelectItem>
-                  <SelectItem value="Local Connect">Local Connect</SelectItem>
-                  <SelectItem value="ServiceHub Inc">ServiceHub Inc</SelectItem>
-                  <SelectItem value="QuickFix Network">QuickFix Network</SelectItem>
+                  {availableClients.map(client => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.company_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -222,60 +241,6 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
               </div>
             </div>
 
-            {/* Business Type */}
-            <div className="space-y-2">
-              <Label htmlFor="businessType" className="text-sm font-medium text-gray-700">
-                Business Type
-              </Label>
-              <Select value={formData.businessType} onValueChange={(value) => handleInputChange('businessType', value)}>
-                <SelectTrigger className="border-gray-200 focus:border-purple-500 focus:ring-purple-500">
-                  <SelectValue placeholder="Select business type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Individual">Individual Contractor</SelectItem>
-                  <SelectItem value="Small Business">Small Business</SelectItem>
-                  <SelectItem value="Corporation">Corporation</SelectItem>
-                  <SelectItem value="Partnership">Partnership</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Services */}
-          <div className="space-y-2">
-            <Label htmlFor="services" className="text-sm font-medium text-gray-700">
-              Services Offered *
-            </Label>
-            <Input
-              id="services"
-              value={formData.services}
-              onChange={(e) => handleInputChange('services', e.target.value)}
-              placeholder="e.g., Plumbing, Emergency Repairs, Installation"
-              className="border-gray-200 focus:border-purple-500 focus:ring-purple-500"
-              required
-            />
-          </div>
-
-          {/* Experience */}
-          <div className="space-y-2">
-            <Label htmlFor="experience" className="text-sm font-medium text-gray-700">
-              Years of Experience
-            </Label>
-            <Select value={formData.experience} onValueChange={(value) => handleInputChange('experience', value)}>
-              <SelectTrigger className="border-gray-200 focus:border-purple-500 focus:ring-purple-500">
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-gray-400" />
-                  <SelectValue placeholder="Select experience level" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0-1">0-1 years</SelectItem>
-                <SelectItem value="2-5">2-5 years</SelectItem>
-                <SelectItem value="6-10">6-10 years</SelectItem>
-                <SelectItem value="11-15">11-15 years</SelectItem>
-                <SelectItem value="15+">15+ years</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Description */}
@@ -307,7 +272,14 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({ isOpen, onClose,
               disabled={isSubmitting}
               className="bg-purple-600 hover:bg-purple-700"
             >
-              {isSubmitting ? "Adding Vendor..." : "Add Vendor"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding Vendor...
+                </>
+              ) : (
+                "Add Vendor"
+              )}
             </Button>
           </DialogFooter>
         </form>

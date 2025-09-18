@@ -316,7 +316,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ isOpen, onCl
                   <SelectItem value="none">No vendor assignment</SelectItem>
                   {availableVendors.map(vendor => (
                     <SelectItem key={vendor.id} value={vendor.id.toString()}>
-                      {vendor.business_name}
+                      {vendor.name || vendor.business_name}
                     </SelectItem>
                   ))}
                 </SelectContent>

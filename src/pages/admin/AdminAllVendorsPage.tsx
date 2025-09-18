@@ -131,6 +131,8 @@ const getStatusVariant = (status: string) => {
       return "secondary";
     case "Suspended":
       return "destructive";
+    case "Terminated":
+      return "destructive";
     default:
       return "outline";
   }
@@ -147,7 +149,7 @@ const AdminAllVendorsPage = () => {
     current_page: 1,
     total_pages: 1,
     total_count: 0,
-    per_page: 20
+    per_page: 50 // Increased from 20 to 50
   });
 
   const [serviceFilter, setServiceFilter] = useState("all");
@@ -223,12 +225,44 @@ const AdminAllVendorsPage = () => {
     // In a real app, this would make an API call to approve the vendor
   };
 
+  const handleUnsuspendVendor = async (vendor: any) => {
+    try {
+      const response = await AdminAPI.unsuspendVendor(vendor.id, 'Unsuspended by admin');
+      if (response.error) {
+        showError(response.message || 'Failed to unsuspend vendor');
+      } else {
+        showSuccess(`${vendor.business_name || vendor.name} has been unsuspended successfully`);
+        fetchVendors(); // Refresh the list
+      }
+    } catch (error: any) {
+      console.error('Error unsuspending vendor:', error);
+      showError(error.response?.data?.message || 'Failed to unsuspend vendor');
+    }
+  };
+
+  const handleTerminateVendor = async (vendor: any) => {
+    try {
+      const response = await AdminAPI.terminateVendor(vendor.id, 'Terminated by admin');
+      if (response.error) {
+        showError(response.message || 'Failed to terminate vendor');
+      } else {
+        showSuccess(`${vendor.business_name || vendor.name} has been terminated successfully`);
+        fetchVendors(); // Refresh the list
+      }
+    } catch (error: any) {
+      console.error('Error terminating vendor:', error);
+      showError(error.response?.data?.message || 'Failed to terminate vendor');
+    }
+  };
+
   const handleAddNewVendor = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleAddVendor = (newVendor: any) => {
-    setVendors(prev => [...prev, newVendor]);
+  const handleAddVendor = async (newVendor: any) => {
+    // Refresh the vendors list from the server to get the most up-to-date data
+    await fetchVendors();
+    setIsAddModalOpen(false);
   };
 
   const handleUpdateVendor = (updatedVendor: any) => {
@@ -429,6 +463,7 @@ const AdminAllVendorsPage = () => {
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="terminated">Terminated</SelectItem>
                   </SelectContent>
                 </Select>
                 {/* <Select value={clientFilter} onValueChange={setClientFilter}>
@@ -622,19 +657,39 @@ const AdminAllVendorsPage = () => {
                               Edit Vendor
                             </DropdownMenuItem>
                             {vendor.status === 'Pending' && (
-                              <DropdownMenuItem onClick={() => handleApproveVendor(vendor.name)}>
+                              <DropdownMenuItem onClick={() => handleApproveVendor(vendor.business_name || vendor.name)}>
                                 <CheckCircle className="mr-2 h-4 w-4" />
                                 Approve
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleSuspendVendor(vendor)}
-                              className="text-red-600 focus:text-red-600"
-                            >
-                              <Ban className="mr-2 h-4 w-4" />
-                              Suspend Vendor
-                            </DropdownMenuItem>
+                            {vendor.status === 'Active' && (
+                              <DropdownMenuItem
+                                onClick={() => handleSuspendVendor(vendor)}
+                                className="text-orange-600 focus:text-orange-600"
+                              >
+                                <Ban className="mr-2 h-4 w-4" />
+                                Suspend Vendor
+                              </DropdownMenuItem>
+                            )}
+                            {vendor.status === 'Suspended' && (
+                              <DropdownMenuItem
+                                onClick={() => handleUnsuspendVendor(vendor)}
+                                className="text-green-600 focus:text-green-600"
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Unsuspend Vendor
+                              </DropdownMenuItem>
+                            )}
+                            {(vendor.status === 'Active' || vendor.status === 'Suspended') && (
+                              <DropdownMenuItem
+                                onClick={() => handleTerminateVendor(vendor)}
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <X className="mr-2 h-4 w-4" />
+                                Terminate Vendor
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -649,19 +704,45 @@ const AdminAllVendorsPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <p className="text-sm text-gray-600">
-              Showing {filteredVendors.length} of {pagination.total_count} vendors
+              Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total_count)} of {pagination.total_count} vendors
               {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") &&
                 <span className="text-purple-600 font-medium"> (filtered)</span>
               }
             </p>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm" disabled>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page <= 1}
+                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page - 1 }))}
+              >
                 Previous
               </Button>
-              <Button variant="outline" size="sm" className="bg-purple-600 text-white hover:bg-purple-700">
-                1
-              </Button>
-              <Button variant="outline" size="sm" disabled>
+
+              {/* Page numbers */}
+              {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                const pageNum = Math.max(1, pagination.current_page - 2) + i;
+                if (pageNum > pagination.total_pages) return null;
+
+                return (
+                  <Button
+                    key={pageNum}
+                    variant="outline"
+                    size="sm"
+                    className={pageNum === pagination.current_page ? "bg-purple-600 text-white hover:bg-purple-700" : ""}
+                    onClick={() => setPagination(prev => ({ ...prev, current_page: pageNum }))}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page >= pagination.total_pages}
+                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page + 1 }))}
+              >
                 Next
               </Button>
             </div>

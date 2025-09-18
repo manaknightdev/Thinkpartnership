@@ -337,6 +337,24 @@ class AdminAPI {
     return response.data;
   }
 
+  async createVendor(data: {
+    business_name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    client_id: number;
+    description?: string;
+  }): Promise<{
+    error: boolean;
+    message: string;
+    vendor?: any;
+  }> {
+    const response = await adminApiClient.post(API_CONFIG.ENDPOINTS.ADMIN_VENDORS.LIST, data);
+    return response.data;
+  }
+
+
+
   // Customer Management Methods
   async getAllCustomers(params?: {
     page?: number;
@@ -719,8 +737,13 @@ class AdminAPI {
     return response.data;
   }
 
-  async unsuspendVendor(vendorId: number): Promise<ApiResponse> {
-    const response = await adminApiClient.put(`/api/marketplace/admin/vendors/${vendorId}/unsuspend`);
+  async unsuspendVendor(vendorId: number, reason?: string): Promise<ApiResponse> {
+    const response = await adminApiClient.post(`/api/marketplace/admin/vendors/${vendorId}/unsuspend`, { reason });
+    return response.data;
+  }
+
+  async terminateVendor(vendorId: number, reason?: string): Promise<ApiResponse> {
+    const response = await adminApiClient.post(`/api/marketplace/admin/vendors/${vendorId}/terminate`, { reason });
     return response.data;
   }
 
