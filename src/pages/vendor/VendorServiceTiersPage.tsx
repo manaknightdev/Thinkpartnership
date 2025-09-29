@@ -187,8 +187,18 @@ const VendorServiceTiersPage = () => {
   };
 
   const handleAddTier = async () => {
-    // NEW SYSTEM: No subscription check required - services can always be created
-    // Use paid promotion to feature services instead
+    // Check subscription limit first
+    const limitCheck = await VendorSubscriptionAPI.checkServiceLimit();
+    if (limitCheck.error || !limitCheck.data?.can_add) {
+      const errorMessage = limitCheck.message || "You've reached your service limit. Please upgrade your subscription plan.";
+      toast.error(errorMessage, { 
+        duration: 8000,
+        description: "Please visit the Subscription Plans page to upgrade your plan.",
+        position: "top-center"
+      });
+      setIsAddModalOpen(false); // Close the modal
+      return;
+    }
 
     // Validate required fields
     if (!newTier.tier_name.trim()) {

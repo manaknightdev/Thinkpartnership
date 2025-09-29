@@ -52,7 +52,6 @@ import ClientMarketplaceOrdersPage from "./pages/client/ClientMarketplaceOrdersP
 import ClientTasksPage from "./pages/client/ClientTasksPage";
 import ClientCategoriesPage from "./pages/client/ClientCategoriesPage"; // New import
 import ClientServiceApprovalsPage from "./pages/client/ClientServiceApprovalsPage";
-import ClientPaidPromotionApprovalsPage from "./pages/client/ClientPaidPromotionApprovalsPage";
 
 // Import new customer sub-pages
 import CustomerBrowseServicesPage from "./pages/customer/CustomerBrowseServicesPage";
@@ -248,7 +247,6 @@ const App = () => (
             <Route path="branding" element={<ClientBrandingPage />} />
             <Route path="categories" element={<ClientCategoriesPage />} /> {/* New route */}
             <Route path="service-approvals" element={<ClientServiceApprovalsPage />} /> {/* New route */}
-            <Route path="promotion-approvals" element={<ClientPaidPromotionApprovalsPage />} /> {/* New route */}
             <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
           </Route>
 

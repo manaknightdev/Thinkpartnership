@@ -585,17 +585,6 @@ class ClientAPI {
     const response = await clientApiClient.post(`/api/marketplace/client/services/${serviceId}/review`, data);
     return response.data;
   }
-
-  // Paid Promotion Approval Methods
-  async getPendingPromotions(): Promise<any> {
-    const response = await clientApiClient.get('/api/marketplace/client/paid-promotion/pending');
-    return response.data;
-  }
-
-  async reviewPromotion(promotionId: number, data: { action: 'approve' | 'reject'; comments?: string }): Promise<any> {
-    const response = await clientApiClient.post(`/api/marketplace/client/paid-promotion/${promotionId}/review`, data);
-    return response.data;
-  }
 }
 
 export default new ClientAPI();

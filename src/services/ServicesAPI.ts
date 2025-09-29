@@ -38,7 +38,6 @@ export interface Service {
   category_tags: string[];
   images: string[];
   image: string;
-  is_promoted?: boolean;
 }
 
 export interface ServiceDetails extends Service {
