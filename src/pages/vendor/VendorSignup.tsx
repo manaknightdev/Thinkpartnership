@@ -176,7 +176,7 @@ const VendorSignup = () => {
             )}
 
             {/* Referral Info Display */}
-            {referralInfo.isReferral && (
+            {/* {referralInfo.isReferral && (
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
@@ -187,7 +187,7 @@ const VendorSignup = () => {
                   )}
                 </AlertDescription>
               </Alert>
-            )}
+            )} */}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Business Information */}

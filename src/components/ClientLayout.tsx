@@ -28,6 +28,7 @@ import {
   ArrowLeft,
   Shield,
   Tag,
+  TrendingUp,
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -80,6 +81,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     { name: "Marketplace Orders", path: "/client-portal/orders", icon: ListOrdered, exact: false },
     { name: "Manage Vendors", path: "/client-portal/vendors", icon: Users, exact: false },
     { name: "Service Approvals", path: "/client-portal/service-approvals", icon: CheckSquare, exact: false },
+    { name: "Promotion Approvals", path: "/client-portal/promotion-approvals", icon: TrendingUp, exact: false },
     { name: "All Customers", path: "/client-portal/customers", icon: User, exact: false },
     { name: "Invite System", path: "/client-portal/invites", icon: UserPlus, exact: false },
     { name: "Service Categories", path: "/client-portal/categories", icon: Tag, exact: false },

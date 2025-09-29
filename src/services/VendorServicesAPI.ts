@@ -25,6 +25,8 @@ export interface VendorService {
   status: number;
   created_at: string;
   updated_at: string;
+  is_promoted?: boolean;
+  promotion_status?: 'pending' | 'approved' | 'active' | 'expired' | 'rejected';
 }
 
 export interface PricingTier {

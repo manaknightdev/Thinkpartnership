@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Edit, Trash2, Image as ImageIcon, List, Grid3X3, Loader2, Upload, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import PromotionBadge from "@/components/PromotionBadge";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -662,14 +663,26 @@ const VendorServicesPage = () => {
                       <ImageIcon className="h-12 w-12 text-gray-400" />
                     </div>
                   )}
+
+                  {/* Promotion Badge */}
+                  {service.is_promoted && (
+                    <div className="absolute top-2 right-2">
+                      <PromotionBadge variant="promoted" size="sm" />
+                    </div>
+                  )}
                 </div>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg line-clamp-1">{service.title}</CardTitle>
                       <p className="text-sm text-gray-600 mt-1">{service.short_description}</p>
-                      <div className="mt-2">
+                      <div className="mt-2 space-y-1">
                         {getStatusBadge(service.status)}
+                        {service.promotion_status && (
+                          <div className="text-xs text-gray-500">
+                            Promotion: <span className="font-medium capitalize">{service.promotion_status}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
@@ -722,6 +735,13 @@ const VendorServicesPage = () => {
                           <ImageIcon className="h-8 w-8 text-gray-400" />
                         </div>
                       )}
+
+                      {/* Promotion Badge */}
+                      {service.is_promoted && (
+                        <div className="absolute top-1 right-1">
+                          <PromotionBadge variant="promoted" size="sm" />
+                        </div>
+                      )}
                     </div>
 
                     {/* Service Info */}
@@ -730,8 +750,13 @@ const VendorServicesPage = () => {
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{service.title}</h3>
                           <p className="text-sm text-gray-600">{service.short_description}</p>
-                          <div className="mt-2">
+                          <div className="mt-2 space-y-1">
                             {getStatusBadge(service.status)}
+                            {service.promotion_status && (
+                              <div className="text-xs text-gray-500">
+                                Promotion: <span className="font-medium capitalize">{service.promotion_status}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

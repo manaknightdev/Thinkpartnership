@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { MarketplaceLayout } from "@/components/MarketplaceLayout";
+import PromotionBadge from "@/components/PromotionBadge";
 import ServicesAPI, { Service, Category } from "@/services/ServicesAPI";
 import API_CONFIG from "@/config/api";
 import { useMarketplaceBranding } from "@/hooks/useMarketplaceBranding";
@@ -298,6 +299,13 @@ const CustomerBrowseServicesPage = () => {
                     alt={service.title}
                     className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
                   />
+
+                  {/* Promotion Badge */}
+                  {service.is_promoted && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <PromotionBadge variant="promoted" size="sm" />
+                    </div>
+                  )}
 
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
