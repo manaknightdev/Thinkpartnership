@@ -138,19 +138,8 @@ const VendorServicesPage = () => {
       setIsCreating(true);
       setError("");
 
-      // Check subscription limit first
-      const limitCheck = await VendorSubscriptionAPI.checkServiceLimit();
-      if (limitCheck.error || !limitCheck.data?.can_add) {
-        const errorMessage = limitCheck.message || "You've reached your service limit. Please upgrade your subscription plan.";
-        setError(errorMessage);
-        toast.error(errorMessage, { 
-          duration: 8000,
-          description: "Please visit the Subscription Plans page to upgrade your plan.",
-          position: "top-center"
-        });
-        setShowCreateDialog(false); // Close the modal
-        return;
-      }
+      // NEW SYSTEM: No subscription check required - services can always be created
+      // Use paid promotion to feature services instead
 
       // Validate required fields including image
       if (!newService.title || !newService.description || !newService.category_id || !newService.base_price) {
