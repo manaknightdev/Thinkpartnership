@@ -1,13 +1,19 @@
 // Date formatting utility for consistent date display across the platform
 // Format: "Month Day, Year" (e.g., "January 15, 2024")
 
-export const formatDate = (dateString: string | Date): string => {
+export const formatDate = (dateString: string | Date | null | undefined): string => {
+  // Handle null, undefined, or empty string
+  if (!dateString) {
+    return 'N/A';
+  }
+
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  
-  if (isNaN(date.getTime())) {
+
+  // Check if date is valid
+  if (!date || isNaN(date.getTime())) {
     return 'Invalid Date';
   }
-  
+
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -15,13 +21,19 @@ export const formatDate = (dateString: string | Date): string => {
   });
 };
 
-export const formatDateTime = (dateString: string | Date): string => {
+export const formatDateTime = (dateString: string | Date | null | undefined): string => {
+  // Handle null, undefined, or empty string
+  if (!dateString) {
+    return 'N/A';
+  }
+
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  
-  if (isNaN(date.getTime())) {
+
+  // Check if date is valid
+  if (!date || isNaN(date.getTime())) {
     return 'Invalid Date';
   }
-  
+
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -31,13 +43,19 @@ export const formatDateTime = (dateString: string | Date): string => {
   });
 };
 
-export const formatDateShort = (dateString: string | Date): string => {
+export const formatDateShort = (dateString: string | Date | null | undefined): string => {
+  // Handle null, undefined, or empty string
+  if (!dateString) {
+    return 'N/A';
+  }
+
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  
-  if (isNaN(date.getTime())) {
+
+  // Check if date is valid
+  if (!date || isNaN(date.getTime())) {
     return 'Invalid Date';
   }
-  
+
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',

@@ -214,7 +214,7 @@ const CustomerOrdersPage = () => {
               <DialogHeader>
                 <DialogTitle>Order Details: {selectedOrder.id}</DialogTitle>
                 <DialogDescription>
-                  Information for your service order placed on {formatDate(selectedOrder.date)}.
+                  Information for your service order placed on {formatDate(selectedOrder.order_date)}.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
