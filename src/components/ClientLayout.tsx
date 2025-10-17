@@ -45,7 +45,7 @@ const getFullImageUrl = (url: string): string => {
     // Use local development server for development, production server for production
     const baseUrl = import.meta.env.DEV
       ? 'http://localhost:5172'
-      : 'https://baas.mytechpassport.com';
+      : import.meta.env.VITE_BASE_URL;
     return `${baseUrl}${url}`;
   }
   return url;

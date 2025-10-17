@@ -10,7 +10,7 @@ const getBaseUrl = () => {
     return 'http://localhost:5172';
   }
 
-  return 'https://baas.mytechpassport.com';
+  return import.meta.env.VITE_BASE_URL;
 };
 
 export const API_CONFIG = {

@@ -138,7 +138,7 @@ const CustomerSignup = () => {
   const handleSocialLogin = (provider: string) => {
     // Get the current client context
     const currentClientSlug = clientSlug || client?.id?.toString();
-    const baseUrl = 'https://baas.mytechpassport.com';
+    const baseUrl = import.meta.env.VITE_BASE_URL;
 
     // Construct the social login URL based on the backend API endpoints
     let socialLoginUrl = '';
