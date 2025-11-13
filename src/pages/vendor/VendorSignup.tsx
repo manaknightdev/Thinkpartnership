@@ -141,7 +141,7 @@ const VendorSignup = () => {
       // Store auth data
       VendorAuthAPI.storeAuthData(response);
 
-      showSuccess('Welcome to ThinkPartnership! Your vendor account has been created successfully.');
+      showSuccess('Welcome to Real PartnersOS! Your vendor account has been created successfully.');
 
       // Redirect to vendor portal
       navigate('/vendor-portal');

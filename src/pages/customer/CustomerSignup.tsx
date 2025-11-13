@@ -266,7 +266,7 @@ const CustomerSignup = () => {
             </div>
           )}
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {client?.company_name || 'ThinkPartnership'}
+            {client?.company_name || 'Real PartnersOS'}
           </h1>
           <p className="text-gray-600">Join our marketplace community</p>
           {referralInfo.isReferral && (

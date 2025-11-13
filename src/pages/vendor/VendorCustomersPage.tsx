@@ -174,7 +174,7 @@ const VendorCustomersPage = () => {
   };
 
   const shareCustomer = (customer: VendorCustomer) => {
-    const shareText = `Check out ${customer.customer_name} - one of my valued customers on ThinkPartnership!`;
+    const shareText = `Check out ${customer.customer_name} - one of my valued customers on Real PartnersOS!`;
     if (navigator.share) {
       navigator.share({
         title: "Customer Referral",

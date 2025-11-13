@@ -86,7 +86,7 @@ const ClientSignup = () => {
       // Store auth data
       ClientAPI.storeAuthData(response);
 
-      showSuccess('Welcome to ThinkPartnership! Your client account has been created successfully.');
+      showSuccess('Welcome to Real PartnersOS! Your client account has been created successfully.');
 
       // Redirect to client portal
       navigate('/client-portal');
