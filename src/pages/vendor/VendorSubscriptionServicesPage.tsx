@@ -18,11 +18,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
-import VendorSubscriptionServicesAPI, { 
+import VendorSubscriptionServicesAPI, {
   VendorSubscriptionServicesAPI as VendorSubscriptionServicesAPIClass,
-  SubscriptionService, 
-  CreateSubscriptionServiceData, 
-  UpdateSubscriptionServiceData 
+  SubscriptionService,
+  CreateSubscriptionServiceData,
+  UpdateSubscriptionServiceData
 } from "@/services/VendorSubscriptionServicesAPI";
 import VendorSubscriptionAPI from "@/services/VendorSubscriptionAPI";
 import { showSuccess, showError } from "@/utils/toast";
@@ -152,6 +152,18 @@ const VendorSubscriptionServicesPage = () => {
         return;
       }
 
+      if (newService.base_price < 0) {
+        setError("Price cannot be negative");
+        showError("Price cannot be negative");
+        return;
+      }
+
+      if (newService.referral_percentage < 0) {
+        setError("Referral percentage cannot be negative");
+        showError("Referral percentage cannot be negative");
+        return;
+      }
+
       if (!selectedImage) {
         setError("Please upload a service image");
         showError("Please upload a service image");
@@ -212,6 +224,18 @@ const VendorSubscriptionServicesPage = () => {
     try {
       setIsUpdating(true);
       setError("");
+
+      if (newService.base_price < 0) {
+        setError("Price cannot be negative");
+        showError("Price cannot be negative");
+        return;
+      }
+
+      if (newService.referral_percentage < 0) {
+        setError("Referral percentage cannot be negative");
+        showError("Referral percentage cannot be negative");
+        return;
+      }
 
       const updateData: UpdateSubscriptionServiceData = {
         title: newService.title,
@@ -443,6 +467,7 @@ const VendorSubscriptionServicesPage = () => {
               size="sm"
               onClick={() => setViewMode("grid")}
               className="h-8 px-3"
+              aria-label="Grid view"
             >
               <Grid3X3 className="h-4 w-4" />
             </Button>
@@ -451,6 +476,7 @@ const VendorSubscriptionServicesPage = () => {
               size="sm"
               onClick={() => setViewMode("list")}
               className="h-8 px-3"
+              aria-label="List view"
             >
               <List className="h-4 w-4" />
             </Button>
@@ -610,6 +636,7 @@ const VendorSubscriptionServicesPage = () => {
                         size="sm"
                         className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
                         onClick={removeImage}
+                        aria-label="Remove image"
                       >
                         <X className="h-3 w-3" />
                       </Button>
@@ -728,6 +755,7 @@ const VendorSubscriptionServicesPage = () => {
                       variant="outline"
                       size="sm"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      aria-label="Delete service"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -806,6 +834,7 @@ const VendorSubscriptionServicesPage = () => {
                             variant="outline"
                             size="sm"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            aria-label="Delete service"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -818,7 +847,7 @@ const VendorSubscriptionServicesPage = () => {
             ))}
           </div>
         )
-        ) : (
+      ) : (
         <Card className="text-center py-12">
           <CardContent>
             <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -830,7 +859,7 @@ const VendorSubscriptionServicesPage = () => {
             </Button>
           </CardContent>
         </Card>
-        )}
+      )}
 
       {/* Pagination Controls */}
       {services.length > 0 && pagination.pages > 1 && (
@@ -970,6 +999,7 @@ const VendorSubscriptionServicesPage = () => {
                     size="sm"
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
                     onClick={removeExistingImage}
+                    aria-label="Remove current image"
                   >
                     <X className="h-3 w-3" />
                   </Button>
@@ -1021,6 +1051,7 @@ const VendorSubscriptionServicesPage = () => {
                     size="sm"
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
                     onClick={removeImage}
+                    aria-label="Remove new image"
                   >
                     <X className="h-3 w-3" />
                   </Button>

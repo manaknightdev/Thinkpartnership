@@ -79,7 +79,7 @@ const ClientLogin = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         {/* Back to Home */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <Link
             to="/"
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -87,7 +87,7 @@ const ClientLogin = () => {
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Home
           </Link>
-        </div>
+        </div> */}
 
         <Card className="shadow-lg">
           <CardHeader className="space-y-1 text-center">

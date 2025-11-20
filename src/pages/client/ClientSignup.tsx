@@ -101,7 +101,7 @@ const ClientSignup = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         {/* Back to Home */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <Link 
             to="/" 
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -109,7 +109,7 @@ const ClientSignup = () => {
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Home
           </Link>
-        </div>
+        </div> */}
 
         <Card className="shadow-lg">
           <CardHeader className="space-y-1 text-center">
@@ -134,7 +134,7 @@ const ClientSignup = () => {
               {/* Company Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Company Information</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="company_name">Company Name *</Label>
@@ -217,7 +217,7 @@ const ClientSignup = () => {
               {/* Business Address */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Business Address</h3>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="business_address">Street Address *</Label>
                   <Input
@@ -276,7 +276,7 @@ const ClientSignup = () => {
               {/* Account Security */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Account Security</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="password">Password *</Label>
@@ -374,8 +374,8 @@ const ClientSignup = () => {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-11 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-medium"
                 disabled={isLoading}
               >

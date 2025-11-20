@@ -101,7 +101,7 @@ const AdminReportsPage = () => {
         </div>
         <div className="flex space-x-3 mt-4 sm:mt-0">
           <Select defaultValue="monthly">
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40" aria-label="Select Report Period">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
             <SelectContent>
@@ -129,7 +129,7 @@ const AdminReportsPage = () => {
                 <p className="text-2xl font-bold text-gray-900">${totalRevenue.toLocaleString()}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-green-600" />
+                <DollarSign className="h-6 w-6 text-green-700" />
               </div>
             </div>
           </CardContent>
@@ -238,10 +238,10 @@ const AdminReportsPage = () => {
               <Line
                 type="monotone"
                 dataKey="platformRevenue"
-                stroke="#059669"
+                stroke="#047857"
                 strokeWidth={3}
                 name="Platform Share ($)"
-                dot={{ fill: '#059669', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#047857', strokeWidth: 2, r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>

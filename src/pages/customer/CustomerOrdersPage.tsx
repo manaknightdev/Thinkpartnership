@@ -125,9 +125,9 @@ const CustomerOrdersPage = () => {
 
   return (
     <MarketplaceLayout>
-      <div className="p-6">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">My Orders</h2>
-        <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
+      <div className="p-4 sm:p-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">My Orders</h2>
+        <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8">
           Here you can view the history and status of all services you've ordered through the marketplace.
         </p>
 
@@ -136,50 +136,52 @@ const CustomerOrdersPage = () => {
             <CardTitle>Order History</CardTitle>
             <CardDescription>A list of all your past and pending service requests.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {orders.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Order ID</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Vendor</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((order) => (
-                      <TableRow
-                        key={order.id}
-                        onClick={() => handleViewOrderDetails(order)}
-                        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <TableCell className="font-medium">{order.id}</TableCell>
-                        <TableCell>{order.service_name}</TableCell>
-                        <TableCell>{order.vendor_name}</TableCell>
-                        <TableCell>{formatDate(order.order_date)}</TableCell>
-                        <TableCell>
-                          <Badge variant={getOrderStatusVariant(order.status)} className="capitalize">{order.status}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">${(order.amount || 0).toFixed(2)}</TableCell>
+              <div className="overflow-x-auto px-4 sm:px-6 pb-6">
+                <div className="min-w-full inline-block align-middle">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="whitespace-nowrap">Order ID</TableHead>
+                        <TableHead className="whitespace-nowrap">Service</TableHead>
+                        <TableHead className="whitespace-nowrap">Vendor</TableHead>
+                        <TableHead className="whitespace-nowrap">Date</TableHead>
+                        <TableHead className="whitespace-nowrap">Status</TableHead>
+                        <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {orders.map((order) => (
+                        <TableRow
+                          key={order.id}
+                          onClick={() => handleViewOrderDetails(order)}
+                          className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <TableCell className="font-medium whitespace-nowrap">{order.id}</TableCell>
+                          <TableCell className="whitespace-nowrap">{order.service_name}</TableCell>
+                          <TableCell className="whitespace-nowrap">{order.vendor_name}</TableCell>
+                          <TableCell className="whitespace-nowrap">{formatDate(order.order_date)}</TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <Badge variant={getOrderStatusVariant(order.status)} className="capitalize">{order.status}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right whitespace-nowrap">${(order.amount || 0).toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             ) : (
-              <p className="text-gray-600 dark:text-gray-400">You haven't placed any orders yet.</p>
+              <p className="text-gray-600 dark:text-gray-400 px-6 pb-6">You haven't placed any orders yet.</p>
             )}
           </CardContent>
         </Card>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+            <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
               Showing {((currentPage - 1) * ordersPerPage) + 1}-{Math.min(currentPage * ordersPerPage, totalOrders)} of {totalOrders} orders
             </div>
             <div className="flex items-center space-x-2">
@@ -188,11 +190,12 @@ const CustomerOrdersPage = () => {
                 size="sm"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
+                className="text-xs sm:text-sm"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Previous
+                <span className="hidden sm:inline">Previous</span>
               </Button>
-              <span className="text-sm text-gray-600">
+              <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                 Page {currentPage} of {totalPages}
               </span>
               <Button
@@ -200,8 +203,9 @@ const CustomerOrdersPage = () => {
                 size="sm"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
+                className="text-xs sm:text-sm"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

@@ -53,7 +53,7 @@ const AdminDashboardOverviewPage = () => {
 
         // Transform revenue analytics data for chart after both API calls complete
         if (!statsResponse.error && !revenueResponse.error &&
-            revenueResponse.revenue_data && Array.isArray(revenueResponse.revenue_data)) {
+          revenueResponse.revenue_data && Array.isArray(revenueResponse.revenue_data)) {
           const transformedData = revenueResponse.revenue_data.map((item, index) => ({
             name: new Date(item.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
             revenue: parseFloat(item.total_revenue || '0'),
@@ -193,7 +193,7 @@ const AdminDashboardOverviewPage = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
             <div className="p-2 bg-green-100 rounded-lg">
-              <DollarSign className="h-4 w-4 text-green-600" />
+              <DollarSign className="h-4 w-4 text-green-700" />
             </div>
           </CardHeader>
           <CardContent>
@@ -212,8 +212,8 @@ const AdminDashboardOverviewPage = () => {
                     }) : '0.00'}
                 </div>
                 <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">
+                  <ArrowUpRight className="h-3 w-3 text-green-700 mr-1" />
+                  <p className="text-xs text-green-700 font-medium">
                     +0.0% from last month
                   </p>
                 </div>
@@ -239,8 +239,8 @@ const AdminDashboardOverviewPage = () => {
               <>
                 <div className="text-2xl font-bold text-gray-900">{dashboardStats?.active_vendors || 0}</div>
                 <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">+0.0% growth this quarter</p>
+                  <ArrowUpRight className="h-3 w-3 text-green-700 mr-1" />
+                  <p className="text-xs text-green-700 font-medium">+0.0% growth this quarter</p>
                 </div>
               </>
             )}
@@ -264,8 +264,8 @@ const AdminDashboardOverviewPage = () => {
               <>
                 <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_clients || 0}</div>
                 <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">+0.0% growth this quarter</p>
+                  <ArrowUpRight className="h-3 w-3 text-green-700 mr-1" />
+                  <p className="text-xs text-green-700 font-medium">+0.0% growth this quarter</p>
                 </div>
               </>
             )}
@@ -289,8 +289,8 @@ const AdminDashboardOverviewPage = () => {
               <>
                 <div className="text-2xl font-bold text-gray-900">{dashboardStats?.total_customers || 0}</div>
                 <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">+0.0% from last month</p>
+                  <ArrowUpRight className="h-3 w-3 text-green-700 mr-1" />
+                  <p className="text-xs text-green-700 font-medium">+0.0% from last month</p>
                 </div>
               </>
             )}
@@ -314,8 +314,8 @@ const AdminDashboardOverviewPage = () => {
               <>
                 <div className="text-2xl font-bold text-gray-900">{dashboardStats?.pending_orders || 0}</div>
                 <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <p className="text-xs text-green-600 font-medium">+0.0% order growth</p>
+                  <ArrowUpRight className="h-3 w-3 text-green-700 mr-1" />
+                  <p className="text-xs text-green-700 font-medium">+0.0% order growth</p>
                 </div>
               </>
             )}
@@ -357,51 +357,51 @@ const AdminDashboardOverviewPage = () => {
                   bottom: 5,
                 }}
               >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="name"
-                stroke="#6b7280"
-                fontSize={12}
-              />
-              <YAxis
-                stroke="#6b7280"
-                fontSize={12}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#7c3aed"
-                strokeWidth={3}
-                name="Revenue ($)"
-                dot={{ fill: '#7c3aed', strokeWidth: 2, r: 4 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="vendors"
-                stroke="#059669"
-                strokeWidth={3}
-                name="Vendors"
-                dot={{ fill: '#059669', strokeWidth: 2, r: 4 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="transactions"
-                stroke="#dc2626"
-                strokeWidth={3}
-                name="Transactions"
-                dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#6b7280"
+                  fontSize={12}
+                />
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={12}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#7c3aed"
+                  strokeWidth={3}
+                  name="Revenue ($)"
+                  dot={{ fill: '#7c3aed', strokeWidth: 2, r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="vendors"
+                  stroke="#059669"
+                  strokeWidth={3}
+                  name="Vendors"
+                  dot={{ fill: '#059669', strokeWidth: 2, r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="transactions"
+                  stroke="#dc2626"
+                  strokeWidth={3}
+                  name="Transactions"
+                  dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           )}
         </CardContent>
       </Card>

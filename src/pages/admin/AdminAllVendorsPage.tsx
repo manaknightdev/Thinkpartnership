@@ -325,17 +325,7 @@ const AdminAllVendorsPage = () => {
   };
 
   // Use vendors directly since filtering is done server-side via API
-  const filteredVendors = vendors.length > 0 ? vendors : mockVendors.filter(vendor => {
-    const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (vendor.services && vendor.services.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || vendor.status.toLowerCase() === statusFilter;
-    const matchesLocation = locationFilter === "all" || (vendor.location && vendor.location.toLowerCase().includes(locationFilter.toLowerCase()));
-
-    const matchesService = serviceFilter === "all" || (vendor.services && vendor.services.toLowerCase().includes(serviceFilter.toLowerCase()));
-
-    return matchesSearch && matchesStatus && matchesLocation && matchesService;
-  });
+  const filteredVendors = vendors.length > 0 ? vendors : [];
 
   // Calculate summary stats based on filtered data
   const totalVendors = filteredVendors.length;
@@ -343,383 +333,525 @@ const AdminAllVendorsPage = () => {
   const pendingVendors = filteredVendors.filter(v => v.status === "Pending").length;
   const suspendedVendors = filteredVendors.filter(v => v.status === "Suspended").length;
 
-  return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">All Vendors</h1>
-          <p className="text-gray-600 mt-2">
-            Comprehensive view of all vendors in the platform
-          </p>
-        </div>
-        <div className="flex space-x-3 mt-4 sm:mt-0">
-          <Button variant="outline" size="sm" onClick={handleAdvancedFilters}>
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
-            Advanced Filters
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportData}>
-            <Users className="h-4 w-4 mr-2" />
-            Export List
-          </Button>
-          <Button onClick={handleAddNewVendor} className="bg-purple-600 hover:bg-purple-700" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Vendor
-          </Button>
-        </div>
-      </div>
+  // Replace your return statement with this mobile-optimized version
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Vendors</p>
-                <p className="text-2xl font-bold text-gray-900">{totalVendors}</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Vendors</p>
-                <p className="text-2xl font-bold text-gray-900">{activeVendors}</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending Approval</p>
-                <p className="text-2xl font-bold text-gray-900">{pendingVendors}</p>
-              </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Suspended</p>
-                <p className="text-2xl font-bold text-gray-900">{suspendedVendors}</p>
-              </div>
-              <div className="p-3 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+return (
+  <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+    {/* Header Section */}
+    <div className="space-y-3">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Vendors</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Comprehensive view of all vendors in the platform
+        </p>
       </div>
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleAdvancedFilters}
+          className="w-full sm:w-auto"
+        >
+          <SlidersHorizontal className="h-4 w-4 mr-2" />
+          <span className="sm:inline">Filters</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleExportData}
+          className="w-full sm:w-auto"
+        >
+          <Users className="h-4 w-4 mr-2" />
+          <span className="sm:inline">Export</span>
+        </Button>
+        <Button 
+          onClick={handleAddNewVendor} 
+          className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700" 
+          size="sm"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Vendor
+        </Button>
+      </div>
+    </div>
 
-      {/* Vendors Table */}
+    {/* Summary Stats */}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
       <Card className="border-0 shadow-md">
-        <CardHeader className="pb-4">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl font-semibold text-gray-900">Vendor Directory</CardTitle>
-              <CardDescription className="text-gray-600 mt-1">
-                Complete list of all vendors across marketplaces
-              </CardDescription>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{totalVendors}</p>
+            </div>
+            <div className="p-2 sm:p-3 bg-blue-100 rounded-lg">
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-4 mb-6">
-            {/* Basic Filters */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
-              <div className="flex flex-col sm:flex-row w-full lg:w-auto space-y-2 sm:space-y-0 sm:space-x-2">
-                <div className="relative flex-grow lg:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search vendors..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
-                  />
+        </CardContent>
+      </Card>
+      
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Active</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{activeVendors}</p>
+            </div>
+            <div className="p-2 sm:p-3 bg-green-100 rounded-lg">
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{pendingVendors}</p>
+            </div>
+            <div className="p-2 sm:p-3 bg-orange-100 rounded-lg">
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Suspended</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{suspendedVendors}</p>
+            </div>
+            <div className="p-2 sm:p-3 bg-red-100 rounded-lg">
+              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    {/* Vendors Table/Cards */}
+    <Card className="border-0 shadow-md">
+      <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+        <div>
+          <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">Vendor Directory</CardTitle>
+          <CardDescription className="text-sm text-gray-600 mt-1">
+            Complete list of all vendors across marketplaces
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+          {/* Basic Filters */}
+          <div className="space-y-2 sm:space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search vendors..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                  <SelectItem value="terminated">Terminated</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") && (
+                <Button variant="outline" size="sm" onClick={clearFilters} className="px-3">
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {showAdvancedFilters && (
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-sm font-medium text-gray-900">Advanced Filters</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Location</label>
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Locations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Locations</SelectItem>
+                      <SelectItem value="new york">New York, NY</SelectItem>
+                      <SelectItem value="los angeles">Los Angeles, CA</SelectItem>
+                      <SelectItem value="chicago">Chicago, IL</SelectItem>
+                      <SelectItem value="austin">Austin, TX</SelectItem>
+                      <SelectItem value="miami">Miami, FL</SelectItem>
+                      <SelectItem value="phoenix">Phoenix, AZ</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="suspended">Suspended</SelectItem>
-                    <SelectItem value="terminated">Terminated</SelectItem>
-                  </SelectContent>
-                </Select>
-                {/* <Select value={clientFilter} onValueChange={setClientFilter}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Clients</SelectItem>
-                    <SelectItem value="techcorp">TechCorp Solutions</SelectItem>
-                    <SelectItem value="homeservices">HomeServices Pro</SelectItem>
-                    <SelectItem value="localconnect">Local Connect</SelectItem>
-                    <SelectItem value="servicehub">ServiceHub Inc</SelectItem>
-                    <SelectItem value="quickfix">QuickFix Network</SelectItem>
-                  </SelectContent>
-                </Select> */}
-                {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") && (
-                  <Button variant="outline" size="sm" onClick={clearFilters}>
-                    <X className="h-4 w-4 mr-2" />
-                    Clear
-                  </Button>
-                )}
+
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Service Type</label>
+                  <Select value={serviceFilter} onValueChange={setServiceFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Services" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Services</SelectItem>
+                      <SelectItem value="plumbing">Plumbing</SelectItem>
+                      <SelectItem value="painting">Painting</SelectItem>
+                      <SelectItem value="electrical">Electrical</SelectItem>
+                      <SelectItem value="hvac">HVAC</SelectItem>
+                      <SelectItem value="landscaping">Landscaping</SelectItem>
+                      <SelectItem value="inspection">Inspection</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-
-            {/* Advanced Filters */}
-            {showAdvancedFilters && (
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-900">Advanced Filters</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">Location</label>
-                    <Select value={locationFilter} onValueChange={setLocationFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Locations" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                        <SelectItem value="new york">New York, NY</SelectItem>
-                        <SelectItem value="los angeles">Los Angeles, CA</SelectItem>
-                        <SelectItem value="chicago">Chicago, IL</SelectItem>
-                        <SelectItem value="austin">Austin, TX</SelectItem>
-                        <SelectItem value="miami">Miami, FL</SelectItem>
-                        <SelectItem value="phoenix">Phoenix, AZ</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">Service Type</label>
-                    <Select value={serviceFilter} onValueChange={setServiceFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Services" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Services</SelectItem>
-                        <SelectItem value="plumbing">Plumbing</SelectItem>
-                        <SelectItem value="painting">Painting</SelectItem>
-                        <SelectItem value="electrical">Electrical</SelectItem>
-                        <SelectItem value="hvac">HVAC</SelectItem>
-                        <SelectItem value="landscaping">Landscaping</SelectItem>
-                        <SelectItem value="inspection">Inspection</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <div className="max-h-[600px] overflow-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-gray-50 z-10">
+          )}
+        </div>
+        
+        {/* Desktop Table View */}
+        <div className="hidden lg:block rounded-lg border border-gray-200 bg-white">
+          <div className="max-h-[600px] overflow-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-gray-50 z-10">
+                <TableRow>
+                  <TableHead className="font-semibold text-gray-900">Vendor Name</TableHead>
+                  <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
+                  <TableHead className="font-semibold text-gray-900">Client</TableHead>
+                  <TableHead className="font-semibold text-gray-900">Services</TableHead>
+                  <TableHead className="font-semibold text-gray-900">Jobs</TableHead>
+                  <TableHead className="font-semibold text-gray-900">Revenue</TableHead>
+                  <TableHead className="font-semibold text-gray-900">Status</TableHead>
+                  <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
                   <TableRow>
-                    <TableHead className="font-semibold text-gray-900">Vendor Name</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Contact Info</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Client</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Services</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Jobs</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Revenue</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="flex items-center justify-center space-x-2">
+                        <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                        <span className="text-gray-500">Loading vendors...</span>
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="flex items-center justify-center space-x-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
-                          <span className="text-gray-500">Loading vendors...</span>
+                ) : filteredVendors.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="text-gray-500">
+                        {searchTerm || statusFilter !== 'all' || locationFilter !== 'all' || serviceFilter !== 'all'
+                          ? 'No vendors found matching your filters.'
+                          : 'No vendors found.'}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredVendors.map((vendor, index) => (
+                  <TableRow
+                    key={vendor.id}
+                    className={`hover:bg-gray-50 transition-colors ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
+                    }`}
+                  >
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-gray-900">{vendor.name}</p>
+                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {vendor.location}
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : filteredVendors.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="text-gray-500">
-                          {searchTerm || statusFilter !== 'all' || locationFilter !== 'all' || serviceFilter !== 'all'
-                            ? 'No vendors found matching your filters.'
-                            : 'No vendors found.'}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredVendors.map((vendor, index) => (
-                    <TableRow
-                      key={vendor.id}
-                      className={`hover:bg-gray-50 transition-colors ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
-                      }`}
-                    >
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-gray-900">{vendor.name}</p>
-                          <div className="flex items-center text-sm text-gray-500 mt-1">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            {vendor.location}
-                          </div>
-                        </div>
-                      </TableCell>
+                      </div>
+                    </TableCell>
 
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Mail className="h-3 w-3 mr-1" />
-                            {vendor.email}
-                          </div>
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Phone className="h-3 w-3 mr-1" />
-                            {vendor.phone}
-                          </div>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Mail className="h-3 w-3 mr-1" />
+                          {vendor.email}
                         </div>
-                      </TableCell>
-
-                      {/* Client Column */}
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-gray-900 text-sm">
-                            {vendor.client_name}
-                          </p>
-                          {vendor.client_email && (
-                            <p className="text-xs text-gray-500">{vendor.client_email}</p>
-                          )}
-                          {!vendor.client_id && (
-                            <Badge variant="outline" className="mt-1 text-xs">
-                              Independent
-                            </Badge>
-                          )}
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {vendor.phone}
                         </div>
-                      </TableCell>
+                      </div>
+                    </TableCell>
 
-                      <TableCell>
-                        <p className="text-sm text-gray-700 max-w-xs truncate" title={vendor.services}>
-                          {vendor.services}
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">
+                          {vendor.client_name}
                         </p>
-                      </TableCell>
-                      <TableCell className="text-gray-900 font-medium">{vendor.totalJobs}</TableCell>
-                      <TableCell className="text-gray-900 font-semibold">{vendor.revenue}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getStatusVariant(vendor.status)}
-                          className={`${
-                            vendor.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                            vendor.status === 'Pending' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
-                            'bg-red-100 text-red-800 hover:bg-red-100'
-                          }`}
-                        >
-                          {vendor.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewVendor(vendor)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditVendor(vendor)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Vendor
-                            </DropdownMenuItem>
-                            {vendor.status === 'Pending' && (
-                              <DropdownMenuItem onClick={() => handleApproveVendor(vendor.business_name || vendor.name)}>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Approve
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            {vendor.status === 'Active' && (
-                              <DropdownMenuItem
-                                onClick={() => handleSuspendVendor(vendor)}
-                                className="text-orange-600 focus:text-orange-600"
-                              >
-                                <Ban className="mr-2 h-4 w-4" />
-                                Suspend Vendor
-                              </DropdownMenuItem>
-                            )}
-                            {vendor.status === 'Suspended' && (
-                              <DropdownMenuItem
-                                onClick={() => handleUnsuspendVendor(vendor)}
-                                className="text-green-600 focus:text-green-600"
-                              >
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Unsuspend Vendor
-                              </DropdownMenuItem>
-                            )}
-                            {(vendor.status === 'Active' || vendor.status === 'Suspended') && (
-                              <DropdownMenuItem
-                                onClick={() => handleTerminateVendor(vendor)}
-                                className="text-red-600 focus:text-red-600"
-                              >
-                                <X className="mr-2 h-4 w-4" />
-                                Terminate Vendor
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-          
-          {/* Pagination */}
-          <div className="flex items-center justify-between mt-6">
-            <p className="text-sm text-gray-600">
-              Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total_count)} of {pagination.total_count} vendors
-              {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") &&
-                <span className="text-purple-600 font-medium"> (filtered)</span>
-              }
-            </p>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.current_page <= 1}
-                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page - 1 }))}
-              >
-                Previous
-              </Button>
+                        {vendor.client_email && (
+                          <p className="text-xs text-gray-500">{vendor.client_email}</p>
+                        )}
+                        {!vendor.client_id && (
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            Independent
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
 
-              {/* Page numbers */}
+                    <TableCell>
+                      <p className="text-sm text-gray-700 max-w-xs truncate" title={vendor.services}>
+                        {vendor.services}
+                      </p>
+                    </TableCell>
+                    <TableCell className="text-gray-900 font-medium">{vendor.totalJobs}</TableCell>
+                    <TableCell className="text-gray-900 font-semibold">{vendor.revenue}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={getStatusVariant(vendor.status)}
+                        className={`${
+                          vendor.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                          vendor.status === 'Pending' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
+                          'bg-red-100 text-red-800 hover:bg-red-100'
+                        }`}
+                      >
+                        {vendor.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewVendor(vendor)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditVendor(vendor)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Vendor
+                          </DropdownMenuItem>
+                          {vendor.status === 'Pending' && (
+                            <DropdownMenuItem onClick={() => handleApproveVendor(vendor.business_name || vendor.name)}>
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Approve
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          {vendor.status === 'Active' && (
+                            <DropdownMenuItem
+                              onClick={() => handleSuspendVendor(vendor)}
+                              className="text-orange-600 focus:text-orange-600"
+                            >
+                              <Ban className="mr-2 h-4 w-4" />
+                              Suspend Vendor
+                            </DropdownMenuItem>
+                          )}
+                          {vendor.status === 'Suspended' && (
+                            <DropdownMenuItem
+                              onClick={() => handleUnsuspendVendor(vendor)}
+                              className="text-green-600 focus:text-green-600"
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Unsuspend Vendor
+                            </DropdownMenuItem>
+                          )}
+                          {(vendor.status === 'Active' || vendor.status === 'Suspended') && (
+                            <DropdownMenuItem
+                              onClick={() => handleTerminateVendor(vendor)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <X className="mr-2 h-4 w-4" />
+                              Terminate Vendor
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-3">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-3">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+              <span className="text-sm text-gray-500">Loading vendors...</span>
+            </div>
+          ) : filteredVendors.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-sm text-gray-500">
+                {searchTerm || statusFilter !== 'all' || locationFilter !== 'all' || serviceFilter !== 'all'
+                  ? 'No vendors found matching your filters.'
+                  : 'No vendors found.'}
+              </p>
+            </div>
+          ) : (
+            filteredVendors.map((vendor) => (
+              <Card key={vendor.id} className="border border-gray-200 shadow-sm">
+                <CardContent className="p-4">
+                  {/* Header Row */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-base truncate">
+                        {vendor.name}
+                      </h3>
+                      <div className="flex items-center text-xs text-gray-500 mt-1">
+                        <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">{vendor.location}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Badge
+                        variant={getStatusVariant(vendor.status)}
+                        className={`text-xs ${
+                          vendor.status === 'Active' ? 'bg-green-100 text-green-800' :
+                          vendor.status === 'Pending' ? 'bg-orange-100 text-orange-800' :
+                          'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {vendor.status}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewVendor(vendor)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditVendor(vendor)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          {vendor.status === 'Pending' && (
+                            <DropdownMenuItem onClick={() => handleApproveVendor(vendor.business_name || vendor.name)}>
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Approve
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          {vendor.status === 'Active' && (
+                            <DropdownMenuItem
+                              onClick={() => handleSuspendVendor(vendor)}
+                              className="text-orange-600"
+                            >
+                              <Ban className="mr-2 h-4 w-4" />
+                              Suspend
+                            </DropdownMenuItem>
+                          )}
+                          {vendor.status === 'Suspended' && (
+                            <DropdownMenuItem
+                              onClick={() => handleUnsuspendVendor(vendor)}
+                              className="text-green-600"
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Unsuspend
+                            </DropdownMenuItem>
+                          )}
+                          {(vendor.status === 'Active' || vendor.status === 'Suspended') && (
+                            <DropdownMenuItem
+                              onClick={() => handleTerminateVendor(vendor)}
+                              className="text-red-600"
+                            >
+                              <X className="mr-2 h-4 w-4" />
+                              Terminate
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="space-y-2 text-sm mb-3">
+                    <div className="flex items-center text-gray-600">
+                      <Mail className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                      <span className="truncate">{vendor.email}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Phone className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                      <span>{vendor.phone}</span>
+                    </div>
+                    {vendor.client_name && (
+                      <div className="flex items-center text-gray-600">
+                        <Users className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                        <span className="truncate">{vendor.client_name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stats Row */}
+                  <div className="grid grid-cols-2 gap-3 py-3 border-t border-gray-100">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Jobs</p>
+                      <p className="font-semibold text-gray-900">{vendor.totalJobs}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Revenue</p>
+                      <p className="font-semibold text-gray-900">{vendor.revenue}</p>
+                    </div>
+                  </div>
+
+                  {/* Services */}
+                  {vendor.services && (
+                    <div className="pt-3 border-t border-gray-100">
+                      <p className="text-xs text-gray-500 mb-1">Services</p>
+                      <p className="text-sm text-gray-700 line-clamp-2">{vendor.services}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+        
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+          <p className="text-xs sm:text-sm text-gray-600 text-center sm:text-left order-2 sm:order-1">
+            Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total_count)} of {pagination.total_count} vendors
+            {(searchTerm || statusFilter !== "all" || locationFilter !== "all" || serviceFilter !== "all") &&
+              <span className="text-purple-600 font-medium"> (filtered)</span>
+            }
+          </p>
+          <div className="flex gap-2 order-1 sm:order-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pagination.current_page <= 1}
+              onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page - 1 }))}
+              className="text-xs sm:text-sm"
+            >
+              Prev
+            </Button>
+
+            {/* Desktop: Show page numbers */}
+            <div className="hidden sm:flex gap-2">
               {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
                 const pageNum = Math.max(1, pagination.current_page - 2) + i;
                 if (pageNum > pagination.total_pages) return null;
@@ -736,35 +868,44 @@ const AdminAllVendorsPage = () => {
                   </Button>
                 );
               })}
+            </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.current_page >= pagination.total_pages}
-                onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page + 1 }))}
-              >
-                Next
+            {/* Mobile: Show current page indicator */}
+            <div className="sm:hidden">
+              <Button variant="outline" size="sm" className="text-xs pointer-events-none">
+                {pagination.current_page} / {pagination.total_pages}
               </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Modals */}
-      <AddVendorModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddVendor}
-      />
-      <ViewEditVendorModal
-        isOpen={isViewEditModalOpen}
-        onClose={() => setIsViewEditModalOpen(false)}
-        vendor={selectedVendor}
-        mode={modalMode}
-        onUpdate={handleUpdateVendor}
-      />
-    </div>
-  );
-};
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pagination.current_page >= pagination.total_pages}
+              onClick={() => setPagination(prev => ({ ...prev, current_page: prev.current_page + 1 }))}
+              className="text-xs sm:text-sm"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Modals */}
+    <AddVendorModal
+      isOpen={isAddModalOpen}
+      onClose={() => setIsAddModalOpen(false)}
+      onAdd={handleAddVendor}
+    />
+    <ViewEditVendorModal
+      isOpen={isViewEditModalOpen}
+      onClose={() => setIsViewEditModalOpen(false)}
+      vendor={selectedVendor}
+      mode={modalMode}
+      onUpdate={handleUpdateVendor}
+    />
+  </div>
+);
+}
 
 export default AdminAllVendorsPage;

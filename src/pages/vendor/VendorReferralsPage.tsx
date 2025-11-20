@@ -71,7 +71,7 @@ const VendorReferralsPage = () => {
           signup_date: invite.accepted_at || invite.sent_at,
           commission_earned: invite.status === 'accepted' ? 50 : 0,
           status: invite.status === 'accepted' ? 'completed' :
-                  invite.status === 'pending' ? 'pending' : 'cancelled'
+            invite.status === 'pending' ? 'pending' : 'cancelled'
         })));
 
         // Generate chart data based on invite timeline
@@ -195,7 +195,7 @@ const VendorReferralsPage = () => {
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="referrals" stroke="#8884d8" name="Referrals" />
-              <Line type="monotone" dataKey="commissions" stroke="#82ca9d" name="Commissions ($)" />
+              <Line type="monotone" dataKey="commissions" stroke="#15803d" name="Commissions ($)" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -247,16 +247,15 @@ const VendorReferralsPage = () => {
                         ${(referral.commission_earned || 0).toFixed(2)}
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          referral.status === 'completed'
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${referral.status === 'completed'
                             ? 'bg-green-100 text-green-800'
                             : referral.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
                           {referral.status === 'completed' ? 'Paid' :
-                           referral.status === 'pending' ? 'Pending' :
-                           referral.status}
+                            referral.status === 'pending' ? 'Pending' :
+                              referral.status}
                         </span>
                       </TableCell>
                     </TableRow>

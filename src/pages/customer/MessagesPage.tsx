@@ -142,8 +142,8 @@ const MessagesPage = () => {
           </div>
         </div>
 
-        {/* Welcome Placeholder */}
-        <div className="flex-1 flex items-center justify-center bg-gray-50">
+        {/* Welcome Placeholder - Desktop Only */}
+        <div className="hidden lg:flex flex-1 items-center justify-center bg-gray-50">
           <div className="text-center">
             <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome to Messages</h2>

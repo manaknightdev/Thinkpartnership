@@ -122,7 +122,7 @@ const HelpSupportPage = () => {
 
   const filteredFaqs = faqs.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
+      faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || faq.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -219,12 +219,11 @@ const HelpSupportPage = () => {
                   variant={selectedCategory === category.id ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center gap-2 ${
-                    selectedCategory === category.id ? "bg-green-600 hover:bg-green-700" : ""
-                  }`}
+                  className={`flex items-center gap-2 ${selectedCategory === category.id ? "bg-green-600 hover:bg-green-700" : ""
+                    }`}
                 >
                   <category.icon className="w-4 h-4" />
-                  {category.name} ({category.count})
+                  {category.name}
                 </Button>
               ))}
             </div>
@@ -247,7 +246,7 @@ const HelpSupportPage = () => {
                             <ChevronRight className="w-5 h-5 text-gray-500 flex-shrink-0" />
                           )}
                         </button>
-                        
+
                         {expandedFaq === faq.id && (
                           <div className="px-6 pb-6 border-t border-gray-100">
                             <p className="text-gray-600 mb-4 pt-4">{faq.answer}</p>

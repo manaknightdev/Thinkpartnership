@@ -30,7 +30,19 @@ const AdminWalletPage = () => {
   const [walletBalance, setWalletBalance] = useState<AdminWalletBalance | null>(null);
   const [transactions, setTransactions] = useState<AdminWalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+  const [balanceVisibility, setBalanceVisibility] = useState({
+    available: true,
+    pending: true,
+    totalEarned: true,
+    totalWithdrawn: true
+  });
+
+  const toggleVisibility = (key: keyof typeof balanceVisibility) => {
+    setBalanceVisibility(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   // Stripe account state
   const [stripeAccount, setStripeAccount] = useState<StripeAccountStatus | null>(null);
@@ -108,8 +120,8 @@ const AdminWalletPage = () => {
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
-      case "commission": return <ArrowUpRight className="h-4 w-4 text-green-600" />;
-      case "platform_revenue": return <ArrowUpRight className="h-4 w-4 text-green-600" />;
+      case "commission": return <ArrowUpRight className="h-4 w-4 text-green-700" />;
+      case "platform_revenue": return <ArrowUpRight className="h-4 w-4 text-green-700" />;
       case "withdrawal": return <ArrowDownLeft className="h-4 w-4 text-red-600" />;
       case "fee": return <ArrowDownLeft className="h-4 w-4 text-orange-600" />;
       case "refund": return <ArrowDownLeft className="h-4 w-4 text-blue-600" />;
@@ -230,15 +242,16 @@ const AdminWalletPage = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+              onClick={() => toggleVisibility('available')}
               className="h-8 w-8 p-0"
+              aria-label={balanceVisibility.available ? "Hide balance" : "Show balance"}
             >
-              {isBalanceVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              {balanceVisibility.available ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </Button>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isBalanceVisible
+              {balanceVisibility.available
                 ? `$${parseFloat(String(walletBalance?.available_balance || '0')).toFixed(2)}`
                 : '••••••'
               }
@@ -252,11 +265,22 @@ const AdminWalletPage = () => {
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Balance</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleVisibility('pending')}
+                className="h-8 w-8 p-0"
+                aria-label={balanceVisibility.pending ? "Hide pending balance" : "Show pending balance"}
+              >
+                {balanceVisibility.pending ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isBalanceVisible
+              {balanceVisibility.pending
                 ? `$${parseFloat(String(walletBalance?.pending_balance || '0')).toFixed(2)}`
                 : '••••••'
               }
@@ -270,11 +294,22 @@ const AdminWalletPage = () => {
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-700" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleVisibility('totalEarned')}
+                className="h-8 w-8 p-0"
+                aria-label={balanceVisibility.totalEarned ? "Hide total earned" : "Show total earned"}
+              >
+                {balanceVisibility.totalEarned ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isBalanceVisible
+              {balanceVisibility.totalEarned
                 ? `$${parseFloat(String(walletBalance?.total_earnings || '0')).toFixed(2)}`
                 : '••••••'
               }
@@ -288,11 +323,22 @@ const AdminWalletPage = () => {
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Withdrawn</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
+            <div className="flex items-center gap-2">
+              <TrendingDown className="h-4 w-4 text-red-600" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleVisibility('totalWithdrawn')}
+                className="h-8 w-8 p-0"
+                aria-label={balanceVisibility.totalWithdrawn ? "Hide total withdrawn" : "Show total withdrawn"}
+              >
+                {balanceVisibility.totalWithdrawn ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isBalanceVisible
+              {balanceVisibility.totalWithdrawn
                 ? `$${parseFloat(String(walletBalance?.total_withdrawals || '0')).toFixed(2)}`
                 : '••••••'
               }
@@ -321,13 +367,12 @@ const AdminWalletPage = () => {
               {/* Account Status */}
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    stripeAccount.connected && stripeAccount.details_submitted
-                      ? 'bg-green-100'
-                      : 'bg-yellow-100'
-                  }`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stripeAccount.connected && stripeAccount.details_submitted
+                    ? 'bg-green-100'
+                    : 'bg-yellow-100'
+                    }`}>
                     {stripeAccount.connected && stripeAccount.details_submitted ? (
-                      <CheckCircle className="h-6 w-6 text-green-600" />
+                      <CheckCircle className="h-6 w-6 text-green-700" />
                     ) : (
                       <Clock className="h-6 w-6 text-yellow-600" />
                     )}
@@ -505,9 +550,8 @@ const AdminWalletPage = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className={`font-semibold ${
-                            parseFloat(String(transaction.amount)) > 0 ? 'text-green-600' : 'text-red-600'
-                          }`}>
+                          <span className={`font-semibold ${parseFloat(String(transaction.amount)) > 0 ? 'text-green-700' : 'text-red-600'
+                            }`}>
                             {parseFloat(String(transaction.amount)) > 0 ? '+' : ''}${Math.abs(parseFloat(String(transaction.amount))).toFixed(2)}
                           </span>
                         </TableCell>

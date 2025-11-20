@@ -26,6 +26,7 @@ import {
   CheckCircle,
   Plus,
   ShoppingCart,
+  ChevronLeft,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -182,10 +183,10 @@ const VendorMessagesPage = () => {
       prevChats.map(chat =>
         chat.id === chatId
           ? {
-              ...chat,
-              last_message: lastMessage,
-              last_message_time: new Date().toISOString()
-            }
+            ...chat,
+            last_message: lastMessage,
+            last_message_time: new Date().toISOString()
+          }
           : chat
       )
     );
@@ -416,6 +417,28 @@ const VendorMessagesPage = () => {
       return;
     }
 
+    // Validate date is not in the past
+    if (quoteData.validUntil) {
+      const selectedDate = new Date(quoteData.validUntil);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
+
+      // Add timezone offset handling to ensure we're comparing dates correctly
+      // The date input returns YYYY-MM-DD which parses as UTC, while new Date() is local
+      // We need to treat the input date as local start of day
+      const dateParts = quoteData.validUntil.split('-');
+      const inputDate = new Date(
+        parseInt(dateParts[0]),
+        parseInt(dateParts[1]) - 1,
+        parseInt(dateParts[2])
+      );
+
+      if (inputDate < today) {
+        toast.error("Valid until date cannot be in the past");
+        return;
+      }
+    }
+
     try {
       setSending(true);
       const response = await VendorMessagesAPI.sendQuote(selectedChatId, {
@@ -452,7 +475,7 @@ const VendorMessagesPage = () => {
     setSelectedChatId(chatId);
     setSelectedCustomer(customer);
     navigate(`/vendor-portal/messages/${customer.id}`);
-    setShowCustomerList(false);
+    setShowCustomerList(false); // Hide list on mobile
     loadMessages(chatId);
   };
 
@@ -464,11 +487,13 @@ const VendorMessagesPage = () => {
   const totalUnreadCount = customers.reduce((sum, customer) => sum + customer.unreadCount, 0);
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex bg-gray-50">
+    <div className="h-[calc(100vh-4rem)] flex bg-gray-50 overflow-x-hidden">
       {/* Customer List Sidebar */}
       <div className={cn(
-        "w-80 bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
-        showCustomerList ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        "bg-white border-r border-gray-200 flex flex-col max-w-full overflow-x-hidden min-w-0",
+        // Mobile: full width when visible, hidden when not
+        // Desktop: fixed width (80) always visible
+        showCustomerList ? "w-full lg:w-80" : "hidden lg:flex lg:w-80"
       )}>
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
@@ -478,15 +503,15 @@ const VendorMessagesPage = () => {
               {totalUnreadCount} unread
             </Badge>
           </div>
-          
+
           {/* Search */}
-          <div className="relative">
+          <div className="relative w-full max-w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search customers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 w-full"
             />
           </div>
         </div>
@@ -503,55 +528,64 @@ const VendorMessagesPage = () => {
             </div>
           ) : (
             filteredCustomers.map((customer) => (
-            <div
-              key={customer.id}
-              onClick={() => handleCustomerSelect(customer)}
-              className={cn(
-                "p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors",
-                selectedCustomer?.id === customer.id ? "bg-blue-50 border-blue-200" : ""
-              )}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <img
-                    src={customer.avatar}
-                    alt={customer.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div className={cn(
-                    "absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full",
-                    customer.status === "online" ? "bg-green-500" : "bg-gray-400"
-                  )}></div>
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-gray-900 truncate">{customer.name}</h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">{customer.timestamp}</span>
-                      {customer.unreadCount > 0 && (
-                        <Badge className="bg-blue-500 text-white text-xs h-5 w-5 rounded-full flex items-center justify-center p-0">
-                          {customer.unreadCount}
-                        </Badge>
-                      )}
-                    </div>
+              <div
+                key={customer.id}
+                onClick={() => handleCustomerSelect(customer)}
+                className={cn(
+                  "p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors",
+                  selectedCustomer?.id === customer.id ? "bg-blue-50 border-blue-200" : ""
+                )}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <img
+                      src={customer.avatar}
+                      alt={customer.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className={cn(
+                      "absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full",
+                      customer.status === "online" ? "bg-green-500" : "bg-gray-400"
+                    )}></div>
                   </div>
-                  <p className="text-sm text-gray-600 truncate mt-1">{customer.lastMessage}</p>
-                  {customer.location && (
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-xs text-gray-500">{customer.location}</span>
+
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium text-gray-900 truncate">{customer.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-gray-500">{customer.timestamp}</span>
+                        {customer.unreadCount > 0 && (
+                          <Badge className="bg-blue-500 text-white text-xs h-5 w-5 rounded-full flex items-center justify-center p-0">
+                            {customer.unreadCount}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  )}
+                    <p className="text-sm text-gray-600 truncate mt-1">
+                      {customer.lastMessage.length > 30
+                        ? customer.lastMessage.substring(0, 30) + "..."
+                        : customer.lastMessage}
+                    </p>
+                    {customer.location && (
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs text-gray-500">{customer.location}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
             ))
           )}
         </div>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={cn(
+        "flex-1 flex-col min-w-0 bg-white",
+        // Mobile: hidden when list is visible
+        // Desktop: always visible
+        showCustomerList ? "hidden lg:flex" : "flex"
+      )}>
         {selectedCustomer ? (
           <>
             {/* Chat Header */}
@@ -561,9 +595,10 @@ const VendorMessagesPage = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowCustomerList(true)}
-                  className="lg:hidden"
+                  className="lg:hidden mr-2"
                 >
-                  <Menu className="h-5 w-5" />
+                  <ChevronLeft className="h-5 w-5 mr-1" />
+                  Back
                 </Button>
 
                 <div className="flex items-center space-x-3">
@@ -592,7 +627,7 @@ const VendorMessagesPage = () => {
                 </div>
               </div>
 
-              
+
             </div>
 
             {/* Customer Info Bar */}
@@ -627,7 +662,7 @@ const VendorMessagesPage = () => {
                           <Input
                             id="quote-service"
                             value={quoteData.service}
-                            onChange={(e) => setQuoteData({...quoteData, service: e.target.value})}
+                            onChange={(e) => setQuoteData({ ...quoteData, service: e.target.value })}
                             placeholder="e.g., Interior Painting - Living Room & Bedroom"
                           />
                         </div>
@@ -636,7 +671,7 @@ const VendorMessagesPage = () => {
                           <Input
                             id="quote-price"
                             value={quoteData.price}
-                            onChange={(e) => setQuoteData({...quoteData, price: e.target.value})}
+                            onChange={(e) => setQuoteData({ ...quoteData, price: e.target.value })}
                             placeholder="e.g., $850"
                           />
                         </div>
@@ -645,7 +680,7 @@ const VendorMessagesPage = () => {
                           <Textarea
                             id="quote-description"
                             value={quoteData.description}
-                            onChange={(e) => setQuoteData({...quoteData, description: e.target.value})}
+                            onChange={(e) => setQuoteData({ ...quoteData, description: e.target.value })}
                             placeholder="Detailed description of work included..."
                             rows={3}
                           />
@@ -656,7 +691,7 @@ const VendorMessagesPage = () => {
                             id="quote-valid"
                             type="date"
                             value={quoteData.validUntil}
-                            onChange={(e) => setQuoteData({...quoteData, validUntil: e.target.value})}
+                            onChange={(e) => setQuoteData({ ...quoteData, validUntil: e.target.value })}
                           />
                         </div>
                       </div>
@@ -783,7 +818,11 @@ const VendorMessagesPage = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            <div
+              className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+              tabIndex={0}
+              aria-label="Chat messages"
+            >
               {loadingMessages ? (
                 <div className="flex justify-center items-center h-32">
                   <div className="text-gray-500">Loading messages...</div>
@@ -794,87 +833,85 @@ const VendorMessagesPage = () => {
                 </div>
               ) : (
                 uiMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === "vendor" ? "justify-end" : "justify-start"}`}
-                >
-                  <div className={`max-w-sm lg:max-w-md ${msg.sender === "vendor" ? "order-2" : "order-1"}`}>
-                    {msg.sender === "customer" && (
-                      <div className="flex items-center space-x-2 mb-1">
-                        <img
-                          src={selectedCustomer.avatar}
-                          alt={selectedCustomer.name}
-                          className="w-6 h-6 rounded-full"
-                        />
-                        <span className="text-xs text-gray-500">{selectedCustomer.name}</span>
-                      </div>
-                    )}
-
-                    {msg.type === "quote" && msg.quoteData ? (
-                      <Card className="bg-white border border-gray-200 shadow-sm max-w-sm">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center space-x-2">
-                            <FileText className="h-4 w-4 text-blue-600" />
-                            <CardTitle className="text-sm font-semibold text-gray-900">Quote Proposal</CardTitle>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div>
-                            <p className="font-semibold text-gray-900 text-base">{msg.quoteData.service}</p>
-                            <p className="text-3xl font-bold text-blue-600 mt-1">
-                              {msg.quoteData.price.replace('$', '')}
-                              <span className="text-sm font-normal text-gray-500 ml-1">USD</span>
-                            </p>
-                          </div>
-                          {msg.quoteData.description && (
-                            <p className="text-sm text-gray-600">{msg.quoteData.description}</p>
-                          )}
-                          {msg.quoteData.validUntil && (
-                            <div className="flex items-center text-xs text-gray-500 border-t pt-2">
-                              <Clock className="h-3 w-3 mr-1" />
-                              Valid until {new Date(msg.quoteData.validUntil).toLocaleDateString()}
-                            </div>
-                          )}
-                          {msg.sender === "vendor" && (
-                            <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Quote sent successfully
-                            </div>
-                          )}
-                          {msg.type === "quote_acceptance" && (
-                            <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Quote accepted & paid
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <div
-                        className={`px-4 py-2 rounded-2xl ${
-                          msg.sender === "vendor"
-                            ? "bg-blue-500 text-white rounded-br-md"
-                            : "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
-                        }`}
-                      >
-                        <p className="text-sm">{msg.content}</p>
-                      </div>
-                    )}
-
-                    <div className={`flex items-center mt-1 space-x-1 ${
-                      msg.sender === "vendor" ? "justify-end" : "justify-start"
-                    }`}>
-                      <span className="text-xs text-gray-500">{msg.timestamp}</span>
-                      {msg.sender === "vendor" && (
-                        <div className="flex items-center">
-                          {msg.status === "sent" && <Clock className="h-3 w-3 text-gray-400" />}
-                          {msg.status === "delivered" && <CheckCircle className="h-3 w-3 text-gray-400" />}
-                          {msg.status === "read" && <CheckCircle className="h-3 w-3 text-blue-500" />}
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.sender === "vendor" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className={`max-w-sm lg:max-w-md ${msg.sender === "vendor" ? "order-2" : "order-1"}`}>
+                      {msg.sender === "customer" && (
+                        <div className="flex items-center space-x-2 mb-1">
+                          <img
+                            src={selectedCustomer.avatar}
+                            alt={selectedCustomer.name}
+                            className="w-6 h-6 rounded-full"
+                          />
+                          <span className="text-xs text-gray-500">{selectedCustomer.name}</span>
                         </div>
                       )}
+
+                      {msg.type === "quote" && msg.quoteData ? (
+                        <Card className="bg-white border border-gray-200 shadow-sm max-w-sm">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center space-x-2">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                              <CardTitle className="text-sm font-semibold text-gray-900">Quote Proposal</CardTitle>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div>
+                              <p className="font-semibold text-gray-900 text-base">{msg.quoteData.service}</p>
+                              <p className="text-3xl font-bold text-blue-600 mt-1">
+                                {msg.quoteData.price.replace('$', '')}
+                                <span className="text-sm font-normal text-gray-500 ml-1">USD</span>
+                              </p>
+                            </div>
+                            {msg.quoteData.description && (
+                              <p className="text-sm text-gray-600">{msg.quoteData.description}</p>
+                            )}
+                            {msg.quoteData.validUntil && (
+                              <div className="flex items-center text-xs text-gray-500 border-t pt-2">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Valid until {new Date(msg.quoteData.validUntil).toLocaleDateString()}
+                              </div>
+                            )}
+                            {msg.sender === "vendor" && (
+                              <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Quote sent successfully
+                              </div>
+                            )}
+                            {msg.type === "quote_acceptance" && (
+                              <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Quote accepted & paid
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <div
+                          className={`px-4 py-2 rounded-2xl ${msg.sender === "vendor"
+                            ? "bg-blue-500 text-white rounded-br-md"
+                            : "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
+                            }`}
+                        >
+                          <p className="text-sm">{msg.content}</p>
+                        </div>
+                      )}
+
+                      <div className={`flex items-center mt-1 space-x-1 ${msg.sender === "vendor" ? "justify-end" : "justify-start"
+                        }`}>
+                        <span className="text-xs text-gray-500">{msg.timestamp}</span>
+                        {msg.sender === "vendor" && (
+                          <div className="flex items-center">
+                            {msg.status === "sent" && <Clock className="h-3 w-3 text-gray-400" />}
+                            {msg.status === "delivered" && <CheckCircle className="h-3 w-3 text-gray-400" />}
+                            {msg.status === "read" && <CheckCircle className="h-3 w-3 text-blue-500" />}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
                 ))
               )}
 
@@ -918,6 +955,7 @@ const VendorMessagesPage = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-500"
+                    aria-label="Add emoji"
                   >
                     <Smile className="w-4 h-4" />
                   </Button>
@@ -927,6 +965,7 @@ const VendorMessagesPage = () => {
                   onClick={handleSendMessage}
                   disabled={!message.trim() || !selectedChatId || sending}
                   className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
+                  aria-label="Send message"
                 >
                   <Send className="w-5 h-5" />
                 </Button>

@@ -217,7 +217,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Left Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             {/* Sidebar Toggle */}
             <Button
               variant="ghost"
@@ -247,7 +247,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
             </Button>
 
             {/* Logo - Show client logo when available, otherwise company name */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 md:gap-2">
               <Link to="/marketplace" className="flex items-center gap-2">
                 {branding?.logo_url ? (
                   <div className="flex items-center gap-2">
@@ -260,17 +260,17 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                    <span className="text-xl font-bold text-green-600">
+                    <span className="text-base md:text-xl font-bold text-green-600 whitespace-nowrap">
                       {branding.company_name || getMarketplaceName()}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xl font-bold text-green-600">
+                  <span className="text-base md:text-xl font-bold text-green-600 whitespace-nowrap">
                     {branding?.company_name || getMarketplaceName()}
                   </span>
                 )}
               </Link>
-              
+
               {/* Admin View Badge - Only show during admin impersonation */}
               {isAdminImpersonation && (
                 <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1">
@@ -327,16 +327,16 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center space-x-3">
-            {/* Mobile Search */}
-            <Button
+          <div className="flex items-center space-x-1 md:space-x-3">
+            {/* Mobile Search - Hidden to save space */}
+            {/* <Button
               variant="ghost"
               size="sm"
               className="md:hidden"
               onClick={() => navigate('/marketplace/services')}
             >
-              <Search className="h-5 w-5" />
-            </Button>
+              <Search className="h-4 w-4 md:h-5 md:w-5" />
+            </Button> */}
 
             {authLoading ? (
               <>
@@ -356,7 +356,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                   onClick={handleNotificationClick}
                   title="View notifications"
                 >
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-4 w-4 md:h-5 md:w-5" />
                   {notificationCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center p-0">
                       {notificationCount}
@@ -372,7 +372,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                   onClick={() => navigate('/marketplace/cart')}
                   title="View cart"
                 >
-                  <ShoppingCart className="h-5 w-5" />
+                  <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
                   {!cartLoading && itemCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
                       {itemCount}
@@ -392,14 +392,14 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
                   <LogIn className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Log In</span>
                 </Button>
-                <Button
+                {/* <Button
                   size="sm"
                   onClick={() => navigate('/marketplace/signup')}
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Sign Up</span>
-                </Button>
+                </Button> */}
               </>
             )}
 
@@ -409,43 +409,45 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
 
                 {/* User Menu - Only show when authenticated */}
                 <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                  <ProfileAvatar
-                    photo={userProfile?.photo}
-                    size="sm"
-                    alt="Profile"
-                  />
-                  <span className="hidden sm:block text-sm font-medium">
-                    {authLoading ? 'Loading...' : getFirstName()}
-                  </span>
-                  <ChevronDown className="h-3 w-3 text-gray-500" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-3 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">
-                    {authLoading ? 'Loading...' : getDisplayName()}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {authLoading ? 'Loading...' : user?.email || 'No email'}
-                  </p>
-                </div>
-                <DropdownMenuItem onClick={() => navigate('/marketplace/account')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Account Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/marketplace/help')}>
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  <span>Help & Support</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-1 md:space-x-2">
+                      <div className="w-6 h-6 md:w-8 md:h-8">
+                        <ProfileAvatar
+                          photo={userProfile?.photo}
+                          size="sm"
+                          alt="Profile"
+                        />
+                      </div>
+                      <span className="hidden sm:block text-sm font-medium">
+                        {authLoading ? 'Loading...' : getFirstName()}
+                      </span>
+                      <ChevronDown className="h-3 w-3 text-gray-500" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-3 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">
+                        {authLoading ? 'Loading...' : getDisplayName()}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {authLoading ? 'Loading...' : user?.email || 'No email'}
+                      </p>
+                    </div>
+                    <DropdownMenuItem onClick={() => navigate('/marketplace/account')}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Account Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/marketplace/help')}>
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      <span>Help & Support</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
           </div>

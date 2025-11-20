@@ -359,9 +359,9 @@ const AccountPage = () => {
     <div className="space-y-6">
       {/* Profile Header */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-6">
-            <div className="relative">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="relative flex-shrink-0">
               <ProfileAvatar
                 photo={userProfile.photo}
                 size="xl"
@@ -396,11 +396,11 @@ const AccountPage = () => {
                 </>
               )}
             </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="flex-1 text-center sm:text-left w-full">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {userProfile.first_name || 'User'} {userProfile.last_name || ''}
               </h2>
-              <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start sm:space-x-4 space-y-2 sm:space-y-0 text-xs sm:text-sm text-gray-600 mb-4">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   Member since {new Date(userProfile.created_at).toLocaleDateString()}
@@ -409,14 +409,14 @@ const AccountPage = () => {
                   Active Customer
                 </Badge>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="grid grid-cols-2 gap-4 text-center max-w-xs mx-auto sm:mx-0">
                 <div>
-                  <div className="text-2xl font-bold text-green-600">{userProfile.total_orders || 0}</div>
-                  <div className="text-sm text-gray-600">Total Orders</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">{userProfile.total_orders || 0}</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Total Orders</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-600">${userProfile.total_spent || 0}</div>
-                  <div className="text-sm text-gray-600">Total Spent</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">${userProfile.total_spent || 0}</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Total Spent</div>
                 </div>
               </div>
             </div>
@@ -438,7 +438,7 @@ const AccountPage = () => {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -491,7 +491,7 @@ const AccountPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="city">City</Label>
               <Input
@@ -582,24 +582,23 @@ const AccountPage = () => {
             {stripeAccount ? (
               <div className="space-y-4">
                 {/* Account Status */}
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      stripeAccount.connected && stripeAccount.details_submitted
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg gap-4">
+                  <div className="flex items-start sm:items-center space-x-4 flex-1">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${stripeAccount.connected && stripeAccount.details_submitted
                         ? 'bg-green-100 text-green-600'
                         : 'bg-yellow-100 text-yellow-600'
-                    }`}>
+                      }`}>
                       {stripeAccount.connected && stripeAccount.details_submitted ? (
-                        <CheckCircle className="w-6 h-6" />
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                       ) : (
-                        <AlertCircle className="w-6 h-6" />
+                        <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                       )}
                     </div>
-                    <div>
-                      <div className="font-medium text-gray-900">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 text-sm sm:text-base">
                         {stripeAccount.connected ? 'Stripe Account Connected' : 'Stripe Account Not Connected'}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs sm:text-sm text-gray-600">
                         {stripeAccount.connected && stripeAccount.details_submitted
                           ? 'Your account is fully set up and ready to receive payments'
                           : stripeAccount.connected
@@ -614,7 +613,7 @@ const AccountPage = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 w-full sm:w-auto">
                     {stripeAccount.connected ? (
                       <>
                         {!stripeAccount.details_submitted && (
@@ -664,26 +663,24 @@ const AccountPage = () => {
 
                 {/* Account Capabilities */}
                 {stripeAccount.connected && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 rounded-full ${
-                          stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
-                        }`}></div>
-                        <span className="font-medium text-gray-900">Accept Payments</span>
+                        <div className={`w-3 h-3 rounded-full ${stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
+                          }`}></div>
+                        <span className="font-medium text-gray-900 text-sm sm:text-base">Accept Payments</span>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
                         {stripeAccount.charges_enabled ? 'Enabled' : 'Disabled'}
                       </p>
                     </div>
                     <div className="p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 rounded-full ${
-                          stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
-                        }`}></div>
-                        <span className="font-medium text-gray-900">Receive Payouts</span>
+                        <div className={`w-3 h-3 rounded-full ${stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
+                          }`}></div>
+                        <span className="font-medium text-gray-900 text-sm sm:text-base">Receive Payouts</span>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
                         {stripeAccount.payouts_enabled ? 'Enabled' : 'Disabled'}
                       </p>
                     </div>
@@ -851,9 +848,8 @@ const AccountPage = () => {
                         <Button
                           key={tab.id}
                           variant={activeTab === tab.id ? "default" : "ghost"}
-                          className={`w-full justify-start ${
-                            activeTab === tab.id ? "bg-green-600 hover:bg-green-700" : ""
-                          }`}
+                          className={`w-full justify-start ${activeTab === tab.id ? "bg-green-600 hover:bg-green-700" : ""
+                            }`}
                           onClick={() => setActiveTab(tab.id)}
                         >
                           <tab.icon className="w-4 h-4 mr-2" />

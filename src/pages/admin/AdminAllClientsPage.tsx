@@ -290,8 +290,8 @@ const AdminAllClientsPage = () => {
         showError(response.message || 'Failed to suspend client');
         return;
       }
-
-      showSuccess(`${selectedClientForAction.company_name} has been suspended successfully`);
+      console.log(selectedClientForAction)
+      showSuccess(`${selectedClientForAction.name} has been suspended successfully`);
       setSuspendModalOpen(false);
       setSelectedClientForAction(null);
       setActionReason('');
@@ -340,8 +340,8 @@ const AdminAllClientsPage = () => {
         showError(response.message || 'Failed to unsuspend client');
         return;
       }
-
-      showSuccess(`${selectedClientForAction.company_name} has been unsuspended successfully`);
+       console.log(selectedClientForAction)
+      showSuccess(`${selectedClientForAction.name} has been unsuspended successfully`);
       setUnsuspendModalOpen(false);
       setSelectedClientForAction(null);
       fetchClients(); // Refresh the list
@@ -481,29 +481,7 @@ const AdminAllClientsPage = () => {
   };
 
   // Use clients directly since filtering is done server-side via API
-  const filteredClients = clients.length > 0 ? clients : mockClients.filter(client => {
-    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (client.website && client.website.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || client.status.toLowerCase() === statusFilter;
-
-    const revenueAmount = client.totalRevenue ? parseFloat(client.totalRevenue.replace('$', '').replace(',', '')) : 0;
-    const matchesRevenue = revenueFilter === "all" ||
-                          (revenueFilter === "high" && revenueAmount >= 400000) ||
-                          (revenueFilter === "medium" && revenueAmount >= 200000 && revenueAmount < 400000) ||
-                          (revenueFilter === "low" && revenueAmount < 200000);
-
-    // Additional filters for mock data (in real implementation, these would be handled server-side)
-    const matchesLocation = locationFilter === "all"; // Simplified for mock data
-    const matchesJoinDate = joinDateFilter === "all"; // Simplified for mock data
-    const matchesClientSize = clientSizeFilter === "all" ||
-                             (clientSizeFilter === "large" && client.vendors >= 50) ||
-                             (clientSizeFilter === "medium" && client.vendors >= 10 && client.vendors < 50) ||
-                             (clientSizeFilter === "small" && client.vendors >= 1 && client.vendors < 10) ||
-                             (clientSizeFilter === "startup" && client.vendors === 0);
-
-    return matchesSearch && matchesStatus && matchesRevenue && matchesLocation && matchesJoinDate && matchesClientSize;
-  });
+  const filteredClients = clients.length > 0 ? clients : [];
 
   // Calculate summary stats based on filtered data
   const totalClients = filteredClients.length;

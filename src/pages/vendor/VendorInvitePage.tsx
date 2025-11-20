@@ -82,12 +82,12 @@ const VendorInvitePage = () => {
   const referralLink = referralLinks.length > 0
     ? getProperReferralLink(referralLinks[0].url)
     : (() => {
-        const fallbackUrl = new URL('/register', 'https://think-partnership.netlify.app');
-        if (client?.id) {
-          fallbackUrl.searchParams.set('client', client.id.toString());
-        }
-        return fallbackUrl.toString();
-      })();
+      const fallbackUrl = new URL('/register', 'https://think-partnership.netlify.app');
+      if (client?.id) {
+        fallbackUrl.searchParams.set('client', client.id.toString());
+      }
+      return fallbackUrl.toString();
+    })();
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
@@ -150,9 +150,9 @@ const VendorInvitePage = () => {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Invite Customers</h2>
-      <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
+    <div className="p-4 md:p-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6">Invite Customers</h2>
+      <p className="text-base md:text-lg text-gray-700 dark:text-gray-300 mb-6 md:mb-8">
         Generate unique links or codes to invite your clients to the marketplace and earn commissions.
       </p>
 
@@ -168,7 +168,7 @@ const VendorInvitePage = () => {
             <Input
               readOnly
               value={loading ? "Loading your referral link..." : referralLink}
-              className="flex-grow"
+              className="flex-grow mb-3 sm:mb-0"
               disabled={loading}
             />
             <Button
@@ -226,47 +226,83 @@ const VendorInvitePage = () => {
             </div>
           ) : sentInvites.length > 0 ? (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Date Sent</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Converted</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sentInvites.map((invite: any) => (
-                    <TableRow key={invite.id}>
-                      <TableCell className="font-medium">
-                        {invite.invitee_email}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(invite.sent_at || invite.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          invite.status === 'accepted'
-                            ? 'bg-green-100 text-green-800'
-                            : invite.status === 'pending'
+              {/* Mobile View - Cards */}
+              <div className="block md:hidden space-y-4">
+                {sentInvites.map((invite: any) => (
+                  <div key={invite.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white break-all">{invite.invitee_email}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Sent: {new Date(invite.sent_at || invite.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium shrink-0 ${invite.status === 'accepted'
+                          ? 'bg-green-100 text-green-800'
+                          : invite.status === 'pending'
                             ? 'bg-yellow-100 text-yellow-800'
                             : invite.status === 'expired'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {invite.status === 'accepted' ? 'Converted' :
-                           invite.status === 'pending' ? 'Sent' :
-                           invite.status === 'expired' ? 'Expired' :
-                           invite.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {invite.status === 'accepted' ? 'Yes' : 'No'}
-                      </TableCell>
+                        {invite.status === 'accepted' ? 'Converted' :
+                          invite.status === 'pending' ? 'Sent' :
+                            invite.status === 'expired' ? 'Expired' :
+                              invite.status}
+                      </span>
+                    </div>
+                    {invite.status === 'accepted' && (
+                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center text-xs text-green-600">
+                        <span className="font-medium">Converted: Yes</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop View - Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Date Sent</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Converted</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {sentInvites.map((invite: any) => (
+                      <TableRow key={invite.id}>
+                        <TableCell className="font-medium">
+                          {invite.invitee_email}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(invite.sent_at || invite.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${invite.status === 'accepted'
+                              ? 'bg-green-100 text-green-800'
+                              : invite.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : invite.status === 'expired'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-gray-100 text-gray-800'
+                            }`}>
+                            {invite.status === 'accepted' ? 'Converted' :
+                              invite.status === 'pending' ? 'Sent' :
+                                invite.status === 'expired' ? 'Expired' :
+                                  invite.status}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {invite.status === 'accepted' ? 'Yes' : 'No'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">No invites sent yet.</p>

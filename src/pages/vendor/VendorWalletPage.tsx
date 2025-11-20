@@ -50,7 +50,19 @@ import { showSuccess, showError } from "@/utils/toast";
 
 const VendorWalletPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [showBalance, setShowBalance] = useState(true);
+  const [balanceVisibility, setBalanceVisibility] = useState({
+    available: true,
+    pending: true,
+    thisMonth: true,
+    total: true
+  });
+
+  const toggleVisibility = (key: keyof typeof balanceVisibility) => {
+    setBalanceVisibility(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -318,7 +330,7 @@ const VendorWalletPage = () => {
   };
   const getTransactionIcon = (type: string) => {
     switch (type) {
-      case "earning": return <ArrowDownLeft className="h-4 w-4 text-green-600" />;
+      case "earning": return <ArrowDownLeft className="h-4 w-4 text-green-700" />;
       case "withdrawal": return <ArrowUpRight className="h-4 w-4 text-blue-600" />;
       case "fee": return <Minus className="h-4 w-4 text-red-600" />;
       case "refund": return <ArrowDownLeft className="h-4 w-4 text-orange-600" />;
@@ -329,7 +341,7 @@ const VendorWalletPage = () => {
 
   const getTransactionColor = (type: string) => {
     switch (type) {
-      case "earning": return "text-green-600";
+      case "earning": return "text-green-700";
       case "withdrawal": return "text-blue-600";
       case "fee": return "text-red-600";
       case "refund": return "text-orange-600";
@@ -533,14 +545,15 @@ const VendorWalletPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowBalance(!showBalance)}
+                onClick={() => toggleVisibility('available')}
                 className="h-6 w-6 p-0"
+                aria-label={balanceVisibility.available ? "Hide balance" : "Show balance"}
               >
-                {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {balanceVisibility.available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${walletBalance?.available_balance?.toFixed(2) || '0.00'}` : "••••••"}
+              {balanceVisibility.available ? `$${walletBalance?.available_balance?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
             <p className="text-xs text-gray-500 mt-1">Ready for withdrawal</p>
           </CardContent>
@@ -548,12 +561,23 @@ const VendorWalletPage = () => {
 
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
-              <span className="text-sm font-medium text-gray-600">Pending</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-yellow-600" />
+                <span className="text-sm font-medium text-gray-600">Pending</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleVisibility('pending')}
+                className="h-6 w-6 p-0"
+                aria-label={balanceVisibility.pending ? "Hide pending balance" : "Show pending balance"}
+              >
+                {balanceVisibility.pending ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${walletBalance?.pending_balance?.toFixed(2) || '0.00'}` : "••••••"}
+              {balanceVisibility.pending ? `$${walletBalance?.pending_balance?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
             <p className="text-xs text-gray-500 mt-1">Processing payments</p>
           </CardContent>
@@ -561,14 +585,25 @@ const VendorWalletPage = () => {
 
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-medium text-gray-600">This Month</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-green-700" />
+                <span className="text-sm font-medium text-gray-600">This Month</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleVisibility('thisMonth')}
+                className="h-6 w-6 p-0"
+                aria-label={balanceVisibility.thisMonth ? "Hide monthly earnings" : "Show monthly earnings"}
+              >
+                {balanceVisibility.thisMonth ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${earningsStats?.this_month?.toFixed(2) || '0.00'}` : "••••••"}
+              {balanceVisibility.thisMonth ? `$${earningsStats?.this_month?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-xs text-green-700 mt-1">
               {earningsStats?.growth_percentage ?
                 `${earningsStats.growth_percentage > 0 ? '+' : ''}${earningsStats.growth_percentage.toFixed(1)}% from last month` :
                 'No data available'
@@ -579,12 +614,23 @@ const VendorWalletPage = () => {
 
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="h-5 w-5 text-purple-600" />
-              <span className="text-sm font-medium text-gray-600">Total Earnings</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-purple-600" />
+                <span className="text-sm font-medium text-gray-600">Total Earnings</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleVisibility('total')}
+                className="h-6 w-6 p-0"
+                aria-label={balanceVisibility.total ? "Hide total earnings" : "Show total earnings"}
+              >
+                {balanceVisibility.total ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {showBalance ? `$${walletBalance?.total_earnings?.toFixed(2) || '0.00'}` : "••••••"}
+              {balanceVisibility.total ? `$${walletBalance?.total_earnings?.toFixed(2) || '0.00'}` : "••••••"}
             </div>
             <p className="text-xs text-gray-500 mt-1">All time earnings</p>
           </CardContent>
@@ -621,11 +667,10 @@ const VendorWalletPage = () => {
                   {/* Account Status */}
                   <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        stripeAccount.connected && stripeAccount.details_submitted
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-yellow-100 text-yellow-600'
-                      }`}>
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stripeAccount.connected && stripeAccount.details_submitted
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-yellow-100 text-yellow-600'
+                        }`}>
                         {stripeAccount.connected && stripeAccount.details_submitted ? (
                           <CheckCircle className="w-6 h-6" />
                         ) : (
@@ -704,9 +749,8 @@ const VendorWalletPage = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 border border-gray-200 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${
-                            stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
-                          }`}></div>
+                          <div className={`w-3 h-3 rounded-full ${stripeAccount.charges_enabled ? 'bg-green-500' : 'bg-red-500'
+                            }`}></div>
                           <span className="font-medium text-gray-900">Accept Payments</span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1">
@@ -715,9 +759,8 @@ const VendorWalletPage = () => {
                       </div>
                       <div className="p-4 border border-gray-200 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${
-                            stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
-                          }`}></div>
+                          <div className={`w-3 h-3 rounded-full ${stripeAccount.payouts_enabled ? 'bg-green-500' : 'bg-red-500'
+                            }`}></div>
                           <span className="font-medium text-gray-900">Receive Payouts</span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1">
@@ -751,7 +794,7 @@ const VendorWalletPage = () => {
                   {/* Security Notice */}
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <CheckCircle className="h-5 w-5 text-green-700" />
                       <h4 className="font-semibold text-green-900">Secure & Trusted</h4>
                     </div>
                     <p className="text-sm text-green-700">

@@ -203,6 +203,14 @@ const VendorServiceTiersPage = () => {
       toast.error('Price must be greater than 0');
       return;
     }
+    if (newTier.min_quantity < 0) {
+      toast.error('Min quantity cannot be negative');
+      return;
+    }
+    if (newTier.max_quantity !== undefined && newTier.max_quantity < 0) {
+      toast.error('Max quantity cannot be negative');
+      return;
+    }
 
     try {
       setIsCreating(true);
@@ -288,6 +296,14 @@ const VendorServiceTiersPage = () => {
     }
     if (editingTier.base_price <= 0) {
       toast.error('Price must be greater than 0');
+      return;
+    }
+    if (editingTier.min_quantity < 0) {
+      toast.error('Min quantity cannot be negative');
+      return;
+    }
+    if (editingTier.max_quantity !== undefined && editingTier.max_quantity < 0) {
+      toast.error('Max quantity cannot be negative');
       return;
     }
 
