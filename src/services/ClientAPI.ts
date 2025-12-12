@@ -381,7 +381,7 @@ class ClientAPI {
       } catch (s3Error) {
         // Fallback to the regular upload endpoint (which may also use S3 internally)
         console.warn('S3 endpoint not available, falling back to regular upload:', s3Error);
-        
+
         const fallbackResponse = await clientApiClient.post('/v1/api/thinkpartnership/client/lambda/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -524,7 +524,7 @@ class ClientAPI {
   // Return to admin portal (for admin impersonation)
   async returnToAdminPortal(): Promise<void> {
     const adminId = this.getImpersonatingAdminId();
-    
+
     if (!adminId) {
       throw new Error('Not an admin impersonation session');
     }
@@ -558,10 +558,10 @@ class ClientAPI {
       window.location.href = '/admin-portal/clients';
     } catch (error: any) {
       console.error('Error returning to admin portal:', error);
-      
+
       // Clear client auth data on error
       this.clearAuthData();
-      
+
       // Show specific error message based on error type
       if (error.response?.status === 401) {
         throw new Error('Your admin session has expired. Please log in again.');
@@ -594,6 +594,16 @@ class ClientAPI {
 
   async reviewPromotion(promotionId: number, data: { action: 'approve' | 'reject'; comments?: string }): Promise<any> {
     const response = await clientApiClient.post(`/api/marketplace/client/paid-promotion/${promotionId}/review`, data);
+    return response.data;
+  }
+
+  async forgotPassword(email: string): Promise<any> {
+    const response = await clientApiClient.post('/api/marketplace/client/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async resetPassword(email: string, code: string, password: string): Promise<any> {
+    const response = await clientApiClient.post('/api/marketplace/client/auth/reset-password', { email, code, password });
     return response.data;
   }
 }

@@ -156,12 +156,14 @@ const VendorLogin = () => {
                     Keep me signed in
                   </Label>
                 </div>
-                <Link
-                  to="/vendor/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
-                >
-                  Forgot password?
-                </Link>
+                <div className="text-sm">
+                  <Link
+                    to="/vendor/forgot-password"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
               </div>
 
               <Button

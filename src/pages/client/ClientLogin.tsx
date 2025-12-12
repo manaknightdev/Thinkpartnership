@@ -152,21 +152,32 @@ const ClientLogin = () => {
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Controller
-                  name="remember"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="remember"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label htmlFor="remember" className="text-sm sm:text-base text-gray-600">
-                  Keep me signed in
-                </Label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Controller
+                    name="remember"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="remember"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Label htmlFor="remember" className="ml-2 text-sm sm:text-base text-gray-600">
+                    Keep me signed in
+                  </Label>
+                </div>
+
+                <div className="text-sm">
+                  <Link
+                    to="/client/forgot-password"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
               </div>
 
               <Button

@@ -561,7 +561,7 @@ class AdminAPI {
     if (authResponse.refresh_token) {
       localStorage.setItem('admin_refresh_token', authResponse.refresh_token);
     }
-    
+
     const userData = {
       user_id: authResponse.user_id,
       email: authResponse.email,
@@ -764,6 +764,16 @@ class AdminAPI {
 
   async updateCustomer(customerId: number, customerData: any): Promise<ApiResponse> {
     const response = await adminApiClient.put(`/api/marketplace/admin/customers/${customerId}`, customerData);
+    return response.data;
+  }
+
+  async forgotPassword(email: string): Promise<any> {
+    const response = await adminApiClient.post('/api/marketplace/admin/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async resetPassword(email: string, code: string, password: string): Promise<any> {
+    const response = await adminApiClient.post('/api/marketplace/admin/auth/reset-password', { email, code, password });
     return response.data;
   }
 }

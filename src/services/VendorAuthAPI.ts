@@ -196,6 +196,16 @@ class VendorAuthAPI {
     // Redirect to vendor login page
     window.location.href = '/vendor/login';
   }
+
+  async forgotPassword(email: string): Promise<any> {
+    const response = await vendorApiClient.post('/api/marketplace/vendor/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async resetPassword(email: string, code: string, password: string): Promise<any> {
+    const response = await vendorApiClient.post('/api/marketplace/vendor/auth/reset-password', { email, code, password });
+    return response.data;
+  }
 }
 
 export default new VendorAuthAPI();

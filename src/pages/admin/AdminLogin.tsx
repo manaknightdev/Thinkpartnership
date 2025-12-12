@@ -142,22 +142,34 @@ const AdminLogin = () => {
               </div>
 
               {/* Remember Me */}
-              <div className="flex items-center space-x-2">
-                <Controller
-                  name="remember"
-                  control={control}
-                  defaultValue={false}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="remember"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label htmlFor="remember" className="text-sm text-gray-600">
-                  Keep me signed in
-                </Label>
+              {/* Remember Me and Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Controller
+                    name="remember"
+                    control={control}
+                    defaultValue={false}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="remember"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
+                    Remember me
+                  </Label>
+                </div>
+
+                <div className="text-sm">
+                  <Link
+                    to="/admin/forgot-password"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
               </div>
 
               {/* Submit Button */}

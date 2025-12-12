@@ -70,7 +70,7 @@ class MarketplaceAuthAPI {
   }
   private getClientAwareApiClient(clientSlug?: string) {
     const baseURL = API_CONFIG.BASE_URL;
-    
+
     const client = axios.create({
       baseURL,
       headers: {
@@ -181,7 +181,7 @@ class MarketplaceAuthAPI {
     if (authResponse.refresh_token) {
       localStorage.setItem('refresh_token', authResponse.refresh_token);
     }
-    
+
     const userData = {
       user_id: authResponse.user_id,
       customer_id: authResponse.customer_id,
@@ -234,6 +234,18 @@ class MarketplaceAuthAPI {
   getCustomerId(): number | null {
     const userData = this.getUserData();
     return userData?.customer_id || null;
+  }
+
+  async forgotPassword(email: string): Promise<any> {
+    const client = this.getClientAwareApiClient();
+    const response = await client.post('/api/marketplace/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async resetPassword(email: string, code: string, password: string): Promise<any> {
+    const client = this.getClientAwareApiClient();
+    const response = await client.post('/api/marketplace/auth/reset-password', { email, code, password });
+    return response.data;
   }
 }
 

@@ -103,6 +103,8 @@ import AdminIntegrationsPage from "./pages/admin/AdminIntegrationsPage";
 import AdminHelpSupportPage from "./pages/admin/AdminHelpSupportPage";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
 import AdminTasksPage from "./pages/admin/AdminTasksPage";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from './pages/auth/ResetPassword';
 
 
 const queryClient = new QueryClient();
@@ -116,187 +118,195 @@ const App = () => (
         <ClientProvider>
           <CartProvider>
             <Routes>
-          {/* Multi-Client Routes - Support /clientname/marketplace pattern */}
-          {/* Client-specific marketplace routes - INVITE-ONLY REGISTRATION */}
-          <Route path="/:clientSlug/marketplace" element={<CustomerBrowseServicesPage />} />
-          <Route path="/:clientSlug/marketplace/login" element={<CustomerLogin />} />
-          <Route path="/:clientSlug/marketplace/signup" element={<CustomerSignup />} />
-          <Route path="/:clientSlug/marketplace/register" element={<CustomerSignup />} />
-          <Route path="/:clientSlug/marketplace/invite/customer" element={<CustomerSignup />} />
-          <Route path="/:clientSlug/login/oauth" element={<OAuthCallback />} />
-          <Route path="/:clientSlug/marketplace/invite/vendor" element={<VendorSignup />} />
-          <Route path="/:clientSlug/marketplace/categories" element={<CategoriesPage />} />
-          <Route path="/:clientSlug/marketplace/services" element={<AllServicesPage />} />
-          <Route path="/:clientSlug/marketplace/services/:id" element={<ServiceDetailsPage />} />
-          <Route path="/:clientSlug/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-          <Route path="/:clientSlug/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
+              {/* Multi-Client Routes - Support /clientname/marketplace pattern */}
+              {/* Client-specific marketplace routes - INVITE-ONLY REGISTRATION */}
+              <Route path="/:clientSlug/marketplace" element={<CustomerBrowseServicesPage />} />
+              <Route path="/:clientSlug/marketplace/login" element={<CustomerLogin />} />
+              <Route path="/:clientSlug/marketplace/signup" element={<CustomerSignup />} />
+              <Route path="/:clientSlug/marketplace/register" element={<CustomerSignup />} />
+              <Route path="/:clientSlug/marketplace/invite/customer" element={<CustomerSignup />} />
+              <Route path="/:clientSlug/login/oauth" element={<OAuthCallback />} />
+              <Route path="/:clientSlug/marketplace/invite/vendor" element={<VendorSignup />} />
+              <Route path="/:clientSlug/marketplace/categories" element={<CategoriesPage />} />
+              <Route path="/:clientSlug/marketplace/services" element={<AllServicesPage />} />
+              <Route path="/:clientSlug/marketplace/services/:id" element={<ServiceDetailsPage />} />
+              <Route path="/:clientSlug/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+              <Route path="/:clientSlug/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
 
-          {/* Client-specific vendor routes - INVITE-ONLY */}
-          <Route path="/:clientSlug/vendor/login" element={<VendorLogin />} />
-          <Route path="/:clientSlug/vendor/signup" element={<VendorSignup />} />
-          <Route path="/:clientSlug/vendor/register" element={<VendorSignup />} />
-          <Route path="/:clientSlug/vendor/invite" element={<VendorSignup />} />
+              {/* Client-specific vendor routes - INVITE-ONLY */}
+              <Route path="/:clientSlug/vendor/login" element={<VendorLogin />} />
+              <Route path="/:clientSlug/vendor/signup" element={<VendorSignup />} />
+              <Route path="/:clientSlug/vendor/register" element={<VendorSignup />} />
+              <Route path="/:clientSlug/vendor/invite" element={<VendorSignup />} />
 
-          {/* Default route - Show client selection or redirect */}
-          <Route path="/" element={<Navigate to="/select-client" replace />} />
+              {/* Default route - Show client selection or redirect */}
+              <Route path="/" element={<Navigate to="/select-client" replace />} />
 
-          {/* Client selection page for users without client context */}
-          <Route path="/select-client" element={<div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="max-w-md w-full space-y-8 p-8">
-              <div className="text-center">
-                <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                  Access Required
-                </h2>
-                <p className="mt-2 text-sm text-gray-600">
-                  Please access the marketplace through your client's specific link.
-                </p>
-                <p className="mt-4 text-xs text-gray-500">
-                  Contact your service provider for the correct marketplace URL.
-                </p>
-              </div>
-            </div>
-          </div>} />
+              {/* Client selection page for users without client context */}
+              <Route path="/select-client" element={<div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="max-w-md w-full space-y-8 p-8">
+                  <div className="text-center">
+                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                      Access Required
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Please access the marketplace through your client's specific link.
+                    </p>
+                    <p className="mt-4 text-xs text-gray-500">
+                      Contact your service provider for the correct marketplace URL.
+                    </p>
+                  </div>
+                </div>
+              </div>} />
 
-          {/* Legacy routes - DISABLED for multi-client */}
-          <Route path="/signup" element={<Navigate to="/select-client" replace />} />
-          <Route path="/login" element={<Navigate to="/select-client" replace />} />
-          <Route path="/onboarding-client" element={<OnboardingClient />} />
-          <Route path="/onboarding-vendor" element={<Navigate to="/select-client" replace />} />
+              {/* Legacy routes - DISABLED for multi-client */}
+              <Route path="/signup" element={<Navigate to="/select-client" replace />} />
+              <Route path="/login" element={<Navigate to="/select-client" replace />} />
+              <Route path="/onboarding-client" element={<OnboardingClient />} />
+              <Route path="/onboarding-vendor" element={<Navigate to="/select-client" replace />} />
 
-          {/* Customer Authentication Routes */}
-          <Route path="/marketplace/login" element={<CustomerLogin />} />
-          <Route path="/marketplace/signup" element={<CustomerSignup />} />
-          <Route path="/marketplace/register" element={<CustomerSignup />} />
-          <Route path="/login/oauth" element={<OAuthCallback />} />
+              {/* Customer Authentication Routes */}
+              <Route path="/marketplace/login" element={<CustomerLogin />} />
+              <Route path="/marketplace/signup" element={<CustomerSignup />} />
+              <Route path="/marketplace/register" element={<CustomerSignup />} />
+              <Route path="/login/oauth" element={<OAuthCallback />} />
+              <Route path="/marketplace/forgot-password" element={<ForgotPassword type="customer" />} />
+              <Route path="/marketplace/reset-password" element={<ResetPassword type="customer" />} />
 
-          {/* Register route for referral links */}
-          <Route path="/register" element={<CustomerSignup />} />
+              {/* Register route for referral links */}
+              <Route path="/register" element={<CustomerSignup />} />
 
-          {/* Vendor Authentication Routes */}
-          <Route path="/vendor/login" element={<VendorLogin />} />
-          <Route path="/vendor/signup" element={<VendorSignup />} />
-          <Route path="/vendor/register" element={<VendorSignup />} />
+              {/* Vendor Authentication Routes */}
+              <Route path="/vendor/login" element={<VendorLogin />} />
+              <Route path="/vendor/signup" element={<VendorSignup />} />
+              <Route path="/vendor/register" element={<VendorSignup />} />
+              <Route path="/vendor/forgot-password" element={<ForgotPassword type="vendor" />} />
+              <Route path="/vendor/reset-password" element={<ResetPassword type="vendor" />} />
 
-          {/* Client Authentication Routes */}
-          <Route path="/client/login" element={<ClientLogin />} />
-          <Route path="/client/signup" element={<ClientSignup />} />
-          <Route path="/client-registration" element={<ClientRegistrationPage />} />
+              {/* Client Authentication Routes */}
+              <Route path="/client/login" element={<ClientLogin />} />
+              <Route path="/client/signup" element={<ClientSignup />} />
+              <Route path="/client-registration" element={<ClientRegistrationPage />} />
+              <Route path="/client/forgot-password" element={<ForgotPassword type="client" />} />
+              <Route path="/client/reset-password" element={<ResetPassword type="client" />} />
 
-          {/* Admin Authentication Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+              {/* Admin Authentication Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/forgot-password" element={<ForgotPassword type="admin" />} />
+              <Route path="/admin/reset-password" element={<ResetPassword type="admin" />} />
 
-          {/* Public Marketplace Routes - No authentication required for browsing */}
-          <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
-          <Route path="/marketplace/login" element={<CustomerLogin />} />
-          <Route path="/marketplace/register" element={<CustomerSignup />} />
-          <Route path="/marketplace/signup" element={<CustomerSignup />} />
-          <Route path="/marketplace/categories" element={<CategoriesPage />} />
-          <Route path="/marketplace/services" element={<AllServicesPage />} />
-          <Route path="/marketplace/services/:id" element={<ServiceDetailsPage />} />
+              {/* Public Marketplace Routes - No authentication required for browsing */}
+              <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
+              <Route path="/marketplace/login" element={<CustomerLogin />} />
+              <Route path="/marketplace/register" element={<CustomerSignup />} />
+              <Route path="/marketplace/signup" element={<CustomerSignup />} />
+              <Route path="/marketplace/categories" element={<CategoriesPage />} />
+              <Route path="/marketplace/services" element={<AllServicesPage />} />
+              <Route path="/marketplace/services/:id" element={<ServiceDetailsPage />} />
 
-          {/* Protected Marketplace Routes - Authentication required for actions */}
-          <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-          <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
-          <Route path="/marketplace/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-          <Route path="/marketplace/cart/checkout" element={<ProtectedRoute><CartCheckoutPage /></ProtectedRoute>} />
-          <Route path="/marketplace/cart/payment-success" element={<ProtectedRoute><CartPaymentSuccessPage /></ProtectedRoute>} />
-          <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
-          <Route path="/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
-          <Route path="/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
-          <Route path="/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
-          <Route path="/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
-          <Route path="/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
-          <Route path="/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-          <Route path="/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
-          <Route path="/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
-          <Route path="/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-          <Route path="/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
+              {/* Protected Marketplace Routes - Authentication required for actions */}
+              <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+              <Route path="/marketplace/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+              <Route path="/marketplace/cart/checkout" element={<ProtectedRoute><CartCheckoutPage /></ProtectedRoute>} />
+              <Route path="/marketplace/cart/payment-success" element={<ProtectedRoute><CartPaymentSuccessPage /></ProtectedRoute>} />
+              <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
+              <Route path="/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+              <Route path="/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
+              <Route path="/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
+              <Route path="/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
+              <Route path="/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
+              <Route path="/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
+              <Route path="/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+              <Route path="/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+              <Route path="/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
 
-          {/* Nested routes for Customer Dashboard */}
-          <Route path="/customer-portal" element={<CustomerDashboard />}>
-            <Route index element={<Navigate to="/marketplace" replace />} />
-            <Route path="orders" element={<CustomerOrdersPage />} />
-            <Route path="account" element={<CustomerAccountPage />} />
-          </Route>
+              {/* Nested routes for Customer Dashboard */}
+              <Route path="/customer-portal" element={<CustomerDashboard />}>
+                <Route index element={<Navigate to="/marketplace" replace />} />
+                <Route path="orders" element={<CustomerOrdersPage />} />
+                <Route path="account" element={<CustomerAccountPage />} />
+              </Route>
 
-          {/* Nested routes for Client Dashboard */}
-          <Route path="/client-portal" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>}>
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<ClientOverviewPage />} />
-            <Route path="tasks" element={<ClientTasksPage />} />
-            <Route path="reports" element={<ClientReportsPage />} />
-            <Route path="vendors" element={<ClientVendorManagementPage />} />
-            <Route path="customers" element={<ClientCustomersPage />} />
-            <Route path="invites" element={<ClientInviteSystemPage />} />
-            <Route path="subscription" element={<ClientSubscriptionPage />} />
-            <Route path="pricing" element={<ClientPricingBillingPage />} />
-            <Route path="wallet" element={<ClientWalletPage />} />
-            <Route path="notifications" element={<ClientNotificationsPage />} />
-            <Route path="help" element={<ClientHelpSupportPage />} />
-            <Route path="rules" element={<ClientCommissionRulesPage />} />
-            <Route path="branding" element={<ClientBrandingPage />} />
-            <Route path="categories" element={<ClientCategoriesPage />} /> {/* New route */}
-            <Route path="service-approvals" element={<ClientServiceApprovalsPage />} /> {/* New route */}
-            <Route path="promotion-approvals" element={<ClientPaidPromotionApprovalsPage />} /> {/* New route */}
-            <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
-          </Route>
+              {/* Nested routes for Client Dashboard */}
+              <Route path="/client-portal" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>}>
+                <Route index element={<Navigate to="overview" replace />} />
+                <Route path="overview" element={<ClientOverviewPage />} />
+                <Route path="tasks" element={<ClientTasksPage />} />
+                <Route path="reports" element={<ClientReportsPage />} />
+                <Route path="vendors" element={<ClientVendorManagementPage />} />
+                <Route path="customers" element={<ClientCustomersPage />} />
+                <Route path="invites" element={<ClientInviteSystemPage />} />
+                <Route path="subscription" element={<ClientSubscriptionPage />} />
+                <Route path="pricing" element={<ClientPricingBillingPage />} />
+                <Route path="wallet" element={<ClientWalletPage />} />
+                <Route path="notifications" element={<ClientNotificationsPage />} />
+                <Route path="help" element={<ClientHelpSupportPage />} />
+                <Route path="rules" element={<ClientCommissionRulesPage />} />
+                <Route path="branding" element={<ClientBrandingPage />} />
+                <Route path="categories" element={<ClientCategoriesPage />} /> {/* New route */}
+                <Route path="service-approvals" element={<ClientServiceApprovalsPage />} /> {/* New route */}
+                <Route path="promotion-approvals" element={<ClientPaidPromotionApprovalsPage />} /> {/* New route */}
+                <Route path="orders" element={<ClientMarketplaceOrdersPage />} /> {/* New route */}
+              </Route>
 
-          {/* Nested routes for Vendor Dashboard */}
-          <Route path="/vendor-portal" element={<VendorProtectedRoute><VendorDashboard /></VendorProtectedRoute>}>
-            <Route index element={<Navigate to="profile" replace />} />
-            <Route path="profile" element={<VendorProfilePage />} />
-            <Route path="services" element={<VendorServicesPage />} />
-            <Route path="service-tiers" element={<VendorServiceTiersPage />} />
-            <Route path="subscription-services" element={<VendorSubscriptionServicesPage />} />
-            <Route path="requests" element={<VendorRequestsPage />} />
-            <Route path="orders" element={<VendorOrdersPage />} />
-            <Route path="messages" element={<VendorMessagesPage />} />
-            <Route path="messages/:customerId" element={<VendorMessagesPage />} />
-            <Route path="customers" element={<VendorCustomersPage />} />
-            <Route path="subscription" element={<VendorSubscriptionPage />} />
-            <Route path="wallet" element={<VendorWalletPage />} />
-            <Route path="notifications" element={<VendorNotificationsPage />} />
-            <Route path="account" element={<VendorAccountPage />} />
-            <Route path="help" element={<VendorHelpSupportPage />} />
-            <Route path="referrals" element={<VendorReferralsPage />} />
-            <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} />
-            <Route path="invite" element={<VendorInvitePage />} />
-          </Route>
+              {/* Nested routes for Vendor Dashboard */}
+              <Route path="/vendor-portal" element={<VendorProtectedRoute><VendorDashboard /></VendorProtectedRoute>}>
+                <Route index element={<Navigate to="profile" replace />} />
+                <Route path="profile" element={<VendorProfilePage />} />
+                <Route path="services" element={<VendorServicesPage />} />
+                <Route path="service-tiers" element={<VendorServiceTiersPage />} />
+                <Route path="subscription-services" element={<VendorSubscriptionServicesPage />} />
+                <Route path="requests" element={<VendorRequestsPage />} />
+                <Route path="orders" element={<VendorOrdersPage />} />
+                <Route path="messages" element={<VendorMessagesPage />} />
+                <Route path="messages/:customerId" element={<VendorMessagesPage />} />
+                <Route path="customers" element={<VendorCustomersPage />} />
+                <Route path="subscription" element={<VendorSubscriptionPage />} />
+                <Route path="wallet" element={<VendorWalletPage />} />
+                <Route path="notifications" element={<VendorNotificationsPage />} />
+                <Route path="account" element={<VendorAccountPage />} />
+                <Route path="help" element={<VendorHelpSupportPage />} />
+                <Route path="referrals" element={<VendorReferralsPage />} />
+                <Route path="referrals/full-report" element={<VendorFullReferralReportPage />} />
+                <Route path="invite" element={<VendorInvitePage />} />
+              </Route>
 
-          {/* Nested routes for Admin Portal */}
-          <Route path="/admin-portal" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>}>
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<AdminDashboardOverviewPage />} />
-            <Route path="tasks" element={<AdminTasksPage />} />
-            <Route path="clients" element={<AdminAllClientsPage />} />
-            <Route path="vendors" element={<AdminAllVendorsPage />} />
-            <Route path="customers" element={<AdminAllCustomersPage />} />
-            <Route path="transactions" element={<AdminTransactionsPage />} />
-            <Route path="wallet" element={<AdminWalletPage />} />
-            <Route path="vendor-approvals" element={<AdminVendorApprovalsPage />} />
+              {/* Nested routes for Admin Portal */}
+              <Route path="/admin-portal" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>}>
+                <Route index element={<Navigate to="overview" replace />} />
+                <Route path="overview" element={<AdminDashboardOverviewPage />} />
+                <Route path="tasks" element={<AdminTasksPage />} />
+                <Route path="clients" element={<AdminAllClientsPage />} />
+                <Route path="vendors" element={<AdminAllVendorsPage />} />
+                <Route path="customers" element={<AdminAllCustomersPage />} />
+                <Route path="transactions" element={<AdminTransactionsPage />} />
+                <Route path="wallet" element={<AdminWalletPage />} />
+                <Route path="vendor-approvals" element={<AdminVendorApprovalsPage />} />
 
-            <Route path="reports" element={<AdminReportsPage />} />
-            <Route path="manual-commissions" element={<AdminManualCommissionsPage />} />
-            <Route path="license-management" element={<AdminLicenseManagementPage />} />
-            <Route path="subscription-plans" element={<AdminSubscriptionPlansPage />} />
-            <Route path="integrations" element={<AdminIntegrationsPage />} />
-            <Route path="help" element={<AdminHelpSupportPage />} />
-            <Route path="profile" element={<AdminProfilePage />} />
-          </Route>
+                <Route path="reports" element={<AdminReportsPage />} />
+                <Route path="manual-commissions" element={<AdminManualCommissionsPage />} />
+                <Route path="license-management" element={<AdminLicenseManagementPage />} />
+                <Route path="subscription-plans" element={<AdminSubscriptionPlansPage />} />
+                <Route path="integrations" element={<AdminIntegrationsPage />} />
+                <Route path="help" element={<AdminHelpSupportPage />} />
+                <Route path="profile" element={<AdminProfilePage />} />
+              </Route>
 
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </CartProvider>
         </ClientProvider>
