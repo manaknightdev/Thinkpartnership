@@ -31,7 +31,7 @@ import ClientReferralAPI from "@/services/ClientReferralAPI";
 const ClientInviteSystemPage = () => {
   // Public site base for referral links shown to users (QA wants Netlify domain)
   const PUBLIC_SITE_BASE = (import.meta as any).env?.VITE_PUBLIC_SITE_URL ||
-    "https://think-partnership.netlify.app";
+    "https://app.realpartnersos.com";
 
   // Rewrite any incoming referral link to the public site base while preserving path and query
   const rewriteReferralLink = (link: string): string => {
@@ -575,11 +575,10 @@ const ClientInviteSystemPage = () => {
                 id="invite-message"
                 placeholder={`Add a personal message to your invitation...
 
-Example: "Hi! I'd like to invite you to join our marketplace where you can ${
-                  inviteType === "customer"
+Example: "Hi! I'd like to invite you to join our marketplace where you can ${inviteType === "customer"
                     ? "find trusted service providers for all your needs"
                     : "offer your services to customers in our network"
-                }."`}
+                  }."`}
                 value={inviteMessage}
                 onChange={(e) => setInviteMessage(e.target.value)}
                 rows={4}
@@ -635,9 +634,8 @@ Example: "Hi! I'd like to invite you to join our marketplace where you can ${
           {selectedInvite && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                  selectedInvite.type === "customer" ? "bg-green-100" : "bg-blue-100"
-                }`}>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${selectedInvite.type === "customer" ? "bg-green-100" : "bg-blue-100"
+                  }`}>
                   {selectedInvite.type === "customer" ? (
                     <Users className={`h-8 w-8 ${selectedInvite.type === "customer" ? "text-green-600" : "text-blue-600"}`} />
                   ) : (

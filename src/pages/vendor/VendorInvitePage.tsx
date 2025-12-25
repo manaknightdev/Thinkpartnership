@@ -61,7 +61,7 @@ const VendorInvitePage = () => {
     try {
       const url = new URL(originalUrl);
       // Always use production URL
-      const productionUrl = new URL(url.pathname + url.search, 'https://think-partnership.netlify.app');
+      const productionUrl = new URL(url.pathname + url.search, 'https://app.realpartnersos.com');
 
       // Add client context if available and not already present
       if (client?.id && !productionUrl.searchParams.has('client')) {
@@ -71,7 +71,7 @@ const VendorInvitePage = () => {
       return productionUrl.toString();
     } catch (error) {
       // Fallback for invalid URLs
-      const fallbackUrl = new URL('/register', 'https://think-partnership.netlify.app');
+      const fallbackUrl = new URL('/register', 'https://app.realpartnersos.com');
       if (client?.id) {
         fallbackUrl.searchParams.set('client', client.id.toString());
       }
@@ -82,7 +82,7 @@ const VendorInvitePage = () => {
   const referralLink = referralLinks.length > 0
     ? getProperReferralLink(referralLinks[0].url)
     : (() => {
-      const fallbackUrl = new URL('/register', 'https://think-partnership.netlify.app');
+      const fallbackUrl = new URL('/register', 'https://app.realpartnersos.com');
       if (client?.id) {
         fallbackUrl.searchParams.set('client', client.id.toString());
       }
@@ -238,12 +238,12 @@ const VendorInvitePage = () => {
                         </p>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium shrink-0 ${invite.status === 'accepted'
-                          ? 'bg-green-100 text-green-800'
-                          : invite.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : invite.status === 'expired'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-gray-100 text-gray-800'
+                        ? 'bg-green-100 text-green-800'
+                        : invite.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : invite.status === 'expired'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-gray-100 text-gray-800'
                         }`}>
                         {invite.status === 'accepted' ? 'Converted' :
                           invite.status === 'pending' ? 'Sent' :
@@ -282,12 +282,12 @@ const VendorInvitePage = () => {
                         </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${invite.status === 'accepted'
-                              ? 'bg-green-100 text-green-800'
-                              : invite.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : invite.status === 'expired'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-gray-100 text-gray-800'
+                            ? 'bg-green-100 text-green-800'
+                            : invite.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : invite.status === 'expired'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-gray-100 text-gray-800'
                             }`}>
                             {invite.status === 'accepted' ? 'Converted' :
                               invite.status === 'pending' ? 'Sent' :
