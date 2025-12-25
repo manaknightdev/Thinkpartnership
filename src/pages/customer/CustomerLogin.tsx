@@ -158,7 +158,7 @@ const CustomerLogin = () => {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Real PartnersOS</h1>
-          <p className="text-gray-600">Welcome backll to the marketplace</p>
+          <p className="text-gray-600">Welcome back to the marketplace</p>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
