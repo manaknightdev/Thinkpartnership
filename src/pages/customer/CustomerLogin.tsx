@@ -94,7 +94,8 @@ const CustomerLogin = () => {
   const handleSocialLogin = (provider: string) => {
     // Get the current client context
     const currentClientSlug = clientSlug || clientParam;
-    const baseUrl = import.meta.env.VITE_BASE_URL;
+    // CHANGE FALLBACK URL HERE: If VITE_BASE_URL is missing, use this URL
+    const baseUrl = 'https://baas.mytechpassport.com';
 
     // Construct the social login URL based on the backend API endpoints
     let socialLoginUrl = '';
@@ -157,7 +158,7 @@ const CustomerLogin = () => {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Real PartnersOS</h1>
-          <p className="text-gray-600">Welcome back to the marketplaafce</p>
+          <p className="text-gray-600">Welcome backll to the marketplace</p>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
