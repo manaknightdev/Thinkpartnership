@@ -95,7 +95,8 @@ const CustomerLogin = () => {
     // Get the current client context
     const currentClientSlug = clientSlug || clientParam;
     // CHANGE FALLBACK URL HERE: If VITE_BASE_URL is missing, use this URL
-    const baseUrl = 'https://baas.mytechpassport.com';
+    // const baseUrl = 'http://api.realpartnersos.com';
+    const baseUrl = 'http://localhost:5172';
 
     // Construct the social login URL based on the backend API endpoints
     let socialLoginUrl = '';
