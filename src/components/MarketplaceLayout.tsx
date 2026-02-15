@@ -146,7 +146,7 @@ export const MarketplaceLayout = ({ children }: MarketplaceLayoutProps) => {
       return client.company_name;
     }
 
-    return 'RealPartnersOS';
+    return 'Marketplace';
   };
 
   // Define sidebar items based on authentication status

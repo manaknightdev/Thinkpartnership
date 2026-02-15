@@ -59,6 +59,23 @@ class MarketplaceBrandingAPI {
           const urlParams = new URLSearchParams(window.location.search);
           client = urlParams.get('client');
         }
+
+        // Try to detect from URL path (e.g., /acmecorp/marketplace)
+        if (!client) {
+          const pathMatch = window.location.pathname.match(/^\/([^\/]+)\/(marketplace|vendor|admin)/);
+          if (pathMatch) {
+            client = pathMatch[1];
+          }
+        }
+
+        // Try to detect from custom domain (not localhost or platform domains)
+        if (!client) {
+          const hostname = window.location.hostname;
+          if (!hostname.includes('localhost') && !hostname.includes('thinkpartnership') &&
+              !hostname.includes('netlify') && !hostname.includes('vercel')) {
+            client = hostname;
+          }
+        }
       }
 
       // If we have a client context, try to get their branding
@@ -71,7 +88,7 @@ class MarketplaceBrandingAPI {
 
       // Return default branding
       return {
-        company_name: 'RealPartnersOS',
+        company_name: '',
         primary_color: '#22C55E',
         secondary_color: '#3B82F6',
         font_family: 'Inter, sans-serif',
@@ -90,7 +107,7 @@ class MarketplaceBrandingAPI {
       
       // Return default branding on error
       return {
-        company_name: 'RealPartnersOS',
+        company_name: '',
         primary_color: '#22C55E',
         secondary_color: '#3B82F6',
         font_family: 'Inter, sans-serif',

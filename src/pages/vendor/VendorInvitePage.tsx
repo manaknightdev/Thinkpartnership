@@ -61,7 +61,7 @@ const VendorInvitePage = () => {
     try {
       const url = new URL(originalUrl);
       // Always use production URL
-      const productionUrl = new URL(url.pathname + url.search, 'https://app.realpartnersos.com');
+      const productionUrl = new URL(url.pathname + url.search, window.location.origin);
 
       // Add client context if available and not already present
       if (client?.id && !productionUrl.searchParams.has('client')) {
@@ -71,7 +71,7 @@ const VendorInvitePage = () => {
       return productionUrl.toString();
     } catch (error) {
       // Fallback for invalid URLs
-      const fallbackUrl = new URL('/register', 'https://app.realpartnersos.com');
+      const fallbackUrl = new URL('/register', window.location.origin);
       if (client?.id) {
         fallbackUrl.searchParams.set('client', client.id.toString());
       }
@@ -82,7 +82,7 @@ const VendorInvitePage = () => {
   const referralLink = referralLinks.length > 0
     ? getProperReferralLink(referralLinks[0].url)
     : (() => {
-      const fallbackUrl = new URL('/register', 'https://app.realpartnersos.com');
+      const fallbackUrl = new URL('/register', window.location.origin);
       if (client?.id) {
         fallbackUrl.searchParams.set('client', client.id.toString());
       }

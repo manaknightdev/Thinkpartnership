@@ -31,7 +31,15 @@ export const useMarketplaceBranding = () => {
           }
         }
 
-        // 3. From subdomain (if applicable)
+        // 3. From URL path (e.g., /acmecorp/marketplace)
+        if (!clientId) {
+          const pathMatch = window.location.pathname.match(/^\/([^\/]+)\/(marketplace|vendor|admin)/);
+          if (pathMatch) {
+            clientId = pathMatch[1];
+          }
+        }
+
+        // 4. From subdomain (e.g., acmecorp.thinkpartnership.com)
         if (!clientId) {
           const hostname = window.location.hostname;
           if (hostname.includes('.') && !hostname.startsWith('www.')) {
@@ -44,6 +52,15 @@ export const useMarketplaceBranding = () => {
                 clientId = subdomain;
               }
             }
+          }
+        }
+
+        // 5. From custom domain (not localhost or platform domains)
+        if (!clientId) {
+          const hostname = window.location.hostname;
+          if (!hostname.includes('localhost') && !hostname.includes('thinkpartnership') &&
+              !hostname.includes('netlify') && !hostname.includes('vercel')) {
+            clientId = hostname;
           }
         }
 
@@ -72,7 +89,7 @@ export const useMarketplaceBranding = () => {
         
         // Set default branding on error
         setBranding({
-          company_name: 'RealPartnersOS',
+          company_name: '',
           primary_color: '#22C55E',
           secondary_color: '#3B82F6',
           font_family: 'Inter, sans-serif',

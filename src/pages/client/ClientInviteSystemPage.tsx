@@ -31,7 +31,7 @@ import ClientReferralAPI from "@/services/ClientReferralAPI";
 const ClientInviteSystemPage = () => {
   // Public site base for referral links shown to users (QA wants Netlify domain)
   const PUBLIC_SITE_BASE = (import.meta as any).env?.VITE_PUBLIC_SITE_URL ||
-    "https://app.realpartnersos.com";
+    window.location.origin;
 
   // Rewrite any incoming referral link to the public site base while preserving path and query
   const rewriteReferralLink = (link: string): string => {

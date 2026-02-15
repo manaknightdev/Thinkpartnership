@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ClientProvider } from "./contexts/ClientContext";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { ClientProvider, useClient } from "./contexts/ClientContext";
 import { CartProvider } from "./contexts/CartContext";
 
 import NotFound from "./pages/NotFound";
@@ -109,6 +109,32 @@ import ResetPassword from './pages/auth/ResetPassword';
 
 const queryClient = new QueryClient();
 
+// Redirects to /marketplace if a client is detected from the domain, otherwise /select-client
+const ClientAwareRoot = () => {
+  const { client, isLoading } = useClient();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+  return <Navigate to={client ? "/marketplace" : "/select-client"} replace />;
+};
+
+// Blocks all flat /marketplace/* routes unless a client is detected (from domain or slug)
+const ClientGuard = () => {
+  const { client, isLoading } = useClient();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+  return client ? <Outlet /> : <Navigate to="/select-client" replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -150,8 +176,8 @@ const App = () => (
               <Route path="/:clientSlug/vendor/register" element={<VendorSignup />} />
               <Route path="/:clientSlug/vendor/invite" element={<VendorSignup />} />
 
-              {/* Default route - Show client selection or redirect */}
-              <Route path="/" element={<Navigate to="/select-client" replace />} />
+              {/* Default route - Redirect to marketplace if client detected from domain, else select-client */}
+              <Route path="/" element={<ClientAwareRoot />} />
 
               {/* Client selection page for users without client context */}
               <Route path="/select-client" element={<div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -206,32 +232,32 @@ const App = () => (
               <Route path="/admin/forgot-password" element={<ForgotPassword type="admin" />} />
               <Route path="/admin/reset-password" element={<ResetPassword type="admin" />} />
 
-              {/* Public Marketplace Routes - No authentication required for browsing */}
-              <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
-              <Route path="/marketplace/login" element={<CustomerLogin />} />
-              <Route path="/marketplace/register" element={<CustomerSignup />} />
-              <Route path="/marketplace/signup" element={<CustomerSignup />} />
-              <Route path="/marketplace/categories" element={<CategoriesPage />} />
-              <Route path="/marketplace/services" element={<AllServicesPage />} />
-              <Route path="/marketplace/services/:id" element={<ServiceDetailsPage />} />
-
-              {/* Protected Marketplace Routes - Authentication required for actions */}
-              <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-              <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
-              <Route path="/marketplace/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-              <Route path="/marketplace/cart/checkout" element={<ProtectedRoute><CartCheckoutPage /></ProtectedRoute>} />
-              <Route path="/marketplace/cart/payment-success" element={<ProtectedRoute><CartPaymentSuccessPage /></ProtectedRoute>} />
-              <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
-              <Route path="/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
-              <Route path="/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
-              <Route path="/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
-              <Route path="/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
-              <Route path="/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
-              <Route path="/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-              <Route path="/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
-              <Route path="/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
-              <Route path="/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-              <Route path="/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
+              {/* All flat /marketplace routes — guarded: requires client context from domain */}
+              <Route element={<ClientGuard />}>
+                <Route path="/marketplace" element={<CustomerBrowseServicesPage />} />
+                <Route path="/marketplace/login" element={<CustomerLogin />} />
+                <Route path="/marketplace/register" element={<CustomerSignup />} />
+                <Route path="/marketplace/signup" element={<CustomerSignup />} />
+                <Route path="/marketplace/categories" element={<CategoriesPage />} />
+                <Route path="/marketplace/services" element={<AllServicesPage />} />
+                <Route path="/marketplace/services/:id" element={<ServiceDetailsPage />} />
+                <Route path="/marketplace/checkout/:serviceName" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                <Route path="/marketplace/payment-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+                <Route path="/marketplace/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+                <Route path="/marketplace/cart/checkout" element={<ProtectedRoute><CartCheckoutPage /></ProtectedRoute>} />
+                <Route path="/marketplace/cart/payment-success" element={<ProtectedRoute><CartPaymentSuccessPage /></ProtectedRoute>} />
+                <Route path="/marketplace/orders" element={<ProtectedRoute><CustomerOrdersPage /></ProtectedRoute>} />
+                <Route path="/marketplace/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+                <Route path="/marketplace/help" element={<ProtectedRoute><HelpSupportPage /></ProtectedRoute>} />
+                <Route path="/marketplace/requests" element={<ProtectedRoute><ServiceRequestsPage /></ProtectedRoute>} />
+                <Route path="/marketplace/requests/:requestId" element={<ProtectedRoute><ServiceRequestDetailsPage /></ProtectedRoute>} />
+                <Route path="/marketplace/request-service/:id" element={<ProtectedRoute><RequestServicePage /></ProtectedRoute>} />
+                <Route path="/marketplace/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+                <Route path="/marketplace/request-submitted" element={<ProtectedRoute><PlaceholderPage title="Request Submitted" description="Your service request has been submitted successfully! We'll match you with qualified professionals soon." /></ProtectedRoute>} />
+                <Route path="/marketplace/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+                <Route path="/marketplace/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+                <Route path="/marketplace/map" element={<ProtectedRoute><PlaceholderPage title="Service Map" description="Interactive map view coming soon." /></ProtectedRoute>} />
+              </Route>
 
               {/* Nested routes for Customer Dashboard */}
               <Route path="/customer-portal" element={<CustomerDashboard />}>

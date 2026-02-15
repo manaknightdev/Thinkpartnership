@@ -713,7 +713,7 @@ const ClientSubscriptionPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="billing-name">Full Name</Label>
-                    <Input id="billing-name" defaultValue="RealPartnersOS Corp" />
+                    <Input id="billing-name" defaultValue="" />
                   </div>
                   <div>
                     <Label htmlFor="billing-email">Email</Label>
