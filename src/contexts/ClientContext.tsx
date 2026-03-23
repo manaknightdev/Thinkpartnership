@@ -81,31 +81,31 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
       return null;
     }
 
-    // Method 2: Subdomain-based detection, but ignore platform subdomains (e.g., *.netlify.app)
-    if (hostname.includes('.') && !hostname.startsWith('www.')) {
-      const parts = hostname.split('.');
-      const tld = parts.slice(-2).join('.');
-      const isPlatformDomain = ['netlify.app', 'vercel.app'].includes(tld);
-      if (!isPlatformDomain && parts.length >= 3) {
-        const subdomain = parts[0];
-        if (subdomain !== 'www' && subdomain !== 'localhost') {
-          return subdomain;
-        }
-      }
-    }
-
-    // Method 3: Path-based client (e.g., /client/clientname/marketplace)
+    // Method 2: Path-based client FIRST (e.g., /clientname/marketplace) - check this BEFORE subdomain
     const pathPatterns = [
-      /^\/client\/([^\/]+)/,  // /client/clientname
       /^\/([^\/]+)\/marketplace/, // /clientname/marketplace
       /^\/([^\/]+)\/vendor/, // /clientname/vendor
-      /^\/([^\/]+)\/admin/   // /clientname/admin
+      /^\/([^\/]+)\/admin/,  // /clientname/admin
+      /^\/client\/([^\/]+)/  // /client/clientname
     ];
 
     for (const pattern of pathPatterns) {
       const match = pathname.match(pattern);
       if (match) {
         return match[1];
+      }
+    }
+
+    // Method 3: Subdomain-based detection, but ignore platform subdomains (e.g., *.netlify.app)
+    if (hostname.includes('.') && !hostname.startsWith('www.')) {
+      const parts = hostname.split('.');
+      const tld = parts.slice(-2).join('.');
+      const isPlatformDomain = ['netlify.app', 'vercel.app', 'realpartnersos.com', 'thinkpartnership.com'].includes(tld);
+      if (!isPlatformDomain && parts.length >= 3) {
+        const subdomain = parts[0];
+        if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== 'app' && subdomain !== 'api') {
+          return subdomain;
+        }
       }
     }
 
@@ -117,8 +117,9 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
       }
     }
 
-    // Method 5: Custom domain
-    if (!hostname.includes('localhost') && !hostname.includes('thinkpartnership')) {
+    // Method 5: Custom domain (not localhost or platform domains)
+    if (!hostname.includes('localhost') && !hostname.includes('thinkpartnership') &&
+        !hostname.includes('realpartnersos') && !hostname.includes('netlify') && !hostname.includes('vercel')) {
       return hostname;
     }
 
