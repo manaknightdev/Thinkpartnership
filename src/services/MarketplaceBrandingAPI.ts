@@ -72,7 +72,8 @@ class MarketplaceBrandingAPI {
         if (!client) {
           const hostname = window.location.hostname;
           if (!hostname.includes('localhost') && !hostname.includes('thinkpartnership') &&
-              !hostname.includes('netlify') && !hostname.includes('vercel')) {
+              !hostname.includes('netlify') && !hostname.includes('vercel') &&
+              !hostname.includes('realpartnersos')) {
             client = hostname;
           }
         }

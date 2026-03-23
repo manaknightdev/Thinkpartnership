@@ -45,10 +45,10 @@ export const useMarketplaceBranding = () => {
           if (hostname.includes('.') && !hostname.startsWith('www.')) {
             const parts = hostname.split('.');
             const tld = parts.slice(-2).join('.');
-            const isPlatformDomain = ['netlify.app', 'vercel.app', 'localhost'].includes(tld);
+            const isPlatformDomain = ['netlify.app', 'vercel.app', 'localhost', 'realpartnersos.com', 'thinkpartnership.com'].includes(tld);
             if (!isPlatformDomain && parts.length >= 3) {
               const subdomain = parts[0];
-              if (subdomain !== 'www') {
+              if (subdomain !== 'www' && subdomain !== 'app' && subdomain !== 'api') {
                 clientId = subdomain;
               }
             }
