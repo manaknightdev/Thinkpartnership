@@ -35,8 +35,9 @@ const ClientBrandingPage = () => {
   const [primaryColor, setPrimaryColor] = useState("#22C55E");
   const [secondaryColor, setSecondaryColor] = useState("#3B82F6");
   const [fontFamily, setFontFamily] = useState("Inter, sans-serif");
-  const [subdomain, setSubdomain] = useState("yourbrand");
-  
+  const [subdomain, setSubdomain] = useState("");
+  const [customDomain, setCustomDomain] = useState("");
+
   // Marketplace content text fields
   const [heroHeading, setHeroHeading] = useState("Find the perfect service for your home");
   const [heroSubheading, setHeroSubheading] = useState("Connect with trusted professionals. Quality guaranteed, satisfaction promised.");
@@ -64,8 +65,9 @@ const ClientBrandingPage = () => {
         setPrimaryColor(brandingData.primary_color || "#22C55E");
         setSecondaryColor(brandingData.secondary_color || "#3B82F6");
         setFontFamily(brandingData.font_family || "Inter, sans-serif");
-        setSubdomain(brandingData.marketplace_subdomain || "yourbrand");
-        
+        setSubdomain(brandingData.marketplace_subdomain || "");
+        setCustomDomain(brandingData.custom_domain || "");
+
         // Load marketplace content text fields
         setHeroHeading(brandingData.hero_heading || "Find the perfect service for your home");
         setHeroSubheading(brandingData.hero_subheading || "Connect with trusted professionals. Quality guaranteed, satisfaction promised.");
@@ -123,6 +125,7 @@ const ClientBrandingPage = () => {
       const brandingData = {
         company_name: companyName,
         marketplace_subdomain: subdomain,
+        custom_domain: customDomain || null,
         primary_color: primaryColor,
         secondary_color: secondaryColor,
         font_family: fontFamily,
@@ -404,27 +407,57 @@ const ClientBrandingPage = () => {
         </CardContent>
       </Card>
 
-      {/* <Card className="mb-8">
+      <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" /> Custom Domain / Subdomain
+            <Globe className="h-5 w-5" /> Domain Configuration
           </CardTitle>
-          <CardDescription>Configure your marketplace URL.</CardDescription>
+          <CardDescription>Configure how customers access your marketplace.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div>
-            <Label htmlFor="subdomain">Your Sub-marketplace URL</Label>
-            <div className="flex items-center space-x-2">
-              <Input id="subdomain" type="text" placeholder="yourbrand" value={subdomain} onChange={(e) => setSubdomain(e.target.value)} className="flex-grow" />
-              <span className="text-gray-600 dark:text-gray-400">.realpartneros.com</span>
+            <Label htmlFor="subdomain">Marketplace Subdomain (Path-based URL)</Label>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className="text-gray-600 dark:text-gray-400">app.realpartnersos.com/</span>
+              <Input
+                id="subdomain"
+                type="text"
+                placeholder="yourbrand"
+                value={subdomain}
+                onChange={(e) => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                className="flex-grow max-w-[200px]"
+              />
+              <span className="text-gray-600 dark:text-gray-400">/marketplace</span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">This will be your unique marketplace address.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              This creates a URL like: <code className="bg-gray-100 px-1 rounded">app.realpartnersos.com/{subdomain || 'yourbrand'}/marketplace</code>
+            </p>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            For a fully custom domain (e.g., `marketplace.yourcompany.com`), you would typically configure DNS settings with your domain provider.
-          </p>
+
+          <div className="border-t pt-4">
+            <Label htmlFor="custom-domain">Custom Domain (Optional)</Label>
+            <Input
+              id="custom-domain"
+              type="text"
+              placeholder="marketplace.yourdomain.com or yourdomain.com"
+              value={customDomain}
+              onChange={(e) => setCustomDomain(e.target.value.toLowerCase())}
+              className="mt-1"
+            />
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Enter your own domain to white-label the marketplace completely.
+            </p>
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800 font-medium">Setup Instructions for Custom Domain:</p>
+              <ol className="text-sm text-blue-700 mt-2 list-decimal list-inside space-y-1">
+                <li>Add a CNAME record pointing to <code className="bg-blue-100 px-1 rounded">app.realpartnersos.com</code></li>
+                <li>Or add an A record pointing to the server IP (contact support)</li>
+                <li>Save your changes here, then notify our team to complete SSL setup</li>
+              </ol>
+            </div>
+          </div>
         </CardContent>
-      </Card> */}
+      </Card>
 
       <div className="text-center mt-10">
         <Button size="lg" onClick={handleSaveBranding} disabled={saving || uploading}>
