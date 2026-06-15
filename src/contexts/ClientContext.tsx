@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { API_CONFIG } from '@/config/api';
+import MarketplaceAuthAPI from '@/services/MarketplaceAuthAPI';
 
 // Client information interface
 export interface ClientInfo {
@@ -269,7 +270,16 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
         console.log('🎫 Invite parameters detected, forcing client detection');
       }
 
-      const identifier = extractClientFromUrl();
+      let identifier = extractClientFromUrl();
+
+      // If no URL-based identifier found, check for authenticated user's client_id
+      if (!identifier) {
+        const storedClientId = MarketplaceAuthAPI.getClientId();
+        if (storedClientId) {
+          console.log(`🔐 Found client_id from authenticated user: ${storedClientId}`);
+          identifier = storedClientId.toString();
+        }
+      }
 
       if (identifier) {
         console.log(`🔍 Detected client identifier: ${identifier}`);
@@ -381,6 +391,19 @@ export const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
   useEffect(() => {
     detectClientFromUrl();
   }, [location.pathname, location.search]);
+
+  // Listen for auth changes (login/logout) to re-detect client from user data
+  useEffect(() => {
+    const handleAuthChange = () => {
+      console.log('🔄 Auth changed, re-detecting client context');
+      detectClientFromUrl();
+    };
+
+    window.addEventListener('auth:changed', handleAuthChange);
+    return () => {
+      window.removeEventListener('auth:changed', handleAuthChange);
+    };
+  }, []);
 
   // Redirect to client-specific routes if needed
   useEffect(() => {
